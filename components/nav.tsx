@@ -3,10 +3,9 @@
 import type { User } from "@supabase/supabase-js";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { UserAvatar } from "./user-avatar";
 
 const links = [
@@ -17,7 +16,7 @@ const links = [
 export function Nav({ user }: { user: User | null }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  console.log(user);
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -29,7 +28,11 @@ export function Nav({ user }: { user: User | null }) {
     };
   }, [open]);
 
-  if (pathname?.startsWith("/signup") || pathname?.startsWith("/login")) {
+  if (
+    pathname?.startsWith("/signup") ||
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/dashboard")
+  ) {
     return null;
   }
 

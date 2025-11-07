@@ -3,20 +3,24 @@
 import {
   BookOpen,
   Bot,
-  Frame,
   LifeBuoy,
-  Map as MapIcon,
-  PieChart,
   Send,
   Settings2,
   SquareTerminal,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import type * as React from "react";
 import { NavMains } from "./nav-main";
 // import { NavProjects } from "./nav-projects";
 import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
-import { Sidebar, SidebarContent, SidebarFooter } from "./ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+} from "./ui/sidebar";
 
 const data = {
   user: {
@@ -144,10 +148,13 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar
-      className="top-(--header-height) h-[calc(100svh-var(--header-height))]! pt-4"
-      {...props}
-    >
+    <Sidebar className="h-svh" {...props}>
+      <SidebarHeader>
+        <Link href="/" className="flex items-center gap-2 px-2 py-1.5">
+          <Image src="/logo.svg" alt="Logo" width={22} height={22} />
+          <span className="font-semibold">OceaPic</span>
+        </Link>
+      </SidebarHeader>
       <SidebarContent>
         <NavMains items={data.navMain} />
         {/* <NavProjects projects={data.projects} /> */}

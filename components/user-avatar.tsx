@@ -19,7 +19,7 @@ export function UserAvatar({ user }: Props) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    redirect("/login");
+    redirect("/");
   };
 
   return (
