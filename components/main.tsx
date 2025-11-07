@@ -1,3 +1,13 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 export function Main({ children }: { children: React.ReactNode }) {
-  return <main className="px-4 max-w-[1600px]">{children}</main>;
+  const pathname = usePathname();
+  const isAuth = pathname?.startsWith("/signup") || pathname?.startsWith("/login");
+  return (
+    <main className={isAuth ? "w-screen h-screen" : "px-4 max-w-[1600px]"}>
+      {children}
+    </main>
+  );
 }
