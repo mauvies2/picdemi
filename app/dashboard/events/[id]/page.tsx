@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
-import PhotoAlbumViewer from "@/components/photo-album-viewer";
 import { createClient } from "@/database/server";
+import { EventPhotoAlbum } from "./event-photo-album";
 
 export default async function EventDetailPage({
   params,
@@ -85,7 +85,8 @@ export default async function EventDetailPage({
         • {event?.city[0]?.toUpperCase() + event?.city?.slice(1)}
       </div>
       <div className="mt-4">
-        <PhotoAlbumViewer
+        <EventPhotoAlbum
+          eventId={id}
           items={
             (photos ?? [])
               .map((p) => {

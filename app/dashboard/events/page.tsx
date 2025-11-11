@@ -1,7 +1,7 @@
-import Image from "next/image";
-import Link from "next/link";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { createClient } from "@/database/server";
+import { deleteEvent } from "./actions";
+import { EventCard } from "./event-card";
 
 export default async function EventsPage() {
   const supabase = await createClient();
@@ -120,45 +120,16 @@ export default async function EventsPage() {
           const coverUrl = coverUrls.get(event.id);
 
           return (
-            <Link
+            <EventCard
               key={event.id}
-              href={`/dashboard/events/${event.id}`}
-              className="group rounded-2xl transition-colors"
-            >
-              <div className="overflow-hidden rounded-2xl bg-muted">
-                <div className="relative aspect-square w-full">
-                  {coverUrl ? (
-                    <Image
-                      src={coverUrl}
-                      alt={`${event.name} cover`}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 33vw"
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                      No photos
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="mt-1 px-1 pb-1">
-                <div className="text-sm font-semibold">{event.name}</div>
-                <div className="flex items-center gap-1">
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(event?.date ?? "")
-                      .toDateString()
-                      .split(" ")
-                      .slice(1)
-                      .join(" ")}
-                  </p>
-                  <span className="text-muted-foreground">•</span>
-                  <p className="text-xs text-muted-foreground">
-                    {count} {count === 1 ? "item" : "items"}
-                  </p>
-                </div>
-              </div>
-            </Link>
+              id={event.id}
+              name={event.name}
+              date={event.date}
+              photoCount={count}
+              coverUrl={coverUrl}
+              editHref={`/dashboard/events/${event.id}/edit`}
+              onDelete={deleteEvent.bind(null, event.id)}
+            />
           );
         })}
       </div>
