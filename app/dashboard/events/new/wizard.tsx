@@ -152,8 +152,8 @@ export default function NewEventForm() {
   }, [pendingValues, form.state.values, files.length]);
 
   return (
-    <div className="px-4 py-6">
-      <div className="mx-auto flex w-full flex-col gap-6">
+    <div className="p-4">
+      <div className="mx-auto w-full space-y-6">
         <header>
           <DashboardHeader title="Create Event" />
           <p className="mt-1 text-sm text-muted-foreground">
@@ -161,288 +161,290 @@ export default function NewEventForm() {
           </p>
         </header>
 
-        <form
-          className="grid gap-6 max-w-lg"
-          onSubmit={(event) => {
-            event.preventDefault();
-            form.handleSubmit();
-          }}
-          noValidate
-        >
-          <div className="grid gap-4">
-            <form.Field
-              name="name"
-              validators={{
-                onChange: ({ value }) =>
-                  value.trim().length === 0 ? "Name is required." : undefined,
-              }}
-            >
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                const error = field.state.meta.errors?.[0];
-                return (
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      value={field.state.value}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      onBlur={field.handleBlur}
-                      placeholder="Event name"
-                      aria-invalid={isInvalid}
-                      autoComplete="off"
-                    />
-                    {isInvalid && error ? (
-                      <p className="text-xs text-destructive">{error}</p>
-                    ) : null}
-                  </div>
-                );
-              }}
-            </form.Field>
-
-            <form.Field
-              name="activity"
-              validators={{
-                onChange: ({ value }) =>
-                  activityValues.includes(
-                    value as (typeof activityValues)[number],
-                  )
-                    ? undefined
-                    : "Activity is required.",
-              }}
-            >
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                const error = field.state.meta.errors?.[0];
-                return (
-                  <div className="grid gap-2">
-                    <Label htmlFor="activity">Activity</Label>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(value) => {
-                        field.handleChange(value as FormValues["activity"]);
-                        field.handleBlur();
-                      }}
-                    >
-                      <SelectTrigger
-                        id="activity"
-                        className="w-full rounded-md"
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+          <form
+            className="flex flex-col gap-6"
+            onSubmit={(event) => {
+              event.preventDefault();
+              form.handleSubmit();
+            }}
+            noValidate
+          >
+            <div className="grid gap-4">
+              <form.Field
+                name="name"
+                validators={{
+                  onChange: ({ value }) =>
+                    value.trim().length === 0 ? "Name is required." : undefined,
+                }}
+              >
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  const error = field.state.meta.errors?.[0];
+                  return (
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        id="name"
+                        value={field.state.value}
+                        onChange={(event) =>
+                          field.handleChange(event.target.value)
+                        }
+                        onBlur={field.handleBlur}
+                        placeholder="Event name"
                         aria-invalid={isInvalid}
-                      >
-                        <SelectValue placeholder="Select an activity" />
-                      </SelectTrigger>
-                      <SelectContent className="w-[--radix-select-trigger-width]">
-                        {activityOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {isInvalid && error ? (
-                      <p className="text-xs text-destructive">{error}</p>
-                    ) : null}
-                  </div>
-                );
-              }}
-            </form.Field>
+                        autoComplete="off"
+                      />
+                      {isInvalid && error ? (
+                        <p className="text-xs text-destructive">{error}</p>
+                      ) : null}
+                    </div>
+                  );
+                }}
+              </form.Field>
 
-            <form.Field
-              name="date"
-              validators={{
-                onChange: ({ value }) =>
-                  value && value.length > 0 ? undefined : "Date is required.",
-              }}
-            >
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                const error = field.state.meta.errors?.[0];
-                const parsedDate = field.state.value
-                  ? new Date(field.state.value)
-                  : undefined;
-                return (
-                  <div className="grid gap-2">
-                    <Label htmlFor={dateInputId}>Date</Label>
-                    <Popover
-                      open={datePopoverOpen}
-                      onOpenChange={setDatePopoverOpen}
-                    >
-                      <PopoverTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-between rounded-md border border-input text-left font-normal",
-                            !parsedDate && "text-muted-foreground",
-                          )}
+              <form.Field
+                name="activity"
+                validators={{
+                  onChange: ({ value }) =>
+                    activityValues.includes(
+                      value as (typeof activityValues)[number],
+                    )
+                      ? undefined
+                      : "Activity is required.",
+                }}
+              >
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  const error = field.state.meta.errors?.[0];
+                  return (
+                    <div className="grid gap-2">
+                      <Label htmlFor="activity">Activity</Label>
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(value) => {
+                          field.handleChange(value as FormValues["activity"]);
+                          field.handleBlur();
+                        }}
+                      >
+                        <SelectTrigger
+                          id="activity"
+                          className="w-full rounded-md"
                           aria-invalid={isInvalid}
                         >
-                          {parsedDate
-                            ? format(parsedDate, "PPP")
-                            : "Select date"}
-                          <ChevronDownIcon className="size-4 opacity-60" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        className="w-auto overflow-hidden p-0"
-                        align="start"
-                      >
-                        <Calendar
-                          mode="single"
-                          selected={parsedDate}
-                          captionLayout="dropdown"
-                          onSelect={(date) => {
-                            field.handleChange(
-                              date ? format(date, "yyyy-MM-dd") : "",
-                            );
-                            field.handleBlur();
-                            setDatePopoverOpen(false);
-                          }}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <input
-                      id={dateInputId}
-                      type="hidden"
-                      value={field.state.value}
-                      readOnly
-                    />
-                    {isInvalid && error ? (
-                      <p className="text-xs text-destructive">{error}</p>
-                    ) : null}
-                  </div>
-                );
-              }}
-            </form.Field>
-
-            <form.Field
-              name="country"
-              validators={{
-                onChange: ({ value }) =>
-                  value.trim().length === 0
-                    ? "Country is required."
-                    : undefined,
-              }}
-            >
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                const error = field.state.meta.errors?.[0];
-                return (
-                  <div className="grid gap-2">
-                    <Label htmlFor="country">Country</Label>
-                    <Input
-                      id="country"
-                      value={field.state.value}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      onBlur={field.handleBlur}
-                      placeholder="Country"
-                      aria-invalid={isInvalid}
-                      autoComplete="country-name"
-                    />
-                    {isInvalid && error ? (
-                      <p className="text-xs text-destructive">{error}</p>
-                    ) : null}
-                  </div>
-                );
-              }}
-            </form.Field>
-
-            <form.Field
-              name="city"
-              validators={{
-                onChange: ({ value }) =>
-                  value.trim().length === 0 ? "City is required." : undefined,
-              }}
-            >
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                const error = field.state.meta.errors?.[0];
-                return (
-                  <div className="grid gap-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      value={field.state.value}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      onBlur={field.handleBlur}
-                      placeholder="City"
-                      aria-invalid={isInvalid}
-                      autoComplete="address-level2"
-                    />
-                    {isInvalid && error ? (
-                      <p className="text-xs text-destructive">{error}</p>
-                    ) : null}
-                  </div>
-                );
-              }}
-            </form.Field>
-          </div>
-
-          <div className="grid gap-4">
-            <Label>Photos</Label>
-            <Dropzone accept=".jpg,.jpeg,.png,.heic" onSelect={handleFiles} />
-            {files.length > 0 && (
-              <ul className="grid gap-2 rounded-xl border border-dashed border-muted-foreground/30 p-4">
-                {files.map((file) => (
-                  <li
-                    key={`${file.name}-${file.lastModified}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-2 transition-colors hover:border-muted-foreground/30"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {file.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatBytes(file.size)}
-                      </p>
+                          <SelectValue placeholder="Select an activity" />
+                        </SelectTrigger>
+                        <SelectContent className="w-[--radix-select-trigger-width]">
+                          {activityOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {isInvalid && error ? (
+                        <p className="text-xs text-destructive">{error}</p>
+                      ) : null}
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(file)}
-                      className="h-8 w-8 rounded-md text-muted-foreground hover:text-destructive"
-                      aria-label={`Remove ${file.name}`}
-                    >
-                      <X className="h-4 w-4" aria-hidden="true" />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+                  );
+                }}
+              </form.Field>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            {submitError ? (
-              <p className="text-sm text-destructive">{submitError}</p>
-            ) : null}
-            <Button
-              type="submit"
-              className="rounded-md sm:ml-auto"
-              disabled={isPending}
-            >
-              Create Event
-            </Button>
-          </div>
-        </form>
+              <form.Field
+                name="date"
+                validators={{
+                  onChange: ({ value }) =>
+                    value && value.length > 0 ? undefined : "Date is required.",
+                }}
+              >
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  const error = field.state.meta.errors?.[0];
+                  const parsedDate = field.state.value
+                    ? new Date(field.state.value)
+                    : undefined;
+                  return (
+                    <div className="grid gap-2">
+                      <Label htmlFor={dateInputId}>Date</Label>
+                      <Popover
+                        open={datePopoverOpen}
+                        onOpenChange={setDatePopoverOpen}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-between rounded-md border border-input text-left font-normal",
+                              !parsedDate && "text-muted-foreground",
+                            )}
+                            aria-invalid={isInvalid}
+                          >
+                            {parsedDate
+                              ? format(parsedDate, "PPP")
+                              : "Select date"}
+                            <ChevronDownIcon className="size-4 opacity-60" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto overflow-hidden p-0"
+                          align="start"
+                        >
+                          <Calendar
+                            mode="single"
+                            selected={parsedDate}
+                            captionLayout="dropdown"
+                            onSelect={(date) => {
+                              field.handleChange(
+                                date ? format(date, "yyyy-MM-dd") : "",
+                              );
+                              field.handleBlur();
+                              setDatePopoverOpen(false);
+                            }}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <input
+                        id={dateInputId}
+                        type="hidden"
+                        value={field.state.value}
+                        readOnly
+                      />
+                      {isInvalid && error ? (
+                        <p className="text-xs text-destructive">{error}</p>
+                      ) : null}
+                    </div>
+                  );
+                }}
+              </form.Field>
+
+              <form.Field
+                name="country"
+                validators={{
+                  onChange: ({ value }) =>
+                    value.trim().length === 0
+                      ? "Country is required."
+                      : undefined,
+                }}
+              >
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  const error = field.state.meta.errors?.[0];
+                  return (
+                    <div className="grid gap-2">
+                      <Label htmlFor="country">Country</Label>
+                      <Input
+                        id="country"
+                        value={field.state.value}
+                        onChange={(event) =>
+                          field.handleChange(event.target.value)
+                        }
+                        onBlur={field.handleBlur}
+                        placeholder="Country"
+                        aria-invalid={isInvalid}
+                        autoComplete="country-name"
+                      />
+                      {isInvalid && error ? (
+                        <p className="text-xs text-destructive">{error}</p>
+                      ) : null}
+                    </div>
+                  );
+                }}
+              </form.Field>
+
+              <form.Field
+                name="city"
+                validators={{
+                  onChange: ({ value }) =>
+                    value.trim().length === 0 ? "City is required." : undefined,
+                }}
+              >
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  const error = field.state.meta.errors?.[0];
+                  return (
+                    <div className="grid gap-2">
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={field.state.value}
+                        onChange={(event) =>
+                          field.handleChange(event.target.value)
+                        }
+                        onBlur={field.handleBlur}
+                        placeholder="City"
+                        aria-invalid={isInvalid}
+                        autoComplete="address-level2"
+                      />
+                      {isInvalid && error ? (
+                        <p className="text-xs text-destructive">{error}</p>
+                      ) : null}
+                    </div>
+                  );
+                }}
+              </form.Field>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Photos</Label>
+              <Dropzone accept=".jpg,.jpeg,.png,.heic" onSelect={handleFiles} />
+              {files.length > 0 && (
+                <div className="rounded-xl border border-dashed border-muted-foreground/30 p-4">
+                  <ul className="grid gap-2">
+                    {files.map((file) => (
+                      <li
+                        key={`${file.name}-${file.lastModified}`}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-2 transition-colors hover:border-muted-foreground/30"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatBytes(file.size)}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(file)}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          aria-label={`Remove ${file.name}`}
+                        >
+                          <X className="h-4 w-4" aria-hidden="true" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-auto flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:justify-end">
+              {submitError ? (
+                <p className="text-sm text-destructive text-right sm:text-left">
+                  {submitError}
+                </p>
+              ) : null}
+              <Button type="submit" disabled={isPending}>
+                Create Event
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
 
       <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/40" />
-          <Dialog.Content className="fixed inset-x-4 top-1/2 z-50 mx-auto w-full max-w-md -translate-y-1/2 rounded-2xl bg-background p-6 shadow-lg focus:outline-none">
+          <Dialog.Content className="fixed inset-x-4 top-1/2 z-120 mx-auto w-full max-w-md -translate-y-1/2 rounded-2xl bg-background p-6 shadow-lg focus:outline-none">
             <Dialog.Title className="text-lg font-semibold">
               Confirm details
             </Dialog.Title>
