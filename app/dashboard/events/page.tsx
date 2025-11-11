@@ -22,7 +22,7 @@ export default async function EventsPage() {
 
   const { data: events } = await supabase
     .from("events")
-    .select("id, name, date, city, province, country_code, activity")
+    .select("id, name, date, city, country, activity")
     .eq("user_id", user.id)
     .order("date", { ascending: false })
     .throwOnError();
@@ -47,14 +47,31 @@ export default async function EventsPage() {
     photoRows = data ?? [];
   }
 
-  const stats = new Map<string, { count: number; coverPath: string | null }>();
+  const stats = new Map<
+    string,
+    {
+      count: number;
+      coverPath: string | null;
+      firstTakenAt: string | null;
+      lastTakenAt: string | null;
+    }
+  >();
 
   (photoRows ?? []).forEach((row) => {
     if (!row.event_id) return;
-    const current = stats.get(row.event_id) ?? { count: 0, coverPath: null };
+    const current = stats.get(row.event_id) ?? {
+      count: 0,
+      coverPath: null,
+      firstTakenAt: null,
+      lastTakenAt: null,
+    };
     current.count += 1;
     if (!current.coverPath && row.original_url) {
       current.coverPath = row.original_url;
+    }
+    if (row.taken_at) {
+      if (!current.firstTakenAt) current.firstTakenAt = row.taken_at;
+      current.lastTakenAt = row.taken_at;
     }
     stats.set(row.event_id, current);
   });
@@ -62,7 +79,12 @@ export default async function EventsPage() {
   // Ensure events with zero photos still have stats entry
   (events ?? []).forEach((event) => {
     if (!stats.has(event.id)) {
-      stats.set(event.id, { count: 0, coverPath: null });
+      stats.set(event.id, {
+        count: 0,
+        coverPath: null,
+        firstTakenAt: null,
+        lastTakenAt: null,
+      });
     }
   });
 
@@ -88,8 +110,15 @@ export default async function EventsPage() {
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {(events ?? []).map((event) => {
-          const count = stats.get(event.id)?.count ?? 0;
+          const stat = stats.get(event.id) ?? {
+            count: 0,
+            coverPath: null,
+            firstTakenAt: null,
+            lastTakenAt: null,
+          };
+          const count = stat.count;
           const coverUrl = coverUrls.get(event.id);
+
           return (
             <Link
               key={event.id}
@@ -115,8 +144,18 @@ export default async function EventsPage() {
               </div>
               <div className="mt-1 px-1 pb-1">
                 <div className="text-sm font-semibold">{event.name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {count} {count === 1 ? "item" : "items"}
+                <div className="flex items-center gap-1">
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(event?.date ?? "")
+                      .toDateString()
+                      .split(" ")
+                      .slice(1)
+                      .join(" ")}
+                  </p>
+                  <span className="text-muted-foreground">•</span>
+                  <p className="text-xs text-muted-foreground">
+                    {count} {count === 1 ? "item" : "items"}
+                  </p>
                 </div>
               </div>
             </Link>

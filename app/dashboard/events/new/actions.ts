@@ -1,296 +1,145 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { Buffer } from "node:buffer";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/database/server";
+import { activityValues } from "./activity-options";
 
-export const createUploadUrls = async (input: unknown) => {
-  const schema = z.object({
-    files: z
-      .array(
-        z.object({
-          name: z.string().min(1),
-          type: z.string().min(1),
-          size: z.number().int().positive(),
-        }),
-      )
-      .min(1),
-  });
-  const { files } = schema.parse(input);
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
+const eventSchema = z.object({
+  name: z.string().trim().min(1, "Name is required."),
+  activity: z
+    .string()
+    .refine(
+      (value): value is (typeof activityValues)[number] =>
+        activityValues.includes(value as (typeof activityValues)[number]),
+      "Activity is required.",
+    ),
+  date: z.string().min(1, "Date is required."),
+  country: z.string().trim().min(1, "Country is required."),
+  city: z.string().trim().min(1, "City is required."),
+});
 
-  // Create a batch
-  const { data: batch } = await supabase
-    .from("upload_batches")
-    .insert({ user_id: user.id, status: "PENDING" })
-    .select()
-    .single()
-    .throwOnError();
+type EventPayload = z.infer<typeof eventSchema>;
 
-  // We will upload from the client with authenticated supabase client.
-  // Return storage paths per file that the client should use.
-  const prefix = `${user.id}/${batch.id}`;
-  const targets = files.map((f) => ({
-    name: f.name,
-    type: f.type,
-    size: f.size,
-    path: `${prefix}/${encodeURIComponent(f.name)}`,
-  }));
-
-  return { batchId: batch.id, targets };
+type CreateEventResult = {
+  eventId: string;
 };
 
-export const completeUploadBatch = async (input: unknown) => {
-  const schema = z.object({
-    batchId: z.uuid(),
-    objects: z
-      .array(
-        z.object({
-          path: z.string().min(1),
-          size: z.number().int().nonnegative(),
-          contentType: z.string().optional().nullable(),
-        }),
-      )
-      .min(1),
-  });
-  const { batchId, objects } = schema.parse(input);
+export const createEvent = async (
+  formData: FormData,
+): Promise<CreateEventResult> => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
 
-  // Insert objects
-  await supabase
-    .from("upload_objects")
-    .insert(
-      objects.map((o) => ({
-        batch_id: batchId,
-        storage_path: o.path,
-        size_bytes: o.size,
-        content_type: o.contentType ?? null,
-      })),
-    )
-    .throwOnError();
-
-  // Flip batch to PROCESSING
-  await supabase
-    .from("upload_batches")
-    .update({ status: "PROCESSING" })
-    .eq("id", batchId)
-    .eq("user_id", user.id);
-
-  // Start extraction (simplified for MVP)
-  await extractMetadata({ batchId });
-
-  return { batchId };
-};
-
-export const getBatchStatus = async (input: unknown) => {
-  const schema = z.object({ batchId: z.uuid() });
-  const { batchId } = schema.parse(input);
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-
-  const { data: batch } = await supabase
-    .from("upload_batches")
-    .select("*")
-    .eq("id", batchId)
-    .eq("user_id", user.id)
-    .single()
-    .throwOnError();
-
-  const { data: objects } = await supabase
-    .from("upload_objects")
-    .select("id, storage_path, created_at")
-    .eq("batch_id", batchId)
-    .throwOnError();
-
-  const total = objects?.length ?? 0;
-  // In this MVP we consider all extracted after PROCESSING->DONE
-  const status = batch?.status ?? "PENDING";
-  const extractedCount =
-    status === "DONE"
-      ? total
-      : status === "PROCESSING"
-        ? Math.floor(total / 2)
-        : 0;
-
-  return {
-    status,
-    extractedCount,
-    total,
-    stats: {
-      withGps: 0,
-      withoutGps: total,
-      withDate: total,
-    },
-    suggested: {
-      date: batch?.suggested_date ?? null,
-      timeStart: batch?.suggested_time_start ?? null,
-      timeEnd: batch?.suggested_time_end ?? null,
-      city: batch?.suggested_city ?? null,
-      province: batch?.suggested_province ?? null,
-      country: batch?.suggested_country ?? null,
-    },
-  } as {
-    status: string;
-    extractedCount: number;
-    total: number;
-    stats: { withGps: number; withoutGps: number; withDate: number };
-    suggested: {
-      date: string | null;
-      timeStart: string | null;
-      timeEnd: string | null;
-      city: string | null;
-      province: string | null;
-      country: string | null;
-    };
-  };
-};
-
-export const extractMetadata = async (input: unknown) => {
-  const schema = z.object({ batchId: z.uuid() });
-  const { batchId } = schema.parse(input);
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-
-  // Simplified MVP: infer suggested date/time from object created_at
-  const { data: objects } = await supabase
-    .from("upload_objects")
-    .select("id, created_at, storage_path")
-    .eq("batch_id", batchId)
-    .throwOnError();
-
-  const times = (objects ?? []).map((o) => new Date(o.created_at).getTime());
-  const minT = times.length ? new Date(Math.min(...times)) : new Date();
-  const maxT = times.length ? new Date(Math.max(...times)) : new Date();
-  const suggestedDate = new Date(minT.toISOString().slice(0, 10));
-
-  // Create photo rows (MVP: original_url is storage_path; signed URL will be generated later)
-  if (objects && objects.length > 0) {
-    await supabase
-      .from("photos")
-      .insert(
-        objects.map((o) => ({
-          user_id: user.id,
-          upload_object_id: o.id,
-          original_url: o.storage_path,
-          taken_at: new Date(o.created_at).toISOString(),
-        })),
-      )
-      .throwOnError();
+  if (!user) {
+    throw new Error("You must be signed in to create an event.");
   }
 
-  await supabase
-    .from("upload_batches")
-    .update({
-      status: "DONE",
-      suggested_date: suggestedDate.toISOString().slice(0, 10),
-      suggested_time_start: minT.toISOString(),
-      suggested_time_end: maxT.toISOString(),
-    })
-    .eq("id", batchId)
-    .eq("user_id", user.id)
-    .throwOnError();
+  const rawPayload: Record<string, FormDataEntryValue | null> = {
+    name: formData.get("name"),
+    activity: formData.get("activity"),
+    date: formData.get("date"),
+    country: formData.get("country"),
+    city: formData.get("city"),
+  };
 
-  revalidateTag(`batch:${batchId}`, { expire: 60 * 60 * 24 });
-  return { ok: true };
-};
-
-export const createEventFromBatch = async (input: unknown) => {
-  const schema = z.object({
-    batchId: z.uuid(),
-    name: z.string().min(1),
-    date: z.string().min(1),
-    timeStart: z.string().nullish(),
-    timeEnd: z.string().nullish(),
-    city: z.string().nullish(),
-    province: z.string().nullish(),
-    countryCode: z.string().nullish(),
-    activity: z.enum([
-      "SURF",
-      "MTB",
-      "SKATEBOARDING",
-      "RUNNING_ROAD",
-      "RUNNING_TRAIL",
-      "CYCLING_ROAD",
-      "CYCLING_GRAVEL",
-      "BMX",
-      "TRIATHLON",
-      "OPEN_WATER_SWIMMING",
-      "SKI_ALPINE",
-      "SNOWBOARD",
-      "SKI_CROSS_COUNTRY",
-      "CLIMBING_BOULDER",
-      "HIKING",
-      "OTHER",
-    ]),
+  const parsed = eventSchema.safeParse({
+    name: rawPayload.name?.toString() ?? "",
+    activity: rawPayload.activity?.toString() ?? "",
+    date: rawPayload.date?.toString() ?? "",
+    country: rawPayload.country?.toString() ?? "",
+    city: rawPayload.city?.toString() ?? "",
   });
-  const payload = schema.parse(input);
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
 
-  // Create event
-  const { data: event } = await supabase
+  if (!parsed.success) {
+    throw new Error(
+      parsed.error.issues[0]?.message ?? "Invalid event data provided.",
+    );
+  }
+
+  const payload: EventPayload = parsed.data;
+  const uploadedFiles = formData
+    .getAll("photos")
+    .filter((value): value is File => value instanceof File && value.size > 0);
+
+  const { data: event, error: eventError } = await supabase
     .from("events")
     .insert({
       user_id: user.id,
       name: payload.name,
-      date: payload.date,
-      time_start: payload.timeStart ?? null,
-      time_end: payload.timeEnd ?? null,
-      city: payload.city ?? null,
-      province: payload.province ?? null,
-      country_code: payload.countryCode ?? null,
       activity: payload.activity,
+      date: payload.date,
+      country: payload.country,
+      city: payload.city,
     })
-    .select()
-    .single()
-    .throwOnError();
-
-  // Backfill photos from batch -> link to event
-  const { data: objs } = await supabase
-    .from("upload_objects")
     .select("id")
-    .eq("batch_id", payload.batchId)
-    .throwOnError();
+    .single();
 
-  if (objs && objs.length > 0) {
-    const ids = objs.map((o) => o.id);
-    // Update photos in place
-    await supabase
-      .from("photos")
-      .update({
+  if (eventError || !event) {
+    throw new Error(eventError?.message ?? "Unable to create event.");
+  }
+
+  const photoRecords: { original_path: string }[] = [];
+
+  try {
+    for (const file of uploadedFiles) {
+      const fileId = crypto.randomUUID();
+      const extension = file.name.split(".").pop();
+      const safeName = extension
+        ? `${fileId}.${extension.toLowerCase()}`
+        : `${fileId}`;
+      const path = `${user.id}/${event.id}/${safeName}`;
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const { error: uploadError } = await supabase.storage
+        .from("photos")
+        .upload(path, buffer, {
+          contentType: file.type || undefined,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { error: photoError } = await supabase.from("photos").insert({
+        user_id: user.id,
         event_id: event.id,
-        city: payload.city ?? undefined,
-        province: payload.province ?? undefined,
-        country_code: payload.countryCode ?? undefined,
-      })
-      .in("upload_object_id", ids)
-      .eq("user_id", user.id)
-      .throwOnError();
+        original_url: path,
+        taken_at: new Date(payload.date).toISOString(),
+        city: payload.city,
+        country: payload.country,
+      });
+
+      if (photoError) {
+        throw photoError;
+      }
+
+      photoRecords.push({ original_path: path });
+    }
+  } catch (error) {
+    console.error("createEvent: upload failed", error);
+    await supabase.from("photos").delete().eq("event_id", event.id);
+    await supabase.storage
+      .from("photos")
+      .remove(photoRecords.map((record) => record.original_path));
+    await supabase.from("events").delete().eq("id", event.id);
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "object" && error !== null
+          ? JSON.stringify(error)
+          : "Unable to upload photos. Please try again.";
+    throw new Error(message);
   }
 
   revalidatePath("/dashboard/events");
   revalidatePath(`/dashboard/events/${event.id}`);
-  return { eventId: event.id };
-};
 
-export const generateThumbnails = async (_photoIds: string[]) => {
-  // TODO: implement in a background worker using sharp. This is a stub.
-  return { queued: _photoIds.length };
+  return { eventId: event.id };
 };

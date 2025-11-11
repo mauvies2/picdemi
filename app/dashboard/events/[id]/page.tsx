@@ -27,12 +27,12 @@ export default async function EventDetailPage({
 
   const { data: photos } = await supabase
     .from("photos")
-    .select("id, original_url, taken_at, city, province")
+    .select("id, original_url, taken_at, city, country")
     .eq("event_id", id)
     .eq("user_id", user.id)
     .order("taken_at", { ascending: true })
     .throwOnError();
-
+  console.log(photos);
   // Generate signed URLs for private storage objects
   const paths = (photos ?? []).map((p) => p.original_url as string);
   const signed: Record<string, string> = {};

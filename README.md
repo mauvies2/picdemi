@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Event Creation Setup
+
+The dashboard event creator uploads photos to the Supabase storage bucket named `photos`. Make sure your environment variables are set (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and server-side service role keys) and that the authenticated user has permission to write to the `photos` bucket. After the files finish uploading, you will be redirected to `/dashboard/events/[eventId]`.
+
 ## Getting Started
 
 First, run the development server:
