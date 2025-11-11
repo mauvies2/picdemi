@@ -168,20 +168,20 @@ function RoleSwitcher({
   );
 }
 
-function CollapseButton() {
-  const { state, toggleSidebar } = useSidebar();
-  const Icon = state === "expanded" ? ChevronLeft : ChevronRight;
-  return (
-    <button
-      type="button"
-      aria-label="Toggle sidebar"
-      onClick={toggleSidebar}
-      className="absolute -right-[1.2rem] top-10 inline-flex h-5 w-5 z-50 items-center justify-center rounded-full border bg-background hover:bg-muted transition-colors shadow-sm"
-    >
-      <Icon className="h-3 w-3 text-foreground/60" />
-    </button>
-  );
-}
+// function CollapseButton() {
+//   const { state, toggleSidebar } = useSidebar();
+//   const Icon = state === "expanded" ? ChevronLeft : ChevronRight;
+//   return (
+//     <button
+//       type="button"
+//       aria-label="Toggle sidebar"
+//       onClick={toggleSidebar}
+//       className="absolute -right-[1.2rem] top-10 inline-flex h-5 w-5 z-50 items-center justify-center rounded-full border bg-background hover:bg-muted transition-colors shadow-sm"
+//     >
+//       <Icon className="h-3 w-3 text-foreground/60" />
+//     </button>
+//   );
+// }
 
 export function AppSidebar({
   activeRole,
@@ -193,7 +193,7 @@ export function AppSidebar({
     <Sidebar collapsible="icon" className="h-svh" {...props}>
       <SidebarHeader>
         <div className="relative flex items-center px-2 pb-1.5 pt-2">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-1">
             <Image
               src="/logo.svg"
               alt="Logo"
@@ -206,7 +206,7 @@ export function AppSidebar({
               OceaPic
             </h1>
           </Link>
-          <CollapseButton />
+          {/* <CollapseButton /> */}
         </div>
       </SidebarHeader>
       <SidebarContent>

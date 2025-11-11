@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       .maybeSingle();
 
     if (existingRole?.role) {
-      return NextResponse.redirect(`${origin}/dashboard`);
+  return NextResponse.redirect(`${origin}/dashboard`);
     }
 
     return NextResponse.redirect(`${origin}/onboarding/role`);

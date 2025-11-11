@@ -4,12 +4,28 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "placehold.co",
-      },
-    ],
+    remotePatterns: (() => {
+      const patterns = [
+        {
+          protocol: "https" as const,
+          hostname: "placehold.co",
+        },
+      ];
+      // Allow Supabase storage signed URLs
+      try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (supabaseUrl) {
+          const hostname = new URL(supabaseUrl).hostname;
+          patterns.push({
+            protocol: "https" as const,
+            hostname,
+          });
+        }
+      } catch {
+        // ignore if env is missing or malformed
+      }
+      return patterns;
+    })(),
   },
 };
 
