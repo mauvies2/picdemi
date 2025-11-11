@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ function Dropzone({
 }: DropzoneProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isDragged, setIsDragged] = useState(false);
+  const inputId = useId();
 
   const handleFiles = useCallback(
     (fileList: FileList | null) => {
@@ -30,7 +31,7 @@ function Dropzone({
   );
 
   const onDrop = useCallback(
-    (event: React.DragEvent<HTMLButtonElement>) => {
+    (event: React.DragEvent<HTMLLabelElement>) => {
       event.preventDefault();
       setIsDragged(false);
       handleFiles(event.dataTransfer.files);
@@ -39,10 +40,8 @@ function Dropzone({
   );
 
   return (
-    <button
-      type="button"
-      tabIndex={0}
-      aria-label="Upload files"
+    <label
+      htmlFor={inputId}
       onDragOver={(event) => {
         event.preventDefault();
         setIsDragged(true);
@@ -52,15 +51,9 @@ function Dropzone({
         setIsDragged(false);
       }}
       onDrop={onDrop}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          inputRef.current?.click();
-        }
-      }}
       className={cn(
         "rounded-2xl border-2 border-dashed border-muted-foreground/40 p-10 text-center transition-colors",
-        "hover:bg-muted/30 focus-within:bg-muted/30",
+        "hover:bg-muted/30 focus-visible:outline focus-visible:outline-offset-2",
         isDragged && "bg-muted/40",
         className,
       )}
@@ -72,6 +65,7 @@ function Dropzone({
         accept={accept}
         multiple={multiple}
         onChange={(event) => handleFiles(event.target.files)}
+        id={inputId}
       />
       <div className="flex flex-col items-center justify-center gap-3">
         <Button
@@ -83,7 +77,7 @@ function Dropzone({
         </Button>
         <p className="text-sm text-muted-foreground">Or drag files here</p>
       </div>
-    </button>
+    </label>
   );
 }
 
