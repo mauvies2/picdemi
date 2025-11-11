@@ -10,6 +10,7 @@ const eventSchema = z.object({
   name: z.string().trim().min(1, "Name is required."),
   activity: z
     .string()
+    .min(1, "Activity is required.")
     .refine(
       (value): value is (typeof activityValues)[number] =>
         activityValues.includes(value as (typeof activityValues)[number]),
@@ -64,6 +65,10 @@ export const createEvent = async (
   const uploadedFiles = formData
     .getAll("photos")
     .filter((value): value is File => value instanceof File && value.size > 0);
+
+  if (uploadedFiles.length === 0) {
+    throw new Error("Add at least one photo to continue.");
+  }
 
   const { data: event, error: eventError } = await supabase
     .from("events")

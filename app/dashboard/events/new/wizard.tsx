@@ -31,7 +31,14 @@ import { activityOptions, activityValues } from "./activity-options";
 
 const eventSchema = z.object({
   name: z.string().trim().min(1, "Name is required."),
-  activity: z.enum(activityValues),
+  activity: z
+    .string()
+    .min(1, "Activity is required.")
+    .refine(
+      (value): value is (typeof activityValues)[number] =>
+        activityValues.includes(value as (typeof activityValues)[number]),
+      "Activity is required.",
+    ),
   date: z.string().min(1, "Date is required."),
   country: z.string().trim().min(1, "Country is required."),
   city: z.string().trim().min(1, "City is required."),
@@ -41,7 +48,7 @@ type FormValues = z.infer<typeof eventSchema>;
 
 const defaultValues: FormValues = {
   name: "",
-  activity: "OTHER",
+  activity: "",
   date: "",
   country: "",
   city: "",
@@ -65,16 +72,28 @@ export default function NewEventForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingValues, setPendingValues] = useState<FormValues | null>(null);
+  const [photosError, setPhotosError] = useState<string | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const dateInputId = useId();
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
 
   const form = useForm({
     defaultValues,
     onSubmit: async ({ value }) => {
-      const parsed = eventSchema.parse(value);
-      setSubmitError(null);
-      setPendingValues(parsed);
-      setIsModalOpen(true);
+      try {
+        const parsed = eventSchema.parse(value);
+        if (files.length === 0) {
+          setPhotosError("Add at least one photo to continue.");
+          return;
+        }
+        setPhotosError(null);
+        setSubmitError(null);
+        setPendingValues(parsed);
+        setIsModalOpen(true);
+        setSubmitAttempted(false);
+      } catch (error) {
+        console.error(error);
+      }
     },
   });
 
@@ -92,6 +111,9 @@ export default function NewEventForm() {
       }
       return next;
     });
+    if (incoming.length > 0) {
+      setPhotosError(null);
+    }
   };
 
   const removeFile = (target: File) => {
@@ -101,6 +123,11 @@ export default function NewEventForm() {
   const confirmCreation = () => {
     const value = pendingValues;
     if (!value || isPending) return;
+    if (files.length === 0) {
+      setPhotosError("Add at least one photo to continue.");
+      setIsModalOpen(false);
+      return;
+    }
     const formData = new FormData();
     formData.append("name", value.name.trim());
     formData.append("activity", value.activity);
@@ -166,6 +193,7 @@ export default function NewEventForm() {
             className="flex flex-col gap-6"
             onSubmit={(event) => {
               event.preventDefault();
+              setSubmitAttempted(true);
               form.handleSubmit();
             }}
             noValidate
@@ -179,9 +207,12 @@ export default function NewEventForm() {
                 }}
               >
                 {(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  const error = field.state.meta.errors?.[0];
+                  const showFeedback =
+                    submitAttempted || field.state.meta.isTouched;
+                  const error = showFeedback
+                    ? field.state.meta.errors?.[0]
+                    : null;
+                  const isInvalid = showFeedback && !field.state.meta.isValid;
                   return (
                     <div className="grid gap-2">
                       <Label htmlFor="name">Name</Label>
@@ -208,6 +239,7 @@ export default function NewEventForm() {
                 name="activity"
                 validators={{
                   onChange: ({ value }) =>
+                    value &&
                     activityValues.includes(
                       value as (typeof activityValues)[number],
                     )
@@ -216,9 +248,12 @@ export default function NewEventForm() {
                 }}
               >
                 {(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  const error = field.state.meta.errors?.[0];
+                  const showFeedback =
+                    submitAttempted || field.state.meta.isTouched;
+                  const error = showFeedback
+                    ? field.state.meta.errors?.[0]
+                    : null;
+                  const isInvalid = showFeedback && !field.state.meta.isValid;
                   return (
                     <div className="grid gap-2">
                       <Label htmlFor="activity">Activity</Label>
@@ -260,9 +295,12 @@ export default function NewEventForm() {
                 }}
               >
                 {(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  const error = field.state.meta.errors?.[0];
+                  const showFeedback =
+                    submitAttempted || field.state.meta.isTouched;
+                  const error = showFeedback
+                    ? field.state.meta.errors?.[0]
+                    : null;
+                  const isInvalid = showFeedback && !field.state.meta.isValid;
                   const parsedDate = field.state.value
                     ? new Date(field.state.value)
                     : undefined;
@@ -332,9 +370,12 @@ export default function NewEventForm() {
                 }}
               >
                 {(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  const error = field.state.meta.errors?.[0];
+                  const showFeedback =
+                    submitAttempted || field.state.meta.isTouched;
+                  const error = showFeedback
+                    ? field.state.meta.errors?.[0]
+                    : null;
+                  const isInvalid = showFeedback && !field.state.meta.isValid;
                   return (
                     <div className="grid gap-2">
                       <Label htmlFor="country">Country</Label>
@@ -365,9 +406,12 @@ export default function NewEventForm() {
                 }}
               >
                 {(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  const error = field.state.meta.errors?.[0];
+                  const showFeedback =
+                    submitAttempted || field.state.meta.isTouched;
+                  const error = showFeedback
+                    ? field.state.meta.errors?.[0]
+                    : null;
+                  const isInvalid = showFeedback && !field.state.meta.isValid;
                   return (
                     <div className="grid gap-2">
                       <Label htmlFor="city">City</Label>
@@ -425,6 +469,9 @@ export default function NewEventForm() {
                   </ul>
                 </div>
               )}
+              {photosError ? (
+                <p className="text-sm text-destructive">{photosError}</p>
+              ) : null}
             </div>
 
             <div className="mt-auto flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:justify-end">
