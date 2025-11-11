@@ -443,7 +443,7 @@ export default function NewEventForm() {
 
       <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/40" />
+          <Dialog.Overlay className="fixed inset-0 bg-black/40 z-100" />
           <Dialog.Content className="fixed inset-x-4 top-1/2 z-120 mx-auto w-full max-w-md -translate-y-1/2 rounded-2xl bg-background p-6 shadow-lg focus:outline-none">
             <Dialog.Title className="text-lg font-semibold">
               Confirm details

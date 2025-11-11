@@ -86,7 +86,6 @@ export default async function EventDetailPage({
       </div>
       <div className="mt-4">
         <EventPhotoAlbum
-          eventId={id}
           items={
             (photos ?? [])
               .map((p) => {

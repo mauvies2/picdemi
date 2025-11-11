@@ -83,7 +83,7 @@ export function EventCard({
             <p className="text-xs text-muted-foreground">{formattedDate}</p>
             <span className="text-muted-foreground">•</span>
             <p className="text-xs text-muted-foreground">
-              {photoCount} {photoCount === 1 ? "item" : "items"}
+              {photoCount} {photoCount === 1 ? "photo" : "photos"}
             </p>
           </div>
         </div>

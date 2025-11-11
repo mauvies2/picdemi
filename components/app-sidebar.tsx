@@ -5,13 +5,12 @@ import {
   CalendarDays,
   CalendarPlus,
   Camera,
-  ChevronLeft,
-  ChevronRight,
   Home,
   LifeBuoy,
   MessageSquare,
   Send,
   User,
+  WalletMinimal,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,6 +45,7 @@ const data = {
     { title: "Overview", url: "/dashboard", icon: Home },
     { title: "Create Event", url: "/dashboard/events/new", icon: CalendarPlus },
     { title: "Events", url: "/dashboard/events", icon: CalendarDays },
+    { title: "Sales", url: "/dashboard/sales", icon: WalletMinimal },
     { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
     { title: "Messages", url: "/dashboard/messages", icon: MessageSquare },
   ],

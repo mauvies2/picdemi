@@ -1,26 +1,20 @@
 "use client";
 
-import { MoreVertical } from "lucide-react";
+import { Check } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import {
+  type KeyboardEvent,
   useCallback,
   useEffect,
   useMemo,
   useState,
-  useTransition,
 } from "react";
 import {
   type Photo,
   type RenderPhotoContext,
   RowsPhotoAlbum,
 } from "react-photo-album";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import "react-photo-album/rows.css";
 import "yet-another-react-lightbox/styles.css";
 
@@ -38,20 +32,30 @@ export type PhotoAlbumItem = {
 
 type PhotoAlbumViewerProps = {
   items: PhotoAlbumItem[];
-  onDelete?: (photoId: string) => Promise<void>;
+  selectionMode?: boolean;
+  selectedIds?: string[];
+  onToggleSelect?: (photoId: string) => void;
 };
 
 export default function PhotoAlbumViewer({
   items,
-  onDelete,
+  selectionMode = false,
+  selectedIds,
+  onToggleSelect,
 }: PhotoAlbumViewerProps) {
-  const router = useRouter();
   const [index, setIndex] = useState<number>(-1);
   const [dimensions, setDimensions] = useState<
     Record<string, { width: number; height: number }>
   >({});
-  const [pendingId, setPendingId] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const selectedSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
+  const canSelect = Boolean(onToggleSelect);
+  const selectionActive = selectionMode || selectedSet.size > 0;
+
+  const extractPhotoId = useCallback((photo: Photo & { id?: string }) => {
+    if (typeof photo.id === "string" && photo.id.length > 0) return photo.id;
+    if (typeof photo.key === "string" && photo.key.length > 0) return photo.key;
+    return photo.src;
+  }, []);
 
   useEffect(() => {
     items.forEach((item) => {
@@ -102,27 +106,12 @@ export default function PhotoAlbumViewer({
     [photos],
   );
 
-  const handleDelete = useCallback(
+  const handleToggleSelect = useCallback(
     (photoId: string) => {
-      if (!onDelete) return;
-      const confirmed = window.confirm(
-        "This will permanently delete the photo. Continue?",
-      );
-      if (!confirmed) return;
-
-      setPendingId(photoId);
-      startTransition(async () => {
-        try {
-          await onDelete(photoId);
-          router.refresh();
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setPendingId((current) => (current === photoId ? null : current));
-        }
-      });
+      if (!canSelect || !onToggleSelect) return;
+      onToggleSelect(photoId);
     },
-    [onDelete, router],
+    [canSelect, onToggleSelect],
   );
 
   const renderExtras = useCallback(
@@ -130,50 +119,36 @@ export default function PhotoAlbumViewer({
       _props: object,
       { photo }: RenderPhotoContext<Photo & { id?: string }>,
     ) => {
-      if (!onDelete) return null;
-      const photoId =
-        typeof photo.id === "string"
-          ? photo.id
-          : typeof photo.key === "string"
-            ? photo.key
-            : photo.src;
-      const isProcessing = isPending && pendingId === photoId;
+      const photoId = extractPhotoId(photo);
+      const isSelected = selectedSet.has(photoId);
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label="Photo actions"
-              disabled={isProcessing}
+      if (canSelect) {
+        return (
+          <div className="absolute inset-0 flex items-start justify-start p-2">
+            <div
+              className={cn(
+                "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-muted-foreground opacity-0 shadow-sm transition-all group-hover:opacity-100",
+                isSelected &&
+                  "opacity-100 bg-primary/50 text-primary-foreground",
+              )}
               onClick={(event) => {
                 event.stopPropagation();
+                handleToggleSelect(photoId);
               }}
               onPointerDown={(event) => {
                 event.stopPropagation();
               }}
-              className="pointer-events-none absolute right-2 top-2 flex size-8 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-all group-hover:pointer-events-auto group-hover:opacity-100 group-hover:shadow-sm focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              aria-hidden="true"
             >
-              <span className="absolute inset-0 rounded-full bg-background/80 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100" />
-              <MoreVertical className="relative z-10 size-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-36">
-            <DropdownMenuItem
-              variant="destructive"
-              disabled={isProcessing}
-              onSelect={(event) => {
-                event.stopPropagation();
-                handleDelete(photoId);
-              }}
-            >
-              Delete photo
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+              <Check className="size-3.5" />
+            </div>
+          </div>
+        );
+      }
+
+      return null;
     },
-    [handleDelete, isPending, onDelete, pendingId],
+    [extractPhotoId, canSelect, handleToggleSelect, selectedSet],
   );
 
   return (
@@ -185,25 +160,45 @@ export default function PhotoAlbumViewer({
         rowConstraints={{ maxPhotos: 4 }}
         render={{ extras: renderExtras }}
         componentsProps={{
-          button: () => ({
-            as: "div",
-            role: "button",
-            tabIndex: 0,
-            className:
-              "group relative flex h-full w-full cursor-pointer overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30",
-            onKeyDown: (event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                (event.currentTarget as HTMLElement).click();
-              }
-            },
-          }),
-          image: () => ({
-            className:
-              "h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]",
-          }),
+          button: ({ photo }) => {
+            const photoId = extractPhotoId(photo as Photo & { id?: string });
+            const isSelected = selectedSet.has(photoId);
+            return {
+              as: "div",
+              role: "button",
+              tabIndex: 0,
+              "data-selected": isSelected ? "" : undefined,
+              className: cn(
+                "group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0",
+                canSelect ? "cursor-pointer" : "cursor-zoom-in",
+              ),
+              onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  (event.currentTarget as HTMLElement).click();
+                }
+              },
+            };
+          },
+          image: ({ photo }) => {
+            const photoId = extractPhotoId(photo as Photo & { id?: string });
+            const isSelected = selectedSet.has(photoId);
+            return {
+              className: cn(
+                "h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]",
+                canSelect && isSelected ? "opacity-75" : "",
+              ),
+            };
+          },
         }}
-        onClick={({ index }) => setIndex(index)}
+        onClick={({ index, photo }) => {
+          const photoId = extractPhotoId(photo as Photo & { id?: string });
+          if (canSelect && selectionActive) {
+            handleToggleSelect(photoId);
+            return;
+          }
+          setIndex(index);
+        }}
       />
       <Lightbox
         open={index >= 0}
