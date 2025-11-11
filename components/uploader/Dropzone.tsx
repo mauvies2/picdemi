@@ -71,7 +71,7 @@ function Dropzone({
         <Button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="focus-visible:outline focus-visible:outline-offset-2"
+          className="rounded-md focus-visible:outline focus-visible:outline-offset-2"
         >
           Upload
         </Button>

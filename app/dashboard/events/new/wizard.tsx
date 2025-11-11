@@ -1,46 +1,55 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
+import { useForm } from "@tanstack/react-form";
+import { format } from "date-fns";
+import { ChevronDownIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useId, useMemo, useState, useTransition } from "react";
 import { z } from "zod";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Dropzone } from "@/components/uploader/Dropzone";
+import { cn } from "@/lib/utils";
 import { createEvent } from "./actions";
 import { activityOptions, activityValues } from "./activity-options";
 
 const eventSchema = z.object({
   name: z.string().trim().min(1, "Name is required."),
-  activity: z
-    .string()
-    .refine(
-      (value): value is (typeof activityValues)[number] =>
-        activityValues.includes(value as (typeof activityValues)[number]),
-      "Activity is required.",
-    ),
+  activity: z.enum(activityValues),
   date: z.string().min(1, "Date is required."),
   country: z.string().trim().min(1, "Country is required."),
   city: z.string().trim().min(1, "City is required."),
 });
 
 type FormValues = z.infer<typeof eventSchema>;
-type FormErrors = Partial<Record<keyof FormValues, string>>;
 
-type FormState = {
-  name: string;
-  activity: string;
-  date: string;
-  country: string;
-  city: string;
+const defaultValues: FormValues = {
+  name: "",
+  activity: "OTHER",
+  date: "",
+  country: "",
+  city: "",
 };
 
 const formatBytes = (bytes: number) => {
   if (bytes === 0) return "0 B";
-  const units = ["B", "KB", "MB", "GB"];
+  const units = ["B", "KB", "MB", "GB"] as const;
   const index = Math.min(
     Math.floor(Math.log(bytes) / Math.log(1024)),
     units.length - 1,
@@ -51,26 +60,23 @@ const formatBytes = (bytes: number) => {
 
 export default function NewEventForm() {
   const router = useRouter();
-  const [values, setValues] = useState<FormState>({
-    name: "",
-    activity: "",
-    date: "",
-    country: "",
-    city: "",
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
   const [files, setFiles] = useState<File[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingValues, setPendingValues] = useState<FormValues | null>(null);
+  const dateInputId = useId();
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
 
-  const handleFieldChange =
-    (field: keyof FormState) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const value = event.target.value;
-      setValues((prev) => ({ ...prev, [field]: value }));
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    };
+  const form = useForm({
+    defaultValues,
+    onSubmit: async ({ value }) => {
+      const parsed = eventSchema.parse(value);
+      setSubmitError(null);
+      setPendingValues(parsed);
+      setIsModalOpen(true);
+    },
+  });
 
   const handleFiles = (incoming: File[]) => {
     setFiles((prev) => {
@@ -82,9 +88,7 @@ export default function NewEventForm() {
             item.size === file.size &&
             item.lastModified === file.lastModified,
         );
-        if (!exists) {
-          next.push(file);
-        }
+        if (!exists) next.push(file);
       }
       return next;
     });
@@ -94,45 +98,15 @@ export default function NewEventForm() {
     setFiles((prev) => prev.filter((file) => file !== target));
   };
 
-  const validateForm = (form: FormState) => {
-    const payload = {
-      ...form,
-      name: form.name.trim(),
-      country: form.country.trim(),
-      city: form.city.trim(),
-    } satisfies FormState;
-    const result = eventSchema.safeParse(payload);
-    if (result.success) {
-      setErrors({});
-      return result.data;
-    }
-    const fieldErrors: FormErrors = {};
-    for (const issue of result.error.issues) {
-      if (issue.path[0]) {
-        fieldErrors[issue.path[0] as keyof FormValues] = issue.message;
-      }
-    }
-    setErrors(fieldErrors);
-    return null;
-  };
-
-  const openConfirmation = () => {
-    const parsed = validateForm(values);
-    if (!parsed) return;
-    setSubmitError(null);
-    setIsModalOpen(true);
-  };
-
   const confirmCreation = () => {
-    const parsed = validateForm(values);
-    if (!parsed) return;
-    const payload = parsed;
+    const value = pendingValues;
+    if (!value || isPending) return;
     const formData = new FormData();
-    formData.append("name", payload.name.trim());
-    formData.append("activity", payload.activity);
-    formData.append("date", payload.date);
-    formData.append("country", payload.country.trim());
-    formData.append("city", payload.city.trim());
+    formData.append("name", value.name.trim());
+    formData.append("activity", value.activity);
+    formData.append("date", value.date);
+    formData.append("country", value.country.trim());
+    formData.append("city", value.city.trim());
     for (const file of files) {
       formData.append("photos", file);
     }
@@ -157,29 +131,29 @@ export default function NewEventForm() {
     });
   };
 
-  const eventSummary = useMemo(
-    () => [
-      { label: "Name", value: values.name },
+  const eventSummary = useMemo(() => {
+    const source = pendingValues ?? form.state.values;
+    return [
+      { label: "Name", value: source.name },
       {
         label: "Activity",
         value:
-          activityOptions.find((option) => option.value === values.activity)
-            ?.label ?? values.activity,
+          activityOptions.find((option) => option.value === source.activity)
+            ?.label ?? source.activity,
       },
       {
         label: "Date",
-        value: values.date ? new Date(values.date).toLocaleDateString() : "",
+        value: source.date ? format(new Date(source.date), "PPP") : "",
       },
-      { label: "Country", value: values.country },
-      { label: "City", value: values.city },
+      { label: "Country", value: source.country },
+      { label: "City", value: source.city },
       { label: "Photos", value: `${files.length} selected` },
-    ],
-    [values, files.length],
-  );
+    ];
+  }, [pendingValues, form.state.values, files.length]);
 
   return (
     <div className="px-4 py-6">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <div className="mx-auto flex w-full flex-col gap-6">
         <header>
           <DashboardHeader title="Create Event" />
           <p className="mt-1 text-sm text-muted-foreground">
@@ -187,103 +161,233 @@ export default function NewEventForm() {
           </p>
         </header>
 
-        <section className="grid gap-6">
+        <form
+          className="grid gap-6 max-w-lg"
+          onSubmit={(event) => {
+            event.preventDefault();
+            form.handleSubmit();
+          }}
+          noValidate
+        >
           <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={values.name}
-                onChange={handleFieldChange("name")}
-                placeholder="Event name"
-                aria-invalid={Boolean(errors.name)}
-                aria-describedby={errors.name ? "name-error" : undefined}
-              />
-              {errors.name && (
-                <p id="name-error" className="text-xs text-destructive">
-                  {errors.name}
-                </p>
-              )}
-            </div>
+            <form.Field
+              name="name"
+              validators={{
+                onChange: ({ value }) =>
+                  value.trim().length === 0 ? "Name is required." : undefined,
+              }}
+            >
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const error = field.state.meta.errors?.[0];
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      value={field.state.value}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
+                      onBlur={field.handleBlur}
+                      placeholder="Event name"
+                      aria-invalid={isInvalid}
+                      autoComplete="off"
+                    />
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
 
-            <div className="grid gap-2">
-              <Label htmlFor="activity">Activity</Label>
-              <select
-                id="activity"
-                value={values.activity}
-                onChange={handleFieldChange("activity")}
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-invalid:border-destructive"
-                aria-invalid={Boolean(errors.activity)}
-                aria-describedby={
-                  errors.activity ? "activity-error" : undefined
-                }
-              >
-                <option value="" disabled hidden>
-                  Select an activity
-                </option>
-                {activityOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {errors.activity && (
-                <p id="activity-error" className="text-xs text-destructive">
-                  {errors.activity}
-                </p>
-              )}
-            </div>
+            <form.Field
+              name="activity"
+              validators={{
+                onChange: ({ value }) =>
+                  activityValues.includes(
+                    value as (typeof activityValues)[number],
+                  )
+                    ? undefined
+                    : "Activity is required.",
+              }}
+            >
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const error = field.state.meta.errors?.[0];
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor="activity">Activity</Label>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => {
+                        field.handleChange(value as FormValues["activity"]);
+                        field.handleBlur();
+                      }}
+                    >
+                      <SelectTrigger
+                        id="activity"
+                        className="w-full rounded-md"
+                        aria-invalid={isInvalid}
+                      >
+                        <SelectValue placeholder="Select an activity" />
+                      </SelectTrigger>
+                      <SelectContent className="w-[--radix-select-trigger-width]">
+                        {activityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
 
-            <div className="grid gap-2">
-              <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={values.date}
-                onChange={handleFieldChange("date")}
-                aria-invalid={Boolean(errors.date)}
-                aria-describedby={errors.date ? "date-error" : undefined}
-              />
-              {errors.date && (
-                <p id="date-error" className="text-xs text-destructive">
-                  {errors.date}
-                </p>
-              )}
-            </div>
+            <form.Field
+              name="date"
+              validators={{
+                onChange: ({ value }) =>
+                  value && value.length > 0 ? undefined : "Date is required.",
+              }}
+            >
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const error = field.state.meta.errors?.[0];
+                const parsedDate = field.state.value
+                  ? new Date(field.state.value)
+                  : undefined;
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor={dateInputId}>Date</Label>
+                    <Popover
+                      open={datePopoverOpen}
+                      onOpenChange={setDatePopoverOpen}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-between rounded-md border border-input text-left font-normal",
+                            !parsedDate && "text-muted-foreground",
+                          )}
+                          aria-invalid={isInvalid}
+                        >
+                          {parsedDate
+                            ? format(parsedDate, "PPP")
+                            : "Select date"}
+                          <ChevronDownIcon className="size-4 opacity-60" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-auto overflow-hidden p-0"
+                        align="start"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={parsedDate}
+                          captionLayout="dropdown"
+                          onSelect={(date) => {
+                            field.handleChange(
+                              date ? format(date, "yyyy-MM-dd") : "",
+                            );
+                            field.handleBlur();
+                            setDatePopoverOpen(false);
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <input
+                      id={dateInputId}
+                      type="hidden"
+                      value={field.state.value}
+                      readOnly
+                    />
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
 
-            <div className="grid gap-2">
-              <Label htmlFor="country">Country</Label>
-              <Input
-                id="country"
-                value={values.country}
-                onChange={handleFieldChange("country")}
-                placeholder="Country"
-                aria-invalid={Boolean(errors.country)}
-                aria-describedby={errors.country ? "country-error" : undefined}
-              />
-              {errors.country && (
-                <p id="country-error" className="text-xs text-destructive">
-                  {errors.country}
-                </p>
-              )}
-            </div>
+            <form.Field
+              name="country"
+              validators={{
+                onChange: ({ value }) =>
+                  value.trim().length === 0
+                    ? "Country is required."
+                    : undefined,
+              }}
+            >
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const error = field.state.meta.errors?.[0];
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Input
+                      id="country"
+                      value={field.state.value}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
+                      onBlur={field.handleBlur}
+                      placeholder="Country"
+                      aria-invalid={isInvalid}
+                      autoComplete="country-name"
+                    />
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
 
-            <div className="grid gap-2">
-              <Label htmlFor="city">City</Label>
-              <Input
-                id="city"
-                value={values.city}
-                onChange={handleFieldChange("city")}
-                placeholder="City"
-                aria-invalid={Boolean(errors.city)}
-                aria-describedby={errors.city ? "city-error" : undefined}
-              />
-              {errors.city && (
-                <p id="city-error" className="text-xs text-destructive">
-                  {errors.city}
-                </p>
-              )}
-            </div>
+            <form.Field
+              name="city"
+              validators={{
+                onChange: ({ value }) =>
+                  value.trim().length === 0 ? "City is required." : undefined,
+              }}
+            >
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const error = field.state.meta.errors?.[0];
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      value={field.state.value}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
+                      onBlur={field.handleBlur}
+                      placeholder="City"
+                      aria-invalid={isInvalid}
+                      autoComplete="address-level2"
+                    />
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
           </div>
 
           <div className="grid gap-4">
@@ -309,7 +413,7 @@ export default function NewEventForm() {
                       variant="ghost"
                       size="sm"
                       onClick={() => removeFile(file)}
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      className="h-8 w-8 rounded-md text-muted-foreground hover:text-destructive"
                       aria-label={`Remove ${file.name}`}
                     >
                       <X className="h-4 w-4" aria-hidden="true" />
@@ -319,21 +423,20 @@ export default function NewEventForm() {
               </ul>
             )}
           </div>
-        </section>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {submitError && (
-            <p className="text-sm text-destructive">{submitError}</p>
-          )}
-          <Button
-            type="button"
-            onClick={openConfirmation}
-            className="sm:ml-auto"
-            disabled={isPending}
-          >
-            Create Event
-          </Button>
-        </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {submitError ? (
+              <p className="text-sm text-destructive">{submitError}</p>
+            ) : null}
+            <Button
+              type="submit"
+              className="rounded-md sm:ml-auto"
+              disabled={isPending}
+            >
+              Create Event
+            </Button>
+          </div>
+        </form>
       </div>
 
       <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -359,7 +462,7 @@ export default function NewEventForm() {
             </div>
             <div className="mt-6 flex justify-end gap-2">
               <Dialog.Close asChild>
-                <Button type="button" variant="outline">
+                <Button type="button" variant="outline" className="rounded-md">
                   Cancel
                 </Button>
               </Dialog.Close>
@@ -367,6 +470,7 @@ export default function NewEventForm() {
                 type="button"
                 onClick={confirmCreation}
                 disabled={isPending}
+                className="rounded-md"
               >
                 {isPending ? "Creating..." : "Confirm"}
               </Button>
