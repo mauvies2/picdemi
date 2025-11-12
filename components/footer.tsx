@@ -1,6 +1,6 @@
+import { Facebook, Instagram, Mail, Twitter } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Camera, Mail, Twitter, Instagram, Facebook } from "lucide-react";
 
 export function Footer() {
   return (
@@ -20,10 +20,12 @@ export function Footer() {
               <span className="text-xl font-bold tracking-tight">OceaPic</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Find yourself in every moment. Connect photographers with athletes and event-goers.
+              Find yourself in every moment. Connect photographers with athletes
+              and event-goers.
             </p>
             <div className="flex items-center gap-4">
               <a
+                // biome-ignore lint/a11y/useValidAnchor: explanation
                 href="#"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Twitter"
@@ -31,6 +33,7 @@ export function Footer() {
                 <Twitter className="h-5 w-5" />
               </a>
               <a
+                // biome-ignore lint/a11y/useValidAnchor: explanation
                 href="#"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Instagram"
@@ -38,6 +41,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
+                // biome-ignore lint/a11y/useValidAnchor: explanation
                 href="#"
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Facebook"
@@ -52,22 +56,36 @@ export function Footer() {
             <h3 className="text-sm font-semibold">Product</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/signup" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/signup"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Get Started
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/login"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Sign In
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Pricing
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Features
                 </a>
               </li>
@@ -79,22 +97,38 @@ export function Footer() {
             <h3 className="text-sm font-semibold">For Photographers</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Upload Photos
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Set Pricing
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Analytics
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Resources
                 </a>
               </li>
@@ -106,22 +140,38 @@ export function Footer() {
             <h3 className="text-sm font-semibold">Support</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Help Center
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Contact Us
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  // biome-ignore lint/a11y/useValidAnchor: explanation
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Terms of Service
                 </a>
               </li>
@@ -136,7 +186,10 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Mail className="h-4 w-4" />
-              <a href="mailto:hello@oceapic.com" className="hover:text-foreground transition-colors">
+              <a
+                href="mailto:hello@oceapic.com"
+                className="hover:text-foreground transition-colors"
+              >
                 hello@oceapic.com
               </a>
             </div>
@@ -146,4 +199,3 @@ export function Footer() {
     </footer>
   );
 }
-

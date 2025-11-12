@@ -284,53 +284,59 @@ export default function PhotoAlbumViewer({
 
   return (
     <>
-      <RowsPhotoAlbum
-        photos={photos}
-        spacing={10}
-        // breakpoints={[50, 5000, 5000]}
-        rowConstraints={{ maxPhotos: 4 }}
-        render={{ extras: renderExtras }}
-        componentsProps={{
-          button: ({ photo }) => {
+      <div className="max-w-full">
+        <RowsPhotoAlbum
+          photos={photos}
+          spacing={10}
+          // breakpoints={[50, 5000, 5000]}
+          rowConstraints={{
+            maxPhotos: 4,
+            minPhotos: 1,
+            singleRowMaxHeight: 200,
+          }}
+          render={{ extras: renderExtras }}
+          componentsProps={{
+            button: ({ photo }) => {
+              const photoId = extractPhotoId(photo as Photo & { id?: string });
+              const isSelected = selectedSet.has(photoId);
+              return {
+                as: "div",
+                role: "button",
+                tabIndex: 0,
+                "data-selected": isSelected ? "" : undefined,
+                className: cn(
+                  "group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0",
+                  canSelect ? "cursor-pointer" : "cursor-zoom-in",
+                ),
+                onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    (event.currentTarget as HTMLElement).click();
+                  }
+                },
+              };
+            },
+            image: ({ photo }) => {
+              const photoId = extractPhotoId(photo as Photo & { id?: string });
+              const isSelected = selectedSet.has(photoId);
+              return {
+                className: cn(
+                  "h-full w-full object-cover",
+                  canSelect && isSelected ? "opacity-75" : "",
+                ),
+              };
+            },
+          }}
+          onClick={({ index, photo }) => {
             const photoId = extractPhotoId(photo as Photo & { id?: string });
-            const isSelected = selectedSet.has(photoId);
-            return {
-              as: "div",
-              role: "button",
-              tabIndex: 0,
-              "data-selected": isSelected ? "" : undefined,
-              className: cn(
-                "group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0",
-                canSelect ? "cursor-pointer" : "cursor-zoom-in",
-              ),
-              onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  (event.currentTarget as HTMLElement).click();
-                }
-              },
-            };
-          },
-          image: ({ photo }) => {
-            const photoId = extractPhotoId(photo as Photo & { id?: string });
-            const isSelected = selectedSet.has(photoId);
-            return {
-              className: cn(
-                "h-full w-full object-cover",
-                canSelect && isSelected ? "opacity-75" : "",
-              ),
-            };
-          },
-        }}
-        onClick={({ index, photo }) => {
-          const photoId = extractPhotoId(photo as Photo & { id?: string });
-          if (canSelect && selectionActive) {
-            handleToggleSelect(photoId);
-            return;
-          }
-          setIndex(index);
-        }}
-      />
+            if (canSelect && selectionActive) {
+              handleToggleSelect(photoId);
+              return;
+            }
+            setIndex(index);
+          }}
+        />
+      </div>
       <Lightbox
         open={index >= 0}
         index={index}

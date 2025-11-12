@@ -17,7 +17,10 @@ export default async function TalentProfilePage() {
   }
 
   const { getProfileFields } = await import("@/database/queries");
-  const profile = await getProfileFields(supabase, user.id, ["display_name", "bio"]);
+  const profile = await getProfileFields(supabase, user.id, [
+    "display_name",
+    "bio",
+  ]);
 
   const updateProfile = async (formData: FormData) => {
     "use server";

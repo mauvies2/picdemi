@@ -1,7 +1,21 @@
-import { Camera, Search, Sparkles, Zap, Shield, TrendingUp, Users, Image as ImageIcon, CreditCard, Bell, MapPin, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  ArrowRight,
+  Bell,
+  Camera,
+  CheckCircle2,
+  CreditCard,
+  Image as ImageIcon,
+  MapPin,
+  Search,
+  Shield,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Zap,
+} from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/footer";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -18,21 +32,24 @@ export default function Home() {
           <div className="mx-auto max-w-4xl text-center">
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border bg-card/50 px-4 py-2 text-sm backdrop-blur-sm">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-muted-foreground">AI-Powered Photo Discovery</span>
+              <span className="text-muted-foreground">
+                AI-Powered Photo Discovery
+              </span>
             </div>
-            
+
             <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl xl:text-8xl">
               Find Yourself in Every
               <span className="block bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
                 Moment
               </span>
             </h1>
-            
+
             <p className="mx-auto mt-8 max-w-2xl text-xl leading-8 text-muted-foreground sm:text-2xl">
-              OceaPic connects photographers with athletes and event-goers. 
-              Upload your event photos, and let AI help users find themselves instantly.
+              OceaPic connects photographers with athletes and event-goers.
+              Upload your event photos, and let AI help users find themselves
+              instantly.
             </p>
-            
+
             <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link href="/signup">
                 <Button size="lg" className="group text-base px-8">
@@ -91,11 +108,16 @@ export default function Home() {
                   <Camera className="h-7 w-7 text-primary" />
                 </div>
                 <div className="mt-6">
-                  <span className="text-sm font-semibold text-primary">Step 1</span>
-                  <h3 className="mt-2 text-2xl font-semibold">Photographers Upload</h3>
+                  <span className="text-sm font-semibold text-primary">
+                    Step 1
+                  </span>
+                  <h3 className="mt-2 text-2xl font-semibold">
+                    Photographers Upload
+                  </h3>
                   <p className="mt-4 text-muted-foreground leading-relaxed">
-                    Upload event photos through a simple interface. Our AI automatically extracts 
-                    activity type, location, and date metadata.
+                    Upload event photos through a simple interface. Our AI
+                    automatically extracts activity type, location, and date
+                    metadata.
                   </p>
                 </div>
               </div>
@@ -106,11 +128,15 @@ export default function Home() {
                   <Sparkles className="h-7 w-7 text-primary" />
                 </div>
                 <div className="mt-6">
-                  <span className="text-sm font-semibold text-primary">Step 2</span>
-                  <h3 className="mt-2 text-2xl font-semibold">AI-Powered Detection</h3>
+                  <span className="text-sm font-semibold text-primary">
+                    Step 2
+                  </span>
+                  <h3 className="mt-2 text-2xl font-semibold">
+                    AI-Powered Detection
+                  </h3>
                   <p className="mt-4 text-muted-foreground leading-relaxed">
-                    Advanced AI recognizes faces, outfits, and bib numbers to help users 
-                    find themselves in photos instantly.
+                    Advanced AI recognizes faces, outfits, and bib numbers to
+                    help users find themselves in photos instantly.
                   </p>
                 </div>
               </div>
@@ -121,11 +147,16 @@ export default function Home() {
                   <Search className="h-7 w-7 text-primary" />
                 </div>
                 <div className="mt-6">
-                  <span className="text-sm font-semibold text-primary">Step 3</span>
-                  <h3 className="mt-2 text-2xl font-semibold">Search & Purchase</h3>
+                  <span className="text-sm font-semibold text-primary">
+                    Step 3
+                  </span>
+                  <h3 className="mt-2 text-2xl font-semibold">
+                    Search & Purchase
+                  </h3>
                   <p className="mt-4 text-muted-foreground leading-relaxed">
-                    Users search by filters or upload a selfie for AI matching. 
-                    Select and buy photos from multiple photographers with flexible pricing.
+                    Users search by filters or upload a selfie for AI matching.
+                    Select and buy photos from multiple photographers with
+                    flexible pricing.
                   </p>
                 </div>
               </div>
@@ -154,7 +185,8 @@ export default function Home() {
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">Smart Search</h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Filter by location, activity, and date, or upload a selfie for instant AI matching.
+                  Filter by location, activity, and date, or upload a selfie for
+                  instant AI matching.
                 </p>
               </div>
 
@@ -162,9 +194,12 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                   <Bell className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="mt-5 text-lg font-semibold">Smart Notifications</h3>
+                <h3 className="mt-5 text-lg font-semibold">
+                  Smart Notifications
+                </h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Get notified when new photos matching your preferences are available.
+                  Get notified when new photos matching your preferences are
+                  available.
                 </p>
               </div>
 
@@ -174,7 +209,8 @@ export default function Home() {
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">Personal Gallery</h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Automatically collect detected photos and create your public profile.
+                  Automatically collect detected photos and create your public
+                  profile.
                 </p>
               </div>
 
@@ -184,7 +220,8 @@ export default function Home() {
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">Flexible Pricing</h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Bundle photos from multiple photographers. Save with package deals.
+                  Bundle photos from multiple photographers. Save with package
+                  deals.
                 </p>
               </div>
 
@@ -194,7 +231,8 @@ export default function Home() {
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">Instant Download</h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Get high-resolution, watermark-free photos immediately after purchase.
+                  Get high-resolution, watermark-free photos immediately after
+                  purchase.
                 </p>
               </div>
 
@@ -202,9 +240,12 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                   <Users className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="mt-5 text-lg font-semibold">No Account Required</h3>
+                <h3 className="mt-5 text-lg font-semibold">
+                  No Account Required
+                </h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Search and purchase without signing up. Create an account for personalized features.
+                  Search and purchase without signing up. Create an account for
+                  personalized features.
                 </p>
               </div>
             </div>
@@ -232,7 +273,8 @@ export default function Home() {
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">Bulk Upload</h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Upload hundreds of photos at once. AI automatically extracts metadata.
+                  Upload hundreds of photos at once. AI automatically extracts
+                  metadata.
                 </p>
               </div>
 
@@ -242,7 +284,8 @@ export default function Home() {
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">Set Your Pricing</h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Create custom bundles (1 photo €5, 3 for €12, 5 for €15, 10 for €20).
+                  Create custom bundles (1 photo €5, 3 for €12, 5 for €15, 10
+                  for €20).
                 </p>
               </div>
 
@@ -252,7 +295,8 @@ export default function Home() {
                 </div>
                 <h3 className="mt-5 text-lg font-semibold">Secure Payments</h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Get paid automatically. We handle transactions with just a 10% platform fee.
+                  Get paid automatically. We handle transactions with just a 10%
+                  platform fee.
                 </p>
               </div>
 
@@ -260,9 +304,12 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                   <Users className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="mt-5 text-lg font-semibold">Reach More Buyers</h3>
+                <h3 className="mt-5 text-lg font-semibold">
+                  Reach More Buyers
+                </h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Your photos are discoverable by AI search, reaching users you never could before.
+                  Your photos are discoverable by AI search, reaching users you
+                  never could before.
                 </p>
               </div>
 
@@ -280,9 +327,12 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                   <TrendingUp className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="mt-5 text-lg font-semibold">Analytics & Insights</h3>
+                <h3 className="mt-5 text-lg font-semibold">
+                  Analytics & Insights
+                </h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  Track sales, popular photos, and buyer engagement to grow your business.
+                  Track sales, popular photos, and buyer engagement to grow your
+                  business.
                 </p>
               </div>
             </div>
@@ -306,7 +356,9 @@ export default function Home() {
             {/* Free Tier */}
             <div className="group rounded-2xl border bg-card p-8 shadow-sm transition-all hover:shadow-lg">
               <h3 className="text-2xl font-bold">Free</h3>
-              <p className="mt-2 text-sm text-muted-foreground">Perfect for getting started</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Perfect for getting started
+              </p>
               <ul className="mt-8 space-y-4 text-sm">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -333,7 +385,9 @@ export default function Home() {
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold">Amateur</h3>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">For active photographers</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                For active photographers
+              </p>
               <ul className="mt-8 space-y-4 text-sm">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -357,7 +411,9 @@ export default function Home() {
             {/* Pro Tier */}
             <div className="group rounded-2xl border bg-card p-8 shadow-sm transition-all hover:shadow-lg">
               <h3 className="text-2xl font-bold">Pro</h3>
-              <p className="mt-2 text-sm text-muted-foreground">For professionals</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                For professionals
+              </p>
               <ul className="mt-8 space-y-4 text-sm">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />

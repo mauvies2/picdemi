@@ -189,9 +189,6 @@ export async function deleteEventPhotos(
     .eq("user_id", userId);
 
   if (error) {
-    throw new Error(
-      `Failed to delete event photos: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to delete event photos: ${getErrorMessage(error)}`);
   }
 }
-

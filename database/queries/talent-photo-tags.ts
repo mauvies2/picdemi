@@ -135,9 +135,7 @@ export async function isPhotoTaggedForTalent(
     .maybeSingle();
 
   if (error) {
-    throw new Error(
-      `Failed to check photo tag: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to check photo tag: ${getErrorMessage(error)}`);
   }
 
   return data !== null;
@@ -188,11 +186,14 @@ export async function getTaggedPhotosForTalent(
     );
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: explanation
   return (data ?? []).map((item: any) => {
     const photo = item.photos;
     // Events might be an array or single object depending on Supabase version
-    const event = Array.isArray(photo?.events) 
-      ? (photo.events.length > 0 ? photo.events[0] : null)
+    const event = Array.isArray(photo?.events)
+      ? photo.events.length > 0
+        ? photo.events[0]
+        : null
       : photo?.events;
     return {
       photo_id: item.photo_id,
@@ -252,7 +253,9 @@ export async function getTagsForPhotos(
 
   // Get unique talent user IDs
   const talentUserIds = [
-    ...new Set((data ?? []).map((tag: any) => tag.talent_user_id)),
+    ...new Set(
+      (data ?? []).map((tag: { talent_user_id: string }) => tag.talent_user_id),
+    ),
   ];
 
   // Fetch profiles for all talent users
@@ -292,24 +295,3 @@ export async function getTagsForPhotos(
 
   return tagsByPhoto;
 }
-
-/**
- * Find user by email (for tagging lookup)
- * Note: This requires the search term to be an email address
- * In production, you might want to create an RPC function for better search
- */
-export async function findUserByEmail(
-  supabase: SupabaseServerClient,
-  email: string,
-): Promise<{ id: string; email: string; display_name: string | null } | null> {
-  // Normalize email
-  const normalizedEmail = email.trim().toLowerCase();
-
-  // Search profiles by matching email pattern
-  // Since we can't directly query auth.users, we'll need to use an RPC function
-  // For now, this is a placeholder - the actual lookup will be done in the server action
-  // using Supabase admin API or an RPC function
-  
-  return null;
-}
-

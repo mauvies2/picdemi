@@ -1,16 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/database/server";
 import {
-  eventExists,
-  getPhotoStoragePaths,
-  deleteEventPhotos,
-  deleteEvent,
-  deleteStorageFiles,
-  getPhoto,
   deletePhoto as dbDeletePhoto,
+  deleteEvent,
+  deleteEventPhotos,
+  deleteStorageFiles,
+  eventExists,
+  getPhoto,
+  getPhotoStoragePaths,
 } from "@/database/queries";
+import { createClient } from "@/database/server";
 
 export const deleteEventAction = async (eventId: string) => {
   if (!eventId) {

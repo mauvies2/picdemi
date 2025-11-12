@@ -1,15 +1,15 @@
 "use client";
 
-import { useTransition } from "react";
 import { X } from "lucide-react";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { untagPhotoForTalentAction } from "@/app/dashboard/events/[id]/actions";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { untagPhotoForTalentAction } from "@/app/dashboard/events/[id]/actions";
-import { toast } from "sonner";
 
 interface PhotoTag {
   tag_id: string;
@@ -85,4 +85,3 @@ export function PhotoLightboxTags({
     </div>
   );
 }
-

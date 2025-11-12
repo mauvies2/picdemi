@@ -142,4 +142,3 @@ export async function upsertProfile(
     throw new Error(`Failed to upsert profile: ${getErrorMessage(error)}`);
   }
 }
-

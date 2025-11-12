@@ -1,10 +1,10 @@
 import { DashboardHeader } from "@/components/dashboard-header";
-import { createClient } from "@/database/server";
 import {
-  getUserEvents,
-  getPhotosForEvents,
   createSignedUrl,
+  getPhotosForEvents,
+  getUserEvents,
 } from "@/database/queries";
+import { createClient } from "@/database/server";
 import { deleteEventAction as deleteEvent } from "./actions";
 import { EventCard } from "./event-card";
 
@@ -75,7 +75,12 @@ export default async function EventsPage() {
   await Promise.all(
     Array.from(stats.entries()).map(async ([eventId, info]) => {
       if (!info.coverPath) return;
-      const signedUrl = await createSignedUrl(supabase, "photos", info.coverPath, 60 * 60);
+      const signedUrl = await createSignedUrl(
+        supabase,
+        "photos",
+        info.coverPath,
+        60 * 60,
+      );
       if (signedUrl) coverUrls.set(eventId, signedUrl);
     }),
   );

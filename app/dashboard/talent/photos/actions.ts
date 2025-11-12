@@ -1,11 +1,11 @@
 "use server";
 
-import { createClient } from "@/database/server";
 import {
-  getTaggedPhotosForTalent,
+  createSignedUrls,
   getTaggedPhotosCountForTalent,
+  getTaggedPhotosForTalent,
 } from "@/database/queries";
-import { createSignedUrls } from "@/database/queries";
+import { createClient } from "@/database/server";
 
 export interface TaggedPhotoGroup {
   event_id: string | null;
@@ -67,7 +67,12 @@ export async function listMyTaggedPhotos(options?: {
 
   const signedUrlsMap: Record<string, string | null> = {};
   if (photoPaths.length > 0) {
-    const signedUrls = await createSignedUrls(supabase, "photos", photoPaths, 3600);
+    const signedUrls = await createSignedUrls(
+      supabase,
+      "photos",
+      photoPaths,
+      3600,
+    );
     for (const item of signedUrls) {
       signedUrlsMap[item.path] = item.signedUrl;
     }
@@ -94,7 +99,15 @@ export async function listMyTaggedPhotos(options?: {
       });
     }
 
-    const group = groupsMap.get(eventKey)!;
+    const group = groupsMap.get(eventKey) ?? {
+      event_id: photo.event_id,
+      event_name: eventName,
+      event_date: eventDate,
+      event_city: eventCity,
+      event_country: eventCountry,
+      dates: [],
+    };
+
     const photoDate = photo.taken_at
       ? new Date(photo.taken_at).toISOString().split("T")[0]
       : "unknown";
@@ -108,7 +121,9 @@ export async function listMyTaggedPhotos(options?: {
     dateGroup.photos.push({
       photo_id: photo.photo_id,
       photo_url: photo.photo_url ?? "",
-      signed_url: photo.photo_url ? signedUrlsMap[photo.photo_url] ?? null : null,
+      signed_url: photo.photo_url
+        ? (signedUrlsMap[photo.photo_url] ?? null)
+        : null,
       taken_at: photo.taken_at,
       tagged_at: photo.tagged_at,
     });
@@ -120,7 +135,8 @@ export async function listMyTaggedPhotos(options?: {
     // Sort photos within each date by tagged_at
     for (const dateGroup of group.dates) {
       dateGroup.photos.sort(
-        (a, b) => new Date(b.tagged_at).getTime() - new Date(a.tagged_at).getTime(),
+        (a, b) =>
+          new Date(b.tagged_at).getTime() - new Date(a.tagged_at).getTime(),
       );
     }
   }
@@ -139,4 +155,3 @@ export async function listMyTaggedPhotos(options?: {
     hasMore: offset + taggedPhotos.length < totalCount,
   };
 }
-

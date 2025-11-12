@@ -3,15 +3,15 @@
 import { Buffer } from "node:buffer";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createClient } from "@/database/server";
 import {
-  createEvent as dbCreateEvent,
   createPhoto,
-  uploadFile,
+  createEvent as dbCreateEvent,
+  deleteEvent,
   deleteEventPhotos,
   deleteStorageFiles,
-  deleteEvent,
+  uploadFile,
 } from "@/database/queries";
+import { createClient } from "@/database/server";
 import { activityValues } from "./activity-options";
 
 const eventSchema = z.object({
@@ -117,7 +117,11 @@ export const createEvent = async (
   } catch (error) {
     console.error("createEvent: upload failed", error);
     await deleteEventPhotos(supabase, event.id, user.id);
-    await deleteStorageFiles(supabase, "photos", photoRecords.map((record) => record.original_path));
+    await deleteStorageFiles(
+      supabase,
+      "photos",
+      photoRecords.map((record) => record.original_path),
+    );
     await deleteEvent(supabase, event.id, user.id);
 
     const message =

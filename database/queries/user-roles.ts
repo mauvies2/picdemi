@@ -71,4 +71,3 @@ export async function upsertUserRole(
     throw new Error(`Failed to upsert user role: ${getErrorMessage(error)}`);
   }
 }
-

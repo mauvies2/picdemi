@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { getActiveRole, switchRole } from "@/app/actions/roles";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -20,15 +20,18 @@ export default async function DashboardLayout({
   }
 
   const { getProfileFields } = await import("@/database/queries");
-  const profile = await getProfileFields(supabase, user.id, ["display_name", "active_role"]);
+  const profile = await getProfileFields(supabase, user.id, [
+    "display_name",
+    "active_role",
+  ]);
 
   // Get current pathname to sync role based on URL
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "";
-  
+
   // Get current active role
   let { activeRole } = await getActiveRole();
-  
+
   // Sync role based on URL path before passing to sidebar
   if (pathname.startsWith("/dashboard/talent")) {
     if (activeRole !== "talent") {

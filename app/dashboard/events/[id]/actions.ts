@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/database/server";
 import {
+  isPhotoTaggedForTalent,
   tagPhotosForTalent,
   untagPhotoForTalent,
-  isPhotoTaggedForTalent,
 } from "@/database/queries";
+import { createClient } from "@/database/server";
 
 /**
  * Find users by partial text match (email or display name)
@@ -14,11 +14,13 @@ import {
 export async function searchTalentUsers(
   searchText: string,
   limit: number = 10,
-): Promise<Array<{
-  id: string;
-  email: string;
-  display_name: string | null;
-}>> {
+): Promise<
+  Array<{
+    id: string;
+    email: string;
+    display_name: string | null;
+  }>
+> {
   const supabase = await createClient();
   const {
     data: { user: currentUser },
@@ -49,11 +51,13 @@ export async function searchTalentUsers(
     return [];
   }
 
-  return data.map((user: any) => ({
-    id: user.id,
-    email: user.email,
-    display_name: user.display_name || null,
-  }));
+  return data.map(
+    (user: { id: string; email: string; display_name: string | null }) => ({
+      id: user.id,
+      email: user.email,
+      display_name: user.display_name || null,
+    }),
+  );
 }
 
 /**
@@ -126,13 +130,16 @@ export async function getPhotoTags(photoIds: string[]): Promise<
   }
 
   // Populate emails in tags
-  const result: Record<string, Array<{
-    tag_id: string;
-    talent_user_id: string;
-    talent_email: string;
-    talent_display_name: string | null;
-    tagged_at: string;
-  }>> = {};
+  const result: Record<
+    string,
+    Array<{
+      tag_id: string;
+      talent_user_id: string;
+      talent_email: string;
+      talent_display_name: string | null;
+      tagged_at: string;
+    }>
+  > = {};
 
   for (const [photoId, tags] of Object.entries(tagsByPhoto)) {
     result[photoId] = tags.map((tag) => ({
@@ -173,7 +180,9 @@ export async function tagPhotosForTalentAction(
     .eq("user_id", user.id);
 
   if (photosError || !photos || photos.length !== photoIds.length) {
-    throw new Error("One or more photos not found or you don't have permission.");
+    throw new Error(
+      "One or more photos not found or you don't have permission.",
+    );
   }
 
   const taggedCount = await tagPhotosForTalent(
@@ -235,4 +244,3 @@ export async function checkPhotoTaggedForTalent(
   const supabase = await createClient();
   return await isPhotoTaggedForTalent(supabase, photoId, talentUserId);
 }
-

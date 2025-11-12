@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 import PhotoAlbumViewer, {
   type PhotoAlbumItem,
 } from "@/components/photo-album-viewer";
 import { TagTalentDialog } from "@/components/tag-talent-dialog";
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 type EventPhotoAlbumProps = {
   items: PhotoAlbumItem[];
@@ -45,13 +45,10 @@ export function EventPhotoAlbum({ items }: EventPhotoAlbumProps) {
     router.refresh();
   }, [router]);
 
-  const handleTagSinglePhoto = useCallback(
-    (photoId: string) => {
-      setSelectedIds([photoId]);
-      setTagDialogOpen(true);
-    },
-    [],
-  );
+  const handleTagSinglePhoto = useCallback((photoId: string) => {
+    setSelectedIds([photoId]);
+    setTagDialogOpen(true);
+  }, []);
 
   const selectedCountLabel = useMemo(() => {
     if (selectedIds.length === 0) return "No photos selected";
@@ -96,7 +93,6 @@ export function EventPhotoAlbum({ items }: EventPhotoAlbumProps) {
               </Button>
               <Button
                 type="button"
-                variant="secondary"
                 size="sm"
                 onClick={() => {
                   setSelectedIds([]);

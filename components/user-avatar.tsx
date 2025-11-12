@@ -4,8 +4,8 @@ import type { User } from "@supabase/supabase-js";
 import { LayoutDashboard, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/database/client";
-import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +44,10 @@ export function UserAvatar({ user }: Props) {
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          >
             <Avatar>
               <AvatarImage src={user.user_metadata.avatar_url} alt="User" />
               <AvatarFallback>
@@ -55,8 +58,12 @@ export function UserAvatar({ user }: Props) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <div className="px-2 py-1.5">
-            <p className="text-sm font-medium">{user.user_metadata?.full_name || user.email}</p>
-            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            <p className="text-sm font-medium">
+              {user.user_metadata?.full_name || user.email}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {user.email}
+            </p>
           </div>
           <DropdownMenuItem onClick={goToDashboard} className="sm:hidden">
             <LayoutDashboard className="mr-2 h-4 w-4" />

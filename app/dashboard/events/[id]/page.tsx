@@ -1,13 +1,9 @@
 import { redirect } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { createSignedUrls, getEvent, getEventPhotos } from "@/database/queries";
 import { createClient } from "@/database/server";
-import {
-  getEvent,
-  getEventPhotos,
-  createSignedUrls,
-} from "@/database/queries";
-import { EventPhotoAlbum } from "./event-photo-album";
 import { getPhotoTags } from "./actions";
+import { EventPhotoAlbum } from "./event-photo-album";
 
 export default async function EventDetailPage({
   params,
@@ -29,11 +25,18 @@ export default async function EventDetailPage({
   const photos = await getEventPhotos(supabase, id, user.id);
 
   // Generate signed URLs for private storage objects
-  const paths = photos.map((p) => p.original_url).filter((url): url is string => url !== null);
+  const paths = photos
+    .map((p) => p.original_url)
+    .filter((url): url is string => url !== null);
   const signed: Record<string, string> = {};
 
   if (paths.length > 0) {
-    const signedUrls = await createSignedUrls(supabase, "photos", paths, 60 * 60); // 1 hour
+    const signedUrls = await createSignedUrls(
+      supabase,
+      "photos",
+      paths,
+      60 * 60,
+    ); // 1 hour
     for (const item of signedUrls) {
       if (item.signedUrl) {
         signed[item.path] = item.signedUrl;
@@ -49,12 +52,8 @@ export default async function EventDetailPage({
     <div className="p-4">
       <DashboardHeader title={event.name} />
       <div className="text-sm text-muted-foreground">
-        {new Date(event.date)
-          .toDateString()
-          .split(" ")
-          .slice(1)
-          .join(" ")}{" "}
-        • {event.city[0]?.toUpperCase() + event.city.slice(1)}
+        {new Date(event.date).toDateString().split(" ").slice(1).join(" ")} •{" "}
+        {event.city[0]?.toUpperCase() + event.city.slice(1)}
       </div>
       <div className="mt-4">
         <EventPhotoAlbum
@@ -65,12 +64,14 @@ export default async function EventDetailPage({
               return {
                 id: p.id,
                 url,
-                alt: p.original_url ?? undefined,
+                ...(p.original_url && { alt: p.original_url }),
                 tags: photoTags[p.id] || [],
               };
             })
             .filter(
-              (item): item is {
+              (
+                item,
+              ): item is {
                 id: string;
                 url: string;
                 alt?: string;

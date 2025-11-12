@@ -110,7 +110,8 @@ export async function deleteStorageFiles(
   const { error } = await supabase.storage.from(bucket).remove(paths);
 
   if (error) {
-    throw new Error(`Failed to delete storage files: ${getErrorMessage(error)}`);
+    throw new Error(
+      `Failed to delete storage files: ${getErrorMessage(error)}`,
+    );
   }
 }
-

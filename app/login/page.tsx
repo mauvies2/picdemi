@@ -73,8 +73,10 @@ export default async function Login({
       return redirect("/login?message=Could not retrieve user after login");
     }
 
-    const { getProfileActiveRole, getUserRoles } = await import("@/database/queries");
-    
+    const { getProfileActiveRole, getUserRoles } = await import(
+      "@/database/queries"
+    );
+
     const activeRole = await getProfileActiveRole(supabase, user.id);
     if (activeRole) {
       const dashboardPath = await getDashboardPath();

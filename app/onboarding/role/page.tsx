@@ -15,8 +15,10 @@ export default async function OnboardingRolePage() {
     return redirect("/login");
   }
 
-  const { getProfileActiveRole, getUserRole } = await import("@/database/queries");
-  
+  const { getProfileActiveRole, getUserRole } = await import(
+    "@/database/queries"
+  );
+
   const activeRole = await getProfileActiveRole(supabase, user.id);
   if (activeRole) {
     const dashboardPath = await getDashboardPath();

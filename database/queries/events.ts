@@ -142,4 +142,3 @@ export async function deleteEvent(
     throw new Error(`Failed to delete event: ${getErrorMessage(error)}`);
   }
 }
-

@@ -22,8 +22,10 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/login`);
     }
 
-    const { getProfileActiveRole, getUserRoles } = await import("@/database/queries");
-    
+    const { getProfileActiveRole, getUserRoles } = await import(
+      "@/database/queries"
+    );
+
     const activeRole = await getProfileActiveRole(supabase, user.id);
     if (activeRole) {
       const dashboardPath = await getDashboardPath();
