@@ -3,6 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import {
+  upsertProfileRole as dbUpsertProfileRole,
+  upsertUserRole as dbUpsertUserRole,
+  getProfileActiveRole,
+  getUserRoles,
+} from "@/database/queries";
 import { createClient } from "@/database/server";
 import {
   type RoleSlug,
@@ -34,56 +40,20 @@ async function getAuthenticatedClient() {
   return { supabase, user };
 }
 
-async function upsertProfileRole(
-  supabase: SupabaseServerClient,
-  userId: string,
-  role: UserRole,
-) {
-  const { error } = await supabase.from("profiles").upsert(
-    { id: userId, active_role: role },
-    {
-      onConflict: "id",
-      ignoreDuplicates: false,
-    },
-  );
-
-  if (error) {
-    throw new Error(error.message);
-  }
-}
-
-async function upsertUserRole(
-  supabase: SupabaseServerClient,
-  userId: string,
-  role: UserRole,
-) {
-  const { error } = await supabase.from("user_role_memberships").upsert(
-    { user_id: userId, role },
-    {
-      onConflict: "user_id,role",
-      ignoreDuplicates: false,
-    },
-  );
-
-  if (error) {
-    throw new Error(error.message);
-  }
-}
-
 async function enableModelRoleInternal(
   supabase: SupabaseServerClient,
   userId: string,
 ) {
-  await upsertUserRole(supabase, userId, "MODEL");
-  await upsertProfileRole(supabase, userId, "MODEL");
+  await dbUpsertUserRole(supabase, userId, "MODEL");
+  await dbUpsertProfileRole(supabase, userId, "MODEL");
 }
 
 export async function completeOnboarding(initialRole: UserRole) {
   const role = userRoleSchema.parse(initialRole);
   const { supabase, user } = await getAuthenticatedClient();
 
-  await upsertProfileRole(supabase, user.id, role);
-  await upsertUserRole(supabase, user.id, role);
+  await dbUpsertProfileRole(supabase, user.id, role);
+  await dbUpsertUserRole(supabase, user.id, role);
 
   revalidatePath("/dashboard");
   // Redirect to the role-specific dashboard
@@ -110,16 +80,7 @@ export async function switchRole(
   const targetRole = roleSlugToEnum(slug);
   const { supabase, user } = await getAuthenticatedClient();
 
-  const { data: rolesData, error: rolesError } = await supabase
-    .from("user_role_memberships")
-    .select("role")
-    .eq("user_id", user.id);
-
-  if (rolesError) {
-    throw new Error(rolesError.message);
-  }
-
-  const existingRoles = rolesData?.map((r) => r.role as UserRole) ?? [];
+  const existingRoles = await getUserRoles(supabase, user.id);
   const { needsEnableModel } = resolveRoleSwitch(existingRoles, targetRole);
 
   if (needsEnableModel) {
@@ -129,7 +90,7 @@ export async function switchRole(
     if (!hasRole) {
       throw new Error("Role is not enabled for this user.");
     }
-    await upsertProfileRole(supabase, user.id, targetRole);
+    await dbUpsertProfileRole(supabase, user.id, targetRole);
   }
 
   // Only revalidate if not called during render (e.g., from user action)
@@ -147,43 +108,27 @@ export async function getActiveRole(): Promise<{
 }> {
   const { supabase, user } = await getAuthenticatedClient();
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (profileError) {
-    throw new Error(profileError.message);
-  }
-
   // If profile exists, it should always have an active_role (NOT NULL with default)
   // Use it directly if present
-  if (profile?.active_role) {
-    return { activeRole: roleEnumToSlug(profile.active_role as UserRole) };
+  const activeRole = await getProfileActiveRole(supabase, user.id);
+  if (activeRole) {
+    return { activeRole: roleEnumToSlug(activeRole) };
   }
 
   // Profile doesn't exist - check user roles to determine what to set
-  const { data: rolesData, error: rolesError } = await supabase
-    .from("user_role_memberships")
-    .select("role")
-    .eq("user_id", user.id);
-
-  if (rolesError) {
-    throw new Error(rolesError.message);
-  }
+  const rolesData = await getUserRoles(supabase, user.id);
 
   // Prefer PHOTOGRAPHER as fallback (default role), then MODEL, then first available
   const fallback =
-    rolesData?.find((record) => record.role === "PHOTOGRAPHER")?.role ??
-    rolesData?.find((record) => record.role === "MODEL")?.role ??
-    rolesData?.[0]?.role ??
-    "PHOTOGRAPHER";
+    rolesData.find((role) => role === "PHOTOGRAPHER") ??
+    rolesData.find((role) => role === "MODEL") ??
+    rolesData[0] ??
+    ("PHOTOGRAPHER" as UserRole);
 
   // Create/update profile with the fallback role
-  await upsertProfileRole(supabase, user.id, fallback as UserRole);
+  await dbUpsertProfileRole(supabase, user.id, fallback);
 
-  return { activeRole: roleEnumToSlug(fallback as UserRole) };
+  return { activeRole: roleEnumToSlug(fallback) };
 }
 
 /**

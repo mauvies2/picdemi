@@ -19,11 +19,8 @@ export default async function DashboardLayout({
     return redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name, active_role")
-    .eq("id", user.id)
-    .maybeSingle();
+  const { getProfileFields } = await import("@/database/queries");
+  const profile = await getProfileFields(supabase, user.id, ["display_name", "active_role"]);
 
   // Get current pathname to sync role based on URL
   const headersList = await headers();

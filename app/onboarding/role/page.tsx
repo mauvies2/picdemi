@@ -15,24 +15,17 @@ export default async function OnboardingRolePage() {
     return redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (profile?.active_role) {
+  const { getProfileActiveRole, getUserRole } = await import("@/database/queries");
+  
+  const activeRole = await getProfileActiveRole(supabase, user.id);
+  if (activeRole) {
     const dashboardPath = await getDashboardPath();
     return redirect(dashboardPath);
   }
 
-  const { data: existingRole } = await supabase
-    .from("user_role_memberships")
-    .select("role")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const existingRole = await getUserRole(supabase, user.id);
 
-  if (existingRole?.role) {
+  if (existingRole) {
     const dashboardPath = await getDashboardPath();
     return redirect(dashboardPath);
   }

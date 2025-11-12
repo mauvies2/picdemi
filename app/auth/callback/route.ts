@@ -22,23 +22,17 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/login`);
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("active_role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profile?.active_role) {
+    const { getProfileActiveRole, getUserRoles } = await import("@/database/queries");
+    
+    const activeRole = await getProfileActiveRole(supabase, user.id);
+    if (activeRole) {
       const dashboardPath = await getDashboardPath();
       return NextResponse.redirect(`${origin}${dashboardPath}`);
     }
 
-    const { data: roles } = await supabase
-      .from("user_role_memberships")
-      .select("role")
-      .eq("user_id", user.id);
+    const roles = await getUserRoles(supabase, user.id);
 
-    if (roles && roles.length > 0) {
+    if (roles.length > 0) {
       const dashboardPath = await getDashboardPath();
       return NextResponse.redirect(`${origin}${dashboardPath}`);
     }

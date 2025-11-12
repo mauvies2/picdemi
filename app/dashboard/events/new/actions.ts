@@ -4,6 +4,14 @@ import { Buffer } from "node:buffer";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/database/server";
+import {
+  createEvent,
+  createPhoto,
+  uploadFile,
+  deleteEventPhotos,
+  deleteStorageFiles,
+  deleteEvent,
+} from "@/database/queries";
 import { activityValues } from "./activity-options";
 
 const eventSchema = z.object({
@@ -70,22 +78,13 @@ export const createEvent = async (
     throw new Error("Add at least one photo to continue.");
   }
 
-  const { data: event, error: eventError } = await supabase
-    .from("events")
-    .insert({
-      user_id: user.id,
-      name: payload.name,
-      activity: payload.activity,
-      date: payload.date,
-      country: payload.country,
-      city: payload.city,
-    })
-    .select("id")
-    .single();
-
-  if (eventError || !event) {
-    throw new Error(eventError?.message ?? "Unable to create event.");
-  }
+  const event = await createEvent(supabase, user.id, {
+    name: payload.name,
+    activity: payload.activity,
+    date: payload.date,
+    country: payload.country,
+    city: payload.city,
+  });
 
   const photoRecords: { original_path: string }[] = [];
 
@@ -100,19 +99,12 @@ export const createEvent = async (
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const { error: uploadError } = await supabase.storage
-        .from("photos")
-        .upload(path, buffer, {
-          contentType: file.type || undefined,
-          upsert: false,
-        });
+      await uploadFile(supabase, "photos", path, buffer, {
+        contentType: file.type || undefined,
+        upsert: false,
+      });
 
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { error: photoError } = await supabase.from("photos").insert({
-        user_id: user.id,
+      await createPhoto(supabase, user.id, {
         event_id: event.id,
         original_url: path,
         taken_at: new Date(payload.date).toISOString(),
@@ -120,19 +112,13 @@ export const createEvent = async (
         country: payload.country,
       });
 
-      if (photoError) {
-        throw photoError;
-      }
-
       photoRecords.push({ original_path: path });
     }
   } catch (error) {
     console.error("createEvent: upload failed", error);
-    await supabase.from("photos").delete().eq("event_id", event.id);
-    await supabase.storage
-      .from("photos")
-      .remove(photoRecords.map((record) => record.original_path));
-    await supabase.from("events").delete().eq("id", event.id);
+    await deleteEventPhotos(supabase, event.id, user.id);
+    await deleteStorageFiles(supabase, "photos", photoRecords.map((record) => record.original_path));
+    await deleteEvent(supabase, event.id, user.id);
 
     const message =
       error instanceof Error

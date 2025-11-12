@@ -1,6 +1,11 @@
 import { DashboardHeader } from "@/components/dashboard-header";
 import { createClient } from "@/database/server";
-import { deleteEvent } from "./actions";
+import {
+  getUserEvents,
+  getPhotosForEvents,
+  createSignedUrl,
+} from "@/database/queries";
+import { deleteEventAction as deleteEvent } from "./actions";
 import { EventCard } from "./event-card";
 
 export default async function EventsPage() {
@@ -20,32 +25,9 @@ export default async function EventsPage() {
     );
   }
 
-  const { data: events } = await supabase
-    .from("events")
-    .select("id, name, date, city, country, activity")
-    .eq("user_id", user.id)
-    .order("date", { ascending: false })
-    .throwOnError();
-
-  const eventIds = (events ?? []).map((e) => e.id).filter(Boolean);
-
-  let photoRows:
-    | {
-        event_id: string | null;
-        original_url: string | null;
-        taken_at: string | null;
-      }[]
-    | null = null;
-
-  if (eventIds.length > 0) {
-    const { data } = await supabase
-      .from("photos")
-      .select("event_id, original_url, taken_at")
-      .in("event_id", eventIds)
-      .order("taken_at", { ascending: true })
-      .throwOnError();
-    photoRows = data ?? [];
-  }
+  const events = await getUserEvents(supabase, user.id);
+  const eventIds = events.map((e) => e.id).filter(Boolean);
+  const photoRows = await getPhotosForEvents(supabase, eventIds);
 
   const stats = new Map<
     string,
@@ -93,10 +75,8 @@ export default async function EventsPage() {
   await Promise.all(
     Array.from(stats.entries()).map(async ([eventId, info]) => {
       if (!info.coverPath) return;
-      const { data } = await supabase.storage
-        .from("photos")
-        .createSignedUrl(info.coverPath, 60 * 60);
-      if (data?.signedUrl) coverUrls.set(eventId, data.signedUrl);
+      const signedUrl = await createSignedUrl(supabase, "photos", info.coverPath, 60 * 60);
+      if (signedUrl) coverUrls.set(eventId, signedUrl);
     }),
   );
 
@@ -104,12 +84,12 @@ export default async function EventsPage() {
     <div className="p-4">
       <DashboardHeader title="Events" />
       <div className="text-sm text-muted-foreground">
-        {events?.length
+        {events.length
           ? `${events.length} event${events.length === 1 ? "" : "s"}`
           : "No events yet."}
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {(events ?? []).map((event) => {
+        {events.map((event) => {
           const stat = stats.get(event.id) ?? {
             count: 0,
             coverPath: null,

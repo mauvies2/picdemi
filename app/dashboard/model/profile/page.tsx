@@ -16,11 +16,8 @@ export default async function ModelProfilePage() {
     return redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name, bio")
-    .eq("id", user.id)
-    .maybeSingle();
+  const { getProfileFields } = await import("@/database/queries");
+  const profile = await getProfileFields(supabase, user.id, ["display_name", "bio"]);
 
   const updateProfile = async (formData: FormData) => {
     "use server";
@@ -37,14 +34,11 @@ export default async function ModelProfilePage() {
       return redirect("/login");
     }
 
-    await supabase.from("profiles").upsert(
-      {
-        id: user.id,
-        display_name: displayName?.trim() || null,
-        bio: bio?.trim() || null,
-      },
-      { onConflict: "id", ignoreDuplicates: false },
-    );
+    const { upsertProfile } = await import("@/database/queries");
+    await upsertProfile(supabase, user.id, {
+      display_name: displayName?.trim() || null,
+      bio: bio?.trim() || null,
+    });
 
     revalidatePath("/dashboard/model/profile");
   };
