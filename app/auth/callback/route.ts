@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getDashboardPath } from "@/app/actions/roles";
 import { createClient } from "@/database/server";
 
 export async function GET(request: Request) {
@@ -21,14 +22,25 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/login`);
     }
 
-    const { data: existingRole } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("active_role")
+      .eq("id", user.id)
       .maybeSingle();
 
-    if (existingRole?.role) {
-  return NextResponse.redirect(`${origin}/dashboard`);
+    if (profile?.active_role) {
+      const dashboardPath = await getDashboardPath();
+      return NextResponse.redirect(`${origin}${dashboardPath}`);
+    }
+
+    const { data: roles } = await supabase
+      .from("user_role_memberships")
+      .select("role")
+      .eq("user_id", user.id);
+
+    if (roles && roles.length > 0) {
+      const dashboardPath = await getDashboardPath();
+      return NextResponse.redirect(`${origin}${dashboardPath}`);
     }
 
     return NextResponse.redirect(`${origin}/onboarding/role`);

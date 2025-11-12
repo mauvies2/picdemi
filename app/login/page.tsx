@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getDashboardPath } from "@/app/actions/roles";
 import { CloseButton } from "@/components/close-button";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
@@ -21,15 +22,27 @@ export default async function Login({
   } = await supabase.auth.getUser();
 
   if (user) {
-    const { data: existingRole } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("active_role")
+      .eq("id", user.id)
       .maybeSingle();
 
-    if (existingRole?.role) {
-      return redirect("/dashboard");
+    if (profile?.active_role) {
+      const dashboardPath = await getDashboardPath();
+      return redirect(dashboardPath);
     }
+
+    const { data: roles } = await supabase
+      .from("user_role_memberships")
+      .select("role")
+      .eq("user_id", user.id);
+
+    if (roles && roles.length > 0) {
+      const dashboardPath = await getDashboardPath();
+      return redirect(dashboardPath);
+    }
+
     return redirect("/onboarding/role");
   }
 
@@ -60,15 +73,27 @@ export default async function Login({
       return redirect("/login?message=Could not retrieve user after login");
     }
 
-    const { data: existingRole } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("active_role")
+      .eq("id", user.id)
       .maybeSingle();
 
-    if (existingRole?.role) {
-      return redirect("/dashboard");
+    if (profile?.active_role) {
+      const dashboardPath = await getDashboardPath();
+      return redirect(dashboardPath);
     }
+
+    const { data: roles } = await supabase
+      .from("user_role_memberships")
+      .select("role")
+      .eq("user_id", user.id);
+
+    if (roles && roles.length > 0) {
+      const dashboardPath = await getDashboardPath();
+      return redirect(dashboardPath);
+    }
+
     return redirect("/onboarding/role");
   };
 

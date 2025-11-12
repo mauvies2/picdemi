@@ -175,5 +175,10 @@
   Example: <Button className="bg-special-gradient text-white hover:opacity-90">
 */
 .bg-special-gradient {
-  background: linear-gradient(135deg, rgb(241, 107, 192) 0%, rgb(144, 117, 217) 50%, rgb(103, 86, 198) 100%);
+  background: linear-gradient(
+    135deg,
+    rgb(241, 107, 192) 0%,
+    rgb(144, 117, 217) 50%,
+    rgb(103, 86, 198) 100%
+  );
 }

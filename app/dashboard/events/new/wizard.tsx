@@ -117,7 +117,15 @@ export default function NewEventForm() {
   };
 
   const removeFile = (target: File) => {
-    setFiles((prev) => prev.filter((file) => file !== target));
+    setFiles((prev) => {
+      const next = prev.filter((file) => file !== target);
+      if (submitAttempted && next.length === 0) {
+        setPhotosError("Add at least one photo to continue.");
+      } else if (next.length > 0) {
+        setPhotosError(null);
+      }
+      return next;
+    });
   };
 
   const confirmCreation = () => {

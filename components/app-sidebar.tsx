@@ -5,19 +5,27 @@ import {
   CalendarDays,
   CalendarPlus,
   Camera,
+  Compass,
   Home,
+  Images,
   LifeBuoy,
   MessageSquare,
   Send,
+  Settings,
   User,
   WalletMinimal,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type * as React from "react";
+import {
+  type ComponentProps,
+  type FC,
+  useOptimistic,
+  useTransition,
+} from "react";
+import { switchRole } from "@/app/actions/roles";
 import { NavMains } from "./nav-main";
-// import { NavProjects } from "./nav-projects";
 import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
 import { Button } from "./ui/button";
@@ -35,82 +43,88 @@ import {
   useSidebar,
 } from "./ui/sidebar";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    { title: "Overview", url: "/dashboard", icon: Home },
-    { title: "Create Event", url: "/dashboard/events/new", icon: CalendarPlus },
-    { title: "Events", url: "/dashboard/events", icon: CalendarDays },
-    { title: "Sales", url: "/dashboard/sales", icon: WalletMinimal },
-    { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
-    { title: "Messages", url: "/dashboard/messages", icon: MessageSquare },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  // projects: [
-  //   {
-  //     name: "Design Engineering",
-  //     url: "#",
-  //     icon: Frame,
-  //   },
-  //   {
-  //     name: "Sales & Marketing",
-  //     url: "#",
-  //     icon: PieChart,
-  //   },
-  //   {
-  //     name: "Travel",
-  //     url: "#",
-  //     icon: MapIcon,
-  //   },
-  // ],
-};
+type RoleSlug = "photographer" | "model";
 
-function RoleSwitcher({
-  activeRole,
-}: {
-  activeRole: "photographer" | "model";
-}) {
+const photographerNav = [
+  { title: "Overview", url: "/dashboard/photographer", icon: Home },
+  { title: "Create Event", url: "/dashboard/events/new", icon: CalendarPlus },
+  { title: "Events", url: "/dashboard/events", icon: CalendarDays },
+  { title: "Sales", url: "/dashboard/sales", icon: WalletMinimal },
+  { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
+  { title: "Messages", url: "/dashboard/messages", icon: MessageSquare },
+];
+
+const modelNav = [
+  { title: "Overview", url: "/dashboard/model", icon: Home },
+  { title: "Photos", url: "/dashboard/model/photos", icon: Images },
+  { title: "Explore", url: "/dashboard/model/explore", icon: Compass },
+  { title: "Profile", url: "/dashboard/model/profile", icon: User },
+  { title: "Settings", url: "/dashboard/model/settings", icon: Settings },
+];
+
+const navSecondary = [
+  {
+    title: "Support",
+    url: "#",
+    icon: LifeBuoy,
+  },
+  {
+    title: "Feedback",
+    url: "#",
+    icon: Send,
+  },
+];
+
+const RoleSwitcher: FC<{
+  activeRole: RoleSlug;
+}> = ({ activeRole }) => {
   const router = useRouter();
   const { state } = useSidebar();
-  const onSelect = async (role: "photographer" | "model") => {
-    await fetch("/auth/role", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role }),
+  const [optimisticRole, addOptimisticRole] = useOptimistic<RoleSlug, RoleSlug>(
+    activeRole,
+    (_, role) => role,
+  );
+  const [isPending, startTransition] = useTransition();
+
+  const onSelect = (role: RoleSlug) => {
+    if (role === optimisticRole) return;
+    startTransition(async () => {
+      addOptimisticRole(role);
+      try {
+        const result = await switchRole(role);
+        addOptimisticRole(result.activeRole);
+        // Redirect to the correct dashboard homepage
+        const dashboardPath =
+          role === "photographer"
+            ? "/dashboard/photographer"
+            : "/dashboard/model";
+        router.push(dashboardPath);
+      } catch (error) {
+        console.error(error);
+        addOptimisticRole(activeRole);
+      } finally {
+        router.refresh();
+      }
     });
-    router.refresh();
   };
 
-  // Collapsed: show icon-only role switcher
+  const currentRole = optimisticRole;
+
   if (state === "collapsed") {
-    const Icon = activeRole === "photographer" ? Camera : User;
+    const Icon = currentRole === "photographer" ? Camera : User;
     const color =
-      activeRole === "photographer"
+      currentRole === "photographer"
         ? "bg-sky-100 text-sky-700 border-sky-200"
         : "bg-emerald-100 text-emerald-700 border-emerald-200";
     return (
-      <div className="pb-2 flex justify-center">
+      <div className="flex justify-center pb-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
               size="sm"
-              className={`h-8 w-8 rounded-full p-2 ${color}`}
+              className={`h-8 w-8 rounded-full p-2 transition-opacity ${color} ${isPending ? "opacity-70" : ""}`}
+              disabled={isPending}
             >
               <Icon className="h-4 w-4" />
             </Button>
@@ -128,7 +142,6 @@ function RoleSwitcher({
     );
   }
 
-  // Expanded: show labeled selector
   return (
     <div className="pb-2">
       <DropdownMenu>
@@ -136,13 +149,14 @@ function RoleSwitcher({
           <Button
             variant="outline"
             size="sm"
-            className={`w-full justify-start gap-2 ${
-              activeRole === "photographer"
+            className={`w-full justify-start gap-2 transition-opacity ${
+              currentRole === "photographer"
                 ? "bg-sky-100 text-sky-700 border-sky-200"
                 : "bg-emerald-100 text-emerald-700 border-emerald-200"
-            }`}
+            } ${isPending ? "opacity-70" : ""}`}
+            disabled={isPending}
           >
-            {activeRole === "photographer" ? (
+            {currentRole === "photographer" ? (
               <>
                 <Camera className="h-4 w-4" />
                 <span>Photographer</span>
@@ -166,29 +180,22 @@ function RoleSwitcher({
       </DropdownMenu>
     </div>
   );
-}
-
-// function CollapseButton() {
-//   const { state, toggleSidebar } = useSidebar();
-//   const Icon = state === "expanded" ? ChevronLeft : ChevronRight;
-//   return (
-//     <button
-//       type="button"
-//       aria-label="Toggle sidebar"
-//       onClick={toggleSidebar}
-//       className="absolute -right-[1.2rem] top-10 inline-flex h-5 w-5 z-50 items-center justify-center rounded-full border bg-background hover:bg-muted transition-colors shadow-sm"
-//     >
-//       <Icon className="h-3 w-3 text-foreground/60" />
-//     </button>
-//   );
-// }
+};
 
 export function AppSidebar({
   activeRole,
+  user,
   ...props
-}: React.ComponentProps<typeof Sidebar> & {
-  activeRole: "photographer" | "model";
+}: ComponentProps<typeof Sidebar> & {
+  activeRole: RoleSlug;
+  user: {
+    name: string;
+    email: string;
+    avatar?: string | null;
+  };
 }) {
+  const navItems = activeRole === "photographer" ? photographerNav : modelNav;
+
   return (
     <Sidebar collapsible="icon" className="h-svh" {...props}>
       <SidebarHeader>
@@ -206,18 +213,16 @@ export function AppSidebar({
               OceaPic
             </h1>
           </Link>
-          {/* <CollapseButton /> */}
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <NavMains items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMains items={navItems} />
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <div className="w-full space-y-2">
           <RoleSwitcher activeRole={activeRole} />
-          <NavUser user={data.user} />
+          <NavUser user={user} />
         </div>
       </SidebarFooter>
     </Sidebar>

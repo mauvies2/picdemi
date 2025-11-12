@@ -36,7 +36,12 @@ function buttonVariants({
   size?: Size;
   className?: string;
 } = {}) {
-  return cn(baseStyles, variantStylesMap[variant], sizeStylesMap[size], className);
+  return cn(
+    baseStyles,
+    variantStylesMap[variant],
+    sizeStylesMap[size],
+    className,
+  );
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

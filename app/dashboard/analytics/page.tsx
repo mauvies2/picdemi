@@ -4,9 +4,9 @@ export default async function AnalyticsPage() {
   return (
     <div className="p-4">
       <DashboardHeader title="Analytics" />
-      <p className="text-muted-foreground mt-2">Metrics and charts coming soon.</p>
+      <p className="text-muted-foreground mt-2">
+        Metrics and charts coming soon.
+      </p>
     </div>
   );
 }
-
-

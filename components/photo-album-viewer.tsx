@@ -127,9 +127,9 @@ export default function PhotoAlbumViewer({
           <div className="absolute inset-0 flex items-start justify-start p-2">
             <div
               className={cn(
-                "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-muted-foreground opacity-0 shadow-sm transition-all group-hover:opacity-100",
+                "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/40 text-muted-foreground opacity-0 shadow-sm transition-all group-hover:opacity-100",
                 isSelected &&
-                  "opacity-100 bg-primary/50 text-primary-foreground",
+                  "opacity-100 bg-primary/40 text-primary-foreground",
               )}
               onClick={(event) => {
                 event.stopPropagation();
@@ -140,7 +140,7 @@ export default function PhotoAlbumViewer({
               }}
               aria-hidden="true"
             >
-              <Check className="size-3.5" />
+              <Check className="size-3" />
             </div>
           </div>
         );

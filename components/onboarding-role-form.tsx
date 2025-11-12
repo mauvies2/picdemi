@@ -8,7 +8,9 @@ type Props = {
 };
 
 export default function OnboardingRoleForm({ saveRole }: Props) {
-  const [selectedRole, setSelectedRole] = useState<"photographer" | "model" | null>(null);
+  const [selectedRole, setSelectedRole] = useState<
+    "photographer" | "model" | null
+  >(null);
 
   return (
     <form action={saveRole} className="grid gap-6">
@@ -54,5 +56,3 @@ export default function OnboardingRoleForm({ saveRole }: Props) {
     </form>
   );
 }
-
-

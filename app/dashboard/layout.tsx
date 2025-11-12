@@ -1,5 +1,6 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { getActiveRole, switchRole } from "@/app/actions/roles";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { createClient } from "@/database/server";
@@ -18,34 +19,45 @@ export default async function DashboardLayout({
     return redirect("/login");
   }
 
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name, active_role")
+    .eq("id", user.id)
+    .maybeSingle();
 
-  if (!roles || roles.length === 0) {
-    return redirect("/onboarding/role");
+  // Get current pathname to sync role based on URL
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  
+  // Get current active role
+  let { activeRole } = await getActiveRole();
+  
+  // Sync role based on URL path before passing to sidebar
+  if (pathname.startsWith("/dashboard/model")) {
+    if (activeRole !== "model") {
+      await switchRole("model", { skipRevalidation: true });
+      activeRole = "model";
+    }
+  } else if (pathname.startsWith("/dashboard/photographer")) {
+    if (activeRole !== "photographer") {
+      await switchRole("photographer", { skipRevalidation: true });
+      activeRole = "photographer";
+    }
   }
 
-  const cookieStore = await cookies();
-  const cookieRole = cookieStore.get("active_role")?.value as
-    | "photographer"
-    | "model"
-    | undefined;
-  const hasPhotographer = roles.some((r) => r.role === "photographer");
-  const hasModel = roles.some((r) => r.role === "model");
-  const activeRole: "photographer" | "model" =
-    cookieRole &&
-    ((cookieRole === "photographer" && hasPhotographer) ||
-      (cookieRole === "model" && hasModel))
-      ? cookieRole
-      : hasPhotographer
-        ? "photographer"
-        : "model";
+  const sidebarUser = {
+    name:
+      profile?.display_name ??
+      user.user_metadata?.full_name ??
+      user.email ??
+      "Member",
+    email: user.email ?? "",
+    avatar: user.user_metadata?.avatar_url ?? null,
+  };
 
   return (
     <SidebarProvider>
-      <AppSidebar activeRole={activeRole} />
+      <AppSidebar activeRole={activeRole} user={sidebarUser} />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
