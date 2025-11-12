@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const role = body?.role as string | undefined;
 
-  if (role !== "photographer" && role !== "model") {
+  if (role !== "photographer" && role !== "talent") {
     return NextResponse.json(
       { ok: false, error: "invalid_role" },
       { status: 400 },

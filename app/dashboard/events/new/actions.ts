@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/database/server";
 import {
-  createEvent,
+  createEvent as dbCreateEvent,
   createPhoto,
   uploadFile,
   deleteEventPhotos,
@@ -78,7 +78,7 @@ export const createEvent = async (
     throw new Error("Add at least one photo to continue.");
   }
 
-  const event = await createEvent(supabase, user.id, {
+  const event = await dbCreateEvent(supabase, user.id, {
     name: payload.name,
     activity: payload.activity,
     date: payload.date,

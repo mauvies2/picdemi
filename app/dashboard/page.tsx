@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   const { activeRole } = await getActiveRole();
-  if (activeRole === "model") {
-    redirect("/dashboard/model");
+  if (activeRole === "talent") {
+    redirect("/dashboard/talent");
   }
   redirect("/dashboard/photographer");
 }

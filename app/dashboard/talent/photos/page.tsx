@@ -1,4 +1,4 @@
-export default function ModelPhotosPage() {
+export default function TalentPhotosPage() {
   return (
     <div className="space-y-4 rounded-xl border p-6">
       <div>

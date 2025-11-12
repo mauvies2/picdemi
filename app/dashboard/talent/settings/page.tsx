@@ -1,4 +1,4 @@
-export default function ModelSettingsPage() {
+export default function TalentSettingsPage() {
   return (
     <div className="max-w-2xl space-y-6 rounded-xl border p-6">
       <div>

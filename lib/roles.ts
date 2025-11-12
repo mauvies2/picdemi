@@ -1,24 +1,24 @@
-export const USER_ROLES = ["PHOTOGRAPHER", "MODEL"] as const;
+export const USER_ROLES = ["PHOTOGRAPHER", "TALENT"] as const;
 
 export type UserRole = (typeof USER_ROLES)[number];
 
-export type RoleSlug = "photographer" | "model";
+export type RoleSlug = "photographer" | "talent";
 
 export const roleSlugToEnum = (slug: RoleSlug): UserRole =>
-  slug === "photographer" ? "PHOTOGRAPHER" : "MODEL";
+  slug === "photographer" ? "PHOTOGRAPHER" : "TALENT";
 
 export const roleEnumToSlug = (role: UserRole): RoleSlug =>
-  role === "PHOTOGRAPHER" ? "photographer" : "model";
+  role === "PHOTOGRAPHER" ? "photographer" : "talent";
 
 export function resolveRoleSwitch(
   existing: UserRole[],
   target: UserRole,
 ): {
-  needsEnableModel: boolean;
+  needsEnableTalent: boolean;
 } {
   const normalized = new Set(existing);
-  if (target === "MODEL" && !normalized.has("MODEL")) {
-    return { needsEnableModel: true };
+  if (target === "TALENT" && !normalized.has("TALENT")) {
+    return { needsEnableTalent: true };
   }
-  return { needsEnableModel: false };
+  return { needsEnableTalent: false };
 }

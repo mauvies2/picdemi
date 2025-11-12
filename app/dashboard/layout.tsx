@@ -30,10 +30,10 @@ export default async function DashboardLayout({
   let { activeRole } = await getActiveRole();
   
   // Sync role based on URL path before passing to sidebar
-  if (pathname.startsWith("/dashboard/model")) {
-    if (activeRole !== "model") {
-      await switchRole("model", { skipRevalidation: true });
-      activeRole = "model";
+  if (pathname.startsWith("/dashboard/talent")) {
+    if (activeRole !== "talent") {
+      await switchRole("talent", { skipRevalidation: true });
+      activeRole = "talent";
     }
   } else if (pathname.startsWith("/dashboard/photographer")) {
     if (activeRole !== "photographer") {

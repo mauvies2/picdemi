@@ -20,8 +20,8 @@ import {
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-const userRoleSchema = z.enum(["PHOTOGRAPHER", "MODEL"]);
-const roleSlugSchema = z.enum(["photographer", "model"]);
+const userRoleSchema = z.enum(["PHOTOGRAPHER", "TALENT"]);
+const roleSlugSchema = z.enum(["photographer", "talent"]);
 
 type SwitchRoleResult = {
   activeRole: RoleSlug;
@@ -40,12 +40,12 @@ async function getAuthenticatedClient() {
   return { supabase, user };
 }
 
-async function enableModelRoleInternal(
+async function enableTalentRoleInternal(
   supabase: SupabaseServerClient,
   userId: string,
 ) {
-  await dbUpsertUserRole(supabase, userId, "MODEL");
-  await dbUpsertProfileRole(supabase, userId, "MODEL");
+  await dbUpsertUserRole(supabase, userId, "TALENT");
+  await dbUpsertProfileRole(supabase, userId, "TALENT");
 }
 
 export async function completeOnboarding(initialRole: UserRole) {
@@ -58,18 +58,18 @@ export async function completeOnboarding(initialRole: UserRole) {
   revalidatePath("/dashboard");
   // Redirect to the role-specific dashboard
   const dashboardPath =
-    role === "MODEL" ? "/dashboard/model" : "/dashboard/photographer";
+    role === "TALENT" ? "/dashboard/talent" : "/dashboard/photographer";
   redirect(dashboardPath);
 }
 
-export async function enableModelRole(): Promise<SwitchRoleResult> {
+export async function enableTalentRole(): Promise<SwitchRoleResult> {
   const { supabase, user } = await getAuthenticatedClient();
-  await enableModelRoleInternal(supabase, user.id);
+  await enableTalentRoleInternal(supabase, user.id);
 
   revalidatePath("/dashboard");
-  revalidatePath("/dashboard/model");
+  revalidatePath("/dashboard/talent");
 
-  return { activeRole: roleEnumToSlug("MODEL") };
+  return { activeRole: roleEnumToSlug("TALENT") };
 }
 
 export async function switchRole(
@@ -81,10 +81,10 @@ export async function switchRole(
   const { supabase, user } = await getAuthenticatedClient();
 
   const existingRoles = await getUserRoles(supabase, user.id);
-  const { needsEnableModel } = resolveRoleSwitch(existingRoles, targetRole);
+  const { needsEnableTalent } = resolveRoleSwitch(existingRoles, targetRole);
 
-  if (needsEnableModel) {
-    await enableModelRoleInternal(supabase, user.id);
+  if (needsEnableTalent) {
+    await enableTalentRoleInternal(supabase, user.id);
   } else {
     const hasRole = existingRoles.includes(targetRole);
     if (!hasRole) {
@@ -96,7 +96,7 @@ export async function switchRole(
   // Only revalidate if not called during render (e.g., from user action)
   if (!options?.skipRevalidation) {
     revalidatePath("/dashboard");
-    revalidatePath("/dashboard/model");
+    revalidatePath("/dashboard/talent");
     revalidatePath("/dashboard/photographer");
   }
 
@@ -118,10 +118,10 @@ export async function getActiveRole(): Promise<{
   // Profile doesn't exist - check user roles to determine what to set
   const rolesData = await getUserRoles(supabase, user.id);
 
-  // Prefer PHOTOGRAPHER as fallback (default role), then MODEL, then first available
+  // Prefer PHOTOGRAPHER as fallback (default role), then TALENT, then first available
   const fallback =
     rolesData.find((role) => role === "PHOTOGRAPHER") ??
-    rolesData.find((role) => role === "MODEL") ??
+    rolesData.find((role) => role === "TALENT") ??
     rolesData[0] ??
     ("PHOTOGRAPHER" as UserRole);
 
@@ -133,11 +133,11 @@ export async function getActiveRole(): Promise<{
 
 /**
  * Gets the dashboard path for the user's active role
- * @returns The dashboard path (e.g., "/dashboard/model" or "/dashboard/photographer")
+ * @returns The dashboard path (e.g., "/dashboard/talent" or "/dashboard/photographer")
  */
 export async function getDashboardPath(): Promise<string> {
   const { activeRole } = await getActiveRole();
-  return activeRole === "model"
-    ? "/dashboard/model"
+  return activeRole === "talent"
+    ? "/dashboard/talent"
     : "/dashboard/photographer";
 }

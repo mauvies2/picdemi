@@ -9,7 +9,7 @@ type Props = {
 
 export default function OnboardingRoleForm({ saveRole }: Props) {
   const [selectedRole, setSelectedRole] = useState<
-    "photographer" | "model" | null
+    "photographer" | "talent" | null
   >(null);
 
   return (
@@ -34,14 +34,14 @@ export default function OnboardingRoleForm({ saveRole }: Props) {
 
         <button
           type="button"
-          onClick={() => setSelectedRole("model")}
+          onClick={() => setSelectedRole("talent")}
           className={`h-40 rounded-xl border-2 p-6 text-left transition-colors ${
-            selectedRole === "model"
+            selectedRole === "talent"
               ? "border-primary bg-primary/5"
               : "border-muted hover:border-primary/50"
           }`}
         >
-          <div className="text-xl font-semibold">Model / Athlete / Buyer</div>
+          <div className="text-xl font-semibold">Talent / Athlete / Buyer</div>
           <div className="mt-2 text-sm text-muted-foreground">
             Purchase multimedia and collaborate with photographers.
           </div>

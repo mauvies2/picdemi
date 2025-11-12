@@ -36,7 +36,7 @@ export default async function OnboardingRolePage() {
     const role = (
       formData.get("role") as string | null
     )?.toLowerCase() as RoleSlug | null;
-    if (role !== "photographer" && role !== "model") {
+    if (role !== "photographer" && role !== "talent") {
       return redirect("/onboarding/role?message=invalid_role");
     }
 

@@ -43,7 +43,7 @@ import {
   useSidebar,
 } from "./ui/sidebar";
 
-type RoleSlug = "photographer" | "model";
+type RoleSlug = "photographer" | "talent";
 
 const photographerNav = [
   { title: "Overview", url: "/dashboard/photographer", icon: Home },
@@ -54,12 +54,12 @@ const photographerNav = [
   { title: "Messages", url: "/dashboard/messages", icon: MessageSquare },
 ];
 
-const modelNav = [
-  { title: "Overview", url: "/dashboard/model", icon: Home },
-  { title: "Photos", url: "/dashboard/model/photos", icon: Images },
-  { title: "Explore", url: "/dashboard/model/explore", icon: Compass },
-  { title: "Profile", url: "/dashboard/model/profile", icon: User },
-  { title: "Settings", url: "/dashboard/model/settings", icon: Settings },
+const talentNav = [
+  { title: "Overview", url: "/dashboard/talent", icon: Home },
+  { title: "Photos", url: "/dashboard/talent/photos", icon: Images },
+  { title: "Explore", url: "/dashboard/talent/explore", icon: Compass },
+  { title: "Profile", url: "/dashboard/talent/profile", icon: User },
+  { title: "Settings", url: "/dashboard/talent/settings", icon: Settings },
 ];
 
 const navSecondary = [
@@ -97,7 +97,7 @@ const RoleSwitcher: FC<{
         const dashboardPath =
           role === "photographer"
             ? "/dashboard/photographer"
-            : "/dashboard/model";
+            : "/dashboard/talent";
         router.push(dashboardPath);
       } catch (error) {
         console.error(error);
@@ -133,8 +133,8 @@ const RoleSwitcher: FC<{
             <DropdownMenuItem onClick={() => onSelect("photographer")}>
               Photographer
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onSelect("model")}>
-              Model
+            <DropdownMenuItem onClick={() => onSelect("talent")}>
+              Talent
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -164,7 +164,7 @@ const RoleSwitcher: FC<{
             ) : (
               <>
                 <User className="h-4 w-4" />
-                <span>Model</span>
+                <span>Talent</span>
               </>
             )}
           </Button>
@@ -173,8 +173,8 @@ const RoleSwitcher: FC<{
           <DropdownMenuItem onClick={() => onSelect("photographer")}>
             Photographer
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSelect("model")}>
-            Model
+          <DropdownMenuItem onClick={() => onSelect("talent")}>
+            Talent
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -194,7 +194,7 @@ export function AppSidebar({
     avatar?: string | null;
   };
 }) {
-  const navItems = activeRole === "photographer" ? photographerNav : modelNav;
+  const navItems = activeRole === "photographer" ? photographerNav : talentNav;
 
   return (
     <Sidebar collapsible="icon" className="h-svh" {...props}>
