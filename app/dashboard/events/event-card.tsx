@@ -68,7 +68,7 @@ export function EventCard({
                 alt={`${name} cover`}
                 fill
                 sizes="(max-width: 640px) 100vw, 33vw"
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                className="object-cover"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">

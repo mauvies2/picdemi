@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, MoreVertical, UserPlus } from "lucide-react";
 import dynamic from "next/dynamic";
 import {
   type KeyboardEvent,
@@ -14,9 +14,14 @@ import {
   type RenderPhotoContext,
   RowsPhotoAlbum,
 } from "react-photo-album";
-import { cn } from "@/lib/utils";
-import { PhotoLightboxTags } from "@/components/photo-lightbox-tags";
 import { PhotoTagsIndicator } from "@/components/photo-tags-indicator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import "react-photo-album/rows.css";
 import "yet-another-react-lightbox/styles.css";
 
@@ -60,6 +65,8 @@ export default function PhotoAlbumViewer({
   const [dimensions, setDimensions] = useState<
     Record<string, { width: number; height: number }>
   >({});
+  const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
+  const [openPopovers, setOpenPopovers] = useState<Set<string>>(new Set());
   const selectedSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
   const canSelect = Boolean(onToggleSelect);
   const selectionActive = selectionMode || selectedSet.size > 0;
@@ -137,40 +144,142 @@ export default function PhotoAlbumViewer({
       const photoItem = items.find((item) => item.id === photoId);
       const tags = photoItem?.tags || [];
 
+      const isDropdownOpen = openDropdowns.has(photoId);
+      const isPopoverOpen = openPopovers.has(photoId);
+      // Keep icons visible if either is open, preventing flicker during transition
+      const hasAnyOpen = isDropdownOpen || isPopoverOpen;
+
       return (
         <div className="absolute inset-0 flex flex-col items-start justify-between p-2">
-          {canSelect && (
-            <div
-              className={cn(
-                "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/40 text-muted-foreground opacity-0 shadow-sm transition-all group-hover:opacity-100",
-                isSelected &&
-                  "opacity-100 bg-primary/40 text-primary-foreground",
-              )}
-              onClick={(event) => {
-                event.stopPropagation();
-                handleToggleSelect(photoId);
-              }}
-              onPointerDown={(event) => {
-                event.stopPropagation();
-              }}
-              aria-hidden="true"
-            >
-              <Check className="size-3" />
-            </div>
-          )}
+          {/* inner gradient overlays for better icon contrast - visible on hover or when dropdowns are open */}
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-x-0 top-0 h-14 bg-linear-to-b from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100",
+              hasAnyOpen && "opacity-100",
+            )}
+          />
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100",
+              hasAnyOpen && "opacity-100",
+            )}
+          />
+          <div className="relative z-10 flex w-full items-start justify-between">
+            {canSelect && (
+              <div
+                className={cn(
+                  "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100",
+                  (isSelected || hasAnyOpen) && "opacity-100",
+                  isSelected && "bg-primary/40 text-primary-foreground",
+                )}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleToggleSelect(photoId);
+                }}
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                }}
+                aria-hidden="true"
+              >
+                <Check className="size-3" />
+              </div>
+            )}
+            {onTagPhoto && (
+              <DropdownMenu
+                open={isDropdownOpen}
+                onOpenChange={(open) => {
+                  setOpenDropdowns((prev) => {
+                    const next = new Set(prev);
+                    if (open) {
+                      next.add(photoId);
+                    } else {
+                      next.delete(photoId);
+                    }
+                    return next;
+                  });
+                }}
+              >
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background/70",
+                      isDropdownOpen && "opacity-100",
+                    )}
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    aria-label="More options"
+                  >
+                    <MoreVertical className="size-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerEnter={(e) => e.stopPropagation()}
+                >
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onTagPhoto(photoId);
+                    }}
+                  >
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Tag talent
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
           {tags.length > 0 && (
-            <div className="pointer-events-auto mt-auto">
+            <div className="pointer-events-auto mt-auto relative z-10">
               <PhotoTagsIndicator
                 tags={tags}
                 photoId={photoId}
                 onUntag={onUntag}
+                isDropdownOpen={isPopoverOpen}
+                onDropdownOpenChange={(open) => {
+                  if (open) {
+                    // When opening popover, set popover state first, then close dropdown
+                    // This ensures hasAnyOpen stays true during transition
+                    setOpenPopovers((prev) => {
+                      const next = new Set(prev);
+                      next.add(photoId);
+                      return next;
+                    });
+                    // Close dropdown after popover is set
+                    if (isDropdownOpen) {
+                      setOpenDropdowns((prev) => {
+                        const next = new Set(prev);
+                        next.delete(photoId);
+                        return next;
+                      });
+                    }
+                  } else {
+                    setOpenPopovers((prev) => {
+                      const next = new Set(prev);
+                      next.delete(photoId);
+                      return next;
+                    });
+                  }
+                }}
               />
             </div>
           )}
         </div>
       );
     },
-    [extractPhotoId, canSelect, handleToggleSelect, selectedSet, items, onUntag],
+    [
+      extractPhotoId,
+      canSelect,
+      handleToggleSelect,
+      selectedSet,
+      items,
+      onUntag,
+      onTagPhoto,
+      openDropdowns,
+      openPopovers,
+    ],
   );
 
   return (
@@ -207,7 +316,7 @@ export default function PhotoAlbumViewer({
             const isSelected = selectedSet.has(photoId);
             return {
               className: cn(
-                "h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]",
+                "h-full w-full object-cover",
                 canSelect && isSelected ? "opacity-75" : "",
               ),
             };
@@ -243,58 +352,12 @@ export default function PhotoAlbumViewer({
                 stroke="currentColor"
                 strokeWidth="2"
               >
+                <title>Close</title>
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
           ),
-        }}
-        toolbar={{
-          render: ({ slide }) => {
-            if (!slide.id) return null;
-            
-            const currentPhoto = items.find((item) => item.id === slide.id);
-            const tags = currentPhoto?.tags || [];
-            
-            return (
-              <>
-                {tags.length > 0 && (
-                  <PhotoLightboxTags
-                    key={`tags-${slide.id}`}
-                    photoId={slide.id as string}
-                    tags={tags}
-                    onUntag={onUntag}
-                  />
-                )}
-                {onTagPhoto && (
-                  <button
-                    key={`tag-btn-${slide.id}`}
-                    type="button"
-                    className="yarl__button"
-                    aria-label="Tag talent"
-                    onClick={() => {
-                      onTagPhoto(slide.id as string);
-                    }}
-                    style={{
-                      marginRight: "8px",
-                    }}
-                  >
-                    <svg
-                      className="yarl__icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      style={{ width: "20px", height: "20px" }}
-                    >
-                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
-                      <line x1="7" y1="7" x2="7.01" y2="7" />
-                    </svg>
-                  </button>
-                )}
-              </>
-            );
-          },
         }}
         close={() => setIndex(-1)}
       />

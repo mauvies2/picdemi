@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useTransition, useMemo, useCallback } from "react";
-import Image from "next/image";
-import dynamic from "next/dynamic";
-import { Button } from "@/components/ui/button";
-import { Check, Loader2 } from "lucide-react";
-import { listMyTaggedPhotos, type TaggedPhotoGroup } from "./actions";
 import { format } from "date-fns";
+import { Check, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useCallback, useMemo, useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { listMyTaggedPhotos, type TaggedPhotoGroup } from "./actions";
 
 const Lightbox = dynamic(() => import("yet-another-react-lightbox"), {
   ssr: false,
@@ -26,7 +26,12 @@ export function TalentPhotosGrid({
   hasMore: initialHasMore,
 }: TalentPhotosGridProps) {
   const [groups, setGroups] = useState(initialGroups);
-  const [offset, setOffset] = useState(initialGroups.reduce((sum, g) => sum + g.dates.reduce((s, d) => s + d.photos.length, 0), 0));
+  const [offset, setOffset] = useState(
+    initialGroups.reduce(
+      (sum, g) => sum + g.dates.reduce((s, d) => s + d.photos.length, 0),
+      0,
+    ),
+  );
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoading, startTransition] = useTransition();
   const [lightboxIndex, setLightboxIndex] = useState(-1);
@@ -79,7 +84,15 @@ export function TalentPhotosGrid({
       try {
         const result = await listMyTaggedPhotos({ limit: 50, offset });
         setGroups((prev) => [...prev, ...result.groups]);
-        setOffset((prev) => prev + result.groups.reduce((sum, g) => sum + g.dates.reduce((s, d) => s + d.photos.length, 0), 0));
+        setOffset(
+          (prev) =>
+            prev +
+            result.groups.reduce(
+              (sum, g) =>
+                sum + g.dates.reduce((s, d) => s + d.photos.length, 0),
+              0,
+            ),
+        );
         setHasMore(result.hasMore);
       } catch (error) {
         console.error("Failed to load more photos:", error);
@@ -91,7 +104,8 @@ export function TalentPhotosGrid({
     return (
       <div className="rounded-xl border border-dashed p-12 text-center">
         <p className="text-muted-foreground">
-          No photos tagged yet. Photographers will tag you in photos from events.
+          No photos tagged yet. Photographers will tag you in photos from
+          events.
         </p>
       </div>
     );
@@ -125,7 +139,7 @@ export function TalentPhotosGrid({
               </Button>
               <Button
                 type="button"
-                variant="secondary"
+                variant="outline"
                 size="sm"
                 onClick={() => {
                   setSelectedIds([]);
@@ -150,7 +164,10 @@ export function TalentPhotosGrid({
               <p className="text-sm text-muted-foreground">
                 {format(new Date(group.event_date), "MMMM d, yyyy")}
                 {group.event_city && group.event_country && (
-                  <> • {group.event_city}, {group.event_country}</>
+                  <>
+                    {" "}
+                    • {group.event_city}, {group.event_country}
+                  </>
                 )}
               </p>
             )}
@@ -165,8 +182,10 @@ export function TalentPhotosGrid({
                   : format(new Date(dateGroup.date), "EEEE, MMMM d, yyyy")}
               </h3>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                {dateGroup.photos.map((photo, photoIndex) => {
-                  const globalIndex = allPhotos.findIndex((p) => p.id === photo.photo_id);
+                {dateGroup.photos.map((photo) => {
+                  const globalIndex = allPhotos.findIndex(
+                    (p) => p.id === photo.photo_id,
+                  );
                   const isSelected = selectedSet.has(photo.photo_id);
                   return (
                     <div
@@ -191,7 +210,7 @@ export function TalentPhotosGrid({
                             fill
                             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                             className={cn(
-                              "object-cover transition-transform duration-300 group-hover:scale-105",
+                              "object-cover",
                               isSelecting && isSelected && "opacity-75",
                             )}
                           />
@@ -245,7 +264,12 @@ export function TalentPhotosGrid({
 
       {/* Total count */}
       <div className="text-center text-sm text-muted-foreground">
-        Showing {groups.reduce((sum, g) => sum + g.dates.reduce((s, d) => s + d.photos.length, 0), 0)} of {totalCount} photos
+        Showing{" "}
+        {groups.reduce(
+          (sum, g) => sum + g.dates.reduce((s, d) => s + d.photos.length, 0),
+          0,
+        )}{" "}
+        of {totalCount} photos
       </div>
 
       {/* Lightbox */}
@@ -258,4 +282,3 @@ export function TalentPhotosGrid({
     </div>
   );
 }
-

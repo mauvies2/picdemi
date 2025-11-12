@@ -30,6 +30,7 @@
     "Serverside",
     "shadcn",
     "SUPABASE",
-    "Untagging"
+    "Untagging",
+    "yarl"
   ]
 }

@@ -24,6 +24,8 @@ interface PhotoTagsIndicatorProps {
   photoId: string;
   className?: string;
   onUntag?: () => void;
+  isDropdownOpen?: boolean;
+  onDropdownOpenChange?: (open: boolean) => void;
 }
 
 export function PhotoTagsIndicator({
@@ -31,6 +33,8 @@ export function PhotoTagsIndicator({
   photoId,
   className,
   onUntag,
+  isDropdownOpen = false,
+  onDropdownOpenChange,
 }: PhotoTagsIndicatorProps) {
   const [isUntagging, startUntagging] = useTransition();
 
@@ -54,24 +58,36 @@ export function PhotoTagsIndicator({
   };
 
   return (
-    <Popover>
+    <Popover
+      onOpenChange={(open) => {
+        onDropdownOpenChange?.(open);
+      }}
+    >
       <PopoverTrigger asChild>
         <button
           type="button"
           className={cn(
-            "pointer-events-auto flex size-8 items-center justify-center rounded-full bg-black/60 text-white opacity-0 shadow-sm transition-all group-hover:opacity-100 cursor-pointer hover:bg-black/80 border-0 p-0",
+            "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 cursor-pointer hover:bg-background/70 border-0 p-0",
+            isDropdownOpen && "opacity-100",
             className,
           )}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               e.stopPropagation();
             }
           }}
-          onPointerDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+          }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
         >
-          <Users className="size-3.5" />
+          <Users className="size-3" />
           {tags.length > 1 && (
             <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
               {tags.length}
@@ -84,6 +100,7 @@ export function PhotoTagsIndicator({
         side="top"
         align="start"
         onClick={(e) => e.stopPropagation()}
+        onPointerEnter={(e) => e.stopPropagation()}
       >
         <div className="space-y-1.5">
           {tags.map((tag) => (
