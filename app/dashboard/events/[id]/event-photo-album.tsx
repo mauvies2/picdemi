@@ -1,17 +1,23 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { UserPlus } from "lucide-react";
 import PhotoAlbumViewer, {
   type PhotoAlbumItem,
 } from "@/components/photo-album-viewer";
+import { TagTalentDialog } from "@/components/tag-talent-dialog";
+import { useRouter } from "next/navigation";
 
 type EventPhotoAlbumProps = {
   items: PhotoAlbumItem[];
 };
 
 export function EventPhotoAlbum({ items }: EventPhotoAlbumProps) {
+  const router = useRouter();
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [tagDialogOpen, setTagDialogOpen] = useState(false);
 
   const handleToggleSelect = useCallback((photoId: string) => {
     setSelectedIds((current) => {
@@ -29,6 +35,24 @@ export function EventPhotoAlbum({ items }: EventPhotoAlbumProps) {
     setIsSelecting(false);
   }, []);
 
+  const handleTagSuccess = useCallback(() => {
+    setSelectedIds([]);
+    setIsSelecting(false);
+    router.refresh();
+  }, [router]);
+
+  const handleUntag = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
+  const handleTagSinglePhoto = useCallback(
+    (photoId: string) => {
+      setSelectedIds([photoId]);
+      setTagDialogOpen(true);
+    },
+    [],
+  );
+
   const selectedCountLabel = useMemo(() => {
     if (selectedIds.length === 0) return "No photos selected";
     if (selectedIds.length === 1) return "1 photo selected";
@@ -37,35 +61,67 @@ export function EventPhotoAlbum({ items }: EventPhotoAlbumProps) {
 
   return (
     <div className="space-y-3">
-      {isSelecting ? (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="text-sm font-medium">{selectedCountLabel}</div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={clearSelection}
-              className="rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedIds([]);
-                setIsSelecting(false);
-              }}
-              className="rounded-md bg-primary px-3 py-1 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
-            >
-              Done
-            </button>
+      <div className="flex items-center justify-between">
+        {!isSelecting && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsSelecting(true)}
+          >
+            Select photos
+          </Button>
+        )}
+        {isSelecting && (
+          <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+            <div className="text-sm font-medium">{selectedCountLabel}</div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={clearSelection}
+              >
+                Clear
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={() => setTagDialogOpen(true)}
+                disabled={selectedIds.length === 0}
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Tag talent
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setSelectedIds([]);
+                  setIsSelecting(false);
+                }}
+              >
+                Done
+              </Button>
+            </div>
           </div>
-        </div>
-      ) : null}
+        )}
+      </div>
       <PhotoAlbumViewer
         items={items}
         selectionMode={isSelecting}
         selectedIds={selectedIds}
         onToggleSelect={handleToggleSelect}
+        onTagPhoto={handleTagSinglePhoto}
+        onUntag={handleUntag}
+      />
+      <TagTalentDialog
+        open={tagDialogOpen}
+        onOpenChange={setTagDialogOpen}
+        photoIds={selectedIds}
+        onSuccess={handleTagSuccess}
       />
     </div>
   );

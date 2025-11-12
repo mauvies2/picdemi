@@ -15,6 +15,8 @@ import {
   RowsPhotoAlbum,
 } from "react-photo-album";
 import { cn } from "@/lib/utils";
+import { PhotoLightboxTags } from "@/components/photo-lightbox-tags";
+import { PhotoTagsIndicator } from "@/components/photo-tags-indicator";
 import "react-photo-album/rows.css";
 import "yet-another-react-lightbox/styles.css";
 
@@ -28,6 +30,13 @@ export type PhotoAlbumItem = {
   alt?: string;
   width?: number;
   height?: number;
+  tags?: Array<{
+    tag_id: string;
+    talent_user_id: string;
+    talent_email: string;
+    talent_display_name: string | null;
+    tagged_at: string;
+  }>;
 };
 
 type PhotoAlbumViewerProps = {
@@ -35,6 +44,8 @@ type PhotoAlbumViewerProps = {
   selectionMode?: boolean;
   selectedIds?: string[];
   onToggleSelect?: (photoId: string) => void;
+  onTagPhoto?: (photoId: string) => void;
+  onUntag?: () => void;
 };
 
 export default function PhotoAlbumViewer({
@@ -42,6 +53,8 @@ export default function PhotoAlbumViewer({
   selectionMode = false,
   selectedIds,
   onToggleSelect,
+  onTagPhoto,
+  onUntag,
 }: PhotoAlbumViewerProps) {
   const [index, setIndex] = useState<number>(-1);
   const [dimensions, setDimensions] = useState<
@@ -121,10 +134,12 @@ export default function PhotoAlbumViewer({
     ) => {
       const photoId = extractPhotoId(photo);
       const isSelected = selectedSet.has(photoId);
+      const photoItem = items.find((item) => item.id === photoId);
+      const tags = photoItem?.tags || [];
 
-      if (canSelect) {
-        return (
-          <div className="absolute inset-0 flex items-start justify-start p-2">
+      return (
+        <div className="absolute inset-0 flex flex-col items-start justify-between p-2">
+          {canSelect && (
             <div
               className={cn(
                 "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/40 text-muted-foreground opacity-0 shadow-sm transition-all group-hover:opacity-100",
@@ -142,13 +157,20 @@ export default function PhotoAlbumViewer({
             >
               <Check className="size-3" />
             </div>
-          </div>
-        );
-      }
-
-      return null;
+          )}
+          {tags.length > 0 && (
+            <div className="pointer-events-auto mt-auto">
+              <PhotoTagsIndicator
+                tags={tags}
+                photoId={photoId}
+                onUntag={onUntag}
+              />
+            </div>
+          )}
+        </div>
+      );
     },
-    [extractPhotoId, canSelect, handleToggleSelect, selectedSet],
+    [extractPhotoId, canSelect, handleToggleSelect, selectedSet, items, onUntag],
   );
 
   return (
@@ -207,6 +229,72 @@ export default function PhotoAlbumViewer({
         render={{
           buttonPrev: undefined,
           buttonNext: undefined,
+          buttonClose: () => (
+            <button
+              type="button"
+              className="yarl__button yarl__button_close"
+              aria-label="Close"
+              onClick={() => setIndex(-1)}
+            >
+              <svg
+                className="yarl__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          ),
+        }}
+        toolbar={{
+          render: ({ slide }) => {
+            if (!slide.id) return null;
+            
+            const currentPhoto = items.find((item) => item.id === slide.id);
+            const tags = currentPhoto?.tags || [];
+            
+            return (
+              <>
+                {tags.length > 0 && (
+                  <PhotoLightboxTags
+                    key={`tags-${slide.id}`}
+                    photoId={slide.id as string}
+                    tags={tags}
+                    onUntag={onUntag}
+                  />
+                )}
+                {onTagPhoto && (
+                  <button
+                    key={`tag-btn-${slide.id}`}
+                    type="button"
+                    className="yarl__button"
+                    aria-label="Tag talent"
+                    onClick={() => {
+                      onTagPhoto(slide.id as string);
+                    }}
+                    style={{
+                      marginRight: "8px",
+                    }}
+                  >
+                    <svg
+                      className="yarl__icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      style={{ width: "20px", height: "20px" }}
+                    >
+                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                      <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>
+                  </button>
+                )}
+              </>
+            );
+          },
         }}
         close={() => setIndex(-1)}
       />

@@ -7,6 +7,7 @@ import {
   createSignedUrls,
 } from "@/database/queries";
 import { EventPhotoAlbum } from "./event-photo-album";
+import { getPhotoTags } from "./actions";
 
 export default async function EventDetailPage({
   params,
@@ -40,6 +41,10 @@ export default async function EventDetailPage({
     }
   }
 
+  // Get tags for all photos
+  const photoIds = photos.map((p) => p.id);
+  const photoTags = await getPhotoTags(photoIds);
+
   return (
     <div className="p-4">
       <DashboardHeader title={event.name} />
@@ -61,9 +66,23 @@ export default async function EventDetailPage({
                 id: p.id,
                 url,
                 alt: p.original_url ?? undefined,
+                tags: photoTags[p.id] || [],
               };
             })
-            .filter((item): item is { id: string; url: string; alt?: string } => item !== null)}
+            .filter(
+              (item): item is {
+                id: string;
+                url: string;
+                alt?: string;
+                tags: Array<{
+                  tag_id: string;
+                  talent_user_id: string;
+                  talent_email: string;
+                  talent_display_name: string | null;
+                  tagged_at: string;
+                }>;
+              } => item !== null,
+            )}
         />
       </div>
     </div>

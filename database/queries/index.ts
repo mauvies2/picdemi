@@ -14,6 +14,8 @@ export * from "./photos";
 export * from "./profiles";
 // Re-export storage queries
 export * from "./storage";
+// Re-export talent photo tag queries
+export * from "./talent-photo-tags";
 // Re-export types
 export type { SupabaseServerClient } from "./types";
 export { getErrorMessage } from "./types";

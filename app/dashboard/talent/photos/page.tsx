@@ -1,26 +1,42 @@
-export default function TalentPhotosPage() {
+import { redirect } from "next/navigation";
+import { DashboardHeader } from "@/components/dashboard-header";
+import { createClient } from "@/database/server";
+import { getActiveRole } from "@/app/actions/roles";
+import { listMyTaggedPhotos } from "./actions";
+import { TalentPhotosGrid } from "./talent-photos-grid";
+
+export const dynamic = "force-dynamic";
+
+export default async function TalentPhotosPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return redirect("/login");
+  }
+
+  // Ensure user is in talent role
+  const { activeRole } = await getActiveRole();
+  if (activeRole !== "talent") {
+    return redirect("/dashboard");
+  }
+
+  const result = await listMyTaggedPhotos({ limit: 50, offset: 0 });
+
   return (
-    <div className="space-y-4 rounded-xl border p-6">
-      <div>
-        <h2 className="text-xl font-semibold">Your photos</h2>
-        <p className="text-sm text-muted-foreground">
-          Upload portraits, portfolio work, or mark favorites from tagged
-          sessions.
-        </p>
-      </div>
-      <div className="grid gap-4 text-sm text-muted-foreground">
-        <div className="rounded-lg border border-dashed p-6 text-center">
-          <p>Photo library is empty.</p>
-          <p>Uploads and selections will appear here soon.</p>
-        </div>
-        <div className="rounded-lg border p-4">
-          <div className="text-sm font-medium">Coming soon</div>
-          <ul className="mt-2 list-disc pl-4 text-xs text-muted-foreground">
-            <li>Sync favorites from tagged shoots.</li>
-            <li>Organize albums and shareable galleries.</li>
-            <li>Track approvals &amp; licensing in one place.</li>
-          </ul>
-        </div>
+    <div className="p-4">
+      <DashboardHeader title="Photos you're tagged in" />
+      <p className="mt-2 text-sm text-muted-foreground">
+        Photos where photographers have tagged you, organized by event and date.
+      </p>
+      <div className="mt-6">
+        <TalentPhotosGrid
+          initialGroups={result.groups}
+          totalCount={result.totalCount}
+          hasMore={result.hasMore}
+        />
       </div>
     </div>
   );
