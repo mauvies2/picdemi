@@ -93,7 +93,7 @@ interface BatchInferenceFilters {
 ## Review UI for Photographers
 
 ### Location
-`/dashboard/events/[id]/ai-matches` or integrated into event detail page
+`/dashboard/photographer/events/[id]/ai-matches` or integrated into event detail page
 
 ### Features
 - List of pending matches for the event

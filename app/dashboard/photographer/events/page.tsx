@@ -112,7 +112,7 @@ export default async function EventsPage() {
               date={event.date}
               photoCount={count}
               coverUrl={coverUrl}
-              editHref={`/dashboard/events/${event.id}/edit`}
+              editHref={`/dashboard/photographer/events/${event.id}/edit`}
               onDelete={deleteEvent.bind(null, event.id)}
             />
           );

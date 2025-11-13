@@ -44,8 +44,8 @@ export const deleteEventAction = async (eventId: string) => {
   // Delete event
   await deleteEvent(supabase, eventId, user.id);
 
-  revalidatePath("/dashboard/events");
-  revalidatePath(`/dashboard/events/${eventId}`);
+  revalidatePath("/dashboard/photographer/events");
+  revalidatePath(`/dashboard/photographer/events/${eventId}`);
 };
 
 export const deletePhoto = async (photoId: string, eventId: string) => {
@@ -79,6 +79,6 @@ export const deletePhoto = async (photoId: string, eventId: string) => {
     await deleteStorageFiles(supabase, "photos", [photo.original_url]);
   }
 
-  revalidatePath("/dashboard/events");
-  revalidatePath(`/dashboard/events/${eventId}`);
+  revalidatePath("/dashboard/photographer/events");
+  revalidatePath(`/dashboard/photographer/events/${eventId}`);
 };

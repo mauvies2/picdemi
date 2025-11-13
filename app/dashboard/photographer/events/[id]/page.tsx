@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { EventShareCode } from "@/components/event-share-code";
 import { createSignedUrls, getEvent, getEventPhotos } from "@/database/queries";
 import { createClient } from "@/database/server";
 import { getPhotoTags } from "./actions";
@@ -20,7 +21,7 @@ export default async function EventDetailPage({
   if (!user) return redirect("/login");
 
   const event = await getEvent(supabase, id, user.id);
-  if (!event) return redirect("/dashboard/events");
+  if (!event) return redirect("/dashboard/photographer/events");
 
   const photos = await getEventPhotos(supabase, id, user.id);
 
@@ -54,7 +55,15 @@ export default async function EventDetailPage({
       <div className="text-sm text-muted-foreground">
         {new Date(event.date).toDateString().split(" ").slice(1).join(" ")} •{" "}
         {event.city[0]?.toUpperCase() + event.city.slice(1)}
+        {event.price_per_photo !== null && (
+          <> • ${event.price_per_photo.toFixed(2)} per photo</>
+        )}
       </div>
+      {!event.is_public && event.share_code && (
+        <div className="mt-4">
+          <EventShareCode shareCode={event.share_code} eventName={event.name} />
+        </div>
+      )}
       <div className="mt-4">
         <EventPhotoAlbum
           items={photos

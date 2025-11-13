@@ -192,8 +192,8 @@ export async function tagPhotosForTalentAction(
     user.id,
   );
 
-  revalidatePath("/dashboard/events");
-  revalidatePath(`/dashboard/events/${photoIds[0]}`); // Revalidate event page
+  revalidatePath("/dashboard/photographer/events");
+  revalidatePath(`/dashboard/photographer/events/${photoIds[0]}`); // Revalidate event page
 
   return { success: true, taggedCount };
 }
@@ -228,8 +228,8 @@ export async function untagPhotoForTalentAction(
 
   await untagPhotoForTalent(supabase, photoId, talentUserId);
 
-  revalidatePath("/dashboard/events");
-  revalidatePath(`/dashboard/events/${photoId}`);
+  revalidatePath("/dashboard/photographer/events");
+  revalidatePath(`/dashboard/photographer/events/${photoId}`);
 
   return { success: true };
 }

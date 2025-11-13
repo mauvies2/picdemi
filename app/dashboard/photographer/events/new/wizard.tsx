@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useId, useMemo, useState, useTransition } from "react";
 import { z } from "zod";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { EventShareCode } from "@/components/event-share-code";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Dropzone } from "@/components/uploader/Dropzone";
 import { cn } from "@/lib/utils";
 import { createEvent } from "./actions";
@@ -42,6 +44,17 @@ const eventSchema = z.object({
   date: z.string().min(1, "Date is required."),
   country: z.string().trim().min(1, "Country is required."),
   city: z.string().trim().min(1, "City is required."),
+  is_public: z.boolean().default(true),
+  price_per_photo: z
+    .union([z.string(), z.number(), z.null(), z.undefined()])
+    .optional()
+    .transform((val) => {
+      if (val === null || val === undefined || val === "") return null;
+      const strVal = typeof val === "string" ? val : String(val);
+      if (strVal.trim() === "") return null;
+      const num = parseFloat(strVal);
+      return Number.isNaN(num) || num < 0 ? null : num;
+    }),
 });
 
 type FormValues = z.infer<typeof eventSchema>;
@@ -52,6 +65,8 @@ const defaultValues: FormValues = {
   date: "",
   country: "",
   city: "",
+  is_public: true,
+  price_per_photo: null,
 };
 
 const formatBytes = (bytes: number) => {
@@ -74,6 +89,9 @@ export default function NewEventForm() {
   const [pendingValues, setPendingValues] = useState<FormValues | null>(null);
   const [photosError, setPhotosError] = useState<string | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [createdShareCode, setCreatedShareCode] = useState<string | null>(null);
+  const [createdEventName, setCreatedEventName] = useState<string | null>(null);
+  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
   const dateInputId = useId();
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
 
@@ -142,6 +160,16 @@ export default function NewEventForm() {
     formData.append("date", value.date);
     formData.append("country", value.country.trim());
     formData.append("city", value.city.trim());
+    formData.append("is_public", value.is_public ? "true" : "false");
+    if (value.price_per_photo !== undefined && value.price_per_photo !== null) {
+      const price =
+        typeof value.price_per_photo === "string"
+          ? parseFloat(value.price_per_photo)
+          : value.price_per_photo;
+      if (!Number.isNaN(price) && price >= 0) {
+        formData.append("price_per_photo", price.toString());
+      }
+    }
     for (const file of files) {
       formData.append("photos", file);
     }
@@ -154,7 +182,18 @@ export default function NewEventForm() {
         }
         setSubmitError(null);
         setIsModalOpen(false);
-        router.push(`/dashboard/events/${result.eventId}`);
+        // If event is private, show share code before redirecting
+        if (!value.is_public && result.shareCode) {
+          setCreatedShareCode(result.shareCode);
+          setCreatedEventName(value.name);
+          setCreatedEventId(result.eventId);
+          // Redirect after a short delay to show the share code
+          setTimeout(() => {
+            router.push(`/dashboard/photographer/events/${result.eventId}`);
+          }, 5000);
+        } else {
+          router.push(`/dashboard/photographer/events/${result.eventId}`);
+        }
       } catch (error) {
         console.error(error);
         setSubmitError(
@@ -168,6 +207,10 @@ export default function NewEventForm() {
 
   const eventSummary = useMemo(() => {
     const source = pendingValues ?? form.state.values;
+    const price =
+      source.price_per_photo !== null && source.price_per_photo !== undefined
+        ? `$${typeof source.price_per_photo === "string" ? parseFloat(source.price_per_photo).toFixed(2) : source.price_per_photo.toFixed(2)}`
+        : "Free";
     return [
       { label: "Name", value: source.name },
       {
@@ -182,6 +225,11 @@ export default function NewEventForm() {
       },
       { label: "Country", value: source.country },
       { label: "City", value: source.city },
+      {
+        label: "Visibility",
+        value: source.is_public ? "Public" : "Private",
+      },
+      { label: "Price per Photo", value: price },
       { label: "Photos", value: `${files.length} selected` },
     ];
   }, [pendingValues, form.state.values, files.length]);
@@ -410,6 +458,115 @@ export default function NewEventForm() {
                 }}
               </form.Field>
 
+              <form.Field name="is_public">
+                {(field) => {
+                  return (
+                    <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-4">
+                      <div className="grid gap-1">
+                        <Label htmlFor="is_public">Event Visibility</Label>
+                        <p className="text-xs text-muted-foreground">
+                          {field.state.value
+                            ? "Anyone can access this event"
+                            : "Only people with the share code can access"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {field.state.value ? "Public" : "Private"}
+                        </span>
+                        <Switch
+                          id="is_public"
+                          checked={field.state.value}
+                          onCheckedChange={(checked) => {
+                            field.handleChange(checked);
+                            field.handleBlur();
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                }}
+              </form.Field>
+
+              <form.Field
+                name="price_per_photo"
+                validators={{
+                  onChange: ({ value }) => {
+                    if (value === undefined || value === null) {
+                      return undefined; // Optional field
+                    }
+                    const num =
+                      typeof value === "string" ? parseFloat(value) : value;
+                    if (Number.isNaN(num)) {
+                      return "Price must be a valid number.";
+                    }
+                    if (num < 0) {
+                      return "Price cannot be negative.";
+                    }
+                    return undefined;
+                  },
+                }}
+              >
+                {(field) => {
+                  const showFeedback =
+                    submitAttempted || field.state.meta.isTouched;
+                  const error = showFeedback
+                    ? field.state.meta.errors?.[0]
+                    : null;
+                  const isInvalid = showFeedback && !field.state.meta.isValid;
+                  return (
+                    <div className="grid gap-2">
+                      <Label htmlFor="price_per_photo">
+                        Price per Photo (Optional)
+                      </Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          $
+                        </span>
+                        <Input
+                          id="price_per_photo"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={
+                            field.state.value === null ||
+                            field.state.value === undefined
+                              ? ""
+                              : typeof field.state.value === "string"
+                                ? field.state.value
+                                : field.state.value.toString()
+                          }
+                          onChange={(event) => {
+                            const val = event.target.value;
+                            if (val === "") {
+                              field.handleChange(null);
+                            } else {
+                              const num = parseFloat(val);
+                              if (!Number.isNaN(num)) {
+                                field.handleChange(num);
+                              } else {
+                                field.handleChange(val as unknown as number);
+                              }
+                            }
+                          }}
+                          onBlur={field.handleBlur}
+                          placeholder="0.00"
+                          aria-invalid={isInvalid}
+                          className="pl-7"
+                          suppressHydrationWarning
+                        />
+                      </div>
+                      {isInvalid && error ? (
+                        <p className="text-xs text-destructive">{error}</p>
+                      ) : null}
+                      <p className="text-xs text-muted-foreground">
+                        Leave empty if photos are free
+                      </p>
+                    </div>
+                  );
+                }}
+              </form.Field>
+
               <form.Field
                 name="city"
                 validators={{
@@ -540,6 +697,47 @@ export default function NewEventForm() {
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
+
+      {createdShareCode && createdEventName && (
+        <Dialog.Root open={true} onOpenChange={() => {}}>
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-black/40 z-100" />
+            <Dialog.Content className="fixed inset-x-4 top-1/2 z-120 mx-auto w-full max-w-md -translate-y-1/2 rounded-2xl bg-background p-6 shadow-lg focus:outline-none">
+              <Dialog.Title className="text-lg font-semibold">
+                Event Created Successfully!
+              </Dialog.Title>
+              <Dialog.Description className="mt-1 text-sm text-muted-foreground">
+                Your private event has been created. Share this code with people
+                who should have access.
+              </Dialog.Description>
+              <div className="mt-4">
+                <EventShareCode
+                  shareCode={createdShareCode}
+                  eventName={createdEventName}
+                />
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (createdEventId) {
+                      setCreatedShareCode(null);
+                      setCreatedEventName(null);
+                      setCreatedEventId(null);
+                      router.push(
+                        `/dashboard/photographer/events/${createdEventId}`,
+                      );
+                    }
+                  }}
+                  className="rounded-md"
+                >
+                  Go to Event
+                </Button>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      )}
     </div>
   );
 }

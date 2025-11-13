@@ -81,6 +81,26 @@ export async function getEventPhotos(
 }
 
 /**
+ * Get photos for an event by event ID (public access, no user check)
+ */
+export async function getEventPhotosPublic(
+  supabase: SupabaseServerClient,
+  eventId: string,
+): Promise<PhotoDetail[]> {
+  const { data, error } = await supabase
+    .from("photos")
+    .select("id, original_url, taken_at, city, country")
+    .eq("event_id", eventId)
+    .order("taken_at", { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to get event photos: ${getErrorMessage(error)}`);
+  }
+
+  return (data ?? []) as PhotoDetail[];
+}
+
+/**
  * Get photo storage paths for an event
  */
 export async function getPhotoStoragePaths(

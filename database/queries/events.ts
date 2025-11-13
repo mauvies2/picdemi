@@ -13,6 +13,9 @@ export interface Event {
   city: string;
   country: string;
   activity: string;
+  is_public: boolean;
+  share_code: string | null;
+  price_per_photo: number | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -24,6 +27,9 @@ export interface EventSummary {
   city: string;
   country: string;
   activity: string;
+  is_public: boolean;
+  share_code: string | null;
+  price_per_photo: number | null;
 }
 
 /**
@@ -35,7 +41,9 @@ export async function getUserEvents(
 ): Promise<EventSummary[]> {
   const { data, error } = await supabase
     .from("events")
-    .select("id, name, date, city, country, activity")
+    .select(
+      "id, name, date, city, country, activity, is_public, share_code, price_per_photo",
+    )
     .eq("user_id", userId)
     .order("date", { ascending: false })
     .throwOnError();
@@ -104,6 +112,9 @@ export async function createEvent(
     city: string;
     country: string;
     activity: string;
+    is_public: boolean;
+    share_code: string | null;
+    price_per_photo: number | null;
   },
 ): Promise<{ id: string }> {
   const { data, error } = await supabase
@@ -122,6 +133,26 @@ export async function createEvent(
   }
 
   return { id: data.id };
+}
+
+/**
+ * Get an event by share code (public access)
+ */
+export async function getEventByShareCode(
+  supabase: SupabaseServerClient,
+  shareCode: string,
+): Promise<Event | null> {
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("share_code", shareCode)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data as Event;
 }
 
 /**

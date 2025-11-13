@@ -57,7 +57,7 @@ export function EventCard({
   return (
     <div className="group relative">
       <Link
-        href={`/dashboard/events/${id}`}
+        href={`/dashboard/photographer/events/${id}`}
         className="block rounded-2xl transition-colors"
       >
         <div className="overflow-hidden rounded-lg bg-muted">

@@ -27,12 +27,25 @@ const eventSchema = z.object({
   date: z.string().min(1, "Date is required."),
   country: z.string().trim().min(1, "Country is required."),
   city: z.string().trim().min(1, "City is required."),
+  is_public: z
+    .string()
+    .default("true")
+    .transform((val) => val === "true"),
+  price_per_photo: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val || val.trim() === "") return null;
+      const num = parseFloat(val);
+      return Number.isNaN(num) || num < 0 ? null : num;
+    }),
 });
 
 type EventPayload = z.infer<typeof eventSchema>;
 
 type CreateEventResult = {
   eventId: string;
+  shareCode: string | null;
 };
 
 export const createEvent = async (
@@ -53,6 +66,8 @@ export const createEvent = async (
     date: formData.get("date"),
     country: formData.get("country"),
     city: formData.get("city"),
+    is_public: formData.get("is_public"),
+    price_per_photo: formData.get("price_per_photo"),
   };
 
   const parsed = eventSchema.safeParse({
@@ -61,6 +76,8 @@ export const createEvent = async (
     date: rawPayload.date?.toString() ?? "",
     country: rawPayload.country?.toString() ?? "",
     city: rawPayload.city?.toString() ?? "",
+    is_public: rawPayload.is_public?.toString() ?? "true",
+    price_per_photo: rawPayload.price_per_photo?.toString(),
   });
 
   if (!parsed.success) {
@@ -78,12 +95,25 @@ export const createEvent = async (
     throw new Error("Add at least one photo to continue.");
   }
 
+  // Generate share code for private events
+  let shareCode: string | null = null;
+  if (!payload.is_public) {
+    // Generate a random 8-character alphanumeric code
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Excluding ambiguous chars
+    shareCode = Array.from({ length: 8 }, () =>
+      chars.charAt(Math.floor(Math.random() * chars.length)),
+    ).join("");
+  }
+
   const event = await dbCreateEvent(supabase, user.id, {
     name: payload.name,
     activity: payload.activity,
     date: payload.date,
     country: payload.country,
     city: payload.city,
+    is_public: payload.is_public,
+    share_code: shareCode,
+    price_per_photo: payload.price_per_photo ?? null,
   });
 
   const photoRecords: { original_path: string }[] = [];
@@ -133,8 +163,8 @@ export const createEvent = async (
     throw new Error(message);
   }
 
-  revalidatePath("/dashboard/events");
-  revalidatePath(`/dashboard/events/${event.id}`);
+  revalidatePath("/dashboard/photographer/events");
+  revalidatePath(`/dashboard/photographer/events/${event.id}`);
 
-  return { eventId: event.id };
+  return { eventId: event.id, shareCode };
 };

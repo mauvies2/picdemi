@@ -35,13 +35,13 @@ export default function PhotographerDashboardPage() {
             <div className="mt-4 grid gap-2">
               <a
                 className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground"
-                href="/dashboard/events/new"
+                href="/dashboard/photographer/events/new"
               >
                 Create New Event
               </a>
               <a
                 className="inline-flex h-9 items-center justify-center rounded-md border px-3 text-sm"
-                href="/dashboard/events"
+                href="/dashboard/photographer/events"
               >
                 View Events
               </a>

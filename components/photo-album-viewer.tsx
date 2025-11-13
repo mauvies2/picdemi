@@ -200,18 +200,29 @@ export default function PhotoAlbumViewer({
                 }}
               >
                 <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
+                  <div
+                    role="button"
+                    tabIndex={0}
                     className={cn(
-                      "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background/70",
+                      "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background/70 cursor-pointer",
                       isDropdownOpen && "opacity-100",
                     )}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
                     onPointerDown={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        (e.currentTarget as HTMLElement).click();
+                      }
+                    }}
                     aria-label="More options"
                   >
                     <MoreVertical className="size-3.5" />
-                  </button>
+                  </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
@@ -346,6 +357,7 @@ export default function PhotoAlbumViewer({
           buttonNext: undefined,
           buttonClose: () => (
             <button
+              key="lightbox-close-button"
               type="button"
               className="yarl__button yarl__button_close"
               aria-label="Close"
