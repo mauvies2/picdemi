@@ -16,6 +16,7 @@ export interface Event {
   is_public: boolean;
   share_code: string | null;
   price_per_photo: number | null;
+  watermark_enabled: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -30,6 +31,7 @@ export interface EventSummary {
   is_public: boolean;
   share_code: string | null;
   price_per_photo: number | null;
+  watermark_enabled: boolean;
 }
 
 /**
@@ -42,7 +44,7 @@ export async function getUserEvents(
   const { data, error } = await supabase
     .from("events")
     .select(
-      "id, name, date, city, country, activity, is_public, share_code, price_per_photo",
+      "id, name, date, city, country, activity, is_public, share_code, price_per_photo, watermark_enabled",
     )
     .eq("user_id", userId)
     .order("date", { ascending: false })
@@ -115,6 +117,7 @@ export async function createEvent(
     is_public: boolean;
     share_code: string | null;
     price_per_photo: number | null;
+    watermark_enabled: boolean;
   },
 ): Promise<{ id: string }> {
   const { data, error } = await supabase
@@ -173,7 +176,7 @@ export async function searchPublicEvents(
   let query = supabase
     .from("events")
     .select(
-      "id, name, date, city, country, activity, is_public, share_code, price_per_photo",
+      "id, name, date, city, country, activity, is_public, share_code, price_per_photo, watermark_enabled",
       { count: "exact" },
     )
     .eq("is_public", true);

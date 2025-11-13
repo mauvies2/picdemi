@@ -45,6 +45,7 @@ const eventSchema = z.object({
   country: z.string().trim().min(1, "Country is required."),
   city: z.string().trim().min(1, "City is required."),
   is_public: z.boolean().default(true),
+  watermark_enabled: z.boolean().default(true),
   price_per_photo: z
     .union([z.string(), z.number(), z.null(), z.undefined()])
     .optional()
@@ -66,6 +67,7 @@ const defaultValues: FormValues = {
   country: "",
   city: "",
   is_public: true,
+  watermark_enabled: true,
   price_per_photo: null,
 };
 
@@ -161,6 +163,10 @@ export default function NewEventForm() {
     formData.append("country", value.country.trim());
     formData.append("city", value.city.trim());
     formData.append("is_public", value.is_public ? "true" : "false");
+    formData.append(
+      "watermark_enabled",
+      value.watermark_enabled ? "true" : "false",
+    );
     if (value.price_per_photo !== undefined && value.price_per_photo !== null) {
       const price =
         typeof value.price_per_photo === "string"
@@ -228,6 +234,11 @@ export default function NewEventForm() {
       {
         label: "Visibility",
         value: source.is_public ? "Public" : "Private",
+      },
+      {
+        label: "Watermark",
+        value:
+          source.is_public && source.watermark_enabled ? "Enabled" : "Disabled",
       },
       { label: "Price per Photo", value: price },
       { label: "Photos", value: `${files.length} selected` },
@@ -480,6 +491,44 @@ export default function NewEventForm() {
                           onCheckedChange={(checked) => {
                             field.handleChange(checked);
                             field.handleBlur();
+                            // Auto-enable watermark when making event public
+                            if (checked) {
+                              form.setFieldValue("watermark_enabled", true);
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                }}
+              </form.Field>
+
+              <form.Field name="watermark_enabled">
+                {(field) => {
+                  const isPublic = form.state.values.is_public;
+                  return (
+                    <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-4">
+                      <div className="grid gap-1">
+                        <Label htmlFor="watermark_enabled">
+                          Watermark on Photos
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {isPublic
+                            ? "Add watermark for talent users (photographers see originals)"
+                            : "Only applies to public events"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {field.state.value ? "Enabled" : "Disabled"}
+                        </span>
+                        <Switch
+                          id="watermark_enabled"
+                          checked={field.state.value}
+                          disabled={!isPublic}
+                          onCheckedChange={(checked) => {
+                            field.handleChange(checked);
+                            field.handleBlur();
                           }}
                         />
                       </div>
@@ -655,6 +704,73 @@ export default function NewEventForm() {
               </Button>
             </div>
           </form>
+
+          {/* Photo Upload - Right Column (Sticky on Desktop) */}
+          <div className="lg:sticky lg:top-4 lg:self-start">
+            <div className="space-y-4">
+              <div>
+                <Label>Photos</Label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Add photos to your event. You can upload multiple files at
+                  once.
+                </p>
+              </div>
+              <Dropzone accept=".jpg,.jpeg,.png,.heic" onSelect={handleFiles} />
+              {files.length > 0 && (
+                <div className="rounded-xl border border-dashed border-muted-foreground/30 p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-sm font-medium">
+                      {files.length} {files.length === 1 ? "photo" : "photos"}
+                    </p>
+                    {files.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setFiles([]);
+                          setPhotosError(null);
+                        }}
+                        className="h-7 text-xs"
+                      >
+                        Clear all
+                      </Button>
+                    )}
+                  </div>
+                  <ul className="grid gap-2 max-h-[400px] overflow-y-auto">
+                    {files.map((file) => (
+                      <li
+                        key={`${file.name}-${file.lastModified}`}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-2 transition-colors hover:border-muted-foreground/30"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatBytes(file.size)}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(file)}
+                          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                          aria-label={`Remove ${file.name}`}
+                        >
+                          <X className="h-4 w-4" aria-hidden="true" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {photosError ? (
+                <p className="text-sm text-destructive">{photosError}</p>
+              ) : null}
+            </div>
+          </div>
         </div>
       </div>
 

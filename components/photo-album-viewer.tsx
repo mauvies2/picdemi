@@ -25,9 +25,12 @@ import { cn } from "@/lib/utils";
 import "react-photo-album/rows.css";
 import "yet-another-react-lightbox/styles.css";
 
-const Lightbox = dynamic(() => import("yet-another-react-lightbox"), {
-  ssr: false,
-});
+const Lightbox = dynamic(
+  () => import("yet-another-react-lightbox").then((mod) => mod.default),
+  {
+    ssr: false,
+  },
+);
 
 export type PhotoAlbumItem = {
   id: string;
@@ -58,8 +61,8 @@ export default function PhotoAlbumViewer({
   selectionMode = false,
   selectedIds,
   onToggleSelect,
-  onTagPhoto,
-  onUntag,
+      onTagPhoto,
+      onUntag,
 }: PhotoAlbumViewerProps) {
   const [index, setIndex] = useState<number>(-1);
   const [dimensions, setDimensions] = useState<

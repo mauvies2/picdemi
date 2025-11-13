@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
-import { createSignedUrls, getEvent, getEventPhotosPublic } from "@/database/queries";
+import { createPhotoUrls, getEventPhotosPublic } from "@/database/queries";
 import { createClient } from "@/database/server";
+import { getActiveRole } from "@/app/actions/roles";
+import { getBaseUrl } from "@/lib/get-base-url";
 import PhotoAlbumViewer from "@/components/photo-album-viewer";
 
 export default async function PublicEventPage({
@@ -23,23 +25,46 @@ export default async function PublicEventPage({
     notFound();
   }
 
+  // Check if user is talent (watermark only shows for talent users)
+  let useWatermark = false;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { activeRole } = await getActiveRole();
+      // Only show watermark for talent users if watermark is enabled
+      useWatermark =
+        activeRole === "talent" &&
+        event.watermark_enabled === true;
+    }
+  } catch {
+    // User not logged in or error - no watermark
+    useWatermark = false;
+  }
+
   // Get photos for the event
   const photos = await getEventPhotosPublic(supabase, event.id);
 
-  // Generate signed URLs for private storage objects
+  // Generate URLs (watermarked or regular signed URLs)
   const paths = photos
     .map((p) => p.original_url)
     .filter((url): url is string => url !== null);
   const signed: Record<string, string> = {};
 
   if (paths.length > 0) {
-    const signedUrls = await createSignedUrls(
+    const baseUrl = await getBaseUrl();
+    const photoUrls = await createPhotoUrls(
       supabase,
       "photos",
       paths,
-      60 * 60,
-    ); // 1 hour
-    for (const item of signedUrls) {
+      {
+        expiresIn: 60 * 60, // 1 hour
+        useWatermark,
+        baseUrl,
+      },
+    );
+    for (const item of photoUrls) {
       if (item.signedUrl) {
         signed[item.path] = item.signedUrl;
       }

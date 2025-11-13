@@ -115,3 +115,31 @@ export async function deleteStorageFiles(
     );
   }
 }
+
+/**
+ * Create photo URLs with optional watermark support
+ * If useWatermark is true, returns watermark API URLs instead of signed URLs
+ */
+export async function createPhotoUrls(
+  supabase: SupabaseServerClient,
+  bucket: string,
+  paths: string[],
+  options?: {
+    expiresIn?: number;
+    useWatermark?: boolean;
+    baseUrl?: string;
+  },
+): Promise<Array<{ path: string; signedUrl: string | null }>> {
+  const { useWatermark = false, baseUrl, expiresIn = 3600 } = options ?? {};
+
+  if (useWatermark && baseUrl) {
+    // Return watermark API URLs
+    return paths.map((path) => ({
+      path,
+      signedUrl: `${baseUrl}/api/watermark/${path}`,
+    }));
+  }
+
+  // Return regular signed URLs
+  return createSignedUrls(supabase, bucket, paths, expiresIn);
+}

@@ -22,6 +22,7 @@ export interface TaggedPhotoWithEvent {
   event_date: string | null;
   event_city: string | null;
   event_country: string | null;
+  event_watermark_enabled: boolean | null;
   tagged_at: string;
 }
 
@@ -171,7 +172,8 @@ export async function getTaggedPhotosForTalent(
           name,
           date,
           city,
-          country
+          country,
+          watermark_enabled
         )
       )
     `,
@@ -204,6 +206,7 @@ export async function getTaggedPhotosForTalent(
       event_date: event?.date ?? null,
       event_city: event?.city ?? null,
       event_country: event?.country ?? null,
+      event_watermark_enabled: event?.watermark_enabled ?? null,
       tagged_at: item.created_at,
     };
   }) as TaggedPhotoWithEvent[];

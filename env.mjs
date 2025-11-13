@@ -12,6 +12,7 @@ export const env = createEnv({
     // Optional: only needed if you explicitly use server-only keys
     SUPABASE_URL: z.url().optional(),
     SUPABASE_ANON_KEY: z.string().min(1).optional(),
+    SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   },
   /*
    * Environment variables available on the client (and server).
@@ -37,5 +38,6 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     SUPABASE_URL: process.env.SUPABASE_URL,
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   },
 });

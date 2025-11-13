@@ -31,6 +31,10 @@ const eventSchema = z.object({
     .string()
     .default("true")
     .transform((val) => val === "true"),
+  watermark_enabled: z
+    .string()
+    .default("true")
+    .transform((val) => val === "true"),
   price_per_photo: z
     .string()
     .optional()
@@ -67,6 +71,7 @@ export const createEvent = async (
     country: formData.get("country"),
     city: formData.get("city"),
     is_public: formData.get("is_public"),
+    watermark_enabled: formData.get("watermark_enabled"),
     price_per_photo: formData.get("price_per_photo"),
   };
 
@@ -77,6 +82,7 @@ export const createEvent = async (
     country: rawPayload.country?.toString() ?? "",
     city: rawPayload.city?.toString() ?? "",
     is_public: rawPayload.is_public?.toString() ?? "true",
+    watermark_enabled: rawPayload.watermark_enabled?.toString() ?? "true",
     price_per_photo: rawPayload.price_per_photo?.toString(),
   });
 
@@ -105,6 +111,9 @@ export const createEvent = async (
     ).join("");
   }
 
+  // Watermark only applies to public events
+  const watermarkEnabled = payload.is_public && payload.watermark_enabled;
+
   const event = await dbCreateEvent(supabase, user.id, {
     name: payload.name,
     activity: payload.activity,
@@ -114,6 +123,7 @@ export const createEvent = async (
     is_public: payload.is_public,
     share_code: shareCode,
     price_per_photo: payload.price_per_photo ?? null,
+    watermark_enabled: watermarkEnabled,
   });
 
   const photoRecords: { original_path: string }[] = [];

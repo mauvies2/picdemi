@@ -1,11 +1,12 @@
 "use server";
 
 import {
-  createSignedUrls,
+  createPhotoUrls,
   getTaggedPhotosCountForTalent,
   getTaggedPhotosForTalent,
 } from "@/database/queries";
 import { createClient } from "@/database/server";
+import { getBaseUrl } from "@/lib/get-base-url";
 
 export interface TaggedPhotoGroup {
   event_id: string | null;
@@ -13,6 +14,7 @@ export interface TaggedPhotoGroup {
   event_date: string | null;
   event_city: string | null;
   event_country: string | null;
+  event_watermark_enabled: boolean | null;
   dates: Array<{
     date: string;
     photos: Array<{
@@ -60,21 +62,42 @@ export async function listMyTaggedPhotos(options?: {
   // Get total count
   const totalCount = await getTaggedPhotosCountForTalent(supabase, user.id);
 
-  // Generate signed URLs for photos
+  // Generate URLs for photos (with watermark if event has watermark enabled)
   const photoPaths = taggedPhotos
     .map((p) => p.photo_url)
     .filter((url): url is string => url !== null);
 
   const signedUrlsMap: Record<string, string | null> = {};
   if (photoPaths.length > 0) {
-    const signedUrls = await createSignedUrls(
-      supabase,
-      "photos",
-      photoPaths,
-      3600,
-    );
-    for (const item of signedUrls) {
-      signedUrlsMap[item.path] = item.signedUrl;
+    // Group photos by watermark requirement
+    const photosByWatermark = new Map<boolean, string[]>();
+    for (const photo of taggedPhotos) {
+      const needsWatermark = photo.event_watermark_enabled === true;
+      const path = photo.photo_url;
+      if (path) {
+        const existing = photosByWatermark.get(needsWatermark) ?? [];
+        existing.push(path);
+        photosByWatermark.set(needsWatermark, existing);
+      }
+    }
+
+    const baseUrl = await getBaseUrl();
+
+    // Generate URLs for each group
+    for (const [needsWatermark, paths] of photosByWatermark.entries()) {
+      const photoUrls = await createPhotoUrls(
+        supabase,
+        "photos",
+        paths,
+        {
+          expiresIn: 3600,
+          useWatermark: needsWatermark,
+          baseUrl,
+        },
+      );
+      for (const item of photoUrls) {
+        signedUrlsMap[item.path] = item.signedUrl;
+      }
     }
   }
 
@@ -87,6 +110,7 @@ export async function listMyTaggedPhotos(options?: {
     const eventDate = photo.event_date ?? null;
     const eventCity = photo.event_city ?? null;
     const eventCountry = photo.event_country ?? null;
+    const eventWatermarkEnabled = photo.event_watermark_enabled ?? null;
 
     if (!groupsMap.has(eventKey)) {
       groupsMap.set(eventKey, {
@@ -95,6 +119,7 @@ export async function listMyTaggedPhotos(options?: {
         event_date: eventDate,
         event_city: eventCity,
         event_country: eventCountry,
+        event_watermark_enabled: eventWatermarkEnabled,
         dates: [],
       });
     }
@@ -105,6 +130,7 @@ export async function listMyTaggedPhotos(options?: {
       event_date: eventDate,
       event_city: eventCity,
       event_country: eventCountry,
+      event_watermark_enabled: eventWatermarkEnabled,
       dates: [],
     };
 

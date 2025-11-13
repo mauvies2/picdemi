@@ -63,6 +63,7 @@ export function TalentPhotosGrid({
         event_date: string | null;
         event_city: string | null;
         event_country: string | null;
+        event_watermark_enabled: boolean | null;
         photos: Array<{
           photo_id: string;
           photo_url: string;
@@ -92,6 +93,7 @@ export function TalentPhotosGrid({
             event_date: group.event_date,
             event_city: group.event_city,
             event_country: group.event_country,
+            event_watermark_enabled: group.event_watermark_enabled,
             photos: [],
           };
           dateEvents.push(eventGroup);
