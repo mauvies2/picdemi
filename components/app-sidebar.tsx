@@ -47,11 +47,27 @@ type RoleSlug = "photographer" | "talent";
 
 const photographerNav = [
   { title: "Overview", url: "/dashboard/photographer", icon: Home },
-  { title: "Create Event", url: "/dashboard/events/new", icon: CalendarPlus },
-  { title: "Events", url: "/dashboard/events", icon: CalendarDays },
-  { title: "Sales", url: "/dashboard/sales", icon: WalletMinimal },
-  { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
-  { title: "Messages", url: "/dashboard/messages", icon: MessageSquare },
+  {
+    title: "Create Event",
+    url: "/dashboard/photographer/events/new",
+    icon: CalendarPlus,
+  },
+  {
+    title: "Events",
+    url: "/dashboard/photographer/events",
+    icon: CalendarDays,
+  },
+  { title: "Sales", url: "/dashboard/photographer/sales", icon: WalletMinimal },
+  {
+    title: "Analytics",
+    url: "/dashboard/photographer/analytics",
+    icon: BarChart3,
+  },
+  {
+    title: "Messages",
+    url: "/dashboard/photographer/messages",
+    icon: MessageSquare,
+  },
 ];
 
 const talentNav = [

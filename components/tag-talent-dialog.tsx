@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   searchTalentUsers,
   tagPhotosForTalentAction,
-} from "@/app/dashboard/events/[id]/actions";
+} from "@/app/dashboard/photographer/events/[id]/actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

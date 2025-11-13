@@ -3,7 +3,7 @@
 import { Trash2, Users } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { untagPhotoForTalentAction } from "@/app/dashboard/events/[id]/actions";
+import { untagPhotoForTalentAction } from "@/app/dashboard/photographer/events/[id]/actions";
 import {
   Popover,
   PopoverContent,

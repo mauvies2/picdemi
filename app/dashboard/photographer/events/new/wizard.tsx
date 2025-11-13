@@ -205,8 +205,9 @@ export default function NewEventForm() {
               form.handleSubmit();
             }}
             noValidate
+            suppressHydrationWarning
           >
-            <div className="grid gap-4">
+            <div className="grid gap-4" suppressHydrationWarning>
               <form.Field
                 name="name"
                 validators={{
@@ -234,6 +235,7 @@ export default function NewEventForm() {
                         placeholder="Event name"
                         aria-invalid={isInvalid}
                         autoComplete="off"
+                        suppressHydrationWarning
                       />
                       {isInvalid && error ? (
                         <p className="text-xs text-destructive">{error}</p>
@@ -359,6 +361,7 @@ export default function NewEventForm() {
                         type="hidden"
                         value={field.state.value}
                         readOnly
+                        suppressHydrationWarning
                       />
                       {isInvalid && error ? (
                         <p className="text-xs text-destructive">{error}</p>
@@ -397,6 +400,7 @@ export default function NewEventForm() {
                         placeholder="Country"
                         aria-invalid={isInvalid}
                         autoComplete="country-name"
+                        suppressHydrationWarning
                       />
                       {isInvalid && error ? (
                         <p className="text-xs text-destructive">{error}</p>
@@ -433,6 +437,7 @@ export default function NewEventForm() {
                         placeholder="City"
                         aria-invalid={isInvalid}
                         autoComplete="address-level2"
+                        suppressHydrationWarning
                       />
                       {isInvalid && error ? (
                         <p className="text-xs text-destructive">{error}</p>
