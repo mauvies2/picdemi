@@ -255,7 +255,93 @@ export default function NewEventForm() {
           </p>
         </header>
 
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+        {/* Mobile: Dropzone first, then form */}
+        <div className="space-y-6 lg:hidden">
+          <div className="grid gap-2">
+            <Dropzone accept=".jpg,.jpeg,.png,.heic" onSelect={handleFiles} />
+            {files.length > 0 && (
+              <div className="rounded-xl border border-dashed border-muted-foreground/30 p-4">
+                <ul className="grid gap-2">
+                  {files.map((file) => (
+                    <li
+                      key={`${file.name}-${file.lastModified}`}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-2 transition-colors hover:border-muted-foreground/30"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatBytes(file.size)}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(file)}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        aria-label={`Remove ${file.name}`}
+                      >
+                        <X className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {photosError ? (
+              <p className="text-sm text-destructive">{photosError}</p>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Desktop: Split layout - Left: Dropzone, Right: Form */}
+        <div className="hidden gap-10 lg:grid lg:grid-cols-2 lg:items-start">
+          {/* Left side: Dropzone */}
+          <div className="space-y-2">
+            <Dropzone
+              accept=".jpg,.jpeg,.png,.heic"
+              onSelect={handleFiles}
+              className="min-h-[400px]"
+            />
+            {files.length > 0 && (
+              <div className="rounded-xl border border-dashed border-muted-foreground/30 p-4">
+                <ul className="grid gap-2">
+                  {files.map((file) => (
+                    <li
+                      key={`${file.name}-${file.lastModified}`}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-2 transition-colors hover:border-muted-foreground/30"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
+                          {file.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatBytes(file.size)}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(file)}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        aria-label={`Remove ${file.name}`}
+                      >
+                        <X className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {photosError ? (
+              <p className="text-sm text-destructive">{photosError}</p>
+            ) : null}
+          </div>
+
+          {/* Right side: Form */}
           <form
             className="flex flex-col gap-6"
             onSubmit={(event) => {
@@ -267,207 +353,339 @@ export default function NewEventForm() {
             suppressHydrationWarning
           >
             <div className="grid gap-4" suppressHydrationWarning>
-              <form.Field
-                name="name"
-                validators={{
-                  onChange: ({ value }) =>
-                    value.trim().length === 0 ? "Name is required." : undefined,
-                }}
-              >
-                {(field) => {
-                  const showFeedback =
-                    submitAttempted || field.state.meta.isTouched;
-                  const error = showFeedback
-                    ? field.state.meta.errors?.[0]
-                    : null;
-                  const isInvalid = showFeedback && !field.state.meta.isValid;
-                  return (
-                    <div className="grid gap-2">
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        value={field.state.value}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                        onBlur={field.handleBlur}
-                        placeholder="Event name"
-                        aria-invalid={isInvalid}
-                        autoComplete="off"
-                        suppressHydrationWarning
-                      />
-                      {isInvalid && error ? (
-                        <p className="text-xs text-destructive">{error}</p>
-                      ) : null}
-                    </div>
-                  );
-                }}
-              </form.Field>
-
-              <form.Field
-                name="activity"
-                validators={{
-                  onChange: ({ value }) =>
-                    value &&
-                    activityValues.includes(
-                      value as (typeof activityValues)[number],
-                    )
-                      ? undefined
-                      : "Activity is required.",
-                }}
-              >
-                {(field) => {
-                  const showFeedback =
-                    submitAttempted || field.state.meta.isTouched;
-                  const error = showFeedback
-                    ? field.state.meta.errors?.[0]
-                    : null;
-                  const isInvalid = showFeedback && !field.state.meta.isValid;
-                  return (
-                    <div className="grid gap-2">
-                      <Label htmlFor="activity">Activity</Label>
-                      <Select
-                        value={field.state.value}
-                        onValueChange={(value) => {
-                          field.handleChange(value as FormValues["activity"]);
-                          field.handleBlur();
-                        }}
-                      >
-                        <SelectTrigger
-                          id="activity"
-                          className="w-full rounded-md"
+              {/* Row 1: Name + Activity (paired on desktop) */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <form.Field
+                  name="name"
+                  validators={{
+                    onChange: ({ value }) =>
+                      value.trim().length === 0
+                        ? "Name is required."
+                        : undefined,
+                  }}
+                >
+                  {(field) => {
+                    const showFeedback =
+                      submitAttempted || field.state.meta.isTouched;
+                    const error = showFeedback
+                      ? field.state.meta.errors?.[0]
+                      : null;
+                    const isInvalid = showFeedback && !field.state.meta.isValid;
+                    return (
+                      <div>
+                        <Label htmlFor="name">Name or place</Label>
+                        <Input
+                          id="name"
+                          className="mt-1"
+                          value={field.state.value}
+                          onChange={(event) =>
+                            field.handleChange(event.target.value)
+                          }
+                          onBlur={field.handleBlur}
+                          placeholder="Event name or place"
                           aria-invalid={isInvalid}
-                        >
-                          <SelectValue placeholder="Select an activity" />
-                        </SelectTrigger>
-                        <SelectContent className="w-[--radix-select-trigger-width]">
-                          {activityOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {isInvalid && error ? (
-                        <p className="text-xs text-destructive">{error}</p>
-                      ) : null}
-                    </div>
-                  );
-                }}
-              </form.Field>
+                          autoComplete="off"
+                          suppressHydrationWarning
+                        />
+                        {isInvalid && error ? (
+                          <p className="text-xs text-destructive">{error}</p>
+                        ) : null}
+                      </div>
+                    );
+                  }}
+                </form.Field>
 
-              <form.Field
-                name="date"
-                validators={{
-                  onChange: ({ value }) =>
-                    value && value.length > 0 ? undefined : "Date is required.",
-                }}
-              >
-                {(field) => {
-                  const showFeedback =
-                    submitAttempted || field.state.meta.isTouched;
-                  const error = showFeedback
-                    ? field.state.meta.errors?.[0]
-                    : null;
-                  const isInvalid = showFeedback && !field.state.meta.isValid;
-                  const parsedDate = field.state.value
-                    ? new Date(field.state.value)
-                    : undefined;
-                  return (
-                    <div className="grid gap-2">
-                      <Label htmlFor={dateInputId}>Date</Label>
-                      <Popover
-                        open={datePopoverOpen}
-                        onOpenChange={setDatePopoverOpen}
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-between rounded-md border border-input text-left font-normal",
-                              !parsedDate && "text-muted-foreground",
-                            )}
+                <form.Field
+                  name="activity"
+                  validators={{
+                    onChange: ({ value }) =>
+                      value &&
+                      activityValues.includes(
+                        value as (typeof activityValues)[number],
+                      )
+                        ? undefined
+                        : "Activity is required.",
+                  }}
+                >
+                  {(field) => {
+                    const showFeedback =
+                      submitAttempted || field.state.meta.isTouched;
+                    const error = showFeedback
+                      ? field.state.meta.errors?.[0]
+                      : null;
+                    const isInvalid = showFeedback && !field.state.meta.isValid;
+                    return (
+                      <div className="grid gap-2">
+                        <Label htmlFor="activity">Activity</Label>
+                        <Select
+                          value={field.state.value}
+                          onValueChange={(value) => {
+                            field.handleChange(value as FormValues["activity"]);
+                            field.handleBlur();
+                          }}
+                        >
+                          <SelectTrigger
+                            id="activity"
+                            className="w-full rounded-md"
                             aria-invalid={isInvalid}
                           >
-                            {parsedDate
-                              ? format(parsedDate, "PPP")
-                              : "Select date"}
-                            <ChevronDownIcon className="size-4 opacity-60" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-auto overflow-hidden p-0"
-                          align="start"
-                        >
-                          <Calendar
-                            mode="single"
-                            selected={parsedDate}
-                            captionLayout="dropdown"
-                            onSelect={(date) => {
-                              field.handleChange(
-                                date ? format(date, "yyyy-MM-dd") : "",
-                              );
-                              field.handleBlur();
-                              setDatePopoverOpen(false);
-                            }}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <input
-                        id={dateInputId}
-                        type="hidden"
-                        value={field.state.value}
-                        readOnly
-                        suppressHydrationWarning
-                      />
-                      {isInvalid && error ? (
-                        <p className="text-xs text-destructive">{error}</p>
-                      ) : null}
-                    </div>
-                  );
-                }}
-              </form.Field>
+                            <SelectValue placeholder="Select an activity" />
+                          </SelectTrigger>
+                          <SelectContent className="w-[--radix-select-trigger-width]">
+                            {activityOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {isInvalid && error ? (
+                          <p className="text-xs text-destructive">{error}</p>
+                        ) : null}
+                      </div>
+                    );
+                  }}
+                </form.Field>
+              </div>
 
-              <form.Field
-                name="country"
-                validators={{
-                  onChange: ({ value }) =>
-                    value.trim().length === 0
-                      ? "Country is required."
-                      : undefined,
-                }}
-              >
-                {(field) => {
-                  const showFeedback =
-                    submitAttempted || field.state.meta.isTouched;
-                  const error = showFeedback
-                    ? field.state.meta.errors?.[0]
-                    : null;
-                  const isInvalid = showFeedback && !field.state.meta.isValid;
-                  return (
-                    <div className="grid gap-2">
-                      <Label htmlFor="country">Country</Label>
-                      <Input
-                        id="country"
-                        value={field.state.value}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                        onBlur={field.handleBlur}
-                        placeholder="Country"
-                        aria-invalid={isInvalid}
-                        autoComplete="country-name"
-                        suppressHydrationWarning
-                      />
-                      {isInvalid && error ? (
-                        <p className="text-xs text-destructive">{error}</p>
-                      ) : null}
-                    </div>
-                  );
-                }}
-              </form.Field>
+              {/* Row 2: City + Country (paired on desktop) */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <form.Field
+                  name="city"
+                  validators={{
+                    onChange: ({ value }) =>
+                      value.trim().length === 0
+                        ? "City is required."
+                        : undefined,
+                  }}
+                >
+                  {(field) => {
+                    const showFeedback =
+                      submitAttempted || field.state.meta.isTouched;
+                    const error = showFeedback
+                      ? field.state.meta.errors?.[0]
+                      : null;
+                    const isInvalid = showFeedback && !field.state.meta.isValid;
+                    return (
+                      <div className="grid gap-2">
+                        <Label htmlFor="city">City</Label>
+                        <Input
+                          id="city"
+                          value={field.state.value}
+                          onChange={(event) =>
+                            field.handleChange(event.target.value)
+                          }
+                          onBlur={field.handleBlur}
+                          placeholder="City"
+                          aria-invalid={isInvalid}
+                          autoComplete="address-level2"
+                          suppressHydrationWarning
+                        />
+                        {isInvalid && error ? (
+                          <p className="text-xs text-destructive">{error}</p>
+                        ) : null}
+                      </div>
+                    );
+                  }}
+                </form.Field>
+
+                <form.Field
+                  name="country"
+                  validators={{
+                    onChange: ({ value }) =>
+                      value.trim().length === 0
+                        ? "Country is required."
+                        : undefined,
+                  }}
+                >
+                  {(field) => {
+                    const showFeedback =
+                      submitAttempted || field.state.meta.isTouched;
+                    const error = showFeedback
+                      ? field.state.meta.errors?.[0]
+                      : null;
+                    const isInvalid = showFeedback && !field.state.meta.isValid;
+                    return (
+                      <div className="grid gap-2">
+                        <Label htmlFor="country">Country</Label>
+                        <Input
+                          id="country"
+                          value={field.state.value}
+                          onChange={(event) =>
+                            field.handleChange(event.target.value)
+                          }
+                          onBlur={field.handleBlur}
+                          placeholder="Country"
+                          aria-invalid={isInvalid}
+                          autoComplete="country-name"
+                          suppressHydrationWarning
+                        />
+                        {isInvalid && error ? (
+                          <p className="text-xs text-destructive">{error}</p>
+                        ) : null}
+                      </div>
+                    );
+                  }}
+                </form.Field>
+              </div>
+
+              {/* Row 3: Date + Price per Photo (paired on desktop) */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <form.Field
+                  name="date"
+                  validators={{
+                    onChange: ({ value }) =>
+                      value && value.length > 0
+                        ? undefined
+                        : "Date is required.",
+                  }}
+                >
+                  {(field) => {
+                    const showFeedback =
+                      submitAttempted || field.state.meta.isTouched;
+                    const error = showFeedback
+                      ? field.state.meta.errors?.[0]
+                      : null;
+                    const isInvalid = showFeedback && !field.state.meta.isValid;
+                    const parsedDate = field.state.value
+                      ? new Date(field.state.value)
+                      : undefined;
+                    return (
+                      <div className="grid gap-2">
+                        <Label htmlFor={dateInputId}>Date</Label>
+                        <Popover
+                          open={datePopoverOpen}
+                          onOpenChange={setDatePopoverOpen}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-between rounded-md border border-input text-left font-normal",
+                                !parsedDate && "text-muted-foreground",
+                              )}
+                              aria-invalid={isInvalid}
+                            >
+                              {parsedDate
+                                ? format(parsedDate, "PPP")
+                                : "Select date"}
+                              <ChevronDownIcon className="size-4 opacity-60" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            className="w-auto overflow-hidden p-0"
+                            align="start"
+                          >
+                            <Calendar
+                              mode="single"
+                              selected={parsedDate}
+                              captionLayout="dropdown"
+                              onSelect={(date) => {
+                                field.handleChange(
+                                  date ? format(date, "yyyy-MM-dd") : "",
+                                );
+                                field.handleBlur();
+                                setDatePopoverOpen(false);
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <input
+                          id={dateInputId}
+                          type="hidden"
+                          value={field.state.value}
+                          readOnly
+                          suppressHydrationWarning
+                        />
+                        {isInvalid && error ? (
+                          <p className="text-xs text-destructive">{error}</p>
+                        ) : null}
+                      </div>
+                    );
+                  }}
+                </form.Field>
+
+                <form.Field
+                  name="price_per_photo"
+                  validators={{
+                    onChange: ({ value }) => {
+                      if (value === undefined || value === null) {
+                        return undefined; // Optional field
+                      }
+                      const num =
+                        typeof value === "string" ? parseFloat(value) : value;
+                      if (Number.isNaN(num)) {
+                        return "Price must be a valid number.";
+                      }
+                      if (num < 0) {
+                        return "Price cannot be negative.";
+                      }
+                      return undefined;
+                    },
+                  }}
+                >
+                  {(field) => {
+                    const showFeedback =
+                      submitAttempted || field.state.meta.isTouched;
+                    const error = showFeedback
+                      ? field.state.meta.errors?.[0]
+                      : null;
+                    const isInvalid = showFeedback && !field.state.meta.isValid;
+                    return (
+                      <div className="grid gap-2">
+                        <Label htmlFor="price_per_photo">
+                          Price per Photo (Optional)
+                        </Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            $
+                          </span>
+                          <Input
+                            id="price_per_photo"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={
+                              field.state.value === null ||
+                              field.state.value === undefined
+                                ? ""
+                                : typeof field.state.value === "string"
+                                  ? field.state.value
+                                  : field.state.value.toString()
+                            }
+                            onChange={(event) => {
+                              const val = event.target.value;
+                              if (val === "") {
+                                field.handleChange(null);
+                              } else {
+                                const num = parseFloat(val);
+                                if (!Number.isNaN(num)) {
+                                  field.handleChange(num);
+                                } else {
+                                  field.handleChange(val as unknown as number);
+                                }
+                              }
+                            }}
+                            onBlur={field.handleBlur}
+                            placeholder="0.00"
+                            aria-invalid={isInvalid}
+                            className="pl-7"
+                            suppressHydrationWarning
+                          />
+                        </div>
+                        {isInvalid && error ? (
+                          <p className="text-xs text-destructive">{error}</p>
+                        ) : null}
+                      </div>
+                    );
+                  }}
+                </form.Field>
+              </div>
 
               <form.Field name="is_public">
                 {(field) => {
@@ -536,161 +754,6 @@ export default function NewEventForm() {
                   );
                 }}
               </form.Field>
-
-              <form.Field
-                name="price_per_photo"
-                validators={{
-                  onChange: ({ value }) => {
-                    if (value === undefined || value === null) {
-                      return undefined; // Optional field
-                    }
-                    const num =
-                      typeof value === "string" ? parseFloat(value) : value;
-                    if (Number.isNaN(num)) {
-                      return "Price must be a valid number.";
-                    }
-                    if (num < 0) {
-                      return "Price cannot be negative.";
-                    }
-                    return undefined;
-                  },
-                }}
-              >
-                {(field) => {
-                  const showFeedback =
-                    submitAttempted || field.state.meta.isTouched;
-                  const error = showFeedback
-                    ? field.state.meta.errors?.[0]
-                    : null;
-                  const isInvalid = showFeedback && !field.state.meta.isValid;
-                  return (
-                    <div className="grid gap-2">
-                      <Label htmlFor="price_per_photo">
-                        Price per Photo (Optional)
-                      </Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          id="price_per_photo"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={
-                            field.state.value === null ||
-                            field.state.value === undefined
-                              ? ""
-                              : typeof field.state.value === "string"
-                                ? field.state.value
-                                : field.state.value.toString()
-                          }
-                          onChange={(event) => {
-                            const val = event.target.value;
-                            if (val === "") {
-                              field.handleChange(null);
-                            } else {
-                              const num = parseFloat(val);
-                              if (!Number.isNaN(num)) {
-                                field.handleChange(num);
-                              } else {
-                                field.handleChange(val as unknown as number);
-                              }
-                            }
-                          }}
-                          onBlur={field.handleBlur}
-                          placeholder="0.00"
-                          aria-invalid={isInvalid}
-                          className="pl-7"
-                          suppressHydrationWarning
-                        />
-                      </div>
-                      {isInvalid && error ? (
-                        <p className="text-xs text-destructive">{error}</p>
-                      ) : null}
-                      <p className="text-xs text-muted-foreground">
-                        Leave empty if photos are free
-                      </p>
-                    </div>
-                  );
-                }}
-              </form.Field>
-
-              <form.Field
-                name="city"
-                validators={{
-                  onChange: ({ value }) =>
-                    value.trim().length === 0 ? "City is required." : undefined,
-                }}
-              >
-                {(field) => {
-                  const showFeedback =
-                    submitAttempted || field.state.meta.isTouched;
-                  const error = showFeedback
-                    ? field.state.meta.errors?.[0]
-                    : null;
-                  const isInvalid = showFeedback && !field.state.meta.isValid;
-                  return (
-                    <div className="grid gap-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        value={field.state.value}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                        onBlur={field.handleBlur}
-                        placeholder="City"
-                        aria-invalid={isInvalid}
-                        autoComplete="address-level2"
-                        suppressHydrationWarning
-                      />
-                      {isInvalid && error ? (
-                        <p className="text-xs text-destructive">{error}</p>
-                      ) : null}
-                    </div>
-                  );
-                }}
-              </form.Field>
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Photos</Label>
-              <Dropzone accept=".jpg,.jpeg,.png,.heic" onSelect={handleFiles} />
-              {files.length > 0 && (
-                <div className="rounded-xl border border-dashed border-muted-foreground/30 p-4">
-                  <ul className="grid gap-2">
-                    {files.map((file) => (
-                      <li
-                        key={`${file.name}-${file.lastModified}`}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-2 transition-colors hover:border-muted-foreground/30"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">
-                            {file.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatBytes(file.size)}
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(file)}
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          aria-label={`Remove ${file.name}`}
-                        >
-                          <X className="h-4 w-4" aria-hidden="true" />
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {photosError ? (
-                <p className="text-sm text-destructive">{photosError}</p>
-              ) : null}
             </div>
 
             <div className="mt-auto flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:justify-end">
@@ -704,74 +767,419 @@ export default function NewEventForm() {
               </Button>
             </div>
           </form>
+        </div>
 
-          {/* Photo Upload - Right Column (Sticky on Desktop) */}
-          <div className="lg:sticky lg:top-4 lg:self-start">
-            <div className="space-y-4">
-              <div>
-                <Label>Photos</Label>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Add photos to your event. You can upload multiple files at
-                  once.
-                </p>
-              </div>
-              <Dropzone accept=".jpg,.jpeg,.png,.heic" onSelect={handleFiles} />
-              {files.length > 0 && (
-                <div className="rounded-xl border border-dashed border-muted-foreground/30 p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="text-sm font-medium">
-                      {files.length} {files.length === 1 ? "photo" : "photos"}
-                    </p>
-                    {files.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setFiles([]);
-                          setPhotosError(null);
-                        }}
-                        className="h-7 text-xs"
-                      >
-                        Clear all
-                      </Button>
-                    )}
+        {/* Mobile: Form fields below dropzone */}
+        <form
+          className="flex flex-col gap-6 lg:hidden"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSubmitAttempted(true);
+            form.handleSubmit();
+          }}
+          noValidate
+          suppressHydrationWarning
+        >
+          <div className="grid gap-4" suppressHydrationWarning>
+            <form.Field
+              name="name"
+              validators={{
+                onChange: ({ value }) =>
+                  value.trim().length === 0 ? "Name is required." : undefined,
+              }}
+            >
+              {(field) => {
+                const showFeedback =
+                  submitAttempted || field.state.meta.isTouched;
+                const error = showFeedback
+                  ? field.state.meta.errors?.[0]
+                  : null;
+                const isInvalid = showFeedback && !field.state.meta.isValid;
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor="name-mobile">Name</Label>
+                    <Input
+                      id="name-mobile"
+                      value={field.state.value}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
+                      onBlur={field.handleBlur}
+                      placeholder="Event name"
+                      aria-invalid={isInvalid}
+                      autoComplete="off"
+                      suppressHydrationWarning
+                    />
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
                   </div>
-                  <ul className="grid gap-2 max-h-[400px] overflow-y-auto">
-                    {files.map((file) => (
-                      <li
-                        key={`${file.name}-${file.lastModified}`}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-2 transition-colors hover:border-muted-foreground/30"
+                );
+              }}
+            </form.Field>
+
+            <form.Field
+              name="activity"
+              validators={{
+                onChange: ({ value }) =>
+                  value &&
+                  activityValues.includes(
+                    value as (typeof activityValues)[number],
+                  )
+                    ? undefined
+                    : "Activity is required.",
+              }}
+            >
+              {(field) => {
+                const showFeedback =
+                  submitAttempted || field.state.meta.isTouched;
+                const error = showFeedback
+                  ? field.state.meta.errors?.[0]
+                  : null;
+                const isInvalid = showFeedback && !field.state.meta.isValid;
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor="activity-mobile">Activity</Label>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => {
+                        field.handleChange(value as FormValues["activity"]);
+                        field.handleBlur();
+                      }}
+                    >
+                      <SelectTrigger
+                        id="activity-mobile"
+                        className="w-full rounded-md"
+                        aria-invalid={isInvalid}
                       >
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">
-                            {file.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatBytes(file.size)}
-                          </p>
-                        </div>
+                        <SelectValue placeholder="Select an activity" />
+                      </SelectTrigger>
+                      <SelectContent className="w-[--radix-select-trigger-width]">
+                        {activityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
+
+            <form.Field
+              name="city"
+              validators={{
+                onChange: ({ value }) =>
+                  value.trim().length === 0 ? "City is required." : undefined,
+              }}
+            >
+              {(field) => {
+                const showFeedback =
+                  submitAttempted || field.state.meta.isTouched;
+                const error = showFeedback
+                  ? field.state.meta.errors?.[0]
+                  : null;
+                const isInvalid = showFeedback && !field.state.meta.isValid;
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor="city-mobile">City</Label>
+                    <Input
+                      id="city-mobile"
+                      value={field.state.value}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
+                      onBlur={field.handleBlur}
+                      placeholder="City"
+                      aria-invalid={isInvalid}
+                      autoComplete="address-level2"
+                      suppressHydrationWarning
+                    />
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
+
+            <form.Field
+              name="country"
+              validators={{
+                onChange: ({ value }) =>
+                  value.trim().length === 0
+                    ? "Country is required."
+                    : undefined,
+              }}
+            >
+              {(field) => {
+                const showFeedback =
+                  submitAttempted || field.state.meta.isTouched;
+                const error = showFeedback
+                  ? field.state.meta.errors?.[0]
+                  : null;
+                const isInvalid = showFeedback && !field.state.meta.isValid;
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor="country-mobile">Country</Label>
+                    <Input
+                      id="country-mobile"
+                      value={field.state.value}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value)
+                      }
+                      onBlur={field.handleBlur}
+                      placeholder="Country"
+                      aria-invalid={isInvalid}
+                      autoComplete="country-name"
+                      suppressHydrationWarning
+                    />
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
+
+            <form.Field
+              name="date"
+              validators={{
+                onChange: ({ value }) =>
+                  value && value.length > 0 ? undefined : "Date is required.",
+              }}
+            >
+              {(field) => {
+                const showFeedback =
+                  submitAttempted || field.state.meta.isTouched;
+                const error = showFeedback
+                  ? field.state.meta.errors?.[0]
+                  : null;
+                const isInvalid = showFeedback && !field.state.meta.isValid;
+                const parsedDate = field.state.value
+                  ? new Date(field.state.value)
+                  : undefined;
+                const mobileDateInputId = `${dateInputId}-mobile`;
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor={mobileDateInputId}>Date</Label>
+                    <Popover
+                      open={datePopoverOpen}
+                      onOpenChange={setDatePopoverOpen}
+                    >
+                      <PopoverTrigger asChild>
                         <Button
                           type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(file)}
-                          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                          aria-label={`Remove ${file.name}`}
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-between rounded-md border border-input text-left font-normal",
+                            !parsedDate && "text-muted-foreground",
+                          )}
+                          aria-invalid={isInvalid}
                         >
-                          <X className="h-4 w-4" aria-hidden="true" />
+                          {parsedDate
+                            ? format(parsedDate, "PPP")
+                            : "Select date"}
+                          <ChevronDownIcon className="size-4 opacity-60" />
                         </Button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {photosError ? (
-                <p className="text-sm text-destructive">{photosError}</p>
-              ) : null}
-            </div>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-auto overflow-hidden p-0"
+                        align="start"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={parsedDate}
+                          captionLayout="dropdown"
+                          onSelect={(date) => {
+                            field.handleChange(
+                              date ? format(date, "yyyy-MM-dd") : "",
+                            );
+                            field.handleBlur();
+                            setDatePopoverOpen(false);
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <input
+                      id={mobileDateInputId}
+                      type="hidden"
+                      value={field.state.value}
+                      readOnly
+                      suppressHydrationWarning
+                    />
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
+
+            <form.Field
+              name="price_per_photo"
+              validators={{
+                onChange: ({ value }) => {
+                  if (value === undefined || value === null) {
+                    return undefined; // Optional field
+                  }
+                  const num =
+                    typeof value === "string" ? parseFloat(value) : value;
+                  if (Number.isNaN(num)) {
+                    return "Price must be a valid number.";
+                  }
+                  if (num < 0) {
+                    return "Price cannot be negative.";
+                  }
+                  return undefined;
+                },
+              }}
+            >
+              {(field) => {
+                const showFeedback =
+                  submitAttempted || field.state.meta.isTouched;
+                const error = showFeedback
+                  ? field.state.meta.errors?.[0]
+                  : null;
+                const isInvalid = showFeedback && !field.state.meta.isValid;
+                return (
+                  <div className="grid gap-2">
+                    <Label htmlFor="price_per_photo-mobile">
+                      Price per Photo (Optional)
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        $
+                      </span>
+                      <Input
+                        id="price_per_photo-mobile"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={
+                          field.state.value === null ||
+                          field.state.value === undefined
+                            ? ""
+                            : typeof field.state.value === "string"
+                              ? field.state.value
+                              : field.state.value.toString()
+                        }
+                        onChange={(event) => {
+                          const val = event.target.value;
+                          if (val === "") {
+                            field.handleChange(null);
+                          } else {
+                            const num = parseFloat(val);
+                            if (!Number.isNaN(num)) {
+                              field.handleChange(num);
+                            } else {
+                              field.handleChange(val as unknown as number);
+                            }
+                          }
+                        }}
+                        onBlur={field.handleBlur}
+                        placeholder="0.00"
+                        aria-invalid={isInvalid}
+                        className="pl-7"
+                        suppressHydrationWarning
+                      />
+                    </div>
+                    {isInvalid && error ? (
+                      <p className="text-xs text-destructive">{error}</p>
+                    ) : null}
+                    <p className="text-xs text-muted-foreground">
+                      Leave empty if photos are free
+                    </p>
+                  </div>
+                );
+              }}
+            </form.Field>
+
+            <form.Field name="is_public">
+              {(field) => {
+                return (
+                  <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-4">
+                    <div className="grid gap-1">
+                      <Label htmlFor="is_public-mobile">Event Visibility</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {field.state.value
+                          ? "Anyone can access this event"
+                          : "Only people with the share code can access"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        {field.state.value ? "Public" : "Private"}
+                      </span>
+                      <Switch
+                        id="is_public-mobile"
+                        checked={field.state.value}
+                        onCheckedChange={(checked) => {
+                          field.handleChange(checked);
+                          field.handleBlur();
+                          // Auto-enable watermark when making event public
+                          if (checked) {
+                            form.setFieldValue("watermark_enabled", true);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              }}
+            </form.Field>
+
+            <form.Field name="watermark_enabled">
+              {(field) => {
+                const isPublic = form.state.values.is_public;
+                return (
+                  <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-4">
+                    <div className="grid gap-1">
+                      <Label htmlFor="watermark_enabled-mobile">
+                        Watermark on Photos
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {isPublic
+                          ? "Add watermark for talent users (photographers see originals)"
+                          : "Only applies to public events"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        {field.state.value ? "Enabled" : "Disabled"}
+                      </span>
+                      <Switch
+                        id="watermark_enabled-mobile"
+                        checked={field.state.value}
+                        disabled={!isPublic}
+                        onCheckedChange={(checked) => {
+                          field.handleChange(checked);
+                          field.handleBlur();
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              }}
+            </form.Field>
           </div>
-        </div>
+
+          <div className="mt-auto flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:justify-end">
+            {submitError ? (
+              <p className="text-sm text-destructive text-right sm:text-left">
+                {submitError}
+              </p>
+            ) : null}
+            <Button type="submit" disabled={isPending}>
+              Create Event
+            </Button>
+          </div>
+        </form>
       </div>
 
       <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
