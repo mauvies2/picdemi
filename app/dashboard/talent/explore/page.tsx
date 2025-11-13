@@ -1,14 +1,14 @@
 import { Suspense } from "react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExplorePageContent } from "./explore-page-content";
 import { getFilterOptionsAction } from "./actions";
+import { ExplorePageContent } from "./explore-page-content";
 
 export default async function TalentExplorePage() {
   const filterOptions = await getFilterOptionsAction();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <DashboardHeader title="Explore Events" />
         <p className="mt-1 text-sm text-muted-foreground">
@@ -25,6 +25,17 @@ export default async function TalentExplorePage() {
 }
 
 function ExplorePageSkeleton() {
+  const skeletonKeys = [
+    "skeleton-1",
+    "skeleton-2",
+    "skeleton-3",
+    "skeleton-4",
+    "skeleton-5",
+    "skeleton-6",
+    "skeleton-7",
+    "skeleton-8",
+  ];
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -36,8 +47,8 @@ function ExplorePageSkeleton() {
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={`skeleton-${i}`} className="aspect-square w-full rounded-lg" />
+        {skeletonKeys.map((key) => (
+          <Skeleton key={key} className="aspect-square w-full rounded-lg" />
         ))}
       </div>
     </div>

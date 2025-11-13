@@ -256,15 +256,18 @@ function Sidebar({
 function SidebarTrigger({
   className,
   onClick,
+  variant = "ghost",
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: React.ComponentProps<typeof Button> & {
+  variant?: "default" | "outline" | "ghost";
+}) {
   const { toggleSidebar } = useSidebar();
 
   return (
     <Button
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
-      variant="ghost"
+      variant={variant}
       className={cn("size-7", className)}
       onClick={(event) => {
         onClick?.(event);

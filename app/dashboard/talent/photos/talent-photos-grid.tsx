@@ -53,24 +53,82 @@ export function TalentPhotosGrid({
     return `${selectedIds.length} photos selected`;
   }, [selectedIds.length]);
 
-  // Convert grouped photos to flat PhotoAlbumItem array
-  const photoItems = useMemo(() => {
-    const items: PhotoAlbumItem[] = [];
+  // Restructure: Group by date first, then by event
+  const dateGroups = useMemo(() => {
+    const dateMap = new Map<
+      string,
+      Array<{
+        event_id: string | null;
+        event_name: string | null;
+        event_date: string | null;
+        event_city: string | null;
+        event_country: string | null;
+        photos: Array<{
+          photo_id: string;
+          photo_url: string;
+          signed_url: string | null;
+          taken_at: string | null;
+          tagged_at: string;
+        }>;
+      }>
+    >();
+
+    // Flatten and regroup by date first
     for (const group of groups) {
       for (const dateGroup of group.dates) {
-        for (const photo of dateGroup.photos) {
+        const dateKey = dateGroup.date;
+        if (!dateMap.has(dateKey)) {
+          dateMap.set(dateKey, []);
+        }
+
+        const dateEvents = dateMap.get(dateKey);
+        if (!dateEvents) continue;
+        let eventGroup = dateEvents.find((e) => e.event_id === group.event_id);
+
+        if (!eventGroup) {
+          eventGroup = {
+            event_id: group.event_id,
+            event_name: group.event_name,
+            event_date: group.event_date,
+            event_city: group.event_city,
+            event_country: group.event_country,
+            photos: [],
+          };
+          dateEvents.push(eventGroup);
+        }
+
+        eventGroup.photos.push(...dateGroup.photos);
+      }
+    }
+
+    // Sort dates (newest first)
+    const sortedDates = Array.from(dateMap.entries()).sort((a, b) => {
+      if (a[0] === "unknown") return 1;
+      if (b[0] === "unknown") return -1;
+      return b[0].localeCompare(a[0]);
+    });
+
+    return sortedDates;
+  }, [groups]);
+
+  // Convert all photos to flat PhotoAlbumItem array
+  const photoItems = useMemo(() => {
+    const items: PhotoAlbumItem[] = [];
+    for (const [, events] of dateGroups) {
+      for (const event of events) {
+        for (const photo of event.photos) {
           if (photo.signed_url) {
             items.push({
               id: photo.photo_id,
               url: photo.signed_url,
-              alt: `Photo from ${group.event_name || "event"}`,
+              alt: `Photo from ${event.event_name || "event"}`,
             });
           }
         }
       }
     }
     return items;
-  }, [groups]);
+  }, [dateGroups]);
 
   const handleLoadMore = () => {
     startTransition(async () => {
@@ -133,40 +191,53 @@ export function TalentPhotosGrid({
         </div>
       )}
 
-      {/* Grouped display */}
-      {groups.map((group) => (
-        <div key={group.event_id ?? "no-event"}>
-          {/* Dates within event */}
-          {group.dates.map((dateGroup) => (
-            <div key={dateGroup.date}>
-              <h3 className="text-2xl font-semibold">
-                {dateGroup.date === "unknown"
-                  ? "Unknown date"
-                  : format(new Date(dateGroup.date), "EEEE, MMMM d, yyyy")}
-              </h3>
-              <div className="flex items-baseline gap-1">
-                <Link
-                  href={`/dashboard/photographer/events/${group.event_id}`}
-                  className="text-sm font-semibold hover:underline"
-                >
-                  {group.event_name ?? "Uncategorized"}
-                </Link>
-                <span>{" • "}</span>
-                {group.event_date && (
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(group.event_date), "MMMM d, yyyy")}
-                  </p>
+      {/* Grouped by date, then event */}
+      {dateGroups.map(([dateKey, events]) => (
+        <div key={dateKey} className="space-y-2">
+          {/* Date Header */}
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-2 -mt-2 pt-4 border-b border-border/50">
+            <h2 className="text-xl font-semibold text-foreground">
+              {dateKey === "unknown"
+                ? "Unknown date"
+                : format(new Date(dateKey), "EEEE, MMMM d, yyyy")}
+            </h2>
+          </div>
+
+          {/* Events within this date */}
+          {events.map((event) => (
+            <div
+              key={event.event_id ?? `no-event-${dateKey}`}
+              className="space-y-3"
+            >
+              {/* Event Info */}
+              <div className="flex flex-wrap items-baseline gap-1.5">
+                {event.event_id ? (
+                  <Link
+                    href={`/dashboard/photographer/events/${event.event_id}`}
+                    className="text-sm font-semibold text-foreground hover:underline"
+                  >
+                    {event.event_name ?? "Uncategorized"}
+                  </Link>
+                ) : (
+                  <span className="text-sm font-semibold text-foreground">
+                    {event.event_name ?? "Uncategorized"}
+                  </span>
                 )}
-                <span>{" • "}</span>
-                <p className="text-sm text-muted-foreground">
-                  {group.event_city}, {group.event_country}
-                </p>
+                {event.event_city && event.event_country && (
+                  <>
+                    <span className="text-muted-foreground">•</span>
+                    <span className="text-sm text-muted-foreground">
+                      {event.event_city}, {event.event_country}
+                    </span>
+                  </>
+                )}
               </div>
-              {/* Filter photos for this date group and render with PhotoAlbumViewer */}
+
+              {/* Photos for this event */}
               <div className="max-w-full">
                 <PhotoAlbumViewer
                   items={photoItems.filter((item) =>
-                    dateGroup.photos.some((p) => p.photo_id === item.id),
+                    event.photos.some((p) => p.photo_id === item.id),
                   )}
                   selectionMode={isSelecting}
                   selectedIds={selectedIds}
