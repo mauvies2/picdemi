@@ -19,6 +19,7 @@ interface AddToCartButtonProps {
   showText?: boolean;
   initialInCart?: boolean;
   asDiv?: boolean; // When true, renders as div instead of button (for nested button scenarios)
+  customSize?: string; // Override default size classes (e.g., "size-6")
 }
 
 export function AddToCartButton({
@@ -29,6 +30,7 @@ export function AddToCartButton({
   showText = true,
   initialInCart = false,
   asDiv = false,
+  customSize,
 }: AddToCartButtonProps) {
   const [isInCart, setIsInCart] = useState(initialInCart);
   const [isPending, startTransition] = useTransition();
@@ -74,9 +76,10 @@ export function AddToCartButton({
 
   const baseClasses = cn(
     "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-    size === "sm" && "size-8",
-    size === "md" && "size-10",
-    size === "lg" && "size-12",
+    // Use customSize if provided, otherwise use default size classes
+    customSize || (size === "sm" && "size-8"),
+    !customSize && size === "md" && "size-10",
+    !customSize && size === "lg" && "size-12",
     variant === "default" &&
       "bg-primary text-primary-foreground hover:bg-primary/90",
     variant === "outline" &&
@@ -112,7 +115,7 @@ export function AddToCartButton({
             </>
           ) : (
             <>
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingCart className="h-3 w-3" />
               {showText && <span className="ml-2">In cart</span>}
             </>
           )}
@@ -143,7 +146,7 @@ export function AddToCartButton({
           </>
         ) : (
           <>
-            <ShoppingCart className="h-4 w-4" />
+            <ShoppingCart className="h-3 w-3" />
             {showText && <span className="ml-2">Add to cart</span>}
           </>
         )}
@@ -192,7 +195,7 @@ export function AddToCartButton({
         </>
       ) : (
         <>
-          <ShoppingCart className="h-4 w-4" />
+          <ShoppingCart className="h-3 w-3" />
           <Plus className="h-3 w-3 ml-0.5" />
           {showText && <span className="ml-2">Add to cart</span>}
         </>

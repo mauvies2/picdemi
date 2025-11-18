@@ -191,9 +191,9 @@ export function TalentPhotosGrid({
   }
 
   return (
-    <div className="space-y-8">
+    <>
       {isSelecting && (
-        <div className="flex flex-wrap items-center justify-between gap-3 w-full">
+        <div className="flex flex-wrap items-center justify-between gap-3 w-full mb-2">
           <div className="text-sm font-medium">{selectedCountLabel}</div>
           <div className="flex items-center gap-2">
             <Button
@@ -218,85 +218,87 @@ export function TalentPhotosGrid({
         </div>
       )}
 
-      {/* Grouped by date, then event */}
-      {dateGroups.map(([dateKey, events]) => (
-        <div key={dateKey} className="space-y-2">
-          {/* Date Header */}
-          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-2 -mt-2 pt-4 border-b border-border/50">
-            <h2 className="text-xl font-semibold text-foreground">
-              {dateKey === "unknown"
-                ? "Unknown date"
-                : format(new Date(dateKey), "EEEE, MMMM d, yyyy")}
-            </h2>
-          </div>
-
-          {/* Events within this date */}
-          {events.map((event) => (
-            <div
-              key={event.event_id ?? `no-event-${dateKey}`}
-              className="space-y-3"
-            >
-              {/* Event Info */}
-              <div className="flex flex-wrap items-baseline gap-1.5">
-                {event.event_id ? (
-                  <Link
-                    href={`/dashboard/talent/events/${event.event_id}`}
-                    className="text-sm font-semibold text-foreground hover:underline"
-                  >
-                    {event.event_name ?? "Uncategorized"}
-                  </Link>
-                ) : (
-                  <span className="text-sm font-semibold text-foreground">
-                    {event.event_name ?? "Uncategorized"}
-                  </span>
-                )}
-                {event.event_city && event.event_country && (
-                  <>
-                    <span className="text-muted-foreground">•</span>
-                    <span className="text-sm text-muted-foreground">
-                      {event.event_city}, {event.event_country}
-                    </span>
-                  </>
-                )}
-              </div>
-
-              {/* Photos for this event */}
-              <div className="max-w-full">
-                <PhotoAlbumViewer
-                  items={photoItems.filter((item) =>
-                    event.photos.some((p) => p.photo_id === item.id),
-                  )}
-                  selectionMode={isSelecting}
-                  selectedIds={selectedIds}
-                  onToggleSelect={handleToggleSelect}
-                  showAddToCart={true}
-                  photosInCart={new Set(photosInCart)}
-                />
-              </div>
+      <div className="space-y-6">
+        {/* Grouped by date, then event */}
+        {dateGroups.map(([dateKey, events]) => (
+          <div key={dateKey} className="space-y-2">
+            {/* Date Header */}
+            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-2 -mt-2 pt-4 border-b border-border/50">
+              <h2 className="text-xl font-semibold text-foreground">
+                {dateKey === "unknown"
+                  ? "Unknown date"
+                  : format(new Date(dateKey), "EEEE, MMMM d, yyyy")}
+              </h2>
             </div>
-          ))}
-        </div>
-      ))}
 
-      {/* Load More Button */}
-      {hasMore && (
-        <div className="flex justify-center pt-8">
-          <Button
-            onClick={handleLoadMore}
-            disabled={isLoading}
-            variant="outline"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              "Load more"
-            )}
-          </Button>
-        </div>
-      )}
-    </div>
+            {/* Events within this date */}
+            {events.map((event) => (
+              <div
+                key={event.event_id ?? `no-event-${dateKey}`}
+                className="space-y-3"
+              >
+                {/* Event Info */}
+                <div className="flex flex-wrap items-baseline gap-1.5">
+                  {event.event_id ? (
+                    <Link
+                      href={`/dashboard/talent/events/${event.event_id}`}
+                      className="text-sm font-semibold text-foreground hover:underline"
+                    >
+                      {event.event_name ?? "Uncategorized"}
+                    </Link>
+                  ) : (
+                    <span className="text-sm font-semibold text-foreground">
+                      {event.event_name ?? "Uncategorized"}
+                    </span>
+                  )}
+                  {event.event_city && event.event_country && (
+                    <>
+                      <span className="text-muted-foreground">•</span>
+                      <span className="text-sm text-muted-foreground">
+                        {event.event_city}, {event.event_country}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Photos for this event */}
+                <div className="max-w-full">
+                  <PhotoAlbumViewer
+                    items={photoItems.filter((item) =>
+                      event.photos.some((p) => p.photo_id === item.id),
+                    )}
+                    selectionMode={isSelecting}
+                    selectedIds={selectedIds}
+                    onToggleSelect={handleToggleSelect}
+                    showAddToCart={true}
+                    photosInCart={new Set(photosInCart)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+
+        {/* Load More Button */}
+        {hasMore && (
+          <div className="flex justify-center pt-8">
+            <Button
+              onClick={handleLoadMore}
+              disabled={isLoading}
+              variant="outline"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "Load more"
+              )}
+            </Button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

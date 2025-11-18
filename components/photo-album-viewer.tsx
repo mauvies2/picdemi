@@ -1,6 +1,5 @@
 "use client";
 
-import { Check, UserPlus } from "lucide-react";
 import dynamic from "next/dynamic";
 import {
   type KeyboardEvent,
@@ -14,8 +13,7 @@ import {
   type RenderPhotoContext,
   RowsPhotoAlbum,
 } from "react-photo-album";
-import { AddToCartButton } from "@/components/add-to-cart-button";
-import { PhotoTagsIndicator } from "@/components/photo-tags-indicator";
+import { PhotoIconButtons } from "@/components/photo-icon-buttons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import "react-photo-album/rows.css";
@@ -150,120 +148,39 @@ export default function PhotoAlbumViewer({
       const isSelected = selectedSet.has(photoId);
       const photoItem = items.find((item) => item.id === photoId);
       const tags = photoItem?.tags || [];
-
       const isPopoverOpen = openPopovers.has(photoId);
-      // Keep icons visible if popover is open, preventing flicker during transition
-      const hasAnyOpen = isPopoverOpen;
 
       return (
-        <div className="absolute inset-0 flex flex-col items-start justify-between p-2">
-          {/* inner gradient overlays for better icon contrast - visible on hover or when dropdowns are open */}
-          <div
-            className={cn(
-              "pointer-events-none absolute inset-x-0 top-0 h-14 bg-linear-to-b from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100",
-              hasAnyOpen && "opacity-100",
-            )}
-          />
-          <div
-            className={cn(
-              "pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100",
-              hasAnyOpen && "opacity-100",
-            )}
-          />
-          <div className="relative z-10 flex w-full items-start justify-between">
-            {canSelect && (
-              <div
-                className={cn(
-                  "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
-                  (isSelected || hasAnyOpen) && "opacity-100",
-                  isSelected && "bg-background",
-                )}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  handleToggleSelect(photoId);
-                }}
-                onPointerDown={(event) => {
-                  event.stopPropagation();
-                }}
-                aria-hidden="true"
-              >
-                <Check className="size-3" />
-              </div>
-            )}
-            <div className="ml-auto flex items-start gap-1.5">
-              {showAddToCart && !selectionActive && (
-                <div
-                  className={cn(
-                    "pointer-events-auto transition-opacity",
-                    isMobile || photosInCart.has(photoId)
-                      ? "opacity-100"
-                      : "opacity-0 group-hover:opacity-100",
-                    hasAnyOpen && "opacity-100",
-                  )}
-                  onPointerDown={(e) => e.stopPropagation()}
-                >
-                  <AddToCartButton
-                    photoId={photoId}
-                    variant="default"
-                    size="sm"
-                    showText={false}
-                    initialInCart={photosInCart.has(photoId)}
-                    asDiv={true}
-                    className={cn(
-                      "rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm hover:bg-background group-hover:opacity-100",
-                      photosInCart.has(photoId) && "bg-background opacity-100",
-                    )}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          {/* Tag/Tagged icon at bottom left - always visible on hover, hidden in selection mode */}
-          {onTagPhoto && !selectionActive && (
-            <div className="pointer-events-auto mt-auto relative z-10">
-              {tags.length === 0 ? (
-                <button
-                  type="button"
-                  className={cn(
-                    "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
-                    hasAnyOpen && "opacity-100",
-                  )}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onTagPhoto(photoId);
-                  }}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  aria-label="Tag talent"
-                >
-                  <UserPlus className="size-3" />
-                </button>
-              ) : (
-                <PhotoTagsIndicator
-                  tags={tags}
-                  photoId={photoId}
-                  onUntag={onUntag}
-                  onTagPhoto={onTagPhoto}
-                  isDropdownOpen={isPopoverOpen}
-                  onDropdownOpenChange={(open) => {
-                    if (open) {
-                      setOpenPopovers((prev) => {
-                        const next = new Set(prev);
-                        next.add(photoId);
-                        return next;
-                      });
-                    } else {
-                      setOpenPopovers((prev) => {
-                        const next = new Set(prev);
-                        next.delete(photoId);
-                        return next;
-                      });
-                    }
-                  }}
-                />
-              )}
-            </div>
-          )}
-        </div>
+        <PhotoIconButtons
+          photoId={photoId}
+          isSelected={isSelected}
+          hasTags={tags.length > 0}
+          tags={tags}
+          isPopoverOpen={isPopoverOpen}
+          onPopoverOpenChange={(open) => {
+            if (open) {
+              setOpenPopovers((prev) => {
+                const next = new Set(prev);
+                next.add(photoId);
+                return next;
+              });
+            } else {
+              setOpenPopovers((prev) => {
+                const next = new Set(prev);
+                next.delete(photoId);
+                return next;
+              });
+            }
+          }}
+          canSelect={canSelect}
+          onToggleSelect={handleToggleSelect}
+          selectionActive={selectionActive}
+          onTagPhoto={onTagPhoto}
+          onUntag={onUntag}
+          showAddToCart={showAddToCart}
+          photosInCart={photosInCart}
+          isMobile={isMobile}
+        />
       );
     },
     [
