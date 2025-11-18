@@ -56,6 +56,7 @@ export function ExplorePageContent({
   const [events, setEvents] = useState<EventWithStats[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, startTransition] = useTransition();
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [page, setPage] = useState(0);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -105,11 +106,13 @@ export function ExplorePageContent({
         );
         setPage(0);
         setTotal(result.total);
+        setIsInitialLoad(false);
       } catch (error) {
         console.error("Error searching events:", error);
         // Set empty state on error
         setEvents([]);
         setTotal(0);
+        setIsInitialLoad(false);
       }
     });
   }, [
@@ -467,7 +470,7 @@ export function ExplorePageContent({
 
       {/* Results */}
       <div>
-        {isLoading && events.length === 0 ? (
+        {isLoading && (events.length === 0 || isInitialLoad) ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {skeletonKeys.map((key) => (
               <div key={key} className="space-y-2">
