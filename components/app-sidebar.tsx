@@ -236,7 +236,9 @@ export function AppSidebar({
       <SidebarFooter>
         <div className="w-full space-y-2">
           <RoleSwitcher activeRole={activeRole} />
-          <NavUser user={user} />
+          <div className="md:hidden">
+            <NavUser user={user} />
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
