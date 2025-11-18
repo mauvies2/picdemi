@@ -37,7 +37,7 @@ export function ExploreEventCard({
 
   return (
     <Link
-      href={`/events/public/${id}`}
+      href={`/dashboard/talent/explore/${id}`}
       className="group block rounded-xl border border-border bg-card transition-all hover:border-primary/50 hover:shadow-md"
     >
       <div className="overflow-hidden rounded-t-xl bg-muted">

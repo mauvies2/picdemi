@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import "react-photo-album/rows.css";
 import "yet-another-react-lightbox/styles.css";
@@ -78,6 +79,7 @@ export default function PhotoAlbumViewer({
   const selectedSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
   const canSelect = Boolean(onToggleSelect);
   const selectionActive = selectionMode || selectedSet.size > 0;
+  const isMobile = useIsMobile();
 
   const extractPhotoId = useCallback((photo: Photo & { id?: string }) => {
     if (typeof photo.id === "string" && photo.id.length > 0) return photo.id;
@@ -180,9 +182,9 @@ export default function PhotoAlbumViewer({
             {canSelect && (
               <div
                 className={cn(
-                  "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/40 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100",
+                  "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/40 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
                   (isSelected || hasAnyOpen) && "opacity-100",
-                  isSelected && "bg-primary/40 text-primary-foreground",
+                  isSelected && "bg-background",
                 )}
                 onClick={(event) => {
                   event.stopPropagation();
@@ -196,11 +198,14 @@ export default function PhotoAlbumViewer({
                 <Check className="size-3" />
               </div>
             )}
-            <div className="flex items-center gap-1.5">
-              {showAddToCart && (
+            <div className="ml-auto flex items-start gap-1.5">
+              {showAddToCart && !selectionActive && (
                 <div
                   className={cn(
-                    "pointer-events-auto opacity-0 transition-opacity group-hover:opacity-100",
+                    "pointer-events-auto transition-opacity",
+                    isMobile || photosInCart.has(photoId)
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100",
                     hasAnyOpen && "opacity-100",
                   )}
                   onPointerDown={(e) => e.stopPropagation()}
@@ -212,7 +217,10 @@ export default function PhotoAlbumViewer({
                     showText={false}
                     initialInCart={photosInCart.has(photoId)}
                     asDiv={true}
-                    className="rounded-full bg-background/40 text-foreground/80 shadow-sm hover:bg-background"
+                    className={cn(
+                      "rounded-full bg-background/40 text-foreground/80 shadow-sm hover:bg-background",
+                      photosInCart.has(photoId) && "bg-background",
+                    )}
                   />
                 </div>
               )}
@@ -324,6 +332,8 @@ export default function PhotoAlbumViewer({
       openPopovers,
       photosInCart,
       showAddToCart,
+      selectionActive,
+      isMobile,
     ],
   );
 

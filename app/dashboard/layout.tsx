@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getActiveRole, switchRole } from "@/app/actions/roles";
 import { AppSidebar } from "@/components/app-sidebar";
+import { DashboardTopHeader } from "@/components/dashboard-top-header";
 import { MobileHeader } from "@/components/mobile-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { createClient } from "@/database/server";
@@ -61,6 +62,7 @@ export default async function DashboardLayout({
       <AppSidebar activeRole={activeRole} user={sidebarUser} />
       <SidebarInset>
         <MobileHeader />
+        <DashboardTopHeader />
         {children}
       </SidebarInset>
     </SidebarProvider>

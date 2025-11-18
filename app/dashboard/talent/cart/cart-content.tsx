@@ -115,15 +115,12 @@ export function CartContent({ initialCartData }: CartContentProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header with clear cart */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Cart</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {cartData.itemCount} {cartData.itemCount === 1 ? "item" : "items"}
-          </p>
-        </div>
+    <div className="relative">
+      {/* Header with clear cart - spans full width */}
+      <div className="flex items-center justify-between mb-2 md:mb-0">
+        <p className="text-sm text-muted-foreground mt-1">
+          {cartData.itemCount} {cartData.itemCount === 1 ? "item" : "items"}
+        </p>
         {cartData.items.length > 0 && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -158,125 +155,156 @@ export function CartContent({ initialCartData }: CartContentProps) {
         )}
       </div>
 
-      {/* Cart items */}
-      <div className="space-y-3">
-        {cartData.items.map((item) => (
-          <div
-            key={item.photoId}
-            className="group flex gap-4 rounded-lg border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md"
-          >
-            {/* Photo thumbnail */}
-            <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg bg-muted">
-              {item.previewUrl ? (
-                <Image
-                  src={item.previewUrl}
-                  alt={item.eventTitle || "Photo"}
-                  fill
-                  className="object-cover transition-transform group-hover:scale-105"
-                  sizes="128px"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                  <ImageIcon className="h-8 w-8" />
+      <div className="flex flex-col md:flex-row gap-6 pb-20 md:pb-0">
+        {/* Left side - Cart items (2/3 width on desktop, full width on mobile) */}
+        <div className="flex-2 min-w-0">
+          {/* Cart items */}
+          <div className="space-y-3">
+            {cartData.items.map((item) => (
+              <div
+                key={item.photoId}
+                className="group flex gap-4 rounded-lg border border-border bg-card p-3 transition-all hover:border-primary/50 hover:shadow-md"
+              >
+                {/* Photo thumbnail */}
+                <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg bg-muted">
+                  {item.previewUrl ? (
+                    <Image
+                      src={item.previewUrl}
+                      alt={item.eventTitle || "Photo"}
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
+                      sizes="128px"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                      <ImageIcon className="h-8 w-8" />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Item details */}
-            <div className="flex flex-1 flex-col gap-3 min-w-0">
-              <div className="space-y-1">
-                {item.eventTitle && (
-                  <h4 className="font-semibold text-base text-foreground line-clamp-1">
-                    {item.eventTitle}
-                  </h4>
-                )}
-                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                  {item.photographerName && (
-                    <div className="flex items-center gap-1.5">
-                      <User className="h-3.5 w-3.5" />
-                      <span className="line-clamp-1">
-                        {item.photographerName}
-                      </span>
+                {/* Item details */}
+                <div className="flex flex-1 flex-col gap-3 min-w-0">
+                  <div className="space-y-1">
+                    {item.eventTitle && (
+                      <h4 className="font-semibold text-base text-foreground line-clamp-1">
+                        {item.eventTitle}
+                      </h4>
+                    )}
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                      {item.photographerName && (
+                        <div className="flex items-center gap-1.5">
+                          <User className="h-3.5 w-3.5" />
+                          <span className="line-clamp-1">
+                            {item.photographerName}
+                          </span>
+                        </div>
+                      )}
+                      {item.eventDate && (
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          <span>
+                            {format(new Date(item.eventDate), "MMM d, yyyy")}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {item.eventDate && (
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span>
-                        {format(new Date(item.eventDate), "MMM d, yyyy")}
+                  </div>
+
+                  <div className="mt-auto flex items-center justify-between gap-4">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-foreground">
+                        {formatPrice(item.unitPriceCents)}
                       </span>
+                      {item.unitPriceCents === 0 && (
+                        <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                          Free
+                        </span>
+                      )}
                     </div>
-                  )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemove(item.photoId)}
+                      disabled={isPending && removingId === item.photoId}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                    >
+                      {isPending && removingId === item.photoId ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          <span className="hidden sm:inline">Remove</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
 
-              <div className="mt-auto flex items-center justify-between gap-4">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-foreground">
-                    {formatPrice(item.unitPriceCents)}
+        {/* Right side - Summary (1/3 width, sticky) - Desktop only */}
+        <div className="hidden md:block flex-1 min-w-0">
+          <div className="sticky top-4 self-start rounded-lg border border-border bg-card p-6 shadow-lg">
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Subtotal
                   </span>
-                  {item.unitPriceCents === 0 && (
-                    <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                      Free
-                    </span>
-                  )}
+                  <span className="text-2xl font-bold text-foreground">
+                    {formatPrice(cartData.subtotalCents)}
+                  </span>
                 </div>
+                {cartData.subtotalCents === 0 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    All items in your cart are free
+                  </p>
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-border">
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemove(item.photoId)}
-                  disabled={isPending && removingId === item.photoId}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => {
+                    toast.info("Checkout coming soon!");
+                  }}
+                  disabled={cartData.items.length === 0}
                 >
-                  {isPending && removingId === item.photoId ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Remove</span>
-                    </>
-                  )}
+                  Proceed to Checkout
                 </Button>
+                <p className="text-xs text-center text-muted-foreground mt-3">
+                  You can continue shopping and add more items
+                </p>
               </div>
             </div>
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* Summary */}
-      <div className="sticky bottom-0 rounded-lg border border-border bg-card p-6 shadow-lg">
-        <div className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">
-                Subtotal
-              </span>
-              <span className="text-2xl font-bold text-foreground">
-                {formatPrice(cartData.subtotalCents)}
-              </span>
-            </div>
-            {cartData.subtotalCents === 0 && (
-              <p className="text-xs text-muted-foreground text-center">
-                All items in your cart are free
-              </p>
-            )}
+      {/* Mobile Summary - Sticky at bottom */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card shadow-lg">
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-muted-foreground">
+              Subtotal
+            </span>
+            <span className="text-lg font-bold text-foreground">
+              {formatPrice(cartData.subtotalCents)}
+            </span>
           </div>
-
-          <div className="pt-4 border-t border-border">
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={() => {
-                toast.info("Checkout coming soon!");
-              }}
-              disabled={cartData.items.length === 0}
-            >
-              Proceed to Checkout
-            </Button>
-            <p className="text-xs text-center text-muted-foreground mt-3">
-              You can continue shopping and add more items
-            </p>
-          </div>
+          <Button
+            className="w-full"
+            size="sm"
+            onClick={() => {
+              toast.info("Checkout coming soon!");
+            }}
+            disabled={cartData.items.length === 0}
+          >
+            Proceed to Checkout
+          </Button>
         </div>
       </div>
     </div>

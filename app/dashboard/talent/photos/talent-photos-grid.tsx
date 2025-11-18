@@ -1,9 +1,11 @@
 "use client";
 
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
+import { addPhotoToCartAction } from "@/app/dashboard/talent/cart/actions";
 import PhotoAlbumViewer, {
   type PhotoAlbumItem,
 } from "@/components/photo-album-viewer";
@@ -48,6 +50,28 @@ export function TalentPhotosGrid({
     setSelectedIds([]);
     setIsSelecting(false);
   }, []);
+
+  const handleAddSelectedToCart = useCallback(() => {
+    if (selectedIds.length === 0) return;
+    startTransition(async () => {
+      try {
+        for (const photoId of selectedIds) {
+          await addPhotoToCartAction(photoId);
+        }
+        toast.success(
+          `Added ${selectedIds.length} photo${selectedIds.length === 1 ? "" : "s"} to cart`,
+        );
+        setSelectedIds([]);
+        setIsSelecting(false);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to add photos to cart";
+        toast.error(message);
+      }
+    });
+  }, [selectedIds]);
 
   const selectedCountLabel = useMemo(() => {
     if (selectedIds.length === 0) return "No photos selected";
@@ -182,14 +206,13 @@ export function TalentPhotosGrid({
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="default"
               size="sm"
-              onClick={() => {
-                setSelectedIds([]);
-                setIsSelecting(false);
-              }}
+              onClick={handleAddSelectedToCart}
+              disabled={selectedIds.length === 0 || isLoading}
             >
-              Done
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Add to cart
             </Button>
           </div>
         </div>
