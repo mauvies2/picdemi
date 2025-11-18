@@ -5,6 +5,8 @@
  * This makes it easier to maintain, test, and potentially replace the database in the future.
  */
 
+// Re-export cart queries
+export * from "./carts";
 // Re-export event queries
 export * from "./events";
 // Re-export photo queries

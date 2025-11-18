@@ -1,9 +1,13 @@
 import { notFound } from "next/navigation";
-import { createPhotoUrls, getEventByShareCode, getEventPhotosPublic } from "@/database/queries";
-import { createClient } from "@/database/server";
 import { getActiveRole } from "@/app/actions/roles";
-import { getBaseUrl } from "@/lib/get-base-url";
 import PhotoAlbumViewer from "@/components/photo-album-viewer";
+import {
+  createPhotoUrls,
+  getEventByShareCode,
+  getEventPhotosPublic,
+} from "@/database/queries";
+import { createClient } from "@/database/server";
+import { getBaseUrl } from "@/lib/get-base-url";
 
 export default async function PublicEventPage({
   params,
@@ -31,8 +35,7 @@ export default async function PublicEventPage({
       // Only show watermark for talent users if watermark is enabled
       // Note: Private events via share code can also have watermarks
       useWatermark =
-        activeRole === "talent" &&
-        event.watermark_enabled === true;
+        activeRole === "talent" && event.watermark_enabled === true;
     }
   } catch {
     // User not logged in or error - no watermark
@@ -50,16 +53,11 @@ export default async function PublicEventPage({
 
   if (paths.length > 0) {
     const baseUrl = await getBaseUrl();
-    const photoUrls = await createPhotoUrls(
-      supabase,
-      "photos",
-      paths,
-      {
-        expiresIn: 60 * 60, // 1 hour
-        useWatermark,
-        baseUrl,
-      },
-    );
+    const photoUrls = await createPhotoUrls(supabase, "photos", paths, {
+      expiresIn: 60 * 60, // 1 hour
+      useWatermark,
+      baseUrl,
+    });
     for (const item of photoUrls) {
       if (item.signedUrl) {
         signed[item.path] = item.signedUrl;
@@ -73,8 +71,8 @@ export default async function PublicEventPage({
         <div className="mb-6">
           <h1 className="text-3xl font-bold">{event.name}</h1>
           <div className="mt-2 text-sm text-muted-foreground">
-            {new Date(event.date).toDateString().split(" ").slice(1).join(" ")} •{" "}
-            {event.city[0]?.toUpperCase() + event.city.slice(1)}
+            {new Date(event.date).toDateString().split(" ").slice(1).join(" ")}{" "}
+            • {event.city[0]?.toUpperCase() + event.city.slice(1)}
             {event.price_per_photo !== null && (
               <> • ${event.price_per_photo.toFixed(2)} per photo</>
             )}
@@ -112,4 +110,3 @@ export default async function PublicEventPage({
     </div>
   );
 }
-

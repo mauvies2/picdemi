@@ -14,6 +14,7 @@ import {
   type RenderPhotoContext,
   RowsPhotoAlbum,
 } from "react-photo-album";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 import { PhotoTagsIndicator } from "@/components/photo-tags-indicator";
 import {
   DropdownMenu,
@@ -54,6 +55,8 @@ type PhotoAlbumViewerProps = {
   onToggleSelect?: (photoId: string) => void;
   onTagPhoto?: (photoId: string) => void;
   onUntag?: () => void;
+  showAddToCart?: boolean;
+  photosInCart?: Set<string>;
 };
 
 export default function PhotoAlbumViewer({
@@ -61,8 +64,10 @@ export default function PhotoAlbumViewer({
   selectionMode = false,
   selectedIds,
   onToggleSelect,
-      onTagPhoto,
-      onUntag,
+  onTagPhoto,
+  onUntag,
+  showAddToCart = false,
+  photosInCart = new Set(),
 }: PhotoAlbumViewerProps) {
   const [index, setIndex] = useState<number>(-1);
   const [dimensions, setDimensions] = useState<
@@ -187,63 +192,83 @@ export default function PhotoAlbumViewer({
                 <Check className="size-3" />
               </div>
             )}
-            {onTagPhoto && (
-              <DropdownMenu
-                open={isDropdownOpen}
-                onOpenChange={(open) => {
-                  setOpenDropdowns((prev) => {
-                    const next = new Set(prev);
-                    if (open) {
-                      next.add(photoId);
-                    } else {
-                      next.delete(photoId);
-                    }
-                    return next;
-                  });
-                }}
-              >
-                <DropdownMenuTrigger asChild>
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    className={cn(
-                      "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background/70 cursor-pointer",
-                      isDropdownOpen && "opacity-100",
-                    )}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }}
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        (e.currentTarget as HTMLElement).click();
-                      }
-                    }}
-                    aria-label="More options"
-                  >
-                    <MoreVertical className="size-3.5" />
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  onClick={(e) => e.stopPropagation()}
-                  onPointerEnter={(e) => e.stopPropagation()}
+            <div className="flex items-center gap-1.5">
+              {showAddToCart && (
+                <div
+                  className={cn(
+                    "pointer-events-auto opacity-0 transition-opacity group-hover:opacity-100",
+                    hasAnyOpen && "opacity-100",
+                  )}
+                  onPointerDown={(e) => e.stopPropagation()}
                 >
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTagPhoto(photoId);
-                    }}
+                  <AddToCartButton
+                    photoId={photoId}
+                    variant="default"
+                    size="sm"
+                    showText={false}
+                    initialInCart={photosInCart.has(photoId)}
+                    asDiv={true}
+                    className="h-6 rounded-full bg-background/90 text-foreground shadow-sm hover:bg-background"
+                  />
+                </div>
+              )}
+              {onTagPhoto && (
+                <DropdownMenu
+                  open={isDropdownOpen}
+                  onOpenChange={(open) => {
+                    setOpenDropdowns((prev) => {
+                      const next = new Set(prev);
+                      if (open) {
+                        next.add(photoId);
+                      } else {
+                        next.delete(photoId);
+                      }
+                      return next;
+                    });
+                  }}
+                >
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background/70 cursor-pointer",
+                        isDropdownOpen && "opacity-100",
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          (e.currentTarget as HTMLElement).click();
+                        }
+                      }}
+                      aria-label="More options"
+                    >
+                      <MoreVertical className="size-3.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerEnter={(e) => e.stopPropagation()}
                   >
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Tag talent
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTagPhoto(photoId);
+                      }}
+                    >
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Tag talent
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
           {tags.length > 0 && (
             <div className="pointer-events-auto mt-auto relative z-10">
@@ -293,43 +318,109 @@ export default function PhotoAlbumViewer({
       onTagPhoto,
       openDropdowns,
       openPopovers,
+      photosInCart,
+      showAddToCart,
     ],
   );
 
   return (
     <>
-      <div className="max-w-full">
+      <div className="w-full max-w-full min-w-0">
         <RowsPhotoAlbum
           photos={photos}
           spacing={10}
-          // breakpoints={[50, 5000, 5000]}
           rowConstraints={{
             maxPhotos: 4,
             minPhotos: 1,
             singleRowMaxHeight: 200,
           }}
-          render={{ extras: renderExtras }}
-          componentsProps={{
-            button: ({ photo }) => {
+          render={{
+            extras: renderExtras,
+            button: (props, { photo }) => {
               const photoId = extractPhotoId(photo as Photo & { id?: string });
               const isSelected = selectedSet.has(photoId);
-              return {
-                as: "div",
-                role: "button",
-                tabIndex: 0,
-                "data-selected": isSelected ? "" : undefined,
-                className: cn(
-                  "group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0",
-                  canSelect ? "cursor-pointer" : "cursor-zoom-in",
-                ),
-                onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    (event.currentTarget as HTMLElement).click();
+              const {
+                onClick,
+                className: propsClassName,
+                ...restProps
+              } = props;
+              return (
+                // biome-ignore lint/a11y/useSemanticElements: Intentionally using div to avoid nested buttons
+                <div
+                  {...(restProps as React.HTMLAttributes<HTMLDivElement>)}
+                  onClick={
+                    onClick
+                      ? (e: React.MouseEvent<HTMLDivElement>) => {
+                          onClick(
+                            e as unknown as React.MouseEvent<HTMLButtonElement>,
+                          );
+                        }
+                      : undefined
                   }
-                },
-              };
+                  tabIndex={0}
+                  role="button"
+                  data-selected={isSelected ? "" : undefined}
+                  className={cn(
+                    "group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0",
+                    canSelect ? "cursor-pointer" : "cursor-zoom-in",
+                    propsClassName,
+                  )}
+                  onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onClick?.(
+                        event as unknown as React.MouseEvent<HTMLButtonElement>,
+                      );
+                    }
+                  }}
+                />
+              );
             },
+            link: (props, { photo }) => {
+              const photoId = extractPhotoId(photo as Photo & { id?: string });
+              const isSelected = selectedSet.has(photoId);
+              const {
+                onClick,
+                href,
+                className: propsClassName,
+                ...restProps
+              } = props;
+              return (
+                // biome-ignore lint/a11y/useSemanticElements: Intentionally using div to avoid nested buttons
+                <div
+                  {...(restProps as React.HTMLAttributes<HTMLDivElement>)}
+                  onClick={
+                    onClick
+                      ? (e: React.MouseEvent<HTMLDivElement>) => {
+                          e.preventDefault();
+                          onClick(
+                            e as unknown as React.MouseEvent<HTMLAnchorElement>,
+                          );
+                        }
+                      : undefined
+                  }
+                  tabIndex={0}
+                  role="link"
+                  data-selected={isSelected ? "" : undefined}
+                  aria-label={href}
+                  className={cn(
+                    "group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0",
+                    canSelect ? "cursor-pointer" : "cursor-zoom-in",
+                    propsClassName,
+                  )}
+                  onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onClick?.(
+                        event as unknown as React.MouseEvent<HTMLAnchorElement>,
+                      );
+                    }
+                  }}
+                />
+              );
+            },
+          }}
+          componentsProps={{
             image: ({ photo }) => {
               const photoId = extractPhotoId(photo as Photo & { id?: string });
               const isSelected = selectedSet.has(photoId);

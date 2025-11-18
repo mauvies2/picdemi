@@ -1,11 +1,12 @@
 "use server";
 
 import {
+  createSignedUrl,
   getEventFilterOptions,
+  getPhotosForEvents,
   searchPublicEvents,
 } from "@/database/queries";
 import { createClient } from "@/database/server";
-import { createSignedUrl, getPhotosForEvents } from "@/database/queries";
 
 export async function searchEventsAction(filters: {
   searchText?: string;
@@ -18,7 +19,7 @@ export async function searchEventsAction(filters: {
 }) {
   const supabase = await createClient();
   const result = await searchPublicEvents(supabase, filters);
-  
+
   // Debug logging
   console.log("Search filters:", filters);
   console.log("Found events:", result.events.length, "Total:", result.total);
@@ -77,4 +78,3 @@ export async function getFilterOptionsAction() {
   const supabase = await createClient();
   return await getEventFilterOptions(supabase);
 }
-

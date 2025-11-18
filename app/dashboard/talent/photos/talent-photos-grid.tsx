@@ -13,11 +13,13 @@ import { listMyTaggedPhotos, type TaggedPhotoGroup } from "./actions";
 interface TalentPhotosGridProps {
   initialGroups: TaggedPhotoGroup[];
   hasMore: boolean;
+  photosInCart?: string[];
 }
 
 export function TalentPhotosGrid({
   initialGroups,
   hasMore: initialHasMore,
+  photosInCart = [],
 }: TalentPhotosGridProps) {
   const [groups, setGroups] = useState(initialGroups);
   const [offset, setOffset] = useState(
@@ -244,6 +246,8 @@ export function TalentPhotosGrid({
                   selectionMode={isSelecting}
                   selectedIds={selectedIds}
                   onToggleSelect={handleToggleSelect}
+                  showAddToCart={true}
+                  photosInCart={new Set(photosInCart)}
                 />
               </div>
             </div>

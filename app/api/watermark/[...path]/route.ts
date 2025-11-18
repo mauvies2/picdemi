@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { type NextRequest, NextResponse } from "next/server";
 import { env } from "@/env.mjs";
 import { addWatermarkToImage } from "@/lib/watermark";
 
@@ -8,7 +8,7 @@ import { addWatermarkToImage } from "@/lib/watermark";
  * Path format: /api/watermark/photos/userId/eventId/filename
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
   try {
@@ -23,17 +23,27 @@ export async function GET(
     // Use service role client for admin access to storage
     // Fallback to anon key if service role key is not available
     const serviceRoleKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ?? env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const supabase = createClient(
-      env.NEXT_PUBLIC_SUPABASE_URL,
-      serviceRoleKey,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!serviceRoleKey || serviceRoleKey.trim() === "") {
+      console.error("Missing Supabase key for watermark API");
+      return new NextResponse("Configuration error", { status: 500 });
+    }
+
+    const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl) {
+      console.error("Missing Supabase URL for watermark API");
+      return new NextResponse("Configuration error", { status: 500 });
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
       },
-    );
+    });
 
     // Download the original image from storage
     const { data: imageData, error: downloadError } = await supabase.storage
@@ -62,7 +72,7 @@ export async function GET(
           : "image/jpeg");
 
     // Return watermarked image with caching
-    return new NextResponse(watermarkedBuffer, {
+    return new NextResponse(new Uint8Array(watermarkedBuffer), {
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=86400, s-maxage=86400", // Cache for 24 hours
@@ -73,4 +83,3 @@ export async function GET(
     return new NextResponse("Internal server error", { status: 500 });
   }
 }
-

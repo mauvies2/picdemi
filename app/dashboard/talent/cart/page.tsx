@@ -2,12 +2,12 @@ import { redirect } from "next/navigation";
 import { getActiveRole } from "@/app/actions/roles";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { createClient } from "@/database/server";
-import { listMyTaggedPhotos } from "./actions";
-import { TalentPhotosGrid } from "./talent-photos-grid";
+import { getCurrentCart } from "./actions";
+import { CartContent } from "./cart-content";
 
 export const dynamic = "force-dynamic";
 
-export default async function TalentPhotosPage() {
+export default async function CartPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -23,21 +23,17 @@ export default async function TalentPhotosPage() {
     return redirect("/dashboard");
   }
 
-  const result = await listMyTaggedPhotos({ limit: 50, offset: 0 });
+  const cartData = await getCurrentCart();
 
   return (
-    <div>
-      <DashboardHeader title="Photos of you" />
-      <p className="text-sm text-muted-foreground">
-        Photos of you or where photographers have tagged you.
-      </p>
-      <div className="mt-6">
-        <TalentPhotosGrid
-          initialGroups={result.groups}
-          hasMore={result.hasMore}
-          photosInCart={result.photosInCart}
-        />
+    <div className="space-y-6">
+      <div>
+        <DashboardHeader title="Shopping Cart" />
+        <p className="text-sm text-muted-foreground mt-1">
+          Review your selected photos before checkout.
+        </p>
       </div>
+      <CartContent initialCartData={cartData} />
     </div>
   );
 }

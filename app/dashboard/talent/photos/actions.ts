@@ -4,6 +4,7 @@ import {
   createPhotoUrls,
   getTaggedPhotosCountForTalent,
   getTaggedPhotosForTalent,
+  isPhotoInCart,
 } from "@/database/queries";
 import { createClient } from "@/database/server";
 import { getBaseUrl } from "@/lib/get-base-url";
@@ -31,6 +32,7 @@ export interface ListMyTaggedPhotosResult {
   groups: TaggedPhotoGroup[];
   totalCount: number;
   hasMore: boolean;
+  photosInCart: string[];
 }
 
 /**
@@ -62,6 +64,16 @@ export async function listMyTaggedPhotos(options?: {
   // Get total count
   const totalCount = await getTaggedPhotosCountForTalent(supabase, user.id);
 
+  // Get all photo IDs to check which are in cart
+  const allPhotoIds = taggedPhotos.map((p) => p.photo_id);
+  const photosInCart: string[] = [];
+  for (const photoId of allPhotoIds) {
+    const inCart = await isPhotoInCart(supabase, user.id, photoId);
+    if (inCart) {
+      photosInCart.push(photoId);
+    }
+  }
+
   // Generate URLs for photos (with watermark if event has watermark enabled)
   const photoPaths = taggedPhotos
     .map((p) => p.photo_url)
@@ -85,16 +97,11 @@ export async function listMyTaggedPhotos(options?: {
 
     // Generate URLs for each group
     for (const [needsWatermark, paths] of photosByWatermark.entries()) {
-      const photoUrls = await createPhotoUrls(
-        supabase,
-        "photos",
-        paths,
-        {
-          expiresIn: 3600,
-          useWatermark: needsWatermark,
-          baseUrl,
-        },
-      );
+      const photoUrls = await createPhotoUrls(supabase, "photos", paths, {
+        expiresIn: 3600,
+        useWatermark: needsWatermark,
+        baseUrl,
+      });
       for (const item of photoUrls) {
         signedUrlsMap[item.path] = item.signedUrl;
       }
@@ -179,5 +186,6 @@ export async function listMyTaggedPhotos(options?: {
     groups,
     totalCount,
     hasMore: offset + taggedPhotos.length < totalCount,
+    photosInCart,
   };
 }

@@ -20,9 +20,10 @@ interface EventShareCodeProps {
 
 export function EventShareCode({ shareCode, eventName }: EventShareCodeProps) {
   const [copied, setCopied] = useState(false);
-  const shareUrl = typeof window !== "undefined" 
-    ? `${window.location.origin}/events/${shareCode}`
-    : "";
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/events/${shareCode}`
+      : "";
 
   const handleCopy = async () => {
     try {
@@ -94,4 +95,3 @@ export function EventShareCode({ shareCode, eventName }: EventShareCodeProps) {
     </div>
   );
 }
-

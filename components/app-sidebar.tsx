@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Send,
   Settings,
+  ShoppingCart,
   User,
   WalletMinimal,
 } from "lucide-react";
@@ -74,6 +75,7 @@ const talentNav = [
   { title: "Overview", url: "/dashboard/talent", icon: Home },
   { title: "Photos", url: "/dashboard/talent/photos", icon: Images },
   { title: "Explore", url: "/dashboard/talent/explore", icon: Compass },
+  { title: "Cart", url: "/dashboard/talent/cart", icon: ShoppingCart },
   { title: "Profile", url: "/dashboard/talent/profile", icon: User },
   { title: "Settings", url: "/dashboard/talent/settings", icon: Settings },
 ];

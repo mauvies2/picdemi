@@ -1,9 +1,13 @@
 import { notFound } from "next/navigation";
-import { createPhotoUrls, getEventPhotosPublic } from "@/database/queries";
-import { createClient } from "@/database/server";
 import { getActiveRole } from "@/app/actions/roles";
-import { getBaseUrl } from "@/lib/get-base-url";
 import PhotoAlbumViewer from "@/components/photo-album-viewer";
+import {
+  createPhotoUrls,
+  getEventPhotosPublic,
+  isPhotoInCart,
+} from "@/database/queries";
+import { createClient } from "@/database/server";
+import { getBaseUrl } from "@/lib/get-base-url";
 
 export default async function PublicEventPage({
   params,
@@ -25,26 +29,39 @@ export default async function PublicEventPage({
     notFound();
   }
 
+  // Get photos for the event
+  const photos = await getEventPhotosPublic(supabase, event.id);
+
+  // Get user info for watermark and cart check
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Check if user is talent (watermark only shows for talent users)
   let useWatermark = false;
+  const photosInCart: string[] = [];
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
     if (user) {
       const { activeRole } = await getActiveRole();
       // Only show watermark for talent users if watermark is enabled
       useWatermark =
-        activeRole === "talent" &&
-        event.watermark_enabled === true;
+        activeRole === "talent" && event.watermark_enabled === true;
+
+      // Check which photos are in cart (only for talent users)
+      if (activeRole === "talent") {
+        const photoIds = photos.map((p) => p.id);
+        for (const photoId of photoIds) {
+          const inCart = await isPhotoInCart(supabase, user.id, photoId);
+          if (inCart) {
+            photosInCart.push(photoId);
+          }
+        }
+      }
     }
   } catch {
-    // User not logged in or error - no watermark
+    // User not logged in or error - no watermark, no cart
     useWatermark = false;
   }
-
-  // Get photos for the event
-  const photos = await getEventPhotosPublic(supabase, event.id);
 
   // Generate URLs (watermarked or regular signed URLs)
   const paths = photos
@@ -54,16 +71,11 @@ export default async function PublicEventPage({
 
   if (paths.length > 0) {
     const baseUrl = await getBaseUrl();
-    const photoUrls = await createPhotoUrls(
-      supabase,
-      "photos",
-      paths,
-      {
-        expiresIn: 60 * 60, // 1 hour
-        useWatermark,
-        baseUrl,
-      },
-    );
+    const photoUrls = await createPhotoUrls(supabase, "photos", paths, {
+      expiresIn: 60 * 60, // 1 hour
+      useWatermark,
+      baseUrl,
+    });
     for (const item of photoUrls) {
       if (item.signedUrl) {
         signed[item.path] = item.signedUrl;
@@ -71,49 +83,54 @@ export default async function PublicEventPage({
     }
   }
 
+  const photoItems = photos
+    .map((p) => {
+      const url = p.original_url ? signed[p.original_url] : null;
+      if (!url) return null;
+      return {
+        id: p.id,
+        url,
+        alt: p.original_url || `Photo from ${event.name}`,
+      };
+    })
+    .filter(
+      (
+        item,
+      ): item is {
+        id: string;
+        url: string;
+        alt: string;
+      } => item !== null,
+    );
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container py-4">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">{event.name}</h1>
           <div className="mt-2 text-sm text-muted-foreground">
-            {new Date(event.date).toDateString().split(" ").slice(1).join(" ")} •{" "}
-            {event.city[0]?.toUpperCase() + event.city.slice(1)}
+            {new Date(event.date).toDateString().split(" ").slice(1).join(" ")}{" "}
+            • {event.city[0]?.toUpperCase() + event.city.slice(1)}
             {event.price_per_photo !== null && (
               <> • ${event.price_per_photo.toFixed(2)} per photo</>
             )}
           </div>
         </div>
 
-        {photos.length === 0 ? (
+        {photoItems.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No photos available yet.</p>
           </div>
         ) : (
-          <PhotoAlbumViewer
-            items={photos
-              .map((p) => {
-                const url = p.original_url ? signed[p.original_url] : null;
-                if (!url) return null;
-                return {
-                  id: p.id,
-                  url,
-                  ...(p.original_url && { alt: p.original_url }),
-                };
-              })
-              .filter(
-                (
-                  item,
-                ): item is {
-                  id: string;
-                  url: string;
-                  alt?: string;
-                } => item !== null,
-              )}
-          />
+          <div className="w-full">
+            <PhotoAlbumViewer
+              items={photoItems}
+              showAddToCart={user !== null}
+              photosInCart={new Set(photosInCart)}
+            />
+          </div>
         )}
       </div>
     </div>
   );
 }
-
