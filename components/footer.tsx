@@ -114,7 +114,7 @@ export function Footer() {
                   Set Pricing
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   // biome-ignore lint/a11y/useValidAnchor: explanation
                   href="#"
@@ -122,7 +122,7 @@ export function Footer() {
                 >
                   Analytics
                 </a>
-              </li>
+              </li> */}
               <li>
                 <a
                   // biome-ignore lint/a11y/useValidAnchor: explanation

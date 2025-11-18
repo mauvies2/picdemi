@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BarChart3,
   CalendarDays,
   CalendarPlus,
   Camera,
@@ -9,10 +8,8 @@ import {
   Home,
   Images,
   LifeBuoy,
-  MessageSquare,
   Send,
   Settings,
-  ShoppingCart,
   User,
   WalletMinimal,
 } from "lucide-react";
@@ -59,16 +56,16 @@ const photographerNav = [
     icon: CalendarDays,
   },
   { title: "Sales", url: "/dashboard/photographer/sales", icon: WalletMinimal },
-  {
-    title: "Analytics",
-    url: "/dashboard/photographer/analytics",
-    icon: BarChart3,
-  },
-  {
-    title: "Messages",
-    url: "/dashboard/photographer/messages",
-    icon: MessageSquare,
-  },
+  // {
+  //   title: "Analytics",
+  //   url: "/dashboard/photographer/analytics",
+  //   icon: BarChart3,
+  // },
+  // {
+  //   title: "Messages",
+  //   url: "/dashboard/photographer/messages",
+  //   icon: MessageSquare,
+  // },
 ];
 
 const talentNav = [
