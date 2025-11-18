@@ -649,7 +649,7 @@ export default function NewEventForm() {
               <form.Field name="is_public">
                 {(field) => {
                   return (
-                    <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-4">
+                    <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-3">
                       <div className="grid gap-1">
                         <Label htmlFor="is_public">Event Visibility</Label>
                         <p className="text-xs text-muted-foreground">
@@ -684,7 +684,7 @@ export default function NewEventForm() {
                 {(field) => {
                   const isPublic = form.state.values.is_public;
                   return (
-                    <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-4">
+                    <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-3">
                       <div className="grid gap-1">
                         <Label htmlFor="watermark_enabled">
                           Watermark on Photos

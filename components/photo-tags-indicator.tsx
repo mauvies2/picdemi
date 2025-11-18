@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2, Users } from "lucide-react";
+import { Trash2, UserPlus, Users } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { untagPhotoForTalentAction } from "@/app/dashboard/photographer/events/[id]/actions";
@@ -24,6 +24,7 @@ interface PhotoTagsIndicatorProps {
   photoId: string;
   className?: string;
   onUntag?: () => void;
+  onTagPhoto?: (photoId: string) => void;
   isDropdownOpen?: boolean;
   onDropdownOpenChange?: (open: boolean) => void;
 }
@@ -33,7 +34,8 @@ export function PhotoTagsIndicator({
   photoId,
   className,
   onUntag,
-  isDropdownOpen = false,
+  onTagPhoto,
+  isDropdownOpen: _isDropdownOpen = false,
   onDropdownOpenChange,
 }: PhotoTagsIndicatorProps) {
   const [isUntagging, startUntagging] = useTransition();
@@ -67,8 +69,8 @@ export function PhotoTagsIndicator({
         <button
           type="button"
           className={cn(
-            "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 cursor-pointer hover:bg-background/70 border-0 p-0",
-            isDropdownOpen && "opacity-100",
+            "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background border-0 p-0",
+            _isDropdownOpen && "opacity-100",
             className,
           )}
           onClick={(e) => {
@@ -109,10 +111,7 @@ export function PhotoTagsIndicator({
               className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm group"
             >
               <div className="flex-1 min-w-0">
-                <div className="font-medium truncate">
-                  {tag.talent_display_name || "No name"}
-                </div>
-                <div className="text-xs text-muted-foreground truncate">
+                <div className="text-sm font-medium truncate">
                   @{tag.talent_username}
                 </div>
               </div>
@@ -124,12 +123,28 @@ export function PhotoTagsIndicator({
                 }}
                 disabled={isUntagging}
                 className="ml-2 rounded p-1 hover:text-destructive disabled:opacity-50"
-                aria-label={`Remove tag for ${tag.talent_display_name || tag.talent_username}`}
+                aria-label={`Remove tag for ${tag.talent_username}`}
               >
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
           ))}
+          {onTagPhoto && (
+            <div className="border-t pt-1.5 mt-1.5">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTagPhoto(photoId);
+                  onDropdownOpenChange?.(false);
+                }}
+                className="flex w-full items-center rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Tag new people
+              </button>
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>

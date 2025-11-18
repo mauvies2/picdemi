@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, MoreVertical, UserPlus } from "lucide-react";
+import { Check, UserPlus } from "lucide-react";
 import dynamic from "next/dynamic";
 import {
   type KeyboardEvent,
@@ -16,12 +16,6 @@ import {
 } from "react-photo-album";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { PhotoTagsIndicator } from "@/components/photo-tags-indicator";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import "react-photo-album/rows.css";
@@ -43,7 +37,7 @@ export type PhotoAlbumItem = {
   tags?: Array<{
     tag_id: string;
     talent_user_id: string;
-    talent_email: string;
+    talent_username: string;
     talent_display_name: string | null;
     tagged_at: string;
   }>;
@@ -74,7 +68,6 @@ export default function PhotoAlbumViewer({
   const [dimensions, setDimensions] = useState<
     Record<string, { width: number; height: number }>
   >({});
-  const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
   const [openPopovers, setOpenPopovers] = useState<Set<string>>(new Set());
   const selectedSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
   const canSelect = Boolean(onToggleSelect);
@@ -158,10 +151,9 @@ export default function PhotoAlbumViewer({
       const photoItem = items.find((item) => item.id === photoId);
       const tags = photoItem?.tags || [];
 
-      const isDropdownOpen = openDropdowns.has(photoId);
       const isPopoverOpen = openPopovers.has(photoId);
-      // Keep icons visible if either is open, preventing flicker during transition
-      const hasAnyOpen = isDropdownOpen || isPopoverOpen;
+      // Keep icons visible if popover is open, preventing flicker during transition
+      const hasAnyOpen = isPopoverOpen;
 
       return (
         <div className="absolute inset-0 flex flex-col items-start justify-between p-2">
@@ -182,7 +174,7 @@ export default function PhotoAlbumViewer({
             {canSelect && (
               <div
                 className={cn(
-                  "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/40 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
+                  "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
                   (isSelected || hasAnyOpen) && "opacity-100",
                   isSelected && "bg-background",
                 )}
@@ -218,103 +210,57 @@ export default function PhotoAlbumViewer({
                     initialInCart={photosInCart.has(photoId)}
                     asDiv={true}
                     className={cn(
-                      "rounded-full bg-background/40 text-foreground/80 shadow-sm hover:bg-background",
-                      photosInCart.has(photoId) && "bg-background",
+                      "rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm hover:bg-background group-hover:opacity-100",
+                      photosInCart.has(photoId) && "bg-background opacity-100",
                     )}
                   />
                 </div>
               )}
-              {onTagPhoto && (
-                <DropdownMenu
-                  open={isDropdownOpen}
-                  onOpenChange={(open) => {
-                    setOpenDropdowns((prev) => {
-                      const next = new Set(prev);
-                      if (open) {
-                        next.add(photoId);
-                      } else {
-                        next.delete(photoId);
-                      }
-                      return next;
-                    });
-                  }}
-                >
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className={cn(
-                        "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background/70 cursor-pointer",
-                        isDropdownOpen && "opacity-100",
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }}
-                      onPointerDown={(e) => e.stopPropagation()}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          (e.currentTarget as HTMLElement).click();
-                        }
-                      }}
-                      aria-label="More options"
-                    >
-                      <MoreVertical className="size-3.5" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerEnter={(e) => e.stopPropagation()}
-                  >
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onTagPhoto(photoId);
-                      }}
-                    >
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      Tag talent
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
             </div>
           </div>
-          {tags.length > 0 && (
+          {/* Tag/Tagged icon at bottom left - always visible on hover, hidden in selection mode */}
+          {onTagPhoto && !selectionActive && (
             <div className="pointer-events-auto mt-auto relative z-10">
-              <PhotoTagsIndicator
-                tags={tags}
-                photoId={photoId}
-                onUntag={onUntag}
-                isDropdownOpen={isPopoverOpen}
-                onDropdownOpenChange={(open) => {
-                  if (open) {
-                    // When opening popover, set popover state first, then close dropdown
-                    // This ensures hasAnyOpen stays true during transition
-                    setOpenPopovers((prev) => {
-                      const next = new Set(prev);
-                      next.add(photoId);
-                      return next;
-                    });
-                    // Close dropdown after popover is set
-                    if (isDropdownOpen) {
-                      setOpenDropdowns((prev) => {
+              {tags.length === 0 ? (
+                <button
+                  type="button"
+                  className={cn(
+                    "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
+                    hasAnyOpen && "opacity-100",
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTagPhoto(photoId);
+                  }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  aria-label="Tag talent"
+                >
+                  <UserPlus className="size-3" />
+                </button>
+              ) : (
+                <PhotoTagsIndicator
+                  tags={tags}
+                  photoId={photoId}
+                  onUntag={onUntag}
+                  onTagPhoto={onTagPhoto}
+                  isDropdownOpen={isPopoverOpen}
+                  onDropdownOpenChange={(open) => {
+                    if (open) {
+                      setOpenPopovers((prev) => {
+                        const next = new Set(prev);
+                        next.add(photoId);
+                        return next;
+                      });
+                    } else {
+                      setOpenPopovers((prev) => {
                         const next = new Set(prev);
                         next.delete(photoId);
                         return next;
                       });
                     }
-                  } else {
-                    setOpenPopovers((prev) => {
-                      const next = new Set(prev);
-                      next.delete(photoId);
-                      return next;
-                    });
-                  }
-                }}
-              />
+                  }}
+                />
+              )}
             </div>
           )}
         </div>
@@ -328,7 +274,6 @@ export default function PhotoAlbumViewer({
       items,
       onUntag,
       onTagPhoto,
-      openDropdowns,
       openPopovers,
       photosInCart,
       showAddToCart,

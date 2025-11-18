@@ -99,6 +99,11 @@ export function TagTalentDialog({
       setSearchText("");
       setSearchResults([]);
       setShowResults(false);
+      // Blur the input to close any open dropdowns
+      const input = document.getElementById("search");
+      if (input instanceof HTMLInputElement) {
+        input.blur();
+      }
     },
     [selectedTalents],
   );
@@ -194,7 +199,7 @@ export function TagTalentDialog({
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               )}
-              {showResults && searchResults.length > 0 && (
+              {showResults && searchResults.length > 0 && searchText.length >= 2 && (
                 <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
                   <div className="max-h-60 overflow-auto p-1">
                     {searchResults.map((user) => (

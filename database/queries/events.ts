@@ -274,6 +274,42 @@ export async function getEventFilterOptions(
 }
 
 /**
+ * Update an event
+ */
+export async function updateEvent(
+  supabase: SupabaseServerClient,
+  eventId: string,
+  userId: string,
+  eventData: {
+    name?: string;
+    date?: string;
+    city?: string;
+    country?: string;
+    activity?: string;
+    is_public?: boolean;
+    share_code?: string | null;
+    price_per_photo?: number | null;
+    watermark_enabled?: boolean;
+  },
+): Promise<void> {
+  // Verify event belongs to user
+  const exists = await eventExists(supabase, eventId, userId);
+  if (!exists) {
+    throw new Error("Event not found or access denied");
+  }
+
+  const { error } = await supabase
+    .from("events")
+    .update(eventData)
+    .eq("id", eventId)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(`Failed to update event: ${getErrorMessage(error)}`);
+  }
+}
+
+/**
  * Delete an event
  */
 export async function deleteEvent(

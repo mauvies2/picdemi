@@ -66,6 +66,7 @@ export default async function EventDetailPage({
       )}
       <div className="mt-4">
         <EventPhotoAlbum
+          eventId={id}
           items={photos
             .map((p) => {
               const url = p.original_url ? signed[p.original_url] : null;
