@@ -9,6 +9,7 @@ import { getErrorMessage } from "./types";
 export interface Profile {
   id: string;
   display_name?: string | null;
+  username: string;
   bio?: string | null;
   active_role: UserRole;
   created_at?: string;
@@ -17,6 +18,7 @@ export interface Profile {
 
 export interface ProfileSelect {
   display_name?: string | null;
+  username: string;
   active_role?: UserRole | null;
   bio?: string | null;
 }
@@ -84,6 +86,67 @@ export async function getProfileActiveRole(
 }
 
 /**
+ * Generate a unique username from email
+ */
+async function generateUsernameFromEmail(
+  supabase: SupabaseServerClient,
+  userId: string,
+): Promise<string> {
+  // Get user email using RPC function
+  const { data: userEmails, error: emailError } = await supabase.rpc(
+    "get_user_emails_batch",
+    { user_ids: [userId] },
+  );
+
+  if (emailError || !userEmails || userEmails.length === 0 || !userEmails[0]?.email) {
+    throw new Error(
+      `Failed to get user email for username generation: ${getErrorMessage(emailError)}`,
+    );
+  }
+
+  // Generate username from email
+  const email = userEmails[0].email;
+  let baseUsername = email.toLowerCase().split("@")[0];
+  baseUsername = baseUsername.replace(/\./g, "_");
+  baseUsername = baseUsername.replace(/[^a-z0-9_-]/g, "");
+
+  // Ensure minimum length
+  if (baseUsername.length < 3) {
+    baseUsername = baseUsername + "_user";
+  }
+
+  // Limit to 30 characters
+  if (baseUsername.length > 30) {
+    baseUsername = baseUsername.substring(0, 30);
+  }
+
+  // Check for uniqueness and append number if needed
+  let finalUsername = baseUsername;
+  let counter = 0;
+  while (true) {
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("username", finalUsername)
+      .maybeSingle();
+
+    if (!existing) {
+      break; // Username is unique
+    }
+
+    counter++;
+    const counterStr = counter.toString();
+    if (baseUsername.length + counterStr.length + 1 > 30) {
+      finalUsername = baseUsername.substring(0, 30 - counterStr.length - 1) + "_" + counterStr;
+    } else {
+      finalUsername = baseUsername + "_" + counterStr;
+    }
+  }
+
+  return finalUsername;
+}
+
+/**
  * Update or insert a profile's active role
  */
 export async function upsertProfileRole(
@@ -91,8 +154,21 @@ export async function upsertProfileRole(
   userId: string,
   role: UserRole,
 ): Promise<void> {
+  // Check if profile exists
+  const existingProfile = await getProfile(supabase, userId);
+
+  // Determine username: use existing or generate new one
+  let username: string;
+  if (existingProfile?.username) {
+    username = existingProfile.username;
+  } else {
+    // Generate username from email
+    username = await generateUsernameFromEmail(supabase, userId);
+  }
+
+  // Upsert with username and role (always include username to satisfy NOT NULL constraint)
   const { error } = await supabase.from("profiles").upsert(
-    { id: userId, active_role: role },
+    { id: userId, active_role: role, username },
     {
       onConflict: "id",
       ignoreDuplicates: false,
@@ -110,7 +186,7 @@ export async function upsertProfileRole(
 export async function updateProfile(
   supabase: SupabaseServerClient,
   userId: string,
-  updates: Partial<Pick<Profile, "display_name" | "bio">>,
+  updates: Partial<Pick<Profile, "display_name" | "username" | "bio">>,
 ): Promise<void> {
   const { error } = await supabase
     .from("profiles")

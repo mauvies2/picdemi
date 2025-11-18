@@ -29,7 +29,7 @@ export interface TaggedPhotoWithEvent {
 export interface PhotoTagInfo {
   tag_id: string;
   talent_user_id: string;
-  talent_email: string;
+  talent_username: string;
   talent_display_name: string | null;
   tagged_at: string;
 }
@@ -262,16 +262,22 @@ export async function getTagsForPhotos(
   ];
 
   // Fetch profiles for all talent users
-  const profilesMap: Record<string, { display_name: string | null }> = {};
+  const profilesMap: Record<
+    string,
+    { display_name: string | null; username: string | null }
+  > = {};
   if (talentUserIds.length > 0) {
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, display_name")
+      .select("id, display_name, username")
       .in("id", talentUserIds);
 
     if (!profilesError && profiles) {
       for (const profile of profiles) {
-        profilesMap[profile.id] = { display_name: profile.display_name };
+        profilesMap[profile.id] = {
+          display_name: profile.display_name,
+          username: profile.username,
+        };
       }
     }
   }
@@ -290,7 +296,7 @@ export async function getTagsForPhotos(
     tagsByPhoto[photoId].push({
       tag_id: tag.id,
       talent_user_id: tag.talent_user_id,
-      talent_email: "", // Will be populated by server action
+      talent_username: profile?.username ?? "unknown",
       talent_display_name: profile?.display_name ?? null,
       tagged_at: tag.created_at,
     });

@@ -42,7 +42,20 @@ export default async function OnboardingRolePage() {
       return redirect("/onboarding/role?message=invalid_role");
     }
 
-    await completeOnboarding(roleSlugToEnum(role));
+    const username = (formData.get("username") as string | null)
+      ?.trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "");
+    if (!username || username.length < 3 || username.length > 30) {
+      return redirect("/onboarding/role?message=invalid_username");
+    }
+
+    // Validate username format
+    if (!/^[a-z0-9_-]+$/.test(username)) {
+      return redirect("/onboarding/role?message=invalid_username_format");
+    }
+
+    await completeOnboarding(roleSlugToEnum(role), username);
   };
 
   return (

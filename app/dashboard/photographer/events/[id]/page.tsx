@@ -87,7 +87,7 @@ export default async function EventDetailPage({
                 tags: Array<{
                   tag_id: string;
                   talent_user_id: string;
-                  talent_email: string;
+                  talent_username: string;
                   talent_display_name: string | null;
                   tagged_at: string;
                 }>;

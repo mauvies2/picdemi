@@ -33,20 +33,35 @@ export default async function Signup({
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
+    const username = (formData.get("username") as string | null)
+      ?.trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "");
 
     if (password !== confirmPassword) {
       return redirect(`/signup?message=Passwords do not match`);
     }
 
+    if (!username || username.length < 3 || username.length > 30) {
+      return redirect(`/signup?message=Username must be between 3 and 30 characters`);
+    }
+
+    if (!/^[a-z0-9_-]+$/.test(username)) {
+      return redirect(`/signup?message=Username can only contain lowercase letters, numbers, underscores, and hyphens`);
+    }
+
     const supabase = await createClient();
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: env.NEXT_PUBLIC_VERCEL_URL
           ? `https://${env.NEXT_PUBLIC_VERCEL_URL}`
           : "http://localhost:3000",
+        data: {
+          username,
+        },
       },
     });
 
@@ -55,6 +70,12 @@ export default async function Signup({
       return redirect(
         `/signup?message=Could not signup user. Reason: ${error.code}`,
       );
+    }
+
+    // If user was created, set username in profile
+    if (data?.user) {
+      const { updateProfile } = await import("@/database/queries");
+      await updateProfile(supabase, data.user.id, { username });
     }
 
     return redirect("/login?success=Check email to continue sign in process");
@@ -118,6 +139,21 @@ export default async function Signup({
             placeholder="you@example.com"
             required
           />
+          <Label htmlFor="username">Username</Label>
+          <Input
+            className="mb-4 rounded-full border bg-inherit px-4 h-10"
+            id="username"
+            type="text"
+            name="username"
+            placeholder="johndoe"
+            minLength={3}
+            maxLength={30}
+            pattern="[a-z0-9_-]+"
+            required
+          />
+          <p className="text-xs text-muted-foreground -mt-2 mb-2">
+            3-30 characters, lowercase letters, numbers, underscores, and hyphens only.
+          </p>
           <Label htmlFor="password">Password</Label>
           <Input
             className="mb-4 rounded-full border bg-inherit px-4 h-10 placeholder:text-muted-foreground/30"

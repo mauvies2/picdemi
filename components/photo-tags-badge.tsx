@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 interface PhotoTag {
   tag_id: string;
   talent_user_id: string;
-  talent_email: string;
+  talent_username: string;
   talent_display_name: string | null;
   tagged_at: string;
 }
@@ -62,7 +62,7 @@ export function PhotoTagsBadge({
             <TooltipTrigger asChild>
               <div className="group relative inline-flex items-center gap-1.5 rounded-full border bg-background/80 px-2 py-1 text-xs backdrop-blur-sm">
                 <span className="text-muted-foreground">
-                  {tag.talent_display_name || tag.talent_email}
+                  {tag.talent_display_name || tag.talent_username}
                 </span>
                 <button
                   type="button"
@@ -72,14 +72,14 @@ export function PhotoTagsBadge({
                   }}
                   disabled={isUntagging}
                   className="rounded-full p-0.5 hover:bg-destructive/20 hover:text-destructive transition-colors disabled:opacity-50"
-                  aria-label={`Remove tag for ${tag.talent_display_name || tag.talent_email}`}
+                  aria-label={`Remove tag for ${tag.talent_display_name || tag.talent_username}`}
                 >
                   <X className="h-3 w-3" />
                 </button>
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{tag.talent_email}</p>
+              <p>@{tag.talent_username}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

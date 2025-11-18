@@ -37,14 +37,14 @@ export function TagTalentDialog({
   const [searchResults, setSearchResults] = useState<
     Array<{
       id: string;
-      email: string;
+      username: string;
       display_name: string | null;
     }>
   >([]);
   const [selectedTalents, setSelectedTalents] = useState<
     Array<{
       id: string;
-      email: string;
+      username: string;
       display_name: string | null;
     }>
   >([]);
@@ -90,7 +90,7 @@ export function TagTalentDialog({
   }, [debouncedSearch, selectedTalents]);
 
   const handleSelectTalent = useCallback(
-    (talent: { id: string; email: string; display_name: string | null }) => {
+    (talent: { id: string; username: string; display_name: string | null }) => {
       // Check if already selected
       if (selectedTalents.some((t) => t.id === talent.id)) {
         return;
@@ -159,14 +159,14 @@ export function TagTalentDialog({
         <DialogHeader>
           <DialogTitle>Tag Talent</DialogTitle>
           <DialogDescription>
-            Search for a talent user by email to tag {photoIds.length}{" "}
+            Search for a talent user by username to tag {photoIds.length}{" "}
             {photoIds.length === 1 ? "photo" : "photos"}.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="search">Search by email or name</Label>
+            <Label htmlFor="search">Search by username or name</Label>
             <div className="relative">
               <Input
                 id="search"
@@ -208,7 +208,7 @@ export function TagTalentDialog({
                           {user.display_name || "No name"}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {user.email}
+                          @{user.username}
                         </div>
                       </button>
                     ))}
@@ -237,7 +237,7 @@ export function TagTalentDialog({
                         {talent.display_name || "No name"}
                       </div>
                       <div className="text-xs text-muted-foreground truncate">
-                        {talent.email}
+                        @{talent.username}
                       </div>
                     </div>
                     <Button

@@ -5,7 +5,7 @@ const actions = [
   {
     title: "Explore photographers",
     description: "Discover photographers, events, and curated collections.",
-    href: "/dashboard/talent/explore",
+    href: "/dashboard/talent/events",
   },
   {
     title: "Your photos",

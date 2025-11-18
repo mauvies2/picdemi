@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 interface PhotoTag {
   tag_id: string;
   talent_user_id: string;
-  talent_email: string;
+  talent_username: string;
   talent_display_name: string | null;
   tagged_at: string;
 }
@@ -113,7 +113,7 @@ export function PhotoTagsIndicator({
                   {tag.talent_display_name || "No name"}
                 </div>
                 <div className="text-xs text-muted-foreground truncate">
-                  {tag.talent_email}
+                  @{tag.talent_username}
                 </div>
               </div>
               <button
@@ -124,7 +124,7 @@ export function PhotoTagsIndicator({
                 }}
                 disabled={isUntagging}
                 className="ml-2 rounded p-1 hover:text-destructive disabled:opacity-50"
-                aria-label={`Remove tag for ${tag.talent_display_name || tag.talent_email}`}
+                aria-label={`Remove tag for ${tag.talent_display_name || tag.talent_username}`}
               >
                 <Trash2 className="h-4 w-4" />
               </button>

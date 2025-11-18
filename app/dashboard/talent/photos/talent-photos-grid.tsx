@@ -240,7 +240,7 @@ export function TalentPhotosGrid({
               <div className="flex flex-wrap items-baseline gap-1.5">
                 {event.event_id ? (
                   <Link
-                    href={`/dashboard/photographer/events/${event.event_id}`}
+                    href={`/dashboard/talent/events/${event.event_id}`}
                     className="text-sm font-semibold text-foreground hover:underline"
                   >
                     {event.event_name ?? "Uncategorized"}

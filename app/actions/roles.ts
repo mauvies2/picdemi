@@ -48,9 +48,18 @@ async function enableTalentRoleInternal(
   await dbUpsertProfileRole(supabase, userId, "TALENT");
 }
 
-export async function completeOnboarding(initialRole: UserRole) {
+export async function completeOnboarding(
+  initialRole: UserRole,
+  username?: string,
+) {
   const role = userRoleSchema.parse(initialRole);
   const { supabase, user } = await getAuthenticatedClient();
+
+  // If username is provided, update profile with username
+  if (username) {
+    const { updateProfile } = await import("@/database/queries");
+    await updateProfile(supabase, user.id, { username });
+  }
 
   await dbUpsertProfileRole(supabase, user.id, role);
   await dbUpsertUserRole(supabase, user.id, role);

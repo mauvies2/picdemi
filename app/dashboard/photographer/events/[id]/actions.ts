@@ -17,7 +17,7 @@ export async function searchTalentUsers(
 ): Promise<
   Array<{
     id: string;
-    email: string;
+    username: string;
     display_name: string | null;
   }>
 > {
@@ -51,24 +51,41 @@ export async function searchTalentUsers(
     return [];
   }
 
+  // Get usernames from profiles
+  const userIds = data.map((user: { id: string }) => user.id);
+  const usernameMap: Record<string, string | null> = {};
+  
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, username")
+      .in("id", userIds);
+    
+    if (profiles) {
+      for (const profile of profiles) {
+        usernameMap[profile.id] = profile.username;
+      }
+    }
+  }
+
   return data.map(
     (user: { id: string; email: string; display_name: string | null }) => ({
       id: user.id,
-      email: user.email,
+      username: usernameMap[user.id] ?? "unknown",
       display_name: user.display_name || null,
     }),
   );
 }
 
 /**
- * Find a user by email for tagging (backward compatibility)
+ * Find a user by username for tagging (backward compatibility)
  */
-export async function findTalentByEmail(email: string): Promise<{
+export async function findTalentByUsername(username: string): Promise<{
   id: string;
-  email: string;
+  username: string;
   display_name: string | null;
 } | null> {
-  const results = await searchTalentUsers(email, 1);
+  const results = await searchTalentUsers(username, 1);
   return results.length > 0 ? results[0] : null;
 }
 
@@ -81,7 +98,7 @@ export async function getPhotoTags(photoIds: string[]): Promise<
     Array<{
       tag_id: string;
       talent_user_id: string;
-      talent_email: string;
+      talent_username: string;
       talent_display_name: string | null;
       tagged_at: string;
     }>
@@ -103,52 +120,8 @@ export async function getPhotoTags(photoIds: string[]): Promise<
   const { getTagsForPhotos } = await import("@/database/queries");
   const tagsByPhoto = await getTagsForPhotos(supabase, photoIds);
 
-  // Get emails for all talent user IDs using batch RPC
-  const talentUserIds = [
-    ...new Set(
-      Object.values(tagsByPhoto)
-        .flat()
-        .map((tag) => tag.talent_user_id),
-    ),
-  ];
-
-  // Fetch emails in batch
-  const emailMap: Record<string, string> = {};
-  if (talentUserIds.length > 0) {
-    const { data: userEmails, error: emailError } = await supabase.rpc(
-      "get_user_emails_batch",
-      {
-        user_ids: talentUserIds,
-      },
-    );
-
-    if (!emailError && userEmails) {
-      for (const user of userEmails) {
-        emailMap[user.id] = user.email;
-      }
-    }
-  }
-
-  // Populate emails in tags
-  const result: Record<
-    string,
-    Array<{
-      tag_id: string;
-      talent_user_id: string;
-      talent_email: string;
-      talent_display_name: string | null;
-      tagged_at: string;
-    }>
-  > = {};
-
-  for (const [photoId, tags] of Object.entries(tagsByPhoto)) {
-    result[photoId] = tags.map((tag) => ({
-      ...tag,
-      talent_email: emailMap[tag.talent_user_id] || "",
-    }));
-  }
-
-  return result;
+  // Tags already have username from getTagsForPhotos, so we can return them directly
+  return tagsByPhoto;
 }
 
 /**

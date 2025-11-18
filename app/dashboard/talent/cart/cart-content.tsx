@@ -98,7 +98,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
         </p>
         <div className="flex gap-3">
           <Button
-            onClick={() => router.push("/dashboard/talent/explore")}
+            onClick={() => router.push("/dashboard/talent/events")}
             variant="default"
           >
             Browse Events
