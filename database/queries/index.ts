@@ -11,6 +11,8 @@ export * from "./carts";
 export * from "./events";
 // Re-export photo queries
 export * from "./photos";
+// Re-export sales queries
+export * from "./sales";
 
 // Re-export profile queries
 export * from "./profiles";
