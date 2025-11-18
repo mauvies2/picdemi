@@ -88,6 +88,10 @@ export default function PhotoAlbumViewer({
   useEffect(() => {
     items.forEach((item) => {
       if (dimensions[item.id]) return;
+      if (!item.url) {
+        console.warn(`Photo ${item.id} has no URL`);
+        return;
+      }
       const img = new window.Image();
       img.onload = () => {
         const width = img.naturalWidth || item.width || 1600;
@@ -176,7 +180,7 @@ export default function PhotoAlbumViewer({
             {canSelect && (
               <div
                 className={cn(
-                  "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/60 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100",
+                  "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/40 text-foreground/80 opacity-0 shadow-sm transition-all group-hover:opacity-100",
                   (isSelected || hasAnyOpen) && "opacity-100",
                   isSelected && "bg-primary/40 text-primary-foreground",
                 )}
@@ -208,7 +212,7 @@ export default function PhotoAlbumViewer({
                     showText={false}
                     initialInCart={photosInCart.has(photoId)}
                     asDiv={true}
-                    className="h-6 rounded-full bg-background/90 text-foreground shadow-sm hover:bg-background"
+                    className="rounded-full bg-background/40 text-foreground/80 shadow-sm hover:bg-background"
                   />
                 </div>
               )}

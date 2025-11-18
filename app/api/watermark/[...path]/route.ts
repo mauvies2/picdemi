@@ -21,15 +21,24 @@ export async function GET(
     }
 
     // Use service role client for admin access to storage
-    // Fallback to anon key if service role key is not available
-    const serviceRoleKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    // Service role key is REQUIRED for storage access
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!serviceRoleKey || serviceRoleKey.trim() === "") {
-      console.error("Missing Supabase key for watermark API");
-      return new NextResponse("Configuration error", { status: 500 });
+      console.error(
+        "Missing SUPABASE_SERVICE_ROLE_KEY - watermark API requires service role key for storage access",
+      );
+      return new NextResponse(
+        JSON.stringify({
+          error: "Configuration error",
+          message:
+            "SUPABASE_SERVICE_ROLE_KEY is not configured. Service role key is required for watermark API to access storage.",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
@@ -51,8 +60,20 @@ export async function GET(
       .download(fullPath);
 
     if (downloadError || !imageData) {
-      console.error("Failed to download image:", downloadError);
-      return new NextResponse("Image not found", { status: 404 });
+      console.error("Failed to download image:", {
+        path: fullPath,
+        error: downloadError?.message,
+      });
+      return new NextResponse(
+        JSON.stringify({
+          error: "Image not found",
+          message: downloadError?.message || "Unknown error",
+        }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Convert blob to buffer

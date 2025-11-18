@@ -23,5 +23,13 @@
   "[jsonc]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "cSpell.words": ["Uncategorized", "yarl"]
+  "cSpell.words": [
+    "ocea",
+    "oceapic",
+    "supabase",
+    "uncategorized",
+    "untagging",
+    "watermarked",
+    "yarl"
+  ]
 }
