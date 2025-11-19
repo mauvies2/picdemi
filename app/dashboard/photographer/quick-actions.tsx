@@ -1,14 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { FolderOpen, Plus } from "lucide-react";
+import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function QuickActions() {
   return (
     <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
-      <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Quick Actions</h2>
+      <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+        Quick Actions
+      </h2>
       <div className="space-y-2 sm:space-y-3">
         <Link
           href="/dashboard/photographer/events/new"
@@ -34,4 +36,3 @@ export function QuickActions() {
     </div>
   );
 }
-
