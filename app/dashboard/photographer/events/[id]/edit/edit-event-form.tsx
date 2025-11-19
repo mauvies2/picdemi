@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { Country, State } from "country-state-city";
 import { format } from "date-fns";
 import { ChevronDownIcon, X } from "lucide-react";
 import Image from "next/image";
@@ -11,7 +12,6 @@ import {
   activityOptions,
   activityValues,
 } from "@/app/dashboard/photographer/events/new/activity-options";
-import { LocationSelector } from "@/components/location-selector";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -47,7 +47,7 @@ const eventSchema = z.object({
   date: z.string().min(1, "Date is required."),
   country: z.string().trim().min(1, "Country is required."),
   state: z.string().trim().min(1, "State/Province is required."),
-  city: z.string().trim().min(1, "City is required."),
+  city: z.string().trim().optional(),
   is_public: z.boolean().default(true),
   watermark_enabled: z.boolean().default(true),
   price_per_photo: z
@@ -184,7 +184,9 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
         formData.append("date", parsed.date);
         formData.append("country", parsed.country.trim());
         formData.append("state", parsed.state.trim());
-        formData.append("city", parsed.city.trim());
+        if (parsed.city?.trim()) {
+          formData.append("city", parsed.city.trim());
+        }
         formData.append("is_public", parsed.is_public ? "true" : "false");
         formData.append(
           "watermark_enabled",
@@ -378,10 +380,7 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
                     <form.Field
                       name="city"
                       validators={{
-                        onChange: ({ value }) =>
-                          value.trim().length === 0
-                            ? "City is required."
-                            : undefined,
+                        onChange: () => undefined, // City is optional
                       }}
                     >
                       {(cityField) => {
@@ -396,31 +395,140 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
                         const stateError = showFeedback
                           ? stateField.state.meta.errors?.[0]
                           : null;
-                        const cityError = showFeedback
-                          ? cityField.state.meta.errors?.[0]
-                          : null;
+                        const states = State.getStatesOfCountry(
+                          countryField.state.value,
+                        );
                         return (
-                          <LocationSelector
-                            country={countryField.state.value}
-                            state={stateField.state.value || ""}
-                            city={cityField.state.value}
-                            onCountryChange={(value) => {
-                              countryField.handleChange(value);
-                              countryField.handleBlur();
-                            }}
-                            onStateChange={(value) => {
-                              stateField.handleChange(value);
-                              stateField.handleBlur();
-                            }}
-                            onCityChange={(value) => {
-                              cityField.handleChange(value);
-                              cityField.handleBlur();
-                            }}
-                            countryError={countryError ?? undefined}
-                            stateError={stateError ?? undefined}
-                            cityError={cityError ?? undefined}
-                            showFeedback={showFeedback}
-                          />
+                          <div className="space-y-4">
+                            {/* Country and State side-by-side */}
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <div className="grid gap-2">
+                                <Label htmlFor="country">Country</Label>
+                                <Select
+                                  value={countryField.state.value}
+                                  onValueChange={(value: string) => {
+                                    countryField.handleChange(value);
+                                    countryField.handleBlur();
+                                  }}
+                                >
+                                  <SelectTrigger
+                                    id="country"
+                                    aria-invalid={
+                                      showFeedback && !!countryError
+                                    }
+                                    className={cn(
+                                      "w-full",
+                                      showFeedback &&
+                                        countryError &&
+                                        "border-destructive",
+                                    )}
+                                  >
+                                    <SelectValue placeholder="Select a country" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Country.getAllCountries()
+                                      .sort((a, b) =>
+                                        a.name.localeCompare(b.name),
+                                      )
+                                      .map((c) => (
+                                        <SelectItem
+                                          key={c.isoCode}
+                                          value={c.isoCode}
+                                        >
+                                          {c.name}
+                                        </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                                </Select>
+                                {showFeedback && countryError ? (
+                                  <p className="text-xs text-destructive">
+                                    {countryError}
+                                  </p>
+                                ) : null}
+                              </div>
+
+                              <div className="grid gap-2">
+                                <Label htmlFor="state">State / Province</Label>
+                                {states.length > 0 ? (
+                                  <Select
+                                    value={stateField.state.value}
+                                    onValueChange={(value: string) => {
+                                      stateField.handleChange(value);
+                                      stateField.handleBlur();
+                                    }}
+                                  >
+                                    <SelectTrigger
+                                      id="state"
+                                      aria-invalid={
+                                        showFeedback && !!stateError
+                                      }
+                                      className={cn(
+                                        "w-full",
+                                        showFeedback &&
+                                          stateError &&
+                                          "border-destructive",
+                                      )}
+                                    >
+                                      <SelectValue placeholder="Select a state or province" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {states
+                                        .sort((a, b) =>
+                                          a.name.localeCompare(b.name),
+                                        )
+                                        .map((s) => (
+                                          <SelectItem
+                                            key={s.isoCode}
+                                            value={s.isoCode}
+                                          >
+                                            {s.name}
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  <Input
+                                    id="state"
+                                    value={stateField.state.value}
+                                    onChange={(e) => {
+                                      stateField.handleChange(e.target.value);
+                                      stateField.handleBlur();
+                                    }}
+                                    placeholder="Enter state or province name"
+                                    aria-invalid={showFeedback && !!stateError}
+                                    className={cn(
+                                      showFeedback &&
+                                        stateError &&
+                                        "border-destructive",
+                                    )}
+                                    autoComplete="address-level1"
+                                    suppressHydrationWarning
+                                  />
+                                )}
+                                {showFeedback && stateError ? (
+                                  <p className="text-xs text-destructive">
+                                    {stateError}
+                                  </p>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            {/* City below */}
+                            <div className="grid gap-2">
+                              <Label htmlFor="city">City (Optional)</Label>
+                              <Input
+                                id="city"
+                                value={cityField.state.value || ""}
+                                onChange={(e) => {
+                                  cityField.handleChange(e.target.value);
+                                  cityField.handleBlur();
+                                }}
+                                placeholder="Enter city name"
+                                autoComplete="address-level2"
+                                suppressHydrationWarning
+                              />
+                            </div>
+                          </div>
                         );
                       }}
                     </form.Field>
@@ -604,9 +712,13 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
                         onCheckedChange={(checked) => {
                           field.handleChange(checked);
                           field.handleBlur();
-                          // Auto-enable watermark when making event public
+                          // Auto-toggle watermark based on visibility
                           if (checked) {
+                            // Enable watermark when making event public
                             form.setFieldValue("watermark_enabled", true);
+                          } else {
+                            // Disable watermark when making event private
+                            form.setFieldValue("watermark_enabled", false);
                           }
                         }}
                       />
@@ -618,7 +730,6 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
 
             <form.Field name="watermark_enabled">
               {(field) => {
-                const isPublic = form.state.values.is_public;
                 return (
                   <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-3">
                     <div className="grid gap-1">
@@ -626,9 +737,8 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
                         Watermark on Photos
                       </Label>
                       <p className="text-xs text-muted-foreground">
-                        {isPublic
-                          ? "Add watermark for talent users (photographers see originals)"
-                          : "Only applies to public events"}
+                        Add watermark for talent users (photographers see
+                        originals)
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -642,7 +752,6 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
                           field.handleChange(checked);
                           field.handleBlur();
                         }}
-                        disabled={!isPublic}
                       />
                     </div>
                   </div>

@@ -13,6 +13,7 @@ export interface Photo {
   taken_at: string | null;
   city?: string | null;
   country?: string | null;
+  state?: string | null;
   created_at?: string;
 }
 
@@ -28,6 +29,7 @@ export interface PhotoDetail {
   taken_at: string | null;
   city: string | null;
   country: string | null;
+  state: string | null;
 }
 
 /**

@@ -27,7 +27,7 @@ const eventSchema = z.object({
   date: z.string().min(1, "Date is required."),
   country: z.string().trim().min(1, "Country is required."),
   state: z.string().trim().min(1, "State/Province is required."),
-  city: z.string().trim().min(1, "City is required."),
+  city: z.string().trim().optional(),
   is_public: z
     .string()
     .default("true")
@@ -83,7 +83,7 @@ export const createEvent = async (
     date: rawPayload.date?.toString() ?? "",
     country: rawPayload.country?.toString() ?? "",
     state: rawPayload.state?.toString(),
-    city: rawPayload.city?.toString() ?? "",
+    city: rawPayload.city?.toString(),
     is_public: rawPayload.is_public?.toString() ?? "true",
     watermark_enabled: rawPayload.watermark_enabled?.toString() ?? "true",
     price_per_photo: rawPayload.price_per_photo?.toString(),
@@ -123,7 +123,7 @@ export const createEvent = async (
     date: payload.date,
     country: payload.country,
     state: payload.state,
-    city: payload.city,
+    city: payload.city || "",
     is_public: payload.is_public,
     share_code: shareCode,
     price_per_photo: payload.price_per_photo ?? null,
@@ -152,9 +152,9 @@ export const createEvent = async (
         event_id: event.id,
         original_url: path,
         taken_at: new Date(payload.date).toISOString(),
-        city: payload.city,
+        city: payload.city || "",
         country: payload.country,
-        state: payload.state,
+        state: payload.state || null,
       });
 
       photoRecords.push({ original_path: path });

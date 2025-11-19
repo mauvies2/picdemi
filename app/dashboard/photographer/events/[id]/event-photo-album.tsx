@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import PhotoAlbumViewer, {
   type PhotoAlbumItem,
 } from "@/components/photo-album-viewer";
@@ -23,6 +24,7 @@ export function EventPhotoAlbum({ items, eventId }: EventPhotoAlbumProps) {
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [tagDialogOpen, setTagDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, startDeleting] = useTransition();
 
   const handleToggleSelect = useCallback((photoId: string) => {
@@ -58,12 +60,10 @@ export function EventPhotoAlbum({ items, eventId }: EventPhotoAlbumProps) {
 
   const handleDeleteSelected = useCallback(() => {
     if (selectedIds.length === 0) return;
+    setDeleteDialogOpen(true);
+  }, [selectedIds.length]);
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedIds.length} photo${selectedIds.length === 1 ? "" : "s"}? This action cannot be undone.`,
-    );
-    if (!confirmed) return;
-
+  const confirmDelete = useCallback(async () => {
     startDeleting(async () => {
       try {
         await Promise.all(
@@ -161,6 +161,16 @@ export function EventPhotoAlbum({ items, eventId }: EventPhotoAlbumProps) {
         onOpenChange={setTagDialogOpen}
         photoIds={selectedIds}
         onSuccess={handleTagSuccess}
+      />
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Photos"
+        description={`Are you sure you want to delete ${selectedIds.length} photo${selectedIds.length === 1 ? "" : "s"}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={confirmDelete}
       />
     </div>
   );

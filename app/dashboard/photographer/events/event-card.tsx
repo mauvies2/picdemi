@@ -4,7 +4,8 @@ import { MoreVertical } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,21 +34,19 @@ export function EventCard({
 }: EventCardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const formattedDate = date
     ? new Date(date).toDateString().split(" ").slice(1).join(" ")
     : "";
 
-  const handleDelete = () => {
-    const confirmed = window.confirm(
-      "This will permanently delete the event and its photos. Continue?",
-    );
-    if (!confirmed) return;
+  const handleDelete = async () => {
+    await onDelete();
+    router.refresh();
+  };
 
-    startTransition(async () => {
-      await onDelete();
-      router.refresh();
-    });
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
   };
 
   const handleEdit = () => {
@@ -114,7 +113,7 @@ export function EventCard({
           <DropdownMenuItem
             onSelect={(event) => {
               event.preventDefault();
-              handleDelete();
+              handleDeleteClick();
             }}
             variant="destructive"
             disabled={isPending}
@@ -123,6 +122,16 @@ export function EventCard({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Event"
+        description="This will permanently delete the event and all its photos. This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
