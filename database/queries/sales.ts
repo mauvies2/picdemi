@@ -52,6 +52,9 @@ export interface TopSellingEvent {
 
 /**
  * Get sales summary for a photographer
+ *
+ * NOTE: Currently returns zeros as there's no purchase/order system yet.
+ * Once an orders/purchases table is implemented, this should query actual completed purchases.
  */
 export async function getSalesSummary(
   supabase: SupabaseServerClient,
@@ -59,40 +62,21 @@ export async function getSalesSummary(
   startDate?: string,
   endDate?: string,
 ): Promise<SalesSummary> {
-  let query = supabase
-    .from("cart_items")
-    .select("unit_price_cents", { count: "exact" })
-    .eq("photographer_id", photographerId);
-
-  if (startDate) {
-    query = query.gte("created_at", startDate);
-  }
-  if (endDate) {
-    query = query.lte("created_at", endDate);
-  }
-
-  const { data, count, error } = await query;
-
-  if (error) {
-    throw new Error(`Failed to get sales summary: ${getErrorMessage(error)}`);
-  }
-
-  const totalRevenueCents =
-    data?.reduce((sum, item) => sum + item.unit_price_cents, 0) ?? 0;
-  const totalSales = count ?? 0;
-  const averageOrderValueCents =
-    totalSales > 0 ? Math.round(totalRevenueCents / totalSales) : 0;
-
+  // TODO: Implement actual sales tracking when purchase/order system is added
+  // For now, return zeros since cart_items only represent items in carts, not completed purchases
   return {
-    totalRevenueCents,
-    totalSales,
-    averageOrderValueCents,
-    totalPhotosSold: totalSales,
+    totalRevenueCents: 0,
+    totalSales: 0,
+    averageOrderValueCents: 0,
+    totalPhotosSold: 0,
   };
 }
 
 /**
  * Get sales over time grouped by date
+ *
+ * NOTE: Currently returns empty array as there's no purchase/order system yet.
+ * Once an orders/purchases table is implemented, this should query actual completed purchases.
  */
 export async function getSalesOverTime(
   supabase: SupabaseServerClient,
@@ -101,57 +85,9 @@ export async function getSalesOverTime(
   endDate?: string,
   groupBy: "day" | "week" | "month" = "day",
 ): Promise<SalesByDate[]> {
-  let query = supabase
-    .from("cart_items")
-    .select("created_at, unit_price_cents")
-    .eq("photographer_id", photographerId)
-    .order("created_at", { ascending: true });
-
-  if (startDate) {
-    query = query.gte("created_at", startDate);
-  }
-  if (endDate) {
-    query = query.lte("created_at", endDate);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(`Failed to get sales over time: ${getErrorMessage(error)}`);
-  }
-
-  // Group by date
-  const grouped = new Map<string, { revenue: number; count: number }>();
-
-  (data ?? []).forEach((item) => {
-    const date = new Date(item.created_at);
-    let key: string;
-
-    if (groupBy === "day") {
-      key = date.toISOString().split("T")[0];
-    } else if (groupBy === "week") {
-      const weekStart = new Date(date);
-      weekStart.setDate(date.getDate() - date.getDay());
-      key = weekStart.toISOString().split("T")[0];
-    } else {
-      // month
-      key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-    }
-
-    const current = grouped.get(key) ?? { revenue: 0, count: 0 };
-    grouped.set(key, {
-      revenue: current.revenue + item.unit_price_cents,
-      count: current.count + 1,
-    });
-  });
-
-  return Array.from(grouped.entries())
-    .map(([date, stats]) => ({
-      date,
-      revenue_cents: stats.revenue,
-      sales_count: stats.count,
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date));
+  // TODO: Implement actual sales tracking when purchase/order system is added
+  // For now, return empty array since cart_items only represent items in carts, not completed purchases
+  return [];
 }
 
 /**
@@ -193,7 +129,9 @@ export async function getTopSellingPhotos(
   const { data, error } = await query;
 
   if (error) {
-    throw new Error(`Failed to get top selling photos: ${getErrorMessage(error)}`);
+    throw new Error(
+      `Failed to get top selling photos: ${getErrorMessage(error)}`,
+    );
   }
 
   // Group by photo_id
@@ -246,6 +184,9 @@ export async function getTopSellingPhotos(
 
 /**
  * Get top selling events
+ *
+ * NOTE: Currently returns empty array as there's no purchase/order system yet.
+ * Once an orders/purchases table is implemented, this should query actual completed purchases.
  */
 export async function getTopSellingEvents(
   supabase: SupabaseServerClient,
@@ -254,85 +195,9 @@ export async function getTopSellingEvents(
   startDate?: string,
   endDate?: string,
 ): Promise<TopSellingEvent[]> {
-  let query = supabase
-    .from("cart_items")
-    .select(
-      `
-      photo_id,
-      unit_price_cents,
-      created_at,
-      photos(
-        event_id,
-        events(
-          name,
-          date
-        )
-      )
-    `,
-    )
-    .eq("photographer_id", photographerId);
-
-  if (startDate) {
-    query = query.gte("created_at", startDate);
-  }
-  if (endDate) {
-    query = query.lte("created_at", endDate);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(`Failed to get top selling events: ${getErrorMessage(error)}`);
-  }
-
-  // Group by event_id
-  const grouped = new Map<
-    string,
-    {
-      event_name: string | null;
-      event_date: string | null;
-      sales_count: number;
-      revenue_cents: number;
-      photos_sold: Set<string>;
-    }
-  >();
-
-  (data ?? []).forEach((item: any) => {
-    const photo = item.photos;
-    const event = Array.isArray(photo?.events)
-      ? photo.events.length > 0
-        ? photo.events[0]
-        : null
-      : photo?.events;
-
-    const eventId = photo?.event_id ?? "unknown";
-    const current = grouped.get(eventId) ?? {
-      event_name: event?.name ?? null,
-      event_date: event?.date ?? null,
-      sales_count: 0,
-      revenue_cents: 0,
-      photos_sold: new Set<string>(),
-    };
-
-    current.photos_sold.add(item.photo_id);
-    grouped.set(eventId, {
-      ...current,
-      sales_count: current.sales_count + 1,
-      revenue_cents: current.revenue_cents + item.unit_price_cents,
-    });
-  });
-
-  return Array.from(grouped.entries())
-    .map(([event_id, stats]) => ({
-      event_id,
-      event_name: stats.event_name,
-      event_date: stats.event_date,
-      sales_count: stats.sales_count,
-      revenue_cents: stats.revenue_cents,
-      photos_sold: stats.photos_sold.size,
-    }))
-    .sort((a, b) => b.revenue_cents - a.revenue_cents)
-    .slice(0, limit);
+  // TODO: Implement actual sales tracking when purchase/order system is added
+  // For now, return empty array since cart_items only represent items in carts, not completed purchases
+  return [];
 }
 
 /**
@@ -396,15 +261,14 @@ export async function getRecentSales(
 
   // Fetch user emails using RPC function if available
   const buyerEmailMap: Record<string, string | null> = {};
-  
+
   if (buyerIds.length > 0) {
     try {
       // Try to use the batch RPC function if it exists
-      const { data: userEmails } = await supabase.rpc(
-        "get_user_emails_batch",
-        { user_ids: buyerIds },
-      );
-      
+      const { data: userEmails } = await supabase.rpc("get_user_emails_batch", {
+        user_ids: buyerIds,
+      });
+
       if (userEmails) {
         for (const user of userEmails) {
           buyerEmailMap[user.id] = user.email ?? null;
@@ -439,4 +303,3 @@ export async function getRecentSales(
     };
   }) as Sale[];
 }
-

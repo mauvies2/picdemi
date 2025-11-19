@@ -1,51 +1,213 @@
+import { format } from "date-fns";
+import {
+  Calendar,
+  DollarSign,
+  HardDrive,
+  Image as ImageIcon,
+  TrendingUp,
+} from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { cn } from "@/lib/utils";
+import { getDashboardData } from "./actions";
+import { PerformanceChart } from "./performance-chart";
+import { QuickActions } from "./quick-actions";
+import { ViewEventButton } from "./view-event-button";
 
-export default function PhotographerDashboardPage() {
+function formatCurrency(cents: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  }).format(cents / 100);
+}
+
+function formatStorage(gb: number): string {
+  if (gb < 1) {
+    return `${(gb * 1024).toFixed(0)} MB`;
+  }
+  return `${gb.toFixed(2)} GB`;
+}
+
+export default async function PhotographerDashboardPage() {
+  const data = await getDashboardData();
+  const { salesSummary, salesOverTime, topEvent, totalEvents, storage } = data;
+
   return (
-    <div className="flex flex-1 flex-col gap-4 px-4 py-3">
-      <DashboardHeader title="Photographer Overview" />
-      <div className="flex flex-1 flex-col gap-6">
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl border p-4">
-            <div className="text-sm text-muted-foreground">Sales (30d)</div>
-            <div className="mt-2 text-3xl font-semibold">$4,320</div>
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6 px-3 sm:px-4 py-3 sm:py-4">
+      <DashboardHeader title="Overview" />
+
+      <div className="flex flex-1 flex-col gap-4">
+        {/* Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Total Sales (30d)
+                </p>
+                <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">
+                  {formatCurrency(salesSummary.totalRevenueCents)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {salesSummary.totalSales}{" "}
+                  {salesSummary.totalSales === 1 ? "sale" : "sales"}
+                </p>
+              </div>
+              <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              </div>
+            </div>
           </div>
-          <div className="rounded-xl border p-4">
-            <div className="text-sm text-muted-foreground">Bookings</div>
-            <div className="mt-2 text-3xl font-semibold">12</div>
+
+          <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Photos Sold (30d)
+                </p>
+                <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">
+                  {salesSummary.totalPhotosSold}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {formatCurrency(salesSummary.averageOrderValueCents)} avg
+                </p>
+              </div>
+              <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
+                <ImageIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              </div>
+            </div>
           </div>
-          <div className="rounded-xl border p-4">
-            <div className="text-sm text-muted-foreground">Top Photo</div>
-            <div className="mt-2 text-3xl font-semibold">"Sunset Wave"</div>
+
+          <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Total Events
+                </p>
+                <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">
+                  {totalEvents}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {totalEvents === 1 ? "event" : "events"} created
+                </p>
+              </div>
+              <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              </div>
+            </div>
+          </div>
+
+          {/* Storage Card */}
+          <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
+            <div className="flex items-center justify-between h-full gap-6">
+              <div className="flex flex-col justify-between h-full">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Storage
+                </p>
+                <div className="space-y-1 w-full">
+                  <div className="text-xs text-muted-foreground">
+                    {formatStorage(storage.usedGB)} /{" "}
+                    {formatStorage(storage.limitGB)}
+                  </div>
+                  <div className="h-1.5 sm:h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full transition-all",
+                        storage.usedPercent >= 90
+                          ? "bg-destructive"
+                          : storage.usedPercent >= 70
+                            ? "bg-yellow-500"
+                            : "bg-primary",
+                      )}
+                      style={{ width: `${storage.usedPercent}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {storage.usedPercent.toFixed(1)}% used
+                  </p>
+                </div>
+              </div>
+              <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
+                <HardDrive className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl border p-6 md:col-span-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Performance</h2>
-              <span className="text-sm text-muted-foreground">
-                Last 30 days
-              </span>
+        {/* Main Content Grid */}
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+          {/* Performance Chart */}
+          <div className="lg:col-span-2 rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
+              <div>
+                <h2 className="text-lg sm:text-xl font-semibold">
+                  Performance
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  Sales over the last 30 days
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>30 days</span>
+              </div>
             </div>
-            <div className="mt-6 h-40 rounded-lg bg-muted/40" />
+            <PerformanceChart data={salesOverTime} />
           </div>
-          <div className="rounded-xl border p-6">
-            <h2 className="text-xl font-semibold">Quick actions</h2>
-            <div className="mt-4 grid gap-2">
-              <a
-                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground"
-                href="/dashboard/photographer/events/new"
-              >
-                Create New Event
-              </a>
-              <a
-                className="inline-flex h-9 items-center justify-center rounded-md border px-3 text-sm"
-                href="/dashboard/photographer/events"
-              >
-                View Events
-              </a>
-            </div>
+
+          {/* Top Event & Quick Actions */}
+          <div className="space-y-4 sm:space-y-6">
+            {/* Top Event */}
+            {topEvent ? (
+              <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                  Top Event
+                </h2>
+                <div className="space-y-3">
+                  <div>
+                    <p className="font-medium text-base sm:text-lg">
+                      {topEvent.event_name || "Unnamed Event"}
+                    </p>
+                    {topEvent.event_date && (
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                        {format(new Date(topEvent.event_date), "MMM d, yyyy")}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-3 border-t">
+                    <div>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Revenue
+                      </p>
+                      <p className="text-base sm:text-lg font-semibold mt-1">
+                        {formatCurrency(topEvent.revenue_cents)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Photos Sold
+                      </p>
+                      <p className="text-base sm:text-lg font-semibold mt-1">
+                        {topEvent.photos_sold}
+                      </p>
+                    </div>
+                  </div>
+                  <ViewEventButton eventId={topEvent.event_id} />
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                  Top Event
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  No sales yet. Create your first event to get started!
+                </p>
+              </div>
+            )}
+
+            {/* Quick Actions */}
+            <QuickActions />
           </div>
         </div>
       </div>
