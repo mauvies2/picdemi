@@ -45,8 +45,10 @@ export async function getDashboardData() {
   const estimatedStorageMB = (totalPhotosCount ?? 0) * 5;
   const estimatedStorageGB = estimatedStorageMB / 1024;
   
-  // For now, assume a free plan with 10GB limit (can be made dynamic later)
-  const storageLimitGB = 10;
+  // For now, assume a free plan (can be fetched from user subscription later)
+  const { getPlanById } = await import("@/lib/plans");
+  const currentPlan = getPlanById("free");
+  const storageLimitGB = currentPlan?.storageGB ?? 1;
   const storageUsedGB = estimatedStorageGB;
   const storageUsedPercent = Math.min((storageUsedGB / storageLimitGB) * 100, 100);
 

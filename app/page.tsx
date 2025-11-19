@@ -16,12 +16,13 @@ import {
 import Link from "next/link";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
+import { PLANS } from "@/lib/plans";
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section - Full Screen Height */}
-      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
+      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-linear-to-br from-background via-background to-primary/5">
         {/* Decorative background elements */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
@@ -39,7 +40,7 @@ export default function Home() {
 
             <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl xl:text-8xl">
               Find Yourself in Every
-              <span className="block bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+              <span className="block bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
                 Moment
               </span>
             </h1>
@@ -166,7 +167,7 @@ export default function Home() {
       </section>
 
       {/* Features for Users */}
-      <section className="py-24 sm:py-32 bg-gradient-to-b from-muted/30 to-background">
+      <section className="py-24 sm:py-32 bg-linear-to-b from-muted/30 to-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
@@ -341,108 +342,141 @@ export default function Home() {
       </section>
 
       {/* Pricing Tiers */}
-      <section className="py-24 sm:py-32 bg-gradient-to-b from-muted/30 to-background">
+      <section className="py-16 sm:py-20 bg-linear-to-b from-muted/20 via-background to-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Header */}
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Photographer Plans
+            <h2 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              Pricing designed for creators who capture the world
             </h2>
-            <p className="mt-6 text-xl text-muted-foreground">
-              Choose the plan that fits your needs
+
+            <p className="mt-3 text-base text-muted-foreground sm:text-lg text-pretty">
+              Whether you're shooting your first event or managing weekly
+              sessions, Captoran grows with you. Start free — upgrade anytime.
             </p>
           </div>
 
-          <div className="mx-auto mt-20 grid max-w-6xl gap-8 sm:grid-cols-3">
-            {/* Free Tier */}
-            <div className="group rounded-2xl border bg-card p-8 shadow-sm transition-all hover:shadow-lg">
-              <h3 className="text-2xl font-bold">Free</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Perfect for getting started
-              </p>
-              <ul className="mt-8 space-y-4 text-sm">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Limited monthly uploads</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Basic gallery</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Standard sales (10% fee)</span>
-                </li>
-              </ul>
-            </div>
+          {/* Pricing grid */}
+          <div className="mx-auto mt-12 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {PLANS.map((plan) => {
+              const isFree = plan.id === "free";
+              const isPopular = plan.popular;
 
-            {/* Amateur Tier */}
-            <div className="group relative rounded-2xl border-2 border-primary bg-card p-8 shadow-lg transition-all hover:shadow-xl">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                <span className="rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground">
-                  Popular
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold">Amateur</h3>
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                For active photographers
-              </p>
-              <ul className="mt-8 space-y-4 text-sm">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>200GB storage</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Custom pricing & bundles</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Reduced platform fee</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Enhanced profile</span>
-                </li>
-              </ul>
-            </div>
+              return (
+                <div
+                  key={plan.id}
+                  className={[
+                    "relative flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-200",
+                    "hover:-translate-y-[2px] hover:border-primary/40 hover:shadow-md",
+                    isPopular &&
+                      "ring-1 ring-primary/40 ring-offset-1 ring-offset-background shadow-lg sm:-mt-2 bg-linear-to-b from-primary/5 to-card",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {/* Popular badge */}
+                  {isPopular && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                      <span className="rounded-full bg-primary px-3 py-1 text-[10px] font-semibold text-primary-foreground uppercase shadow-sm tracking-wide">
+                        Most popular
+                      </span>
+                    </div>
+                  )}
 
-            {/* Pro Tier */}
-            <div className="group rounded-2xl border bg-card p-8 shadow-sm transition-all hover:shadow-lg">
-              <h3 className="text-2xl font-bold">Pro</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                For professionals
-              </p>
-              <ul className="mt-8 space-y-4 text-sm">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Unlimited storage</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Premium features & analytics</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Priority listing</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>Lowest transaction fees</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span>€20/month subscription</span>
-                </li>
-              </ul>
-            </div>
+                  {/* Header */}
+                  <div className="mb-5">
+                    <h3 className="text-2xl font-semibold">{plan.name}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {plan.description}
+                    </p>
+
+                    <div className="mt-3 flex items-baseline gap-2">
+                      {plan.price !== null ? (
+                        <>
+                          <span className="text-3xl font-semibold">
+                            ${plan.price}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            /month
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-3xl font-semibold">Free</span>
+                      )}
+                    </div>
+
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {plan.salesFeePercent}% sales fee • Cancel anytime
+                    </p>
+                  </div>
+
+                  {/* Features */}
+                  <ul className="mb-6 space-y-2 text-sm flex-1 text-foreground/90">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-center gap-2 leading-relaxed"
+                      >
+                        <div className="rounded-full bg-primary/10 p-1 text-primary mt-0.5">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        </div>
+                        <span className="text-[13px]">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA Button */}
+                  <Link
+                    href={isFree ? "/signup" : `/signup?plan=${plan.id}`}
+                    className="mt-auto block"
+                  >
+                    <Button
+                      variant={isFree ? "outline" : "default"}
+                      size="lg"
+                      className={[
+                        "w-full justify-center gap-2 text-sm font-medium tracking-tight",
+                        !isFree &&
+                          "bg-primary text-primary-foreground hover:bg-primary/90",
+                      ].join(" ")}
+                    >
+                      {isFree
+                        ? "Start for free"
+                        : plan.id === "amateur"
+                          ? "Upgrade to Amateur"
+                          : "Go Pro"}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+
+                  <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                    Best for{" "}
+                    {plan.id === "amateur"
+                      ? "growing event photographers"
+                      : plan.id === "pro"
+                        ? "high-volume professionals"
+                        : "trying out the platform"}
+                  </p>
+                </div>
+              );
+            })}
           </div>
+
+          {/* Footer helper */}
+          <p className="mx-auto mt-8 max-w-2xl text-center text-[11px] text-muted-foreground">
+            Need a custom plan for large studios or organizers?{" "}
+            <Link
+              href="/contact"
+              className="underline underline-offset-4 hover:text-foreground"
+            >
+              Contact us
+            </Link>
+            .
+          </p>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 sm:py-32 bg-gradient-to-br from-primary/10 via-primary/5 to-background">
+      <section className="py-24 sm:py-32 bg-linear-to-br from-primary/10 via-primary/5 to-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">

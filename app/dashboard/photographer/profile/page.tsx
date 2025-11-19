@@ -1,10 +1,9 @@
 import { format } from "date-fns";
 import {
-  Camera,
   Calendar,
+  Camera,
+  DollarSign,
   Mail,
-  Package,
-  ShoppingCart,
   User,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
@@ -17,10 +16,11 @@ function formatCurrency(cents: number): string {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(cents / 100);
 }
 
-export default async function TalentProfilePage() {
+export default async function PhotographerProfilePage() {
   const data = await getProfileData();
   const { profile, email, createdAt, stats } = data;
 
@@ -99,36 +99,49 @@ export default async function TalentProfilePage() {
         {/* Statistics */}
         <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
           <h2 className="text-lg sm:text-xl font-semibold mb-4">Statistics</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-primary/10 p-2 sm:p-3">
                 <Camera className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground">Photos Tagged</p>
+                <p className="text-xs text-muted-foreground">Total Events</p>
                 <p className="text-lg sm:text-xl font-bold">
-                  {stats.taggedPhotosCount}
+                  {stats.totalEvents}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-primary/10 p-2 sm:p-3">
-                <Package className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                <Camera className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground">Photos Purchased</p>
+                <p className="text-xs text-muted-foreground">Total Photos</p>
                 <p className="text-lg sm:text-xl font-bold">
-                  {stats.purchasedPhotosCount}
+                  {stats.totalPhotos}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-primary/10 p-2 sm:p-3">
-                <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground">Total Orders</p>
-                <p className="text-lg sm:text-xl font-bold">{stats.totalOrders}</p>
+                <p className="text-xs text-muted-foreground">Total Sales</p>
+                <p className="text-lg sm:text-xl font-bold">
+                  {stats.totalSales}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-primary/10 p-2 sm:p-3">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-muted-foreground">Total Revenue</p>
+                <p className="text-lg sm:text-xl font-bold">
+                  {formatCurrency(stats.totalRevenueCents)}
+                </p>
               </div>
             </div>
           </div>
@@ -137,3 +150,4 @@ export default async function TalentProfilePage() {
     </div>
   );
 }
+

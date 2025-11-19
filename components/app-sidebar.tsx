@@ -56,6 +56,12 @@ const photographerNav = [
     icon: CalendarDays,
   },
   { title: "Sales", url: "/dashboard/photographer/sales", icon: WalletMinimal },
+  { title: "Profile", url: "/dashboard/photographer/profile", icon: User },
+  {
+    title: "Settings",
+    url: "/dashboard/photographer/settings",
+    icon: Settings,
+  },
   // {
   //   title: "Analytics",
   //   url: "/dashboard/photographer/analytics",
@@ -73,7 +79,6 @@ const talentNav = [
   { title: "Photos of you", url: "/dashboard/talent/photos", icon: Images },
   { title: "Explore", url: "/dashboard/talent/events", icon: Compass },
   { title: "Profile", url: "/dashboard/talent/profile", icon: User },
-  { title: "Settings", url: "/dashboard/talent/settings", icon: Settings },
 ];
 
 const navSecondary = [
