@@ -11,6 +11,7 @@ import {
   activityOptions,
   activityValues,
 } from "@/app/dashboard/photographer/events/new/activity-options";
+import { LocationSelector } from "@/components/location-selector";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ const eventSchema = z.object({
     ),
   date: z.string().min(1, "Date is required."),
   country: z.string().trim().min(1, "Country is required."),
+  state: z.string().trim().min(1, "State/Province is required."),
   city: z.string().trim().min(1, "City is required."),
   is_public: z.boolean().default(true),
   watermark_enabled: z.boolean().default(true),
@@ -112,6 +114,7 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
     activity: event.activity,
     date: eventDate,
     country: event.country,
+    state: event.state || "",
     city: event.city,
     is_public: event.is_public,
     watermark_enabled: event.watermark_enabled,
@@ -180,6 +183,7 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
         formData.append("activity", parsed.activity);
         formData.append("date", parsed.date);
         formData.append("country", parsed.country.trim());
+        formData.append("state", parsed.state.trim());
         formData.append("city", parsed.city.trim());
         formData.append("is_public", parsed.is_public ? "true" : "false");
         formData.append(
@@ -350,84 +354,80 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
               </form.Field>
             </div>
 
-            {/* Row 2: City + Country */}
-            <div className="grid gap-4 md:grid-cols-2">
-              <form.Field
-                name="city"
-                validators={{
-                  onChange: ({ value }) =>
-                    value.trim().length === 0 ? "City is required." : undefined,
-                }}
-              >
-                {(field) => {
-                  const showFeedback =
-                    submitAttempted || field.state.meta.isTouched;
-                  const error = showFeedback
-                    ? field.state.meta.errors?.[0]
-                    : null;
-                  const isInvalid = showFeedback && !field.state.meta.isValid;
-                  return (
-                    <div className="grid gap-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        value={field.state.value}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                        onBlur={field.handleBlur}
-                        placeholder="City"
-                        aria-invalid={isInvalid}
-                        autoComplete="address-level2"
-                        suppressHydrationWarning
-                      />
-                      {isInvalid && error ? (
-                        <p className="text-xs text-destructive">{error}</p>
-                      ) : null}
-                    </div>
-                  );
-                }}
-              </form.Field>
-
-              <form.Field
-                name="country"
-                validators={{
-                  onChange: ({ value }) =>
-                    value.trim().length === 0
-                      ? "Country is required."
-                      : undefined,
-                }}
-              >
-                {(field) => {
-                  const showFeedback =
-                    submitAttempted || field.state.meta.isTouched;
-                  const error = showFeedback
-                    ? field.state.meta.errors?.[0]
-                    : null;
-                  const isInvalid = showFeedback && !field.state.meta.isValid;
-                  return (
-                    <div className="grid gap-2">
-                      <Label htmlFor="country">Country</Label>
-                      <Input
-                        id="country"
-                        value={field.state.value}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                        onBlur={field.handleBlur}
-                        placeholder="Country"
-                        aria-invalid={isInvalid}
-                        autoComplete="country-name"
-                        suppressHydrationWarning
-                      />
-                      {isInvalid && error ? (
-                        <p className="text-xs text-destructive">{error}</p>
-                      ) : null}
-                    </div>
-                  );
-                }}
-              </form.Field>
-            </div>
+            {/* Row 2: Location (Country, State, City) */}
+            <form.Field
+              name="country"
+              validators={{
+                onChange: ({ value }) =>
+                  value.trim().length === 0
+                    ? "Country is required."
+                    : undefined,
+              }}
+            >
+              {(countryField) => (
+                <form.Field
+                  name="state"
+                  validators={{
+                    onChange: ({ value }) =>
+                      value.trim().length === 0
+                        ? "State/Province is required."
+                        : undefined,
+                  }}
+                >
+                  {(stateField) => (
+                    <form.Field
+                      name="city"
+                      validators={{
+                        onChange: ({ value }) =>
+                          value.trim().length === 0
+                            ? "City is required."
+                            : undefined,
+                      }}
+                    >
+                      {(cityField) => {
+                        const showFeedback =
+                          submitAttempted ||
+                          countryField.state.meta.isTouched ||
+                          stateField.state.meta.isTouched ||
+                          cityField.state.meta.isTouched;
+                        const countryError = showFeedback
+                          ? countryField.state.meta.errors?.[0]
+                          : null;
+                        const stateError = showFeedback
+                          ? stateField.state.meta.errors?.[0]
+                          : null;
+                        const cityError = showFeedback
+                          ? cityField.state.meta.errors?.[0]
+                          : null;
+                        return (
+                          <LocationSelector
+                            country={countryField.state.value}
+                            state={stateField.state.value || ""}
+                            city={cityField.state.value}
+                            onCountryChange={(value) => {
+                              countryField.handleChange(value);
+                              countryField.handleBlur();
+                            }}
+                            onStateChange={(value) => {
+                              stateField.handleChange(value);
+                              stateField.handleBlur();
+                            }}
+                            onCityChange={(value) => {
+                              cityField.handleChange(value);
+                              cityField.handleBlur();
+                            }}
+                            countryError={countryError ?? undefined}
+                            stateError={stateError ?? undefined}
+                            cityError={cityError ?? undefined}
+                            showFeedback={showFeedback}
+                          />
+                        );
+                      }}
+                    </form.Field>
+                  )}
+                </form.Field>
+              )}
+            </form.Field>
 
             {/* Row 3: Date + Price per Photo */}
             <div className="grid gap-4 md:grid-cols-2">

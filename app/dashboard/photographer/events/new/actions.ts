@@ -26,6 +26,7 @@ const eventSchema = z.object({
     ),
   date: z.string().min(1, "Date is required."),
   country: z.string().trim().min(1, "Country is required."),
+  state: z.string().trim().min(1, "State/Province is required."),
   city: z.string().trim().min(1, "City is required."),
   is_public: z
     .string()
@@ -69,6 +70,7 @@ export const createEvent = async (
     activity: formData.get("activity"),
     date: formData.get("date"),
     country: formData.get("country"),
+    state: formData.get("state"),
     city: formData.get("city"),
     is_public: formData.get("is_public"),
     watermark_enabled: formData.get("watermark_enabled"),
@@ -80,6 +82,7 @@ export const createEvent = async (
     activity: rawPayload.activity?.toString() ?? "",
     date: rawPayload.date?.toString() ?? "",
     country: rawPayload.country?.toString() ?? "",
+    state: rawPayload.state?.toString(),
     city: rawPayload.city?.toString() ?? "",
     is_public: rawPayload.is_public?.toString() ?? "true",
     watermark_enabled: rawPayload.watermark_enabled?.toString() ?? "true",
@@ -119,6 +122,7 @@ export const createEvent = async (
     activity: payload.activity,
     date: payload.date,
     country: payload.country,
+    state: payload.state,
     city: payload.city,
     is_public: payload.is_public,
     share_code: shareCode,
@@ -150,6 +154,7 @@ export const createEvent = async (
         taken_at: new Date(payload.date).toISOString(),
         city: payload.city,
         country: payload.country,
+        state: payload.state,
       });
 
       photoRecords.push({ original_path: path });

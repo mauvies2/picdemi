@@ -163,6 +163,7 @@ export async function createPhoto(
     taken_at: string;
     city: string;
     country: string;
+    state: string | null;
   },
 ): Promise<void> {
   const { error } = await supabase.from("photos").insert({

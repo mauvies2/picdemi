@@ -10,8 +10,9 @@ export interface Event {
   user_id: string;
   name: string;
   date: string;
-  city: string;
-  country: string;
+    city: string;
+    country: string;
+    state: string;
   activity: string;
   is_public: boolean;
   share_code: string | null;
@@ -25,8 +26,9 @@ export interface EventSummary {
   id: string;
   name: string;
   date: string;
-  city: string;
-  country: string;
+    city: string;
+    country: string;
+    state: string;
   activity: string;
   is_public: boolean;
   share_code: string | null;
@@ -113,6 +115,7 @@ export async function createEvent(
     date: string;
     city: string;
     country: string;
+    state: string;
     activity: string;
     is_public: boolean;
     share_code: string | null;
@@ -176,7 +179,7 @@ export async function searchPublicEvents(
   let query = supabase
     .from("events")
     .select(
-      "id, name, date, city, country, activity, is_public, share_code, price_per_photo, watermark_enabled",
+      "id, name, date, city, country, state, activity, is_public, share_code, price_per_photo, watermark_enabled",
       { count: "exact" },
     )
     .eq("is_public", true);
@@ -285,6 +288,7 @@ export async function updateEvent(
     date?: string;
     city?: string;
     country?: string;
+    state?: string | null;
     activity?: string;
     is_public?: boolean;
     share_code?: string | null;

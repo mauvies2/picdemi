@@ -9,6 +9,7 @@ import { useId, useMemo, useState, useTransition } from "react";
 import { z } from "zod";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { EventShareCode } from "@/components/event-share-code";
+import { LocationSelector } from "@/components/location-selector";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ const eventSchema = z.object({
     ),
   date: z.string().min(1, "Date is required."),
   country: z.string().trim().min(1, "Country is required."),
+  state: z.string().trim().min(1, "State/Province is required."),
   city: z.string().trim().min(1, "City is required."),
   is_public: z.boolean().default(true),
   watermark_enabled: z.boolean().default(true),
@@ -65,6 +67,7 @@ const defaultValues: FormValues = {
   activity: "",
   date: "",
   country: "",
+  state: "",
   city: "",
   is_public: true,
   watermark_enabled: true,
@@ -161,6 +164,7 @@ export default function NewEventForm() {
     formData.append("activity", value.activity);
     formData.append("date", value.date);
     formData.append("country", value.country.trim());
+    formData.append("state", value.state.trim());
     formData.append("city", value.city.trim());
     formData.append("is_public", value.is_public ? "true" : "false");
     formData.append(
@@ -230,6 +234,9 @@ export default function NewEventForm() {
         value: source.date ? format(new Date(source.date), "PPP") : "",
       },
       { label: "Country", value: source.country },
+      ...(source.state
+        ? [{ label: "State / Province", value: source.state }]
+        : []),
       { label: "City", value: source.city },
       {
         label: "Visibility",
@@ -410,86 +417,80 @@ export default function NewEventForm() {
                 </form.Field>
               </div>
 
-              {/* Row 2: City + Country (paired on desktop) */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <form.Field
-                  name="city"
-                  validators={{
-                    onChange: ({ value }) =>
-                      value.trim().length === 0
-                        ? "City is required."
-                        : undefined,
-                  }}
-                >
-                  {(field) => {
-                    const showFeedback =
-                      submitAttempted || field.state.meta.isTouched;
-                    const error = showFeedback
-                      ? field.state.meta.errors?.[0]
-                      : null;
-                    const isInvalid = showFeedback && !field.state.meta.isValid;
-                    return (
-                      <div className="grid gap-2">
-                        <Label htmlFor="city">City</Label>
-                        <Input
-                          id="city"
-                          value={field.state.value}
-                          onChange={(event) =>
-                            field.handleChange(event.target.value)
-                          }
-                          onBlur={field.handleBlur}
-                          placeholder="City"
-                          aria-invalid={isInvalid}
-                          autoComplete="address-level2"
-                          suppressHydrationWarning
-                        />
-                        {isInvalid && error ? (
-                          <p className="text-xs text-destructive">{error}</p>
-                        ) : null}
-                      </div>
-                    );
-                  }}
-                </form.Field>
-
-                <form.Field
-                  name="country"
-                  validators={{
-                    onChange: ({ value }) =>
-                      value.trim().length === 0
-                        ? "Country is required."
-                        : undefined,
-                  }}
-                >
-                  {(field) => {
-                    const showFeedback =
-                      submitAttempted || field.state.meta.isTouched;
-                    const error = showFeedback
-                      ? field.state.meta.errors?.[0]
-                      : null;
-                    const isInvalid = showFeedback && !field.state.meta.isValid;
-                    return (
-                      <div className="grid gap-2">
-                        <Label htmlFor="country">Country</Label>
-                        <Input
-                          id="country"
-                          value={field.state.value}
-                          onChange={(event) =>
-                            field.handleChange(event.target.value)
-                          }
-                          onBlur={field.handleBlur}
-                          placeholder="Country"
-                          aria-invalid={isInvalid}
-                          autoComplete="country-name"
-                          suppressHydrationWarning
-                        />
-                        {isInvalid && error ? (
-                          <p className="text-xs text-destructive">{error}</p>
-                        ) : null}
-                      </div>
-                    );
-                  }}
-                </form.Field>
-              </div>
+              {/* Row 2: Location (Country, State, City) */}
+              <form.Field
+                name="country"
+                validators={{
+                  onChange: ({ value }) =>
+                    value.trim().length === 0
+                      ? "Country is required."
+                      : undefined,
+                }}
+              >
+                {(countryField) => (
+                  <form.Field
+                    name="state"
+                    validators={{
+                      onChange: ({ value }) =>
+                        value.trim().length === 0
+                          ? "State/Province is required."
+                          : undefined,
+                    }}
+                  >
+                    {(stateField) => (
+                      <form.Field
+                        name="city"
+                        validators={{
+                          onChange: ({ value }) =>
+                            value.trim().length === 0
+                              ? "City is required."
+                              : undefined,
+                        }}
+                      >
+                        {(cityField) => {
+                          const showFeedback =
+                            submitAttempted ||
+                            countryField.state.meta.isTouched ||
+                            stateField.state.meta.isTouched ||
+                            cityField.state.meta.isTouched;
+                          const countryError = showFeedback
+                            ? countryField.state.meta.errors?.[0]
+                            : null;
+                          const stateError = showFeedback
+                            ? stateField.state.meta.errors?.[0]
+                            : null;
+                          const cityError = showFeedback
+                            ? cityField.state.meta.errors?.[0]
+                            : null;
+                          return (
+                            <LocationSelector
+                              country={countryField.state.value}
+                              state={stateField.state.value || ""}
+                              city={cityField.state.value}
+                              onCountryChange={(value) => {
+                                countryField.handleChange(value);
+                                countryField.handleBlur();
+                              }}
+                              onStateChange={(value) => {
+                                stateField.handleChange(value);
+                                stateField.handleBlur();
+                              }}
+                              onCityChange={(value) => {
+                                cityField.handleChange(value);
+                                cityField.handleBlur();
+                              }}
+                              countryError={countryError ?? undefined}
+                              stateError={stateError ?? undefined}
+                              cityError={cityError ?? undefined}
+                              showFeedback={showFeedback}
+                            />
+                          );
+                        }}
+                      </form.Field>
+                    )}
+                  </form.Field>
+                )}
+              </form.Field>
 
               {/* Row 3: Date + Price per Photo (paired on desktop) */}
               <div className="grid gap-4 md:grid-cols-2">
