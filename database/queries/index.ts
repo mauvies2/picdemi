@@ -11,13 +11,14 @@ export * from "./carts";
 export * from "./events";
 // Re-export photo queries
 export * from "./photos";
-// Re-export sales queries
-export * from "./sales";
-
 // Re-export profile queries
 export * from "./profiles";
+// Re-export sales queries
+export * from "./sales";
 // Re-export storage queries
 export * from "./storage";
+// Re-export subscription queries
+export * from "./subscriptions";
 // Re-export talent photo tag queries
 export * from "./talent-photo-tags";
 // Re-export types

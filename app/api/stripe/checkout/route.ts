@@ -4,9 +4,9 @@
  */
 
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe/config";
-import { createClient } from "@/database/server";
 import { getCartItemsWithDetails } from "@/database/queries/carts";
+import { createClient } from "@/database/server";
+import { stripe } from "@/lib/stripe/config";
 
 export async function POST(request: Request) {
   try {
@@ -85,4 +85,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

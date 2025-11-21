@@ -15,10 +15,18 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Footer } from "@/components/footer";
+import { PricingPlanButton } from "@/components/pricing-plan-button";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/database/server";
 import { PLANS } from "@/lib/plans";
 
-export default function Home() {
+export default async function Home() {
+  // Check if user is authenticated
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAuthenticated = !!user;
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
@@ -430,27 +438,13 @@ export default function Home() {
                     ))}
                   </ul>
 
-                  <Link
-                    href={isFree ? "/signup" : `/signup?plan=${plan.id}`}
-                    className="mt-auto block"
-                  >
-                    <Button
-                      variant={isFree ? "outline" : "default"}
-                      size="lg"
-                      className={[
-                        "w-full justify-center gap-2 text-sm font-medium tracking-tight",
-                        !isFree &&
-                          "bg-primary text-primary-foreground hover:bg-primary/90",
-                      ].join(" ")}
-                    >
-                      {isFree
-                        ? "Start for free"
-                        : plan.id === "amateur"
-                          ? "Upgrade to Amateur"
-                          : "Go Pro"}
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <div className="mt-auto">
+                    <PricingPlanButton
+                      planId={plan.id}
+                      isFree={isFree}
+                      isAuthenticated={isAuthenticated}
+                    />
+                  </div>
 
                   <p className="mt-2 text-center text-[11px] text-muted-foreground">
                     Best for{" "}

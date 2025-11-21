@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import {
   type CartData,
   clearCartAction,
+  createCheckoutSessionAction,
   getCurrentCart,
   removePhotoFromCartAction,
 } from "./actions";
@@ -41,6 +42,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
   const [cartData, setCartData] = useState(initialCartData);
   const [isPending, startTransition] = useTransition();
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const router = useRouter();
 
   const handleRemove = (photoId: string) => {
@@ -74,6 +76,27 @@ export function CartContent({ initialCartData }: CartContentProps) {
         const message =
           error instanceof Error ? error.message : "Failed to clear cart";
         toast.error(message);
+      }
+    });
+  };
+
+  const handleCheckout = () => {
+    if (cartData.items.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    setIsCheckingOut(true);
+    startTransition(async () => {
+      try {
+        const { url } = await createCheckoutSessionAction();
+        // Redirect to Stripe Checkout
+        window.location.href = url;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to start checkout";
+        toast.error(message);
+        setIsCheckingOut(false);
       }
     });
   };
@@ -268,12 +291,17 @@ export function CartContent({ initialCartData }: CartContentProps) {
                 <Button
                   className="w-full"
                   size="lg"
-                  onClick={() => {
-                    toast.info("Checkout coming soon!");
-                  }}
-                  disabled={cartData.items.length === 0}
+                  onClick={handleCheckout}
+                  disabled={cartData.items.length === 0 || isCheckingOut}
                 >
-                  Proceed to Checkout
+                  {isCheckingOut ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Proceed to Checkout"
+                  )}
                 </Button>
                 <p className="text-xs text-center text-muted-foreground mt-3">
                   You can continue shopping and add more items
@@ -298,12 +326,17 @@ export function CartContent({ initialCartData }: CartContentProps) {
           <Button
             className="w-full"
             size="sm"
-            onClick={() => {
-              toast.info("Checkout coming soon!");
-            }}
-            disabled={cartData.items.length === 0}
+            onClick={handleCheckout}
+            disabled={cartData.items.length === 0 || isCheckingOut}
           >
-            Proceed to Checkout
+            {isCheckingOut ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Proceed to Checkout"
+            )}
           </Button>
         </div>
       </div>

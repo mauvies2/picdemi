@@ -12,7 +12,7 @@ import { createClient } from "@/database/server";
 export default async function Login({
   searchParams,
 }: {
-  searchParams: Promise<{ message?: string }>;
+  searchParams: Promise<{ message?: string; plan?: string; success?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -20,6 +20,15 @@ export default async function Login({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // If user is logged in and has a plan parameter, redirect to billing checkout
+  if (
+    user &&
+    params.plan &&
+    (params.plan === "amateur" || params.plan === "pro")
+  ) {
+    return redirect(`/dashboard/photographer/settings?upgrade=${params.plan}`);
+  }
 
   if (user) {
     const { data: profile } = await supabase
@@ -76,6 +85,12 @@ export default async function Login({
     const { getProfileActiveRole, getUserRoles } = await import(
       "@/database/queries"
     );
+
+    // Check if there's a plan parameter to redirect to billing after login
+    const planParam = params.plan;
+    if (planParam && (planParam === "amateur" || planParam === "pro")) {
+      return redirect(`/dashboard/photographer/settings?upgrade=${planParam}`);
+    }
 
     const activeRole = await getProfileActiveRole(supabase, user.id);
     if (activeRole) {

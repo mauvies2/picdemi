@@ -24,12 +24,15 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "cSpell.words": [
-    "Captoran",
+    "captoran",
     "ocea",
     "oceapic",
+    "serverside",
     "supabase",
     "uncategorized",
     "untagging",
+    "upserted",
+    "upserting",
     "watermarked",
     "yarl"
   ]

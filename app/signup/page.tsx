@@ -13,7 +13,7 @@ import { env } from "@/env.mjs";
 export default async function Signup({
   searchParams,
 }: {
-  searchParams: Promise<{ message: string }>;
+  searchParams: Promise<{ message?: string; plan?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -21,6 +21,15 @@ export default async function Signup({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // If user is logged in and has a plan parameter, redirect to settings page
+  if (
+    user &&
+    params.plan &&
+    (params.plan === "amateur" || params.plan === "pro")
+  ) {
+    return redirect(`/dashboard/photographer/settings?upgrade=${params.plan}`);
+  }
 
   if (user) {
     const dashboardPath = await getDashboardPath();
@@ -43,11 +52,15 @@ export default async function Signup({
     }
 
     if (!username || username.length < 3 || username.length > 30) {
-      return redirect(`/signup?message=Username must be between 3 and 30 characters`);
+      return redirect(
+        `/signup?message=Username must be between 3 and 30 characters`,
+      );
     }
 
     if (!/^[a-z0-9_-]+$/.test(username)) {
-      return redirect(`/signup?message=Username can only contain lowercase letters, numbers, underscores, and hyphens`);
+      return redirect(
+        `/signup?message=Username can only contain lowercase letters, numbers, underscores, and hyphens`,
+      );
     }
 
     const supabase = await createClient();
@@ -78,7 +91,11 @@ export default async function Signup({
       await updateProfile(supabase, data.user.id, { username });
     }
 
-    return redirect("/login?success=Check email to continue sign in process");
+    // Preserve plan parameter if present
+    const planParam = params.plan ? `&plan=${params.plan}` : "";
+    return redirect(
+      `/login?success=Check email to continue sign in process${planParam}`,
+    );
   };
 
   return (
@@ -152,7 +169,8 @@ export default async function Signup({
             required
           />
           <p className="text-xs text-muted-foreground -mt-2 mb-2">
-            3-30 characters, lowercase letters, numbers, underscores, and hyphens only.
+            3-30 characters, lowercase letters, numbers, underscores, and
+            hyphens only.
           </p>
           <Label htmlFor="password">Password</Label>
           <Input

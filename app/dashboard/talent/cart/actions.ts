@@ -259,3 +259,45 @@ export async function checkPhotoInCartAction(
 
   return isPhotoInCart(supabase, user.id, photoId);
 }
+
+/**
+ * Create Stripe checkout session for cart
+ */
+export async function createCheckoutSessionAction(): Promise<{ url: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("You must be signed in to checkout.");
+  }
+
+  // Verify user is talent
+  const { activeRole } = await getActiveRole();
+  if (activeRole !== "talent") {
+    throw new Error("Only talent users can checkout.");
+  }
+
+  // Call the checkout API
+  const response = await fetch(`${await getBaseUrl()}/api/stripe/checkout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response
+      .json()
+      .catch(() => ({ error: "Checkout failed" }));
+    throw new Error(error.error || "Failed to create checkout session");
+  }
+
+  const data = await response.json();
+  if (!data.url) {
+    throw new Error("No checkout URL returned");
+  }
+
+  return { url: data.url };
+}

@@ -1,5 +1,4 @@
-import { CreditCard, Database, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { CreditCard, Database } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { getSubscription } from "@/database/queries";
+import { createClient } from "@/database/server";
 import { formatPlanPrice, PLANS, type PlanId } from "@/lib/plans";
 import { getDashboardData } from "../actions";
+import { UpgradeHandler } from "./upgrade-handler";
+import { UpgradePlanButton } from "./upgrade-plan-button";
 
 function formatStorage(gb: number): string {
   if (gb < 1) {
@@ -25,12 +28,25 @@ export default async function PhotographerSettingsPage() {
   const dashboardData = await getDashboardData();
   const { storage } = dashboardData;
 
-  // For now, assume free plan - can be fetched from user subscription later
-  const currentPlanId = "free" as PlanId;
+  // Fetch actual subscription from database
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let currentPlanId: PlanId = "free";
+  if (user) {
+    const subscription = await getSubscription(supabase, user.id);
+    if (subscription) {
+      currentPlanId = subscription.plan_id as PlanId;
+    }
+  }
+
   const currentPlan = PLANS.find((p) => p.id === currentPlanId) || PLANS[0];
 
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-6 px-3 sm:px-4 py-3 sm:py-4">
+      <UpgradeHandler />
       <DashboardHeader title="Settings" />
 
       <div className="flex flex-1 flex-col gap-6">
@@ -56,14 +72,7 @@ export default async function PhotographerSettingsPage() {
                     ` • ${formatPlanPrice(currentPlan)}`}
                 </p>
               </div>
-              {currentPlanId !== "pro" && (
-                <Link href="/signup?plan=pro">
-                  <Button size="sm">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Upgrade
-                  </Button>
-                </Link>
-              )}
+              {currentPlanId !== "pro" && <UpgradePlanButton planId="pro" />}
             </div>
 
             {/* Storage Usage */}
@@ -138,14 +147,12 @@ export default async function PhotographerSettingsPage() {
                           </p>
                         </div>
                       </div>
-                      <Link
-                        href={`/signup?plan=${plan.id}`}
-                        className="mt-4 block"
-                      >
-                        <Button variant="outline" size="sm" className="w-full">
-                          {currentPlanId === "free" ? "Upgrade" : "Switch Plan"}
-                        </Button>
-                      </Link>
+                      <div className="mt-4">
+                        <UpgradePlanButton
+                          planId={plan.id as "amateur" | "pro"}
+                          variant="outline"
+                        />
+                      </div>
                     </div>
                   ),
                 )}
