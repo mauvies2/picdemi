@@ -37,7 +37,12 @@ export default async function PhotographerSettingsPage() {
   let currentPlanId: PlanId = "free";
   if (user) {
     const subscription = await getSubscription(supabase, user.id);
-    if (subscription) {
+    // Only show subscription as current plan if it's active, trialing, or past_due
+    // Don't show incomplete subscriptions as the current plan
+    if (
+      subscription?.status &&
+      ["active", "trialing", "past_due"].includes(subscription.status)
+    ) {
       currentPlanId = subscription.plan_id as PlanId;
     }
   }
@@ -150,7 +155,7 @@ export default async function PhotographerSettingsPage() {
                       <div className="mt-4">
                         <UpgradePlanButton
                           planId={plan.id as "amateur" | "pro"}
-                          variant="outline"
+                          variant={plan.id === "pro" ? "default" : "outline"}
                         />
                       </div>
                     </div>

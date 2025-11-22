@@ -1,12 +1,11 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import { createBillingCheckoutAction } from "@/app/dashboard/photographer/billing/actions";
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { createBillingCheckoutAction } from "@/app/dashboard/photographer/billing/actions";
+import { Button } from "@/components/ui/button";
 
 interface PricingPlanButtonProps {
   planId: "free" | "amateur" | "pro";
@@ -49,7 +48,7 @@ export function PricingPlanButton({
           size="lg"
           className="w-full justify-center gap-2 text-sm font-medium tracking-tight bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          {planId === "amateur" ? "Upgrade to Amateur" : "Go Pro"}
+          {planId === "amateur" ? "Get Amateur" : "Go Pro"}
           <ArrowRight className="h-4 w-4" />
         </Button>
       </Link>
@@ -100,11 +99,10 @@ export function PricingPlanButton({
         </>
       ) : (
         <>
-          {planId === "amateur" ? "Upgrade to Amateur" : "Go Pro"}
+          {planId === "amateur" ? "Get Amateur" : "Go Pro"}
           <ArrowRight className="h-4 w-4" />
         </>
       )}
     </Button>
   );
 }
-

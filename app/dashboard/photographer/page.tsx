@@ -100,7 +100,7 @@ export default async function PhotographerDashboardPage() {
           {/* Storage Card */}
           <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between h-full gap-6">
-              <div className="flex flex-col justify-between h-full">
+              <div className="flex flex-col flex-1 justify-between h-full">
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Storage
                 </p>

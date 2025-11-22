@@ -1,12 +1,11 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { createBillingCheckoutAction } from "../billing/actions";
-import { Loader2 } from "lucide-react";
 
 interface UpgradePlanButtonProps {
   planId: "amateur" | "pro";
@@ -28,7 +27,7 @@ export function UpgradePlanButton({
     startTransition(async () => {
       try {
         const result = await createBillingCheckoutAction(planId);
-        
+
         if ("url" in result) {
           // Redirect to Stripe Checkout
           window.location.href = result.url;
@@ -67,4 +66,3 @@ export function UpgradePlanButton({
     </Button>
   );
 }
-
