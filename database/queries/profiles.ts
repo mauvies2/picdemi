@@ -12,6 +12,16 @@ export interface Profile {
   username: string;
   bio?: string | null;
   active_role: UserRole;
+  full_name?: string | null;
+  country_code?: string | null;
+  city?: string | null;
+  address_line1?: string | null;
+  address_line2?: string | null;
+  state_or_region?: string | null;
+  postal_code?: string | null;
+  payout_method?: "bank_transfer" | "paypal" | "other" | null;
+  payout_details_json?: Record<string, unknown> | null;
+  is_payout_profile_complete?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -21,6 +31,16 @@ export interface ProfileSelect {
   username: string;
   active_role?: UserRole | null;
   bio?: string | null;
+  full_name?: string | null;
+  country_code?: string | null;
+  city?: string | null;
+  address_line1?: string | null;
+  address_line2?: string | null;
+  state_or_region?: string | null;
+  postal_code?: string | null;
+  payout_method?: "bank_transfer" | "paypal" | "other" | null;
+  payout_details_json?: Record<string, unknown> | null;
+  is_payout_profile_complete?: boolean;
 }
 
 /**
@@ -98,7 +118,12 @@ async function generateUsernameFromEmail(
     { user_ids: [userId] },
   );
 
-  if (emailError || !userEmails || userEmails.length === 0 || !userEmails[0]?.email) {
+  if (
+    emailError ||
+    !userEmails ||
+    userEmails.length === 0 ||
+    !userEmails[0]?.email
+  ) {
     throw new Error(
       `Failed to get user email for username generation: ${getErrorMessage(emailError)}`,
     );
@@ -112,7 +137,7 @@ async function generateUsernameFromEmail(
 
   // Ensure minimum length
   if (baseUsername.length < 3) {
-    baseUsername = baseUsername + "_user";
+    baseUsername = `${baseUsername}_user`;
   }
 
   // Limit to 30 characters
@@ -137,9 +162,9 @@ async function generateUsernameFromEmail(
     counter++;
     const counterStr = counter.toString();
     if (baseUsername.length + counterStr.length + 1 > 30) {
-      finalUsername = baseUsername.substring(0, 30 - counterStr.length - 1) + "_" + counterStr;
+      finalUsername = `${baseUsername.substring(0, 30 - counterStr.length - 1)}_${counterStr}`;
     } else {
-      finalUsername = baseUsername + "_" + counterStr;
+      finalUsername = `${baseUsername}_${counterStr}`;
     }
   }
 
@@ -186,7 +211,24 @@ export async function upsertProfileRole(
 export async function updateProfile(
   supabase: SupabaseServerClient,
   userId: string,
-  updates: Partial<Pick<Profile, "display_name" | "username" | "bio">>,
+  updates: Partial<
+    Pick<
+      Profile,
+      | "display_name"
+      | "username"
+      | "bio"
+      | "full_name"
+      | "country_code"
+      | "city"
+      | "address_line1"
+      | "address_line2"
+      | "state_or_region"
+      | "postal_code"
+      | "payout_method"
+      | "payout_details_json"
+      | "is_payout_profile_complete"
+    >
+  >,
 ): Promise<void> {
   const { error } = await supabase
     .from("profiles")

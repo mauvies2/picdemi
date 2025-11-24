@@ -1,7 +1,7 @@
 "use server";
 
-import { getProfile } from "@/database/queries/profiles";
 import { getUserEvents } from "@/database/queries/events";
+import { getProfile } from "@/database/queries/profiles";
 import { getSalesSummary } from "@/database/queries/sales";
 import { createClient } from "@/database/server";
 
@@ -46,4 +46,3 @@ export async function getProfileData() {
     },
   };
 }
-

@@ -46,7 +46,7 @@ export async function DashboardTopHeader({
         </Link>
       )}
       <div className="pointer-events-auto">
-        <DashboardUserMenu user={user} />
+        <DashboardUserMenu user={user} activeRole={activeRole} />
       </div>
     </div>
   );

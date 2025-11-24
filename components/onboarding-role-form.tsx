@@ -77,7 +77,9 @@ export default function OnboardingRoleForm({ saveRole }: Props) {
             className="rounded-full"
           />
           <p className="text-xs text-muted-foreground">
-            This will be how others see you (e.g., in photo tags). 3-30 characters, lowercase letters, numbers, underscores, and hyphens only.
+            This will be how others see you (e.g., in photo tags). 3-30
+            characters, lowercase letters, numbers, underscores, and hyphens
+            only.
           </p>
           {username && !isUsernameValid && (
             <p className="text-xs text-destructive">

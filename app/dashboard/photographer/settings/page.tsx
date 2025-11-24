@@ -155,7 +155,6 @@ export default async function PhotographerSettingsPage() {
                       <div className="mt-4">
                         <UpgradePlanButton
                           planId={plan.id as "amateur" | "pro"}
-                          variant={plan.id === "pro" ? "default" : "outline"}
                         />
                       </div>
                     </div>

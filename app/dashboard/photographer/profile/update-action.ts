@@ -1,8 +1,8 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { updateProfile } from "@/database/queries/profiles";
 import { createClient } from "@/database/server";
-import { revalidatePath } from "next/cache";
 
 export async function updateProfileAction(values: {
   username: string;
@@ -38,4 +38,3 @@ export async function updateProfileAction(values: {
 
   revalidatePath("/dashboard/photographer/profile");
 }
-

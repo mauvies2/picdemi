@@ -279,25 +279,47 @@ export async function createCheckoutSessionAction(): Promise<{ url: string }> {
     throw new Error("Only talent users can checkout.");
   }
 
-  // Call the checkout API
-  const response = await fetch(`${await getBaseUrl()}/api/stripe/checkout`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  // Get user's cart
+  const cart = await getOrCreateCart(supabase, user.id);
+
+  // Get cart items
+  const cartItems = await getCartItemsWithDetails(supabase, cart.id, user.id);
+
+  if (cartItems.length === 0) {
+    throw new Error("Cart is empty");
+  }
+
+  // Import Stripe here to avoid circular dependencies
+  const { stripe } = await import("@/lib/stripe/config");
+  const { getBaseUrl } = await import("@/lib/get-base-url");
+
+  // Create Stripe Checkout Session
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    line_items: cartItems.map((item) => ({
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: item.event_name ? `Photo from ${item.event_name}` : "Photo",
+          description: item.event_name
+            ? `Photo from ${item.event_name}`
+            : undefined,
+        },
+        unit_amount: item.unit_price_cents,
+      },
+      quantity: 1,
+    })),
+    success_url: `${await getBaseUrl()}/dashboard/talent/cart?status=success`,
+    cancel_url: `${await getBaseUrl()}/dashboard/talent/cart?status=cancelled`,
+    metadata: {
+      user_id: user.id,
+      cart_id: cart.id,
     },
   });
 
-  if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ error: "Checkout failed" }));
-    throw new Error(error.error || "Failed to create checkout session");
-  }
-
-  const data = await response.json();
-  if (!data.url) {
+  if (!session.url) {
     throw new Error("No checkout URL returned");
   }
 
-  return { url: data.url };
+  return { url: session.url };
 }

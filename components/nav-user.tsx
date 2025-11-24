@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  BadgeCheck,
   Bell,
   ChevronsUpDown,
   CreditCard,
   LogOut,
-  Sparkles,
+  Settings,
+  User,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -26,23 +26,40 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+type RoleSlug = "photographer" | "talent";
+
 export function NavUser({
   user,
+  activeRole,
 }: {
   user: {
     name: string;
     email: string;
     avatar?: string | null;
   };
+  activeRole: RoleSlug;
 }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     await fetch("/auth/signout", { method: "POST" });
     router.push("/");
     router.refresh();
   };
+
+  const profileUrl =
+    activeRole === "photographer"
+      ? "/dashboard/photographer/profile"
+      : "/dashboard/talent/profile";
+  const settingsUrl =
+    activeRole === "photographer"
+      ? "/dashboard/photographer/settings"
+      : "/dashboard/talent/settings";
+
+  const isProfileActive = pathname.startsWith(profileUrl);
+  const isSettingsActive = pathname.startsWith(settingsUrl);
 
   return (
     <SidebarMenu>
@@ -82,36 +99,50 @@ export function NavUser({
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user.email}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+              <DropdownMenuItem
+                onClick={() => router.push(profileUrl)}
+                className={isProfileActive ? "bg-accent" : ""}
+              >
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push(settingsUrl)}
+                className={isSettingsActive ? "bg-accent" : ""}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
+              {activeRole === "photographer" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push("/dashboard/photographer/settings?tab=billing")
+                  }
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  <span>Billing</span>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem disabled>
+                <Bell className="mr-2 h-4 w-4" />
+                <span>Notifications</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
-              <LogOut />
-              Log out
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -55,7 +55,7 @@ export async function completeOnboarding(
   const role = userRoleSchema.parse(initialRole);
   const { supabase, user } = await getAuthenticatedClient();
 
-  // If username is provided, update profile with username
+  // Update profile with username
   if (username) {
     const { updateProfile } = await import("@/database/queries");
     await updateProfile(supabase, user.id, { username });

@@ -9,8 +9,8 @@ import {
   Images,
   LifeBuoy,
   Send,
-  Settings,
   User,
+  Wallet,
   WalletMinimal,
 } from "lucide-react";
 import Image from "next/image";
@@ -25,7 +25,6 @@ import {
 import { switchRole } from "@/app/actions/roles";
 import { NavMains } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
-import { NavUser } from "./nav-user";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -56,12 +55,7 @@ const photographerNav = [
     icon: CalendarDays,
   },
   { title: "Sales", url: "/dashboard/photographer/sales", icon: WalletMinimal },
-  { title: "Profile", url: "/dashboard/photographer/profile", icon: User },
-  {
-    title: "Settings",
-    url: "/dashboard/photographer/settings",
-    icon: Settings,
-  },
+  { title: "Earnings", url: "/dashboard/photographer/earnings", icon: Wallet },
   // {
   //   title: "Analytics",
   //   url: "/dashboard/photographer/analytics",
@@ -78,7 +72,6 @@ const talentNav = [
   { title: "Overview", url: "/dashboard/talent", icon: Home },
   { title: "Photos of you", url: "/dashboard/talent/photos", icon: Images },
   { title: "Explore", url: "/dashboard/talent/events", icon: Compass },
-  { title: "Profile", url: "/dashboard/talent/profile", icon: User },
 ];
 
 const navSecondary = [
@@ -239,12 +232,7 @@ export function AppSidebar({
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <div className="w-full space-y-2">
-          <RoleSwitcher activeRole={activeRole} />
-          <div className="md:hidden">
-            <NavUser user={user} />
-          </div>
-        </div>
+        <RoleSwitcher activeRole={activeRole} />
       </SidebarFooter>
     </Sidebar>
   );

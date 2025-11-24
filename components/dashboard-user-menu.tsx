@@ -1,7 +1,7 @@
 "use client";
 
-import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Bell, CreditCard, LogOut, Settings, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,22 +14,39 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+type RoleSlug = "photographer" | "talent";
+
 export function DashboardUserMenu({
   user,
+  activeRole,
 }: {
   user: {
     name: string;
     email: string;
     avatar?: string | null;
   };
+  activeRole: RoleSlug;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     await fetch("/auth/signout", { method: "POST" });
     router.push("/");
     router.refresh();
   };
+
+  const profileUrl =
+    activeRole === "photographer"
+      ? "/dashboard/photographer/profile"
+      : "/dashboard/talent/profile";
+  const settingsUrl =
+    activeRole === "photographer"
+      ? "/dashboard/photographer/settings"
+      : "/dashboard/talent/settings";
+
+  const isProfileActive = pathname.startsWith(profileUrl);
+  const isSettingsActive = pathname.startsWith(settingsUrl);
 
   return (
     <DropdownMenu>
@@ -72,30 +89,42 @@ export function DashboardUserMenu({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Sparkles className="mr-2 h-4 w-4" />
-            Upgrade to Pro
+          <DropdownMenuItem
+            onClick={() => router.push(profileUrl)}
+            className={isProfileActive ? "bg-accent" : ""}
+          >
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => router.push(settingsUrl)}
+            className={isSettingsActive ? "bg-accent" : ""}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <BadgeCheck className="mr-2 h-4 w-4" />
-            Account
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard className="mr-2 h-4 w-4" />
-            Billing
-          </DropdownMenuItem>
-          <DropdownMenuItem>
+          {activeRole === "photographer" && (
+            <DropdownMenuItem
+              onClick={() =>
+                router.push("/dashboard/photographer/settings?tab=billing")
+              }
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              <span>Billing</span>
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem disabled>
             <Bell className="mr-2 h-4 w-4" />
-            Notifications
+            <span>Notifications</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          Log out
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -10,7 +10,7 @@ import { createBillingCheckoutAction } from "../billing/actions";
 interface UpgradePlanButtonProps {
   planId: "amateur" | "pro";
   variant?: "default" | "outline";
-  size?: "default" | "sm" | "lg";
+  size?: "sm" | "lg";
   className?: string;
 }
 
