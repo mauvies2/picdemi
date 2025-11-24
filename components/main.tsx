@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 export function Main({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuth =
-    pathname?.startsWith("/signup") || pathname?.startsWith("/login");
+    pathname?.startsWith("/signup") ||
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/auth/reset-password");
   const isDashboard = pathname?.startsWith("/dashboard");
 
   return (

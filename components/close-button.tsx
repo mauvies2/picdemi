@@ -1,14 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export function CloseButton({ className = "" }: { className?: string }) {
   const router = useRouter();
+  const pathname = usePathname();
+  
+  // Redirect to /login for reset password page, otherwise to home
+  const handleClick = () => {
+    if (pathname?.startsWith("/auth/reset-password")) {
+      router.push("/login");
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <button
       type="button"
       aria-label="Close"
-      onClick={() => router.push("/")}
+      onClick={handleClick}
       className={`inline-flex h-9 w-9 items-center justify-center text-foreground/70 hover:text-foreground/60 transition-colors ${className}`}
     >
       <svg

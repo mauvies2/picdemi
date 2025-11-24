@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getDashboardPath } from "@/app/actions/roles";
 import { CloseButton } from "@/components/close-button";
+import { ForgotPasswordLink } from "@/components/forgot-password-link";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,12 @@ import { createClient } from "@/database/server";
 export default async function Login({
   searchParams,
 }: {
-  searchParams: Promise<{ message?: string; plan?: string; success?: string }>;
+  searchParams: Promise<{
+    message?: string;
+    plan?: string;
+    success?: string;
+    reset?: string;
+  }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -86,12 +92,6 @@ export default async function Login({
       "@/database/queries"
     );
 
-    // Check if there's a plan parameter to redirect to billing after login
-    const planParam = params.plan;
-    if (planParam && (planParam === "amateur" || planParam === "pro")) {
-      return redirect(`/dashboard/photographer/settings?upgrade=${planParam}`);
-    }
-
     const activeRole = await getProfileActiveRole(supabase, user.id);
     if (activeRole) {
       const dashboardPath = await getDashboardPath();
@@ -144,15 +144,21 @@ export default async function Login({
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-background px-2 text-xs text-muted-foreground">
-              or
+            <span className="bg-background px-2 text-sm text-muted-foreground">
+              or continue with email
             </span>
           </div>
         </div>
 
         <form className="animate-in flex w-full flex-col justify-center gap-2">
           {params?.message && (
-            <p className="mt-4 border border-red-500 bg-red-100 p-4 text-center text-slate-600">
+            <p
+              className={`mt-4 border p-4 text-center ${
+                params.reset === "success"
+                  ? "border-green-500 bg-green-100 text-green-800"
+                  : "border-red-500 bg-red-100 text-slate-600"
+              }`}
+            >
               {params.message}
             </p>
           )}
@@ -165,17 +171,22 @@ export default async function Login({
             placeholder="you@example.com"
             required
           />
-          <Label htmlFor="password">Password</Label>
-          <Input
-            className="mb-6 rounded-full border bg-inherit px-4 h-10 placeholder:text-muted-foreground/30"
-            id="password"
-            type="password"
-            autoComplete="off"
-            name="password"
-            placeholder="••••••••"
-            minLength={6}
-            required
-          />
+          <div className="mb-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <ForgotPasswordLink emailId="email" />
+            </div>
+            <Input
+              className="mt-2 rounded-full border bg-inherit px-4 h-10 placeholder:text-muted-foreground/30"
+              id="password"
+              type="password"
+              autoComplete="off"
+              name="password"
+              placeholder="••••••••"
+              minLength={6}
+              required
+            />
+          </div>
           <SubmitButton formAction={signIn} className="mb-2 h-10">
             Log in
           </SubmitButton>

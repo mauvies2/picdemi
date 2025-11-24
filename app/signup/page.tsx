@@ -77,11 +77,12 @@ export default async function Signup({
     <div className="relative flex h-full w-full flex-col items-center justify-center p-6 md:p-8">
       <CloseButton className="absolute right-4 top-4 md:right-6 md:top-6" />
       <div className="w-full max-w-md">
-        <h1 className="mb-6 text-center text-4xl font-bold">
-          Create an account
-        </h1>
+        <h1 className="text-center text-4xl font-bold">Create an account</h1>
+        <p className="mt-4 text-center text-muted-foreground">
+          Sign up with your Google, Facebook or Apple account
+        </p>
 
-        <div className="flex gap-2">
+        <div className="mt-4 flex gap-2">
           <Button
             type="button"
             variant="outline"
@@ -110,8 +111,8 @@ export default async function Signup({
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-background px-2 text-xs text-muted-foreground">
-              or
+            <span className="bg-background px-2 text-sm text-muted-foreground">
+              or continue with email
             </span>
           </div>
         </div>
@@ -156,7 +157,7 @@ export default async function Signup({
           <SubmitButton formAction={signUp} className="mb-2 h-10">
             Create Account
           </SubmitButton>
-          <p className="text-center">
+          <p className="text-center text-muted-foreground">
             Already have account?{" "}
             <Link className="text-sky-600 hover:underline" href="/login">
               {"Log in"}
