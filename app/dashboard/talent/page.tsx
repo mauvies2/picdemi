@@ -27,7 +27,7 @@ export default async function TalentDashboardPage() {
   const { stats, recentTaggedPhotos, recentOrders } = data;
 
   return (
-    <div className="flex flex-1 flex-col gap-4 sm:gap-6 px-3 sm:px-4 py-3 sm:py-4">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6">
       <DashboardHeader title="Overview" />
 
       <div className="flex flex-1 flex-col gap-4">
@@ -158,7 +158,7 @@ export default async function TalentDashboardPage() {
                       </div>
                     )}
                     {photo.event_name && (
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/60 to-transparent p-2">
                         <p className="text-xs font-medium text-white truncate">
                           {photo.event_name}
                         </p>

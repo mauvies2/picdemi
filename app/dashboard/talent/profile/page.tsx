@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import {
-  Camera,
   Calendar,
+  Camera,
   Mail,
   Package,
   ShoppingCart,
@@ -9,16 +9,8 @@ import {
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { ProfileForm } from "@/components/profile-form";
-import { updateProfileAction } from "./update-action";
 import { getProfileData } from "./actions";
-
-function formatCurrency(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(cents / 100);
-}
+import { updateProfileAction } from "./update-action";
 
 export default async function TalentProfilePage() {
   const data = await getProfileData();
@@ -26,7 +18,7 @@ export default async function TalentProfilePage() {
 
   if (!profile) {
     return (
-      <div className="flex flex-1 flex-col gap-4 sm:gap-6 px-3 sm:px-4 py-3 sm:py-4">
+      <div className="flex flex-1 flex-col gap-4 sm:gap-6">
         <DashboardHeader title="Profile" />
         <div className="text-center py-12">
           <p className="text-muted-foreground">Profile not found</p>
@@ -36,7 +28,7 @@ export default async function TalentProfilePage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 sm:gap-6 px-3 sm:px-4 py-3 sm:py-4">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6">
       <DashboardHeader title="Profile" />
 
       <div className="flex flex-1 flex-col gap-6">
@@ -45,10 +37,12 @@ export default async function TalentProfilePage() {
           {/* Profile Form */}
           <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
             <div className="mb-6">
-              <h2 className="text-lg sm:text-xl font-semibold">Profile Details</h2>
+              <h2 className="text-lg sm:text-xl font-semibold">
+                Profile Details
+              </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Update your profile information. Your username is how others will
-                identify you.
+                Update your profile information. Your username is how others
+                will identify you.
               </p>
             </div>
             <ProfileForm
@@ -88,7 +82,9 @@ export default async function TalentProfilePage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-muted-foreground">Role</p>
                   <p className="text-sm font-medium capitalize">
-                    {profile.active_role === "MODEL" ? "Talent" : "Photographer"}
+                    {profile.active_role === "TALENT"
+                      ? "Talent"
+                      : "Photographer"}
                   </p>
                 </div>
               </div>
@@ -116,7 +112,9 @@ export default async function TalentProfilePage() {
                 <Package className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground">Photos Purchased</p>
+                <p className="text-xs text-muted-foreground">
+                  Photos Purchased
+                </p>
                 <p className="text-lg sm:text-xl font-bold">
                   {stats.purchasedPhotosCount}
                 </p>
@@ -128,7 +126,9 @@ export default async function TalentProfilePage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-muted-foreground">Total Orders</p>
-                <p className="text-lg sm:text-xl font-bold">{stats.totalOrders}</p>
+                <p className="text-lg sm:text-xl font-bold">
+                  {stats.totalOrders}
+                </p>
               </div>
             </div>
           </div>

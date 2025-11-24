@@ -18,6 +18,8 @@ type EventCardProps = {
   name: string;
   date: string | null;
   photoCount: number;
+  salesCount: number;
+  isPublic: boolean;
   coverUrl?: string | null;
   onDelete: () => Promise<void>;
   editHref: string;
@@ -28,12 +30,14 @@ export function EventCard({
   name,
   date,
   photoCount,
+  salesCount,
+  isPublic,
   coverUrl,
   onDelete,
   editHref,
 }: EventCardProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isPending] = useTransition();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const formattedDate = date
@@ -76,14 +80,41 @@ export function EventCard({
             )}
           </div>
         </div>
-        <div className="mt-1 px-1 pb-1">
-          <div className="text-sm font-semibold">{name}</div>
-          <div className="flex items-center gap-1">
-            <p className="text-xs text-muted-foreground">{formattedDate}</p>
-            <span className="text-muted-foreground">•</span>
-            <p className="text-xs text-muted-foreground">
-              {photoCount} {photoCount === 1 ? "photo" : "photos"}
-            </p>
+        <div className="mt-3 px-1 pb-2 space-y-2">
+          {/* First row: Title and Badge */}
+          <div className="flex items-start gap-2">
+            <h3 className="text-sm font-semibold leading-tight line-clamp-2 flex-1 min-w-0">
+              {name}
+            </h3>
+            <span
+              className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider shrink-0 ${
+                isPublic
+                  ? "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950/50 dark:text-green-400"
+                  : "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400"
+              }`}
+            >
+              {isPublic ? "Public" : "Private"}
+            </span>
+          </div>
+
+          {/* Second row: Date and Stats */}
+          <div className="flex items-center justify-between gap-2">
+            {/* Left: Date */}
+            {formattedDate && (
+              <div className="text-xs text-muted-foreground">
+                {formattedDate}
+              </div>
+            )}
+            {/* Right: Photo count and sales */}
+            <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
+              <span>
+                {photoCount} {photoCount === 1 ? "photo" : "photos"}
+              </span>
+              <span className="text-muted-foreground/50">•</span>
+              <span>
+                {salesCount} {salesCount === 1 ? "sale" : "sales"}
+              </span>
+            </div>
           </div>
         </div>
       </Link>

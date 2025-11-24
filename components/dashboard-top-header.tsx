@@ -1,22 +1,22 @@
 import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
-import { getActiveRole } from "@/app/actions/roles";
 import { getCartItemCountAction } from "@/app/dashboard/talent/cart/actions";
 import { DashboardUserMenu } from "@/components/dashboard-user-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { RoleSlug } from "@/lib/roles";
 
 export async function DashboardTopHeader({
   user,
+  activeRole,
 }: {
   user: {
     name: string;
     email: string;
     avatar?: string | null;
   };
+  activeRole: RoleSlug;
 }) {
-  const { activeRole } = await getActiveRole();
-
   // Only show cart for talent users
   const cartItemCount =
     activeRole === "talent" ? await getCartItemCountAction() : 0;

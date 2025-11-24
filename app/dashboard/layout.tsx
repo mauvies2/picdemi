@@ -62,7 +62,7 @@ export default async function DashboardLayout({
       <AppSidebar activeRole={activeRole} user={sidebarUser} />
       <SidebarInset>
         <MobileHeader />
-        <DashboardTopHeader user={sidebarUser} />
+        <DashboardTopHeader user={sidebarUser} activeRole={activeRole} />
         {children}
       </SidebarInset>
     </SidebarProvider>

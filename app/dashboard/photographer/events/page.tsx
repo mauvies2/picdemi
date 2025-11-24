@@ -8,6 +8,60 @@ import { createClient } from "@/database/server";
 import { deleteEventAction as deleteEvent } from "./actions";
 import { EventCard } from "./event-card";
 
+async function getEventSalesCounts(
+  supabase: ReturnType<typeof createClient>,
+  eventIds: string[],
+  photographerId: string,
+): Promise<Map<string, number>> {
+  if (eventIds.length === 0) {
+    return new Map();
+  }
+
+  const { data, error } = await supabase
+    .from("order_items")
+    .select(
+      `
+      photo_id,
+      orders!inner(
+        id,
+        status
+      ),
+      photos!inner(
+        event_id
+      )
+    `,
+    )
+    .eq("photographer_id", photographerId)
+    .eq("orders.status", "completed")
+    .in("photos.event_id", eventIds);
+
+  if (error) {
+    console.error("Error fetching event sales:", error);
+    return new Map();
+  }
+
+  const uniqueOrdersPerEvent = new Map<string, Set<string>>();
+
+  (data ?? []).forEach((item: any) => {
+    const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
+    const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
+    if (!photo?.event_id || !order?.id) return;
+
+    const eventId = photo.event_id;
+    const orderSet = uniqueOrdersPerEvent.get(eventId) ?? new Set<string>();
+    orderSet.add(order.id);
+    uniqueOrdersPerEvent.set(eventId, orderSet);
+  });
+
+  // Convert sets to counts
+  const salesCounts = new Map<string, number>();
+  uniqueOrdersPerEvent.forEach((orderSet, eventId) => {
+    salesCounts.set(eventId, orderSet.size);
+  });
+
+  return salesCounts;
+}
+
 export default async function EventsPage() {
   const supabase = await createClient();
   const {
@@ -27,7 +81,10 @@ export default async function EventsPage() {
 
   const events = await getUserEvents(supabase, user.id);
   const eventIds = events.map((e) => e.id).filter(Boolean);
-  const photoRows = await getPhotosForEvents(supabase, eventIds);
+  const [photoRows, salesCounts] = await Promise.all([
+    getPhotosForEvents(supabase, eventIds),
+    getEventSalesCounts(supabase, eventIds, user.id),
+  ]);
 
   const stats = new Map<
     string,
@@ -111,6 +168,8 @@ export default async function EventsPage() {
               name={event.name}
               date={event.date}
               photoCount={count}
+              salesCount={salesCounts.get(event.id) ?? 0}
+              isPublic={event.is_public}
               coverUrl={coverUrl}
               editHref={`/dashboard/photographer/events/${event.id}/edit`}
               onDelete={deleteEvent.bind(null, event.id)}

@@ -50,7 +50,7 @@ export default async function PhotographerSettingsPage() {
   const currentPlan = PLANS.find((p) => p.id === currentPlanId) || PLANS[0];
 
   return (
-    <div className="flex flex-1 flex-col gap-4 sm:gap-6 px-3 sm:px-4 py-3 sm:py-4">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6">
       <UpgradeHandler />
       <DashboardHeader title="Settings" />
 
