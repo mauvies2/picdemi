@@ -5,6 +5,12 @@
  * This makes it easier to maintain, test, and potentially replace the database in the future.
  */
 
+// Re-export AI search profile queries
+export * from "./ai-search-profiles";
+// Re-export AI search usage queries
+export * from "./ai-search-usage";
+// Re-export AI similarity search queries
+export * from "./ai-similarity-search";
 // Re-export cart queries
 export * from "./carts";
 // Re-export earnings queries

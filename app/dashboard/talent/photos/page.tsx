@@ -3,6 +3,7 @@ import { getActiveRole } from "@/app/actions/roles";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { createClient } from "@/database/server";
 import { listMyTaggedPhotos } from "./actions";
+import { AIMatchingButton } from "./ai-matching/ai-matching-button";
 import { TalentPhotosGrid } from "./talent-photos-grid";
 
 export const dynamic = "force-dynamic";
@@ -28,9 +29,12 @@ export default async function TalentPhotosPage() {
   return (
     <div>
       <DashboardHeader title="Photos of you" />
-      <p className="text-sm text-muted-foreground">
-        Photos of you or where photographers have tagged you.
-      </p>
+      <div className="flex items-center justify-between gap-4 mb-2">
+        <p className="text-sm text-muted-foreground">
+          Photos of you or where photographers have tagged you.
+        </p>
+        <AIMatchingButton />
+      </div>
       <div className="mt-6">
         <TalentPhotosGrid
           initialGroups={result.groups}

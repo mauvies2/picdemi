@@ -25,6 +25,7 @@ interface LocationSelectorProps {
   cityError?: string;
   showFeedback?: boolean;
   className?: string;
+  hideCity?: boolean;
 }
 
 export function LocationSelector({
@@ -39,6 +40,7 @@ export function LocationSelector({
   cityError,
   showFeedback = false,
   className,
+  hideCity = false,
 }: LocationSelectorProps) {
   // Get all countries sorted by name
   const countries = useMemo(() => {
@@ -140,22 +142,24 @@ export function LocationSelector({
       </div>
 
       {/* City */}
-      <div className="grid gap-2">
-        <Label htmlFor="city">City</Label>
-        <Input
-          id="city"
-          value={city}
-          onChange={(e) => onCityChange(e.target.value)}
-          placeholder="Enter city name"
-          aria-invalid={isCityInvalid}
-          className={cn(isCityInvalid && "border-destructive")}
-          autoComplete="address-level2"
-          suppressHydrationWarning
-        />
-        {isCityInvalid && cityError ? (
-          <p className="text-xs text-destructive">{cityError}</p>
-        ) : null}
-      </div>
+      {!hideCity && (
+        <div className="grid gap-2">
+          <Label htmlFor="city">City</Label>
+          <Input
+            id="city"
+            value={city}
+            onChange={(e) => onCityChange(e.target.value)}
+            placeholder="Enter city name"
+            aria-invalid={isCityInvalid}
+            className={cn(isCityInvalid && "border-destructive")}
+            autoComplete="address-level2"
+            suppressHydrationWarning
+          />
+          {isCityInvalid && cityError ? (
+            <p className="text-xs text-destructive">{cityError}</p>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }
