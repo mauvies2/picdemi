@@ -50,7 +50,7 @@ export default async function EventDetailPage({
   const photoTags = await getPhotoTags(photoIds);
 
   return (
-    <div className="p-4">
+    <div>
       <DashboardHeader title={event.name} />
       <div className="text-sm text-muted-foreground">
         {new Date(event.date).toDateString().split(" ").slice(1).join(" ")} •{" "}

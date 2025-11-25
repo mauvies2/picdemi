@@ -21,4 +21,3 @@ export function ViewEventButton({ eventId }: ViewEventButtonProps) {
     </Link>
   );
 }
-

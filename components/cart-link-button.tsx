@@ -2,7 +2,6 @@
 
 import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { getCartItemCountAction } from "@/app/dashboard/talent/cart/actions";
 import { Button } from "@/components/ui/button";
@@ -10,8 +9,7 @@ import { cn } from "@/lib/utils";
 
 export function CartLinkButton() {
   const [cartItemCount, setCartItemCount] = useState<number>(0);
-  const [isPending, startTransition] = useTransition();
-  const pathname = usePathname();
+  const [, startTransition] = useTransition();
 
   const fetchCartCount = useCallback(() => {
     startTransition(async () => {
@@ -26,7 +24,7 @@ export function CartLinkButton() {
 
   useEffect(() => {
     fetchCartCount();
-  }, [pathname, fetchCartCount]);
+  }, [fetchCartCount]);
 
   // Refresh cart count when window regains focus (e.g., after returning from cart page)
   useEffect(() => {
@@ -60,4 +58,3 @@ export function CartLinkButton() {
     </Link>
   );
 }
-

@@ -13,7 +13,7 @@
 
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { clearCart, getCartItemsWithDetails } from "@/database/queries/carts";
+import { clearCart } from "@/database/queries/carts";
 import {
   addOrderItems,
   createOrder,
@@ -21,7 +21,6 @@ import {
   getOrderByPaymentIntentId,
   updateOrderStatus,
 } from "@/database/queries/orders";
-import { createClient } from "@/database/server";
 import { supabaseAdmin } from "@/database/supabase-admin";
 import { env } from "@/env.mjs";
 import { stripe } from "@/lib/stripe/config";
@@ -57,8 +56,6 @@ export async function POST(request: Request) {
     console.error("Webhook signature verification failed:", err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
-
-  const supabase = await createClient();
 
   try {
     switch (event.type) {
@@ -108,7 +105,7 @@ export async function POST(request: Request) {
         // Handle payment checkout (cart-based orders)
         // Check if order already exists
         const existingOrder = await getOrderByCheckoutSessionId(
-          supabase,
+          supabaseAdmin,
           session.id,
         );
 
@@ -132,16 +129,101 @@ export async function POST(request: Request) {
           break;
         }
 
-        const cartItems = await getCartItemsWithDetails(
-          supabase,
-          cartId,
-          userId,
-        );
+        // Use admin client to bypass RLS for webhook operations
+        // First verify cart belongs to user
+        const { data: cart } = await supabaseAdmin
+          .from("carts")
+          .select("*")
+          .eq("id", cartId)
+          .eq("user_id", userId)
+          .maybeSingle();
 
-        if (cartItems.length === 0) {
-          console.error("Cart is empty");
+        if (!cart) {
+          console.error(
+            `Cart ${cartId} not found or doesn't belong to user ${userId}`,
+          );
           break;
         }
+
+        // Get cart items with admin client
+        const { data: cartItemsData, error: cartItemsError } =
+          await supabaseAdmin
+            .from("cart_items")
+            .select(
+              `
+            id,
+            cart_id,
+            photo_id,
+            photographer_id,
+            unit_price_cents,
+            created_at,
+            photos!inner(
+              original_url,
+              events(
+                name,
+                date
+              )
+            )
+          `,
+            )
+            .eq("cart_id", cartId);
+
+        if (cartItemsError || !cartItemsData || cartItemsData.length === 0) {
+          console.error(
+            "Cart is empty or error fetching cart items:",
+            cartItemsError,
+          );
+          break;
+        }
+
+        // Map cart items to CartItemWithDetails format
+        const cartItems = (cartItemsData ?? []).map(
+          (item: {
+            id: string;
+            cart_id: string;
+            photo_id: string;
+            photographer_id: string;
+            unit_price_cents: number;
+            created_at: string;
+            photos:
+              | Array<{
+                  original_url: string | null;
+                  events:
+                    | Array<{ name: string | null; date: string | null }>
+                    | { name: string | null; date: string | null }
+                    | null;
+                }>
+              | {
+                  original_url: string | null;
+                  events:
+                    | Array<{ name: string | null; date: string | null }>
+                    | { name: string | null; date: string | null }
+                    | null;
+                }
+              | null;
+          }) => {
+            const photo = Array.isArray(item.photos)
+              ? item.photos[0]
+              : item.photos;
+            const event = photo
+              ? Array.isArray(photo.events)
+                ? photo.events[0]
+                : photo.events
+              : null;
+            return {
+              id: item.id,
+              cart_id: item.cart_id,
+              photo_id: item.photo_id,
+              photographer_id: item.photographer_id,
+              unit_price_cents: item.unit_price_cents,
+              created_at: item.created_at,
+              photo_url: photo?.original_url ?? null,
+              photographer_name: null, // Not needed for order creation
+              event_name: event?.name ?? null,
+              event_date: event?.date ?? null,
+            };
+          },
+        );
 
         // Calculate total
         const totalAmountCents = cartItems.reduce(
@@ -149,8 +231,8 @@ export async function POST(request: Request) {
           0,
         );
 
-        // Create order
-        const order = await createOrder(supabase, userId, {
+        // Create order using admin client
+        const order = await createOrder(supabaseAdmin, userId, {
           cart_id: cartId,
           stripe_checkout_session_id: session.id,
           stripe_payment_intent_id:
@@ -168,9 +250,9 @@ export async function POST(request: Request) {
           },
         });
 
-        // Add order items
+        // Add order items using admin client
         await addOrderItems(
-          supabase,
+          supabaseAdmin,
           order.id,
           cartItems.map((item) => ({
             photo_id: item.photo_id,
@@ -180,8 +262,8 @@ export async function POST(request: Request) {
           })),
         );
 
-        // Clear cart after successful order
-        await clearCart(supabase, cartId);
+        // Clear cart after successful order using admin client
+        await clearCart(supabaseAdmin, cartId);
 
         console.log(`Order created: ${order.id} for user ${userId}`);
         break;
@@ -191,12 +273,12 @@ export async function POST(request: Request) {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
         const order = await getOrderByPaymentIntentId(
-          supabase,
+          supabaseAdmin,
           paymentIntent.id,
         );
 
         if (order && order.status !== "completed") {
-          await updateOrderStatus(supabase, order.id, "completed", {
+          await updateOrderStatus(supabaseAdmin, order.id, "completed", {
             payment_intent_succeeded_at: new Date().toISOString(),
           });
         }
@@ -207,12 +289,12 @@ export async function POST(request: Request) {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
         const order = await getOrderByPaymentIntentId(
-          supabase,
+          supabaseAdmin,
           paymentIntent.id,
         );
 
         if (order && order.status === "pending") {
-          await updateOrderStatus(supabase, order.id, "failed", {
+          await updateOrderStatus(supabaseAdmin, order.id, "failed", {
             payment_intent_failed_at: new Date().toISOString(),
             failure_reason: paymentIntent.last_payment_error?.message,
           });

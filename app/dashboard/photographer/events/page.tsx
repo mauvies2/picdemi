@@ -9,7 +9,7 @@ import { deleteEventAction as deleteEvent } from "./actions";
 import { EventCard } from "./event-card";
 
 async function getEventSalesCounts(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   eventIds: string[],
   photographerId: string,
 ): Promise<Map<string, number>> {
@@ -42,7 +42,12 @@ async function getEventSalesCounts(
 
   const uniqueOrdersPerEvent = new Map<string, Set<string>>();
 
-  (data ?? []).forEach((item: any) => {
+  const items = (data ?? []) as Array<{
+    photos: Array<{ event_id: string | null }> | { event_id: string | null };
+    orders: Array<{ id: string }> | { id: string };
+  }>;
+
+  items.forEach((item) => {
     const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
     const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
     if (!photo?.event_id || !order?.id) return;
@@ -70,7 +75,7 @@ export default async function EventsPage() {
 
   if (!user) {
     return (
-      <div className="p-4">
+      <div>
         <DashboardHeader title="Events" />
         <p className="mt-2 text-muted-foreground">
           Please sign in to view your events.
@@ -143,7 +148,7 @@ export default async function EventsPage() {
   );
 
   return (
-    <div className="p-4">
+    <div>
       <DashboardHeader title="Events" />
       <div className="text-sm text-muted-foreground">
         {events.length

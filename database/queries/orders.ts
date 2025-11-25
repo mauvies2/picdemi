@@ -164,7 +164,9 @@ export async function getOrder(
     .order("created_at", { ascending: true });
 
   if (itemsError) {
-    throw new Error(`Failed to get order items: ${getErrorMessage(itemsError)}`);
+    throw new Error(
+      `Failed to get order items: ${getErrorMessage(itemsError)}`,
+    );
   }
 
   return {
@@ -318,12 +320,11 @@ export async function getPhotographerOrders(
 
   // Filter out duplicate orders (since we're joining with order_items)
   const uniqueOrders = new Map<string, Order>();
-  (data ?? []).forEach((order: any) => {
+  (data ?? []).forEach((order: Order & { order_items?: unknown }) => {
     if (!uniqueOrders.has(order.id)) {
-      uniqueOrders.set(order.id, order as Order);
+      uniqueOrders.set(order.id, order);
     }
   });
 
   return Array.from(uniqueOrders.values());
 }
-

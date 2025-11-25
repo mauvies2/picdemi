@@ -4,7 +4,7 @@ import { createClient } from "@/database/server";
 /**
  * Debug endpoint to get the current user's ID
  * GET /api/debug/user-id
- * 
+ *
  * This is useful for testing Stripe webhooks locally
  */
 export async function GET() {
@@ -34,4 +34,3 @@ Then you can trigger subscription events:
 stripe trigger customer.subscription.created`,
   });
 }
-

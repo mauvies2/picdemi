@@ -54,10 +54,10 @@ export function DashboardUserMenu({
         <Button
           variant="ghost"
           size="sm"
-          className="relative h-11 w-11 p-0 hover:bg-foreground/10 shadow-[0_4px_12px_rgba(0,0,0,0.15)] bg-background backdrop-blur-lg"
+          className="relative h-9 w-9 rounded-lg hover:bg-accent p-0"
           aria-label="User menu"
         >
-          <Avatar className="h-11 w-11">
+          <Avatar className="h-9 w-9">
             <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
             <AvatarFallback>
               {user.name?.charAt(0).toUpperCase() ?? "U"}

@@ -171,4 +171,3 @@ export function PhotoIconButtons({
     </div>
   );
 }
-

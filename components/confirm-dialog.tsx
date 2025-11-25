@@ -56,7 +56,9 @@ export function ConfirmDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>
+            {cancelText}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isPending}
@@ -73,4 +75,3 @@ export function ConfirmDialog({
     </AlertDialog>
   );
 }
-

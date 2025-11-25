@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getActiveRole } from "@/app/actions/roles";
 import { DashboardHeader } from "@/components/dashboard-header";
 import PhotoAlbumViewer from "@/components/photo-album-viewer";
 import {
@@ -8,7 +9,6 @@ import {
 } from "@/database/queries";
 import { createClient } from "@/database/server";
 import { getBaseUrl } from "@/lib/get-base-url";
-import { getActiveRole } from "@/app/actions/roles";
 
 export default async function ExploreEventDetailPage({
   params,
@@ -109,8 +109,8 @@ export default async function ExploreEventDetailPage({
       <div>
         <DashboardHeader title={event.name} />
         <div className="mt-2 text-sm text-muted-foreground">
-          {new Date(event.date).toDateString().split(" ").slice(1).join(" ")}{" "}
-          • {event.city[0]?.toUpperCase() + event.city.slice(1)}
+          {new Date(event.date).toDateString().split(" ").slice(1).join(" ")} •{" "}
+          {event.city[0]?.toUpperCase() + event.city.slice(1)}
           {event.price_per_photo !== null && (
             <> • ${event.price_per_photo.toFixed(2)} per photo</>
           )}
@@ -133,4 +133,3 @@ export default async function ExploreEventDetailPage({
     </div>
   );
 }
-

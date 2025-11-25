@@ -56,7 +56,7 @@ export default async function EditEventPage({
   }));
 
   return (
-    <div className="p-4">
+    <div>
       <DashboardHeader title="Edit Event" />
       <p className="mt-1 text-sm text-muted-foreground">
         Update your event details and manage photos.

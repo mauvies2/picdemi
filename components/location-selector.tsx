@@ -1,7 +1,9 @@
 "use client";
 
-import { Country, State, City } from "country-state-city";
+import { Country, State } from "country-state-city";
 import { useMemo } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -9,8 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface LocationSelectorProps {
@@ -55,7 +55,6 @@ export function LocationSelector({
     );
   }, [country]);
 
-
   const handleCountryChange = (value: string) => {
     onCountryChange(value);
     // Reset state and city when country changes
@@ -86,10 +85,7 @@ export function LocationSelector({
           <SelectTrigger
             id="country"
             aria-invalid={isCountryInvalid}
-            className={cn(
-              "w-full",
-              isCountryInvalid && "border-destructive",
-            )}
+            className={cn("w-full", isCountryInvalid && "border-destructive")}
           >
             <SelectValue placeholder="Select a country" />
           </SelectTrigger>
@@ -114,10 +110,7 @@ export function LocationSelector({
             <SelectTrigger
               id="state"
               aria-invalid={isStateInvalid}
-              className={cn(
-                "w-full",
-                isStateInvalid && "border-destructive",
-              )}
+              className={cn("w-full", isStateInvalid && "border-destructive")}
             >
               <SelectValue placeholder="Select a state or province" />
             </SelectTrigger>
@@ -166,4 +159,3 @@ export function LocationSelector({
     </div>
   );
 }
-

@@ -27,6 +27,8 @@ export * from "./sales";
 export * from "./storage";
 // Re-export subscription queries
 export * from "./subscriptions";
+// Re-export talent library queries
+export * from "./talent-library";
 // Re-export talent photo tag queries
 export * from "./talent-photo-tags";
 // Re-export types

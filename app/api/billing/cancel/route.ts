@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
+import { getSubscription } from "@/database/queries/subscriptions";
 import { createClient } from "@/database/server";
 import { stripe } from "@/lib/stripe/config";
-import { getSubscription } from "@/database/queries/subscriptions";
 
 /**
  * Cancel subscription
@@ -55,4 +55,3 @@ export async function POST() {
     );
   }
 }
-

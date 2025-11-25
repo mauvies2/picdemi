@@ -49,25 +49,26 @@ export function NavMains({
       // Exact match for dashboard home pages
       return pathname === url;
     }
-    
+
     // Check for exact match first
     if (pathname === url) {
       return true;
     }
-    
+
     // Check if pathname starts with URL followed by `/` (for sub-routes)
     // But only if no other URL is a more specific match
     if (pathname.startsWith(`${url}/`)) {
       // Check if any other URL is a more specific match (longer and also matches)
       const hasMoreSpecificMatch = allUrls.some(
         (otherUrl) =>
-          otherUrl !== url &&
-          otherUrl.length > url.length &&
-          pathname.startsWith(`${otherUrl}/`) || pathname === otherUrl,
+          (otherUrl !== url &&
+            otherUrl.length > url.length &&
+            pathname.startsWith(`${otherUrl}/`)) ||
+          pathname === otherUrl,
       );
       return !hasMoreSpecificMatch;
     }
-    
+
     return false;
   };
 
@@ -102,8 +103,12 @@ export function NavMains({
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {item.items?.map((subItem) => {
-                          const allSubUrls = item.items?.map((i) => i.url) ?? [];
-                          const isSubItemActive = isItemActive(subItem.url, allSubUrls);
+                          const allSubUrls =
+                            item.items?.map((i) => i.url) ?? [];
+                          const isSubItemActive = isItemActive(
+                            subItem.url,
+                            allSubUrls,
+                          );
                           return (
                             <SidebarMenuSubItem key={subItem.title}>
                               <SidebarMenuSubButton

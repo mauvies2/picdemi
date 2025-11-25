@@ -36,5 +36,6 @@ export async function updateProfileAction(values: {
     bio: values.bio?.trim() || null,
   });
 
+  revalidatePath("/dashboard/talent/settings");
   revalidatePath("/dashboard/talent/profile");
 }

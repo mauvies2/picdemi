@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function CloseButton({ className = "" }: { className?: string }) {
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Redirect to /login for reset password page, otherwise to home
   const handleClick = () => {
     if (pathname?.startsWith("/auth/reset-password")) {

@@ -43,12 +43,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    // Calculate total
-    const totalAmountCents = cartItems.reduce(
-      (sum, item) => sum + item.unit_price_cents,
-      0,
-    );
-
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

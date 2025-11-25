@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
-import { Mail, CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, Mail } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { resetPasswordAction } from "@/app/login/actions";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { resetPasswordAction } from "@/app/login/actions";
 
 interface ForgotPasswordDialogProps {
   open: boolean;
@@ -60,7 +60,9 @@ export function ForgotPasswordDialog({
         setError(null);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Something went wrong. Please try again.",
+          err instanceof Error
+            ? err.message
+            : "Something went wrong. Please try again.",
         );
       }
     });
@@ -160,8 +162,8 @@ export function ForgotPasswordDialog({
             <div className="space-y-4">
               <div className="rounded-lg border bg-muted/50 p-4">
                 <p className="text-sm text-muted-foreground">
-                  <strong>Didn&apos;t receive the email?</strong> Check your spam
-                  folder or try again in a few minutes.
+                  <strong>Didn&apos;t receive the email?</strong> Check your
+                  spam folder or try again in a few minutes.
                 </p>
               </div>
               <Button
@@ -178,4 +180,3 @@ export function ForgotPasswordDialog({
     </Dialog>
   );
 }
-

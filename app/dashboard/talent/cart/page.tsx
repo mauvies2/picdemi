@@ -7,7 +7,11 @@ import { CartContent } from "./cart-content";
 
 export const dynamic = "force-dynamic";
 
-export default async function CartPage() {
+interface CartPageProps {
+  searchParams: Promise<{ status?: string }>;
+}
+
+export default async function CartPage({ searchParams }: CartPageProps) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -21,6 +25,14 @@ export default async function CartPage() {
   const { activeRole } = await getActiveRole();
   if (activeRole !== "talent") {
     return redirect("/dashboard");
+  }
+
+  const params = await searchParams;
+  const status = params.status;
+
+  // If success, redirect to profile page after a moment
+  if (status === "success") {
+    return redirect("/dashboard/talent/profile?purchased=true");
   }
 
   const cartData = await getCurrentCart();

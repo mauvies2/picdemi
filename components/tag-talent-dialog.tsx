@@ -199,27 +199,29 @@ export function TagTalentDialog({
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               )}
-              {showResults && searchResults.length > 0 && searchText.length >= 2 && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
-                  <div className="max-h-60 overflow-auto p-1">
-                    {searchResults.map((user) => (
-                      <button
-                        key={user.id}
-                        type="button"
-                        className="w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
-                        onClick={() => handleSelectTalent(user)}
-                      >
-                        <div className="font-medium">
-                          {user.display_name || "No name"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          @{user.username}
-                        </div>
-                      </button>
-                    ))}
+              {showResults &&
+                searchResults.length > 0 &&
+                searchText.length >= 2 && (
+                  <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
+                    <div className="max-h-60 overflow-auto p-1">
+                      {searchResults.map((user) => (
+                        <button
+                          key={user.id}
+                          type="button"
+                          className="w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                          onClick={() => handleSelectTalent(user)}
+                        >
+                          <div className="font-medium">
+                            {user.display_name || "No name"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            @{user.username}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
 

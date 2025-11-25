@@ -54,13 +54,13 @@ export async function searchTalentUsers(
   // Get usernames from profiles
   const userIds = data.map((user: { id: string }) => user.id);
   const usernameMap: Record<string, string | null> = {};
-  
+
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
       .select("id, username")
       .in("id", userIds);
-    
+
     if (profiles) {
       for (const profile of profiles) {
         usernameMap[profile.id] = profile.username;

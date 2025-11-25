@@ -71,6 +71,7 @@ const photographerNav = [
 const talentNav = [
   { title: "Overview", url: "/dashboard/talent", icon: Home },
   { title: "Photos of you", url: "/dashboard/talent/photos", icon: Images },
+  { title: "Profile", url: "/dashboard/talent/profile", icon: User },
   { title: "Explore", url: "/dashboard/talent/events", icon: Compass },
 ];
 
@@ -121,13 +122,22 @@ const RoleSwitcher: FC<{
   };
 
   const currentRole = optimisticRole;
+  const roleStyles: Record<string, { bg: string; color: string }> = {
+    photographer: {
+      bg: "bg-role-photographer",
+      color: "text-primary-foreground",
+    },
+    talent: {
+      bg: "bg-role-talent",
+      color: "text-primary-foreground",
+    },
+  };
+
+  const { bg, color } = roleStyles[currentRole] ?? roleStyles.talent;
 
   if (state === "collapsed") {
     const Icon = currentRole === "photographer" ? Camera : User;
-    const color =
-      currentRole === "photographer"
-        ? "bg-sky-100 text-sky-700 border-sky-200"
-        : "bg-emerald-100 text-emerald-700 border-emerald-200";
+
     return (
       <div className="flex justify-center pb-2">
         <DropdownMenu>
@@ -135,7 +145,7 @@ const RoleSwitcher: FC<{
             <Button
               variant="outline"
               size="sm"
-              className={`h-8 w-8 rounded-full p-2 transition-opacity ${color} ${isPending ? "opacity-70" : ""}`}
+              className={`h-8 w-8 rounded-full p-2 transition-opacity ${color} ${bg} hover:text-white ${isPending ? "opacity-70" : ""}`}
               disabled={isPending}
             >
               <Icon className="h-4 w-4" />
@@ -161,11 +171,9 @@ const RoleSwitcher: FC<{
           <Button
             variant="outline"
             size="sm"
-            className={`w-full justify-start gap-2 transition-opacity ${
-              currentRole === "photographer"
-                ? "bg-sky-100 text-sky-700 border-sky-200"
-                : "bg-emerald-100 text-emerald-700 border-emerald-200"
-            } ${isPending ? "opacity-70" : ""}`}
+            className={`w-full justify-start gap-2 transition-opacity ${color} ${bg} border-transparent hover:text-white ${
+              isPending ? "opacity-70" : ""
+            }`}
             disabled={isPending}
           >
             {currentRole === "photographer" ? (

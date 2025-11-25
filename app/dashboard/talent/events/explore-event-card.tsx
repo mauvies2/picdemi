@@ -79,9 +79,7 @@ export function ExploreEventCard({
           <span className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
             {activityLabel}
           </span>
-          <span className="text-sm font-semibold text-foreground">
-            {priceText}
-          </span>
+          <span className="text-sm  text-muted-foreground">{priceText}</span>
         </div>
       </div>
     </Link>

@@ -359,7 +359,7 @@ export default function NewEventForm() {
   }, [pendingValues, form.state.values, files.length]);
 
   return (
-    <div className="p-4">
+    <div>
       <div className="mx-auto w-full max-w-full space-y-6">
         <header>
           <DashboardHeader title="Create Event" />

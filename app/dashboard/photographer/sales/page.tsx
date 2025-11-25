@@ -3,7 +3,7 @@ import { SalesContent } from "./sales-content";
 
 export default async function SalesPage() {
   return (
-    <div className="p-4">
+    <div>
       <DashboardHeader title="Sales" />
       <p className="text-sm text-muted-foreground">
         Track your sales performance and revenue

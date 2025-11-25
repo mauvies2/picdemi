@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { Compass, FolderOpen, ShoppingCart } from "lucide-react";
+import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -55,4 +55,3 @@ export function QuickActions({ cartItemCount }: QuickActionsProps) {
     </div>
   );
 }
-

@@ -61,7 +61,7 @@ export async function getSalesSummary(
   endDate?: string,
 ): Promise<SalesSummary> {
   // Query order_items for this photographer with completed orders
-  let query = supabase
+  const query = supabase
     .from("order_items")
     .select(
       `
@@ -78,14 +78,6 @@ export async function getSalesSummary(
     .eq("photographer_id", photographerId)
     .eq("orders.status", "completed");
 
-  // Filter by order_items.created_at (which is very close to orders.created_at)
-  if (startDate) {
-    query = query.gte("created_at", startDate);
-  }
-  if (endDate) {
-    query = query.lte("created_at", endDate);
-  }
-
   const { data, error } = await query;
 
   if (error) {
@@ -96,17 +88,38 @@ export async function getSalesSummary(
   const items = (data ?? []) as Array<{
     total_price_cents: number;
     quantity: number;
-    orders: Array<{ id: string; status: string; created_at: string }>;
+    created_at: string;
+    orders:
+      | Array<{ id: string; status: string; created_at: string }>
+      | { id: string; status: string; created_at: string };
   }>;
 
-  const totalRevenueCents = items.reduce(
+  // Filter by orders.created_at if date filters are provided
+  let filteredItems = items;
+  if (startDate || endDate) {
+    filteredItems = items.filter((item) => {
+      const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
+      const orderDate = order?.created_at ?? item.created_at;
+      if (startDate && orderDate < startDate) return false;
+      if (endDate && orderDate > endDate) return false;
+      return true;
+    });
+  }
+
+  const totalRevenueCents = filteredItems.reduce(
     (sum, item) => sum + item.total_price_cents,
     0,
   );
-  const totalPhotosSold = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPhotosSold = filteredItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
   const uniqueOrders = new Set(
-    items
-      .map((item) => item.orders[0]?.id)
+    filteredItems
+      .map((item) => {
+        const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
+        return order?.id;
+      })
       .filter((id): id is string => Boolean(id)),
   );
   const totalSales = uniqueOrders.size;
@@ -132,7 +145,7 @@ export async function getSalesOverTime(
   endDate?: string,
   groupBy: "day" | "week" | "month" = "day",
 ): Promise<SalesByDate[]> {
-  let query = supabase
+  const query = supabase
     .from("order_items")
     .select(
       `
@@ -150,14 +163,6 @@ export async function getSalesOverTime(
     .eq("orders.status", "completed")
     .order("created_at", { ascending: true });
 
-  // Filter by order_items.created_at (which is very close to orders.created_at)
-  if (startDate) {
-    query = query.gte("created_at", startDate);
-  }
-  if (endDate) {
-    query = query.lte("created_at", endDate);
-  }
-
   const { data, error } = await query;
 
   if (error) {
@@ -171,13 +176,22 @@ export async function getSalesOverTime(
     total_price_cents: number;
     quantity: number;
     created_at: string;
-    orders: Array<{ id: string; created_at: string; status: string }>;
+    orders:
+      | Array<{ id: string; created_at: string; status: string }>
+      | { id: string; created_at: string; status: string };
   }>;
 
   items.forEach((item) => {
     // Use order.created_at if available, otherwise fall back to order_items.created_at
-    const order = item.orders[0];
+    const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
     const orderDate = order?.created_at ?? item.created_at;
+
+    // Filter by orders.created_at if date filters are provided
+    if (startDate || endDate) {
+      if (startDate && orderDate < startDate) return;
+      if (endDate && orderDate > endDate) return;
+    }
+
     const date = new Date(orderDate);
     let key: string;
 
@@ -264,13 +278,36 @@ export async function getTopSellingPhotos(
     }
   >();
 
-  (data ?? []).forEach((item: any) => {
-    const photo = item.photos;
-    const event = Array.isArray(photo?.events)
-      ? photo.events.length > 0
+  const items = (data ?? []) as Array<{
+    photo_id: string;
+    unit_price_cents: number;
+    photos:
+      | Array<{
+          original_url: string | null;
+          event_id: string | null;
+          events:
+            | Array<{ name: string | null; date: string | null }>
+            | { name: string | null; date: string | null }
+            | null;
+        }>
+      | {
+          original_url: string | null;
+          event_id: string | null;
+          events:
+            | Array<{ name: string | null; date: string | null }>
+            | { name: string | null; date: string | null }
+            | null;
+        }
+      | null;
+  }>;
+
+  items.forEach((item) => {
+    const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
+    const event = photo
+      ? Array.isArray(photo.events)
         ? photo.events[0]
-        : null
-      : photo?.events;
+        : photo.events
+      : null;
 
     const current = grouped.get(item.photo_id) ?? {
       photo_url: photo?.original_url ?? null,
@@ -311,7 +348,7 @@ export async function getTopSellingEvents(
   startDate?: string,
   endDate?: string,
 ): Promise<TopSellingEvent[]> {
-  let query = supabase
+  const query = supabase
     .from("order_items")
     .select(
       `
@@ -335,14 +372,6 @@ export async function getTopSellingEvents(
     )
     .eq("photographer_id", photographerId)
     .eq("orders.status", "completed");
-
-  // Filter by order_items.created_at (which is very close to orders.created_at)
-  if (startDate) {
-    query = query.gte("created_at", startDate);
-  }
-  if (endDate) {
-    query = query.lte("created_at", endDate);
-  }
 
   const { data, error } = await query;
 
@@ -368,20 +397,53 @@ export async function getTopSellingEvents(
     photo_id: string;
     total_price_cents: number;
     quantity: number;
-    orders: Array<{ id: string; created_at: string; status: string }>;
-    photos: Array<{
-      event_id: string | null;
-      events: Array<{ name: string | null; date: string | null }> | null;
-    }>;
+    orders:
+      | Array<{ id: string; created_at: string; status: string }>
+      | { id: string; created_at: string; status: string };
+    photos:
+      | Array<{
+          event_id: string | null;
+          events:
+            | Array<{ name: string | null; date: string | null }>
+            | { name: string | null; date: string | null }
+            | null;
+        }>
+      | {
+          event_id: string | null;
+          events:
+            | Array<{ name: string | null; date: string | null }>
+            | { name: string | null; date: string | null }
+            | null;
+        };
   }>;
 
   items.forEach((item) => {
-    const photo = Array.isArray(item.photos) ? item.photos[0] : null;
-    if (!photo) return;
-    const eventId = photo.event_id ?? "unknown";
+    // Handle Supabase returning orders as array or single object
+    const order = Array.isArray(item.orders)
+      ? (item.orders[0] ?? null)
+      : item.orders;
+
+    // Filter by orders.created_at if date filters are provided
+    if (startDate || endDate) {
+      const orderDate = order?.created_at ?? item.created_at;
+      if (startDate && orderDate < startDate) return;
+      if (endDate && orderDate > endDate) return;
+    }
+
+    // Handle Supabase returning photos as array or single object
+    const photo = Array.isArray(item.photos)
+      ? (item.photos[0] ?? null)
+      : item.photos;
+
+    if (!photo || !photo.event_id) return;
+
+    const eventId = photo.event_id;
+
+    // Handle events as array or single object
     const event = Array.isArray(photo.events)
       ? (photo.events[0] ?? null)
       : photo.events;
+
     const current = grouped.get(eventId) ?? {
       event_name: event?.name ?? null,
       event_date: event?.date ?? null,
@@ -413,6 +475,7 @@ export async function getTopSellingEvents(
 
 /**
  * Get recent sales with details
+ * Queries completed orders from the orders table
  */
 export async function getRecentSales(
   supabase: SupabaseServerClient,
@@ -421,18 +484,21 @@ export async function getRecentSales(
   startDate?: string,
   endDate?: string,
 ): Promise<Sale[]> {
-  let query = supabase
-    .from("cart_items")
+  const query = supabase
+    .from("order_items")
     .select(
       `
       id,
       photo_id,
       photographer_id,
-      unit_price_cents,
+      total_price_cents,
+      quantity,
       created_at,
-      cart_id,
-      carts(
-        user_id
+      orders!inner(
+        id,
+        user_id,
+        created_at,
+        status
       ),
       photos(
         original_url,
@@ -445,15 +511,9 @@ export async function getRecentSales(
     `,
     )
     .eq("photographer_id", photographerId)
+    .eq("orders.status", "completed")
     .order("created_at", { ascending: false })
     .limit(limit);
-
-  if (startDate) {
-    query = query.gte("created_at", startDate);
-  }
-  if (endDate) {
-    query = query.lte("created_at", endDate);
-  }
 
   const { data, error } = await query;
 
@@ -461,11 +521,63 @@ export async function getRecentSales(
     throw new Error(`Failed to get recent sales: ${getErrorMessage(error)}`);
   }
 
+  const items = (data ?? []) as Array<{
+    id: string;
+    photo_id: string;
+    photographer_id: string;
+    total_price_cents: number;
+    quantity: number;
+    created_at: string;
+    orders:
+      | Array<{
+          id: string;
+          user_id: string;
+          created_at: string;
+          status: string;
+        }>
+      | { id: string; user_id: string; created_at: string; status: string };
+    photos:
+      | Array<{
+          original_url: string | null;
+          event_id: string | null;
+          events:
+            | Array<{ name: string | null; date: string | null }>
+            | { name: string | null; date: string | null }
+            | null;
+        }>
+      | {
+          original_url: string | null;
+          event_id: string | null;
+          events:
+            | Array<{ name: string | null; date: string | null }>
+            | { name: string | null; date: string | null }
+            | null;
+        }
+      | null;
+  }>;
+
+  // Filter by orders.created_at if date filters are provided
+  let filteredItems = items;
+  if (startDate || endDate) {
+    filteredItems = items.filter((item) => {
+      const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
+      const orderDate = order?.created_at ?? item.created_at;
+      if (startDate && orderDate < startDate) return false;
+      if (endDate && orderDate > endDate) return false;
+      return true;
+    });
+  }
+
   // Get unique buyer IDs
   const buyerIds = [
     ...new Set(
-      (data ?? [])
-        .map((item: any) => item.carts?.user_id)
+      filteredItems
+        .map((item) => {
+          const order = Array.isArray(item.orders)
+            ? item.orders[0]
+            : item.orders;
+          return order?.user_id;
+        })
         .filter((id): id is string => typeof id === "string"),
     ),
   ];
@@ -490,27 +602,27 @@ export async function getRecentSales(
     }
   }
 
-  return (data ?? []).map((item: any) => {
-    const photo = item.photos;
-    const event = Array.isArray(photo?.events)
-      ? photo.events.length > 0
-        ? photo.events[0]
-        : null
-      : photo?.events;
-    const cart = item.carts;
+  return filteredItems.map((item) => {
+    const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
+    const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
+    const event = photo
+      ? Array.isArray(photo.events)
+        ? (photo.events[0] ?? null)
+        : photo.events
+      : null;
 
     return {
       id: item.id,
       photo_id: item.photo_id,
       photographer_id: item.photographer_id,
-      unit_price_cents: item.unit_price_cents,
-      created_at: item.created_at,
+      unit_price_cents: item.total_price_cents,
+      created_at: order?.created_at ?? item.created_at,
       photo_url: photo?.original_url ?? null,
       event_id: photo?.event_id ?? null,
       event_name: event?.name ?? null,
       event_date: event?.date ?? null,
-      buyer_id: cart?.user_id ?? "",
-      buyer_email: buyerEmailMap[cart?.user_id ?? ""] ?? null,
+      buyer_id: order?.user_id ?? "",
+      buyer_email: buyerEmailMap[order?.user_id ?? ""] ?? null,
     };
   }) as Sale[];
 }

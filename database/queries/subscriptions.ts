@@ -73,4 +73,3 @@ export async function getSubscriptionByStripeId(
 
   return data as Subscription | null;
 }
-

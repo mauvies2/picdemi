@@ -111,7 +111,7 @@ export default async function TalentDashboardPage() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-3">
           {/* Recent Tagged Photos */}
           <div className="lg:col-span-2 rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4 sm:mb-6">

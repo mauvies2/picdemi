@@ -3,17 +3,17 @@
 import { Buffer } from "node:buffer";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { activityValues } from "@/app/dashboard/photographer/events/new/activity-options";
 import {
-  updateEvent,
   createPhoto,
-  uploadFile,
   deletePhoto as dbDeletePhoto,
   deleteStorageFiles,
-  getPhoto,
   eventExists,
+  getPhoto,
+  updateEvent,
+  uploadFile,
 } from "@/database/queries";
 import { createClient } from "@/database/server";
-import { activityValues } from "@/app/dashboard/photographer/events/new/activity-options";
 
 const eventSchema = z.object({
   name: z.string().trim().min(1, "Name is required."),
@@ -150,7 +150,9 @@ export async function updateEventAction(
   if (photoFormData) {
     const uploadedFiles = photoFormData
       .getAll("photos")
-      .filter((value): value is File => value instanceof File && value.size > 0);
+      .filter(
+        (value): value is File => value instanceof File && value.size > 0,
+      );
 
     if (uploadedFiles.length > 0) {
       const photoRecords: { original_path: string }[] = [];
@@ -200,7 +202,7 @@ export async function updateEventAction(
   revalidatePath("/dashboard/photographer/events");
   revalidatePath(`/dashboard/photographer/events/${eventId}`);
   revalidatePath(`/dashboard/photographer/events/${eventId}/edit`);
-  
+
   return { success: true };
 }
 
@@ -329,4 +331,3 @@ export async function addPhotosAction(
   revalidatePath(`/dashboard/photographer/events/${eventId}`);
   revalidatePath(`/dashboard/photographer/events/${eventId}/edit`);
 }
-

@@ -8,10 +8,7 @@ import {
 } from "@/database/queries";
 import { createClient } from "@/database/server";
 
-export async function getSalesDataAction(
-  startDate?: string,
-  endDate?: string,
-) {
+export async function getSalesDataAction(startDate?: string, endDate?: string) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -35,4 +32,3 @@ export async function getSalesDataAction(
     recentSales,
   };
 }
-

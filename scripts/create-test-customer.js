@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * Script to create a test Stripe customer with metadata
- * 
+ *
  * Usage:
  *   node scripts/create-test-customer.js <user_id> [email]
- * 
+ *
  * Example:
  *   node scripts/create-test-customer.js 07cf6833-ba80-4d56-8f90-96c9c4c2868e test@example.com
  */
@@ -20,7 +20,9 @@ async function main() {
 
   if (!userId) {
     console.error("Error: User ID is required");
-    console.error("Usage: node scripts/create-test-customer.js <user_id> [email]");
+    console.error(
+      "Usage: node scripts/create-test-customer.js <user_id> [email]",
+    );
     process.exit(1);
   }
 
@@ -44,7 +46,9 @@ async function main() {
     console.log(`\nNow you can trigger subscription events:`);
     console.log(`  stripe trigger customer.subscription.created`);
     console.log(`\nOr create a subscription for this customer:`);
-    console.log(`  stripe subscriptions create --customer ${customer.id} --items[0][price]=YOUR_PRICE_ID`);
+    console.log(
+      `  stripe subscriptions create --customer ${customer.id} --items[0][price]=YOUR_PRICE_ID`,
+    );
   } catch (error) {
     console.error("Error creating customer:", error.message);
     process.exit(1);
@@ -52,4 +56,3 @@ async function main() {
 }
 
 main();
-

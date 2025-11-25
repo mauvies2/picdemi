@@ -182,3 +182,22 @@
     rgb(103, 86, 198) 100%
   );
 }
+
+/* Photographer role badge background */
+.bg-role-photographer {
+  background-color: var(--sidebar-primary);
+}
+
+/* Talent role badge background */
+.bg-role-talent {
+  background-color: var(--chart-2);
+}
+
+/* Optional: nicer hover states */
+.bg-role-photographer:hover {
+  background-color: color-mix(in srgb, var(--sidebar-primary) 85%, white);
+}
+
+.bg-role-talent:hover {
+  background-color: color-mix(in srgb, var(--chart-2) 85%, white);
+}

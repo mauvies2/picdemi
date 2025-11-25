@@ -10,9 +10,9 @@ export interface Event {
   user_id: string;
   name: string;
   date: string;
-    city: string;
-    country: string;
-    state: string;
+  city: string;
+  country: string;
+  state: string;
   activity: string;
   is_public: boolean;
   share_code: string | null;
@@ -26,9 +26,9 @@ export interface EventSummary {
   id: string;
   name: string;
   date: string;
-    city: string;
-    country: string;
-    state: string;
+  city: string;
+  country: string;
+  state: string;
   activity: string;
   is_public: boolean;
   share_code: string | null;

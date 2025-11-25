@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createBillingCheckoutAction } from "../billing/actions";
+import { useEffect } from "react";
 import { toast } from "sonner";
+import { createBillingCheckoutAction } from "../billing/actions";
 
 /**
  * Client component to handle upgrade query parameter
@@ -48,4 +48,3 @@ export function UpgradeHandler() {
 
   return null;
 }
-

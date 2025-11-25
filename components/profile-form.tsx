@@ -20,7 +20,11 @@ const profileSchema = z.object({
       /^[a-z0-9_-]+$/,
       "Username can only contain lowercase letters, numbers, underscores, and hyphens",
     ),
-  display_name: z.string().trim().max(100, "Display name is too long").optional(),
+  display_name: z
+    .string()
+    .trim()
+    .max(100, "Display name is too long")
+    .optional(),
   bio: z.string().trim().max(500, "Bio is too long").optional(),
 });
 
@@ -65,7 +69,9 @@ export function ProfileForm({
             setSubmitError(error.errors[0]?.message || "Validation failed");
           } else {
             setSubmitError(
-              error instanceof Error ? error.message : "Failed to update profile",
+              error instanceof Error
+                ? error.message
+                : "Failed to update profile",
             );
           }
         }
@@ -131,8 +137,8 @@ export function ProfileForm({
                 disabled={isFormPending}
               />
               <p className="text-xs text-muted-foreground">
-                Your unique username. This is how others will identify you (e.g.,
-                @{field.state.value || "username"}).
+                Your unique username. This is how others will identify you
+                (e.g., @{field.state.value || "username"}).
               </p>
               {usernameError ? (
                 <p className="text-xs text-destructive">{usernameError}</p>
@@ -244,4 +250,3 @@ export function ProfileForm({
     </form>
   );
 }
-
