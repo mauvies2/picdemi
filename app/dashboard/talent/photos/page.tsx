@@ -29,13 +29,13 @@ export default async function TalentPhotosPage() {
   return (
     <div>
       <DashboardHeader title="Photos of you" />
-      <div className="flex items-center justify-between gap-4 mb-2">
-        <p className="text-sm text-muted-foreground">
-          Photos of you or where photographers have tagged you.
-        </p>
+      <p className="text-sm text-muted-foreground">
+        Photos you have selected or tagged.
+      </p>
+      <div className="mt-4 flex justify-end">
         <AIMatchingButton />
       </div>
-      <div className="mt-6">
+      <div className="mt-2">
         <TalentPhotosGrid
           initialGroups={result.groups}
           hasMore={result.hasMore}

@@ -97,7 +97,7 @@ export class MockEmbeddingProvider implements EmbeddingProvider {
     let hash = 0;
     const maxBytes = Math.min(100, view.length);
     for (let i = 0; i < maxBytes; i++) {
-      hash += view[i]!;
+      hash += view[i];
     }
 
     return hash;

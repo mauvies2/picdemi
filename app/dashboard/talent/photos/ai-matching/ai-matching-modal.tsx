@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import {
   type AISearchProfile,
   addMatchedPhotosToLibrary,
@@ -43,6 +44,19 @@ interface AIMatchingModalProps {
 }
 
 export function AIMatchingModal({ open, onOpenChange }: AIMatchingModalProps) {
+  // Check feature flag - close modal if disabled
+  const isEnabled = isFeatureEnabled("AI_MATCHING");
+  
+  useEffect(() => {
+    if (!isEnabled && open) {
+      onOpenChange(false);
+      toast.info("AI Matching is coming soon!");
+    }
+  }, [isEnabled, open, onOpenChange]);
+
+  if (!isEnabled) {
+    return null;
+  }
   const [step, setStep] = useState<Step>("upload");
   const [isPending, startTransition] = useTransition();
 

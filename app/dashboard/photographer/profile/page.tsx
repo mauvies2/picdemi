@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { Calendar, Mail, User as UserIcon } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { ProfileForm } from "@/components/profile-form";
+import { ROLES } from "@/lib/roles";
 import { getProfileData } from "./actions";
 import { PayoutProfileSection } from "./payout-profile-section";
 import { updateProfileAction } from "./update-action";
@@ -87,7 +88,7 @@ export default async function PhotographerProfilePage() {
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted-foreground">Role</p>
                     <p className="font-medium capitalize">
-                      {profile.active_role === "TALENT"
+                      {profile.active_role === ROLES.TALENT
                         ? "Talent"
                         : "Photographer"}
                     </p>

@@ -8,6 +8,7 @@ import {
   Home,
   Images,
   LifeBuoy,
+  Package,
   Send,
   User,
   Wallet,
@@ -73,6 +74,7 @@ const talentNav = [
   { title: "Photos of you", url: "/dashboard/talent/photos", icon: Images },
   { title: "Profile", url: "/dashboard/talent/profile", icon: User },
   { title: "Explore", url: "/dashboard/talent/events", icon: Compass },
+  { title: "Orders", url: "/dashboard/talent/orders", icon: Package },
 ];
 
 const navSecondary = [

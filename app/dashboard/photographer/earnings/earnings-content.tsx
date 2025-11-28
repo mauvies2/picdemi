@@ -547,7 +547,7 @@ export function EarningsContent() {
           <PaymentAccountsSection />
 
           {/* Payout Request & History */}
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             <div className="rounded-xl border bg-card p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Request Payout</h3>

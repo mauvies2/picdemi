@@ -299,7 +299,7 @@ export function SalesContent() {
               <Skeleton key={id} className="h-32" />
             ))}
           </div>
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             <Skeleton className="h-64" />
             <Skeleton className="h-64" />
           </div>
@@ -333,7 +333,7 @@ export function SalesContent() {
           {/* Charts and Recent Sales */}
           {salesData.summary.totalSales > 0 ? (
             <>
-              <div className="grid gap-6 lg:grid-cols-2">
+              <div className="grid gap-4 lg:grid-cols-2">
                 <SalesChart data={salesData.salesOverTime} />
                 <RecentSales sales={salesData.recentSales} />
               </div>

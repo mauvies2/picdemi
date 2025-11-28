@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import type { ProfileData } from "./actions";
-import { AISearchProfilesSection } from "./ai-search-profiles-section";
 import { ProfilePhotoViewer } from "./profile-photo-viewer";
 
 type ProfileContentProps = {
@@ -125,9 +124,6 @@ export function ProfileContent({
           </div>
         </div>
       </div>
-
-      {/* AI Search Profiles Section */}
-      <AISearchProfilesSection />
 
       {/* Instagram-style Photo Grid */}
       {photos.length === 0 ? (

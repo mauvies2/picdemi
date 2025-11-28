@@ -235,7 +235,7 @@ export function ProfilePhotoViewer({
           {/* Gradient overlay for better icon contrast */}
           <div
             className={cn(
-              "pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100",
+              "pointer-events-none absolute inset-x-0 top-0 h-14 bg-linear-to-b from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100",
             )}
           />
 
@@ -243,34 +243,38 @@ export function ProfilePhotoViewer({
           <div className="relative z-10 flex w-full items-start justify-end gap-1.5">
             {/* Download button */}
             {metadata?.download_url && (
-              <button
-                type="button"
+              // biome-ignore lint/a11y/useSemanticElements: Intentionally using div to avoid nested buttons
+              <div
+                role="button"
                 className={cn(
                   "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
                 )}
                 onClick={(e) => handleDownload(photoId, e)}
-                onPointerDown={(event) => {
+                onKeyDown={(event) => {
                   event.stopPropagation();
                 }}
                 aria-label="Download photo"
+                tabIndex={0}
               >
                 <Download className="size-3" />
-              </button>
+              </div>
             )}
             {/* Share button */}
-            <button
-              type="button"
+            {/* biome-ignore lint/a11y/useSemanticElements: Intentionally using div to avoid nested buttons */}
+            <div
+              role="button"
               className={cn(
                 "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
               )}
               onClick={(e) => handleShare(photoId, e)}
-              onPointerDown={(event) => {
+              onKeyDown={(event) => {
                 event.stopPropagation();
               }}
               aria-label="Share photo"
+              tabIndex={0}
             >
               <Share2 className="size-3" />
-            </button>
+            </div>
           </div>
         </div>
       );
@@ -354,7 +358,7 @@ export function ProfilePhotoViewer({
 
       {/* Custom overlay with photo info and actions */}
       {currentIndex >= 0 && currentMetadata && (
-        <div className="fixed bottom-0 left-0 right-0 z-[9998] bg-background/95 backdrop-blur-sm border-t p-4 md:left-auto md:right-4 md:bottom-4 md:w-80 md:rounded-lg md:border md:shadow-lg pointer-events-auto">
+        <div className="fixed bottom-0 left-0 right-0 z-9998 bg-background/95 backdrop-blur-sm border-t p-4 md:left-auto md:right-4 md:bottom-4 md:w-80 md:rounded-lg md:border md:shadow-lg pointer-events-auto">
           <div className="flex flex-col gap-3">
             {currentMetadata.event_name && (
               <h3 className="font-semibold text-sm">

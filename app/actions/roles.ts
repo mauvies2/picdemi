@@ -11,6 +11,7 @@ import {
 } from "@/database/queries";
 import { createClient } from "@/database/server";
 import {
+  ROLES,
   type RoleSlug,
   resolveRoleSwitch,
   roleEnumToSlug,
@@ -20,7 +21,7 @@ import {
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-const userRoleSchema = z.enum(["PHOTOGRAPHER", "TALENT"]);
+const userRoleSchema = z.enum([ROLES.PHOTOGRAPHER, ROLES.TALENT]);
 const roleSlugSchema = z.enum(["photographer", "talent"]);
 
 type SwitchRoleResult = {
@@ -44,8 +45,8 @@ async function enableTalentRoleInternal(
   supabase: SupabaseServerClient,
   userId: string,
 ) {
-  await dbUpsertUserRole(supabase, userId, "TALENT");
-  await dbUpsertProfileRole(supabase, userId, "TALENT");
+  await dbUpsertUserRole(supabase, userId, ROLES.TALENT);
+  await dbUpsertProfileRole(supabase, userId, ROLES.TALENT);
 }
 
 export async function completeOnboarding(
@@ -67,7 +68,7 @@ export async function completeOnboarding(
   revalidatePath("/dashboard");
   // Redirect to the role-specific dashboard
   const dashboardPath =
-    role === "TALENT" ? "/dashboard/talent" : "/dashboard/photographer";
+    role === ROLES.TALENT ? "/dashboard/talent" : "/dashboard/photographer";
   redirect(dashboardPath);
 }
 
@@ -78,7 +79,7 @@ export async function enableTalentRole(): Promise<SwitchRoleResult> {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/talent");
 
-  return { activeRole: roleEnumToSlug("TALENT") };
+  return { activeRole: roleEnumToSlug(ROLES.TALENT) };
 }
 
 export async function switchRole(
@@ -129,10 +130,10 @@ export async function getActiveRole(): Promise<{
 
   // Prefer PHOTOGRAPHER as fallback (default role), then TALENT, then first available
   const fallback =
-    rolesData.find((role) => role === "PHOTOGRAPHER") ??
-    rolesData.find((role) => role === "TALENT") ??
+    rolesData.find((role) => role === ROLES.PHOTOGRAPHER) ??
+    rolesData.find((role) => role === ROLES.TALENT) ??
     rolesData[0] ??
-    ("PHOTOGRAPHER" as UserRole);
+    (ROLES.PHOTOGRAPHER as UserRole);
 
   // Create/update profile with the fallback role
   await dbUpsertProfileRole(supabase, user.id, fallback);

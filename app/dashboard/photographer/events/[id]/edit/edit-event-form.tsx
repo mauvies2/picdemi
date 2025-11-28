@@ -260,7 +260,7 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
         )}
 
         {/* Top Row: Form and Upload Section */}
-        <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
           {/* Left Half: Form */}
           <div className="space-y-4" suppressHydrationWarning>
             {/* Row 1: Name + Activity */}

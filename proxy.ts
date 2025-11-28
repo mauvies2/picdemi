@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { env } from "@/env.mjs";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Add the pathname to the request headers so server components can access it
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
@@ -34,14 +34,14 @@ export async function middleware(request: NextRequest) {
   );
 
   // Refresh session if expired - this prevents race conditions
-  // by centralizing token refresh in middleware
+  // by centralizing token refresh in proxy
   // This ensures tokens are refreshed before server components/API routes access them
   try {
     await supabase.auth.getUser();
   } catch (error) {
     // If it's a refresh token error, the session is invalid
     // Let individual routes handle authentication errors
-    // This prevents middleware from blocking all requests
+    // This prevents proxy from blocking all requests
     if (
       error &&
       typeof error === "object" &&
@@ -69,3 +69,4 @@ export const config = {
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
+
