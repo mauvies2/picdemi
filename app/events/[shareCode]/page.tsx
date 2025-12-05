@@ -70,7 +70,7 @@ export default async function PublicEventPage({
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">{event.name}</h1>
-          <div className="mt-2 text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             {new Date(event.date).toDateString().split(" ").slice(1).join(" ")}{" "}
             • {event.city[0]?.toUpperCase() + event.city.slice(1)}
             {event.price_per_photo !== null && (

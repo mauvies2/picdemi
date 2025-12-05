@@ -108,7 +108,7 @@ export default async function ExploreEventDetailPage({
     <div className="space-y-4">
       <div>
         <DashboardHeader title={event.name} />
-        <div className="mt-2 text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
           {new Date(event.date).toDateString().split(" ").slice(1).join(" ")} •{" "}
           {event.city[0]?.toUpperCase() + event.city.slice(1)}
           {event.price_per_photo !== null && (

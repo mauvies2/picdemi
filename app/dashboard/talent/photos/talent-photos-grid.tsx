@@ -11,6 +11,7 @@ import PhotoAlbumViewer, {
 } from "@/components/photo-album-viewer";
 import { Button } from "@/components/ui/button";
 import { listMyTaggedPhotos, type TaggedPhotoGroup } from "./actions";
+import { AIMatchingButton } from "./ai-matching/ai-matching-button";
 
 interface TalentPhotosGridProps {
   initialGroups: TaggedPhotoGroup[];
@@ -191,11 +192,13 @@ export function TalentPhotosGrid({
   }
 
   return (
-    <>
-      {isSelecting && (
-        <div className="flex flex-wrap items-center justify-between gap-3 w-full mb-2">
-          <div className="text-sm font-medium">{selectedCountLabel}</div>
-          <div className="flex items-center gap-2">
+    <div className="mt-2">
+      <div className="mt-4 flex justify-end items-center gap-3">
+        {isSelecting && (
+          <>
+            <div className="text-sm font-medium text-muted-foreground">
+              {selectedCountLabel}
+            </div>
             <Button
               type="button"
               variant="outline"
@@ -214,16 +217,17 @@ export function TalentPhotosGrid({
               <ShoppingCart className="mr-2 h-4 w-4" />
               Add to cart
             </Button>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+        <AIMatchingButton />
+      </div>
 
       <div className="space-y-6">
         {/* Grouped by date, then event */}
         {dateGroups.map(([dateKey, events]) => (
           <div key={dateKey} className="space-y-2">
             {/* Date Header */}
-            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-2 -mt-2 pt-4 border-b border-border/50">
+            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-2 pt-4 border-b border-border/50">
               <h2 className="text-xl font-semibold text-foreground">
                 {dateKey === "unknown"
                   ? "Unknown date"
@@ -299,6 +303,6 @@ export function TalentPhotosGrid({
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

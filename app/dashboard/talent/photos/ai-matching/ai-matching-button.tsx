@@ -27,9 +27,10 @@ export function AIMatchingButton({ className }: { className?: string }) {
                 disabled
                 className={cn("gap-2", className)}
                 variant="default"
+                size="sm"
               >
                 <Sparkles className="h-4 w-4" />
-                Find Me with AI
+                Find Me
               </Button>
             </span>
           </TooltipTrigger>

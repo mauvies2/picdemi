@@ -17,7 +17,17 @@ import { PhotoIconButtons } from "@/components/photo-icon-buttons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import "react-photo-album/rows.css";
+
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Share from "yet-another-react-lightbox/plugins/share";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+
 import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css";
+import "yet-another-react-lightbox/plugins/counter.css";
+import "yet-another-react-lightbox/plugins/thumbnails.css";
+import NextJsImage from "./nextjs-image";
 
 const Lightbox = dynamic(
   () => import("yet-another-react-lightbox").then((mod) => mod.default),
@@ -127,7 +137,7 @@ export default function PhotoAlbumViewer({
   );
 
   const slides = useMemo(
-    () => photos.map((p) => ({ src: p.src, alt: p.alt, id: p.id })),
+    () => photos.map((p) => ({ src: p.src, alt: p.alt, id: p.id, title: "" })),
     [photos],
   );
 
@@ -325,32 +335,13 @@ export default function PhotoAlbumViewer({
         open={index >= 0}
         index={index}
         slides={slides}
-        render={{
-          buttonPrev: undefined,
-          buttonNext: undefined,
-          buttonClose: () => (
-            <button
-              key="lightbox-close-button"
-              type="button"
-              className="yarl__button yarl__button_close"
-              aria-label="Close"
-              onClick={() => setIndex(-1)}
-            >
-              <svg
-                className="yarl__icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <title>Close</title>
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          ),
-        }}
+        render={{ slide: NextJsImage }}
         close={() => setIndex(-1)}
+        plugins={[Fullscreen, Zoom, Counter, Share]}
+        toolbar={{
+          buttons: ["zoom", "share", "fullscreen", "close"],
+        }}
+        counter={{ container: { style: { top: 0, bottom: "unset" } } }}
       />
     </>
   );

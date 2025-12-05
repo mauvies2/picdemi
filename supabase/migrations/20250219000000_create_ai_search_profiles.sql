@@ -94,3 +94,4 @@ comment on column public.ai_search_profiles.activity_type is 'Preferred activity
 comment on column public.ai_search_profiles.country is 'Country filter for search';
 comment on column public.ai_search_profiles.region is 'State/province/region filter for search';
 
+

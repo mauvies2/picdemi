@@ -37,7 +37,7 @@ export default async function TalentDashboardPage() {
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  Photos Tagged
+                  Photos of you
                 </p>
                 <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">
                   {stats.taggedPhotosCount}
@@ -117,7 +117,7 @@ export default async function TalentDashboardPage() {
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold">
-                  Recent Photos of You
+                  Recent photos of you
                 </h2>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   Latest photos where you&apos;ve been tagged

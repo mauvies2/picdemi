@@ -3,7 +3,6 @@ import { getActiveRole } from "@/app/actions/roles";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { createClient } from "@/database/server";
 import { listMyTaggedPhotos } from "./actions";
-import { AIMatchingButton } from "./ai-matching/ai-matching-button";
 import { TalentPhotosGrid } from "./talent-photos-grid";
 
 export const dynamic = "force-dynamic";
@@ -32,16 +31,11 @@ export default async function TalentPhotosPage() {
       <p className="text-sm text-muted-foreground">
         Photos you have selected or tagged.
       </p>
-      <div className="mt-4 flex justify-end">
-        <AIMatchingButton />
-      </div>
-      <div className="mt-2">
-        <TalentPhotosGrid
-          initialGroups={result.groups}
-          hasMore={result.hasMore}
-          photosInCart={result.photosInCart}
-        />
-      </div>
+      <TalentPhotosGrid
+        initialGroups={result.groups}
+        hasMore={result.hasMore}
+        photosInCart={result.photosInCart}
+      />
     </div>
   );
 }

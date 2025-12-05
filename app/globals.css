@@ -86,8 +86,8 @@
 
   /* Functional tokens */
   --destructive: oklch(0.68 0.2 25); /* coral red (#F87171) */
-  --border: oklch(0.92 0 0);
-  --input: oklch(0.93 0 0);
+  --border: oklch(0.82 0 0);
+  --input: oklch(0.83 0 0);
   --ring: oklch(0.65 0.1 280); /* soft blue ring */
 
   /* Chart tones (optional, balanced neutrals) */

@@ -14,7 +14,7 @@ export function ViewAllLink() {
         "text-xs sm:text-sm",
       )}
     >
-      View All
+      View all
       <ArrowRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
     </Link>
   );

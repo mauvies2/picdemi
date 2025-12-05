@@ -22,7 +22,7 @@ export async function DashboardTopHeader({
     activeRole === "talent" ? await getCartItemCountAction() : 0;
 
   return (
-    <div className="pointer-events-none absolute top-3 right-4 z-40 hidden md:flex md:items-center md:gap-3">
+    <div className="pointer-events-none absolute top-4 right-4 z-40 hidden md:flex md:items-center md:gap-3">
       {activeRole === "talent" && (
         <Link href="/dashboard/talent/cart" className="pointer-events-auto">
           <Button

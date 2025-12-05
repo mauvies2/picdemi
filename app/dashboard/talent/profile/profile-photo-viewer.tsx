@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation */
 "use client";
 
 import { format } from "date-fns";
@@ -10,6 +11,10 @@ import {
   RowsPhotoAlbum,
 } from "react-photo-album";
 import { toast } from "sonner";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getPhotoDownloadUrl } from "./actions";
@@ -328,31 +333,37 @@ export function ProfilePhotoViewer({
         open={currentIndex >= 0}
         index={currentIndex}
         slides={slides}
-        render={{
-          buttonPrev: undefined,
-          buttonNext: undefined,
-          buttonClose: () => (
-            <button
-              key="lightbox-close-button"
-              type="button"
-              className="yarl__button yarl__button_close"
-              aria-label="Close"
-              onClick={() => onIndexChange(-1)}
-            >
-              <svg
-                className="yarl__icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <title>Close</title>
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          ),
-        }}
+        // render={{
+        //   buttonPrev: undefined,
+        //   buttonNext: undefined,
+        //   buttonClose: () => (
+        //     <button
+        //       key="lightbox-close-button"
+        //       type="button"
+        //       className="yarl__button yarl__button_close"
+        //       aria-label="Close"
+        //       onClick={() => onIndexChange(-1)}
+        //     >
+        //       <svg
+        //         className="yarl__icon"
+        //         viewBox="0 0 24 24"
+        //         fill="none"
+        //         stroke="currentColor"
+        //         strokeWidth="2"
+        //       >
+        //         <title>Close</title>
+        //         <line x1="18" y1="6" x2="6" y2="18" />
+        //         <line x1="6" y1="6" x2="18" y2="18" />
+        //       </svg>
+        //     </button>
+        //   ),
+        // }}
+        plugins={[
+          Fullscreen as any,
+          Slideshow as any,
+          Thumbnails as any,
+          Zoom as any,
+        ]}
         close={() => onIndexChange(-1)}
       />
 

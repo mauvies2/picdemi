@@ -192,7 +192,7 @@ export function ExplorePageContent({
             placeholder="Search events by name, city, or country..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className="pl-9 pr-9 rounded-full"
+            className="pl-9 pr-9"
           />
           {searchText && (
             <button
