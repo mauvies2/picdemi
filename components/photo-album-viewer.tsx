@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import {
   type KeyboardEvent,
   useCallback,
@@ -14,27 +13,13 @@ import {
   RowsPhotoAlbum,
 } from "react-photo-album";
 import { PhotoIconButtons } from "@/components/photo-icon-buttons";
+import {
+  PhotoLightbox,
+  type PhotoLightboxItem,
+} from "@/components/photo-lightbox";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import "react-photo-album/rows.css";
-
-import Counter from "yet-another-react-lightbox/plugins/counter";
-import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
-import Share from "yet-another-react-lightbox/plugins/share";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
-
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/captions.css";
-import "yet-another-react-lightbox/plugins/counter.css";
-import "yet-another-react-lightbox/plugins/thumbnails.css";
-import NextJsImage from "./nextjs-image";
-
-const Lightbox = dynamic(
-  () => import("yet-another-react-lightbox").then((mod) => mod.default),
-  {
-    ssr: false,
-  },
-);
 
 export type PhotoAlbumItem = {
   id: string;
@@ -60,6 +45,18 @@ type PhotoAlbumViewerProps = {
   onUntag?: () => void;
   showAddToCart?: boolean;
   photosInCart?: Set<string>;
+  onDownload?: (photoId: string) => void;
+  onAddToPhotos?: (photoId: string) => void;
+  onRemoveFromPhotos?: (photoId: string) => void;
+  onRemove?: (photoId: string) => void;
+  onTagTalent?: (photoId: string) => void;
+  // Button visibility controls
+  showDownload?: boolean;
+  showAddToPhotos?: boolean;
+  showRemove?: boolean;
+  showTagTalent?: boolean;
+  // Track which photos are in "my photos"
+  photosInMyPhotos?: Set<string>;
 };
 
 export default function PhotoAlbumViewer({
@@ -71,6 +68,16 @@ export default function PhotoAlbumViewer({
   onUntag,
   showAddToCart = false,
   photosInCart = new Set(),
+  onDownload,
+  onAddToPhotos,
+  onRemoveFromPhotos,
+  onRemove,
+  onTagTalent,
+  showDownload = false,
+  showAddToPhotos = false,
+  showRemove = false,
+  showTagTalent = false,
+  photosInMyPhotos = new Set(),
 }: PhotoAlbumViewerProps) {
   const [index, setIndex] = useState<number>(-1);
   const [dimensions, setDimensions] = useState<
@@ -136,9 +143,17 @@ export default function PhotoAlbumViewer({
     [items, dimensions],
   );
 
-  const slides = useMemo(
-    () => photos.map((p) => ({ src: p.src, alt: p.alt, id: p.id, title: "" })),
-    [photos],
+  const lightboxItems: PhotoLightboxItem[] = useMemo(
+    () =>
+      items.map((item) => ({
+        id: item.id,
+        url: item.url,
+        alt: item.alt,
+        width: dimensions[item.id]?.width ?? item.width,
+        height: dimensions[item.id]?.height ?? item.height,
+        tags: item.tags,
+      })),
+    [items, dimensions],
   );
 
   const handleToggleSelect = useCallback(
@@ -331,17 +346,22 @@ export default function PhotoAlbumViewer({
           }}
         />
       </div>
-      <Lightbox
+      <PhotoLightbox
+        items={lightboxItems}
         open={index >= 0}
-        index={index}
-        slides={slides}
-        render={{ slide: NextJsImage }}
-        close={() => setIndex(-1)}
-        plugins={[Fullscreen, Zoom, Counter, Share]}
-        toolbar={{
-          buttons: ["zoom", "share", "fullscreen", "close"],
-        }}
-        counter={{ container: { style: { top: 0, bottom: "unset" } } }}
+        initialIndex={index >= 0 ? index : 0}
+        onClose={() => setIndex(-1)}
+        showDownload={showDownload}
+        showAddToPhotos={showAddToPhotos}
+        showRemove={showRemove}
+        showTagTalent={showTagTalent}
+        onDownload={onDownload}
+        onAddToPhotos={onAddToPhotos}
+        onRemoveFromPhotos={onRemoveFromPhotos}
+        onRemove={onRemove}
+        onTagTalent={onTagTalent}
+        onUntag={onUntag}
+        photosInMyPhotos={photosInMyPhotos}
       />
     </>
   );

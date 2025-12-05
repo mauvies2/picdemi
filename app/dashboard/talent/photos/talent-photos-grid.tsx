@@ -194,7 +194,7 @@ export function TalentPhotosGrid({
   return (
     <div className="mt-2">
       <div className="mt-4 flex justify-end items-center gap-3">
-        {isSelecting && (
+        {isSelecting ? (
           <>
             <div className="text-sm font-medium text-muted-foreground">
               {selectedCountLabel}
@@ -218,6 +218,15 @@ export function TalentPhotosGrid({
               Add to cart
             </Button>
           </>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsSelecting(true)}
+          >
+            Select
+          </Button>
         )}
         <AIMatchingButton />
       </div>

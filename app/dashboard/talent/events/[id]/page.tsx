@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { getActiveRole } from "@/app/actions/roles";
 import { DashboardHeader } from "@/components/dashboard-header";
-import PhotoAlbumViewer from "@/components/photo-album-viewer";
 import {
   createPhotoUrls,
   getEventPhotosPublic,
@@ -9,6 +8,7 @@ import {
 } from "@/database/queries";
 import { createClient } from "@/database/server";
 import { getBaseUrl } from "@/lib/get-base-url";
+import { EventPhotoViewer } from "./event-photo-viewer";
 
 export default async function ExploreEventDetailPage({
   params,
@@ -123,7 +123,7 @@ export default async function ExploreEventDetailPage({
         </div>
       ) : (
         <div className="w-full">
-          <PhotoAlbumViewer
+          <EventPhotoViewer
             items={photoItems}
             showAddToCart={user !== null}
             photosInCart={new Set(photosInCart)}

@@ -58,6 +58,11 @@ export function EventPhotoAlbum({ items, eventId }: EventPhotoAlbumProps) {
     setTagDialogOpen(true);
   }, []);
 
+  const handleDeleteSinglePhoto = useCallback((photoId: string) => {
+    setSelectedIds([photoId]);
+    setDeleteDialogOpen(true);
+  }, []);
+
   const handleDeleteSelected = useCallback(() => {
     if (selectedIds.length === 0) return;
     setDeleteDialogOpen(true);
@@ -155,6 +160,10 @@ export function EventPhotoAlbum({ items, eventId }: EventPhotoAlbumProps) {
         onToggleSelect={handleToggleSelect}
         onTagPhoto={handleTagSinglePhoto}
         onUntag={handleUntag}
+        showRemove={true}
+        showTagTalent={true}
+        onRemove={handleDeleteSinglePhoto}
+        onTagTalent={handleTagSinglePhoto}
       />
       <TagTalentDialog
         open={tagDialogOpen}

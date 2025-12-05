@@ -46,7 +46,7 @@ interface AIMatchingModalProps {
 export function AIMatchingModal({ open, onOpenChange }: AIMatchingModalProps) {
   // Check feature flag - close modal if disabled
   const isEnabled = isFeatureEnabled("AI_MATCHING");
-  
+
   useEffect(() => {
     if (!isEnabled && open) {
       onOpenChange(false);
@@ -54,9 +54,6 @@ export function AIMatchingModal({ open, onOpenChange }: AIMatchingModalProps) {
     }
   }, [isEnabled, open, onOpenChange]);
 
-  if (!isEnabled) {
-    return null;
-  }
   const [step, setStep] = useState<Step>("upload");
   const [isPending, startTransition] = useTransition();
 
@@ -283,7 +280,7 @@ export function AIMatchingModal({ open, onOpenChange }: AIMatchingModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
-            Find Me with AI
+            Find Me
           </DialogTitle>
           <DialogDescription>
             Upload a selfie and let AI find photos of you from events

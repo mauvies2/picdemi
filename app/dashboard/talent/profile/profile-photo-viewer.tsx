@@ -1,9 +1,6 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation */
 "use client";
 
-import { format } from "date-fns";
 import { Download, Share2 } from "lucide-react";
-import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type Photo,
@@ -11,22 +8,13 @@ import {
   RowsPhotoAlbum,
 } from "react-photo-album";
 import { toast } from "sonner";
-import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
-import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
-import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import { Button } from "@/components/ui/button";
+import {
+  PhotoLightbox,
+  type PhotoLightboxItem,
+} from "@/components/photo-lightbox";
 import { cn } from "@/lib/utils";
 import { getPhotoDownloadUrl } from "./actions";
 import "react-photo-album/rows.css";
-import "yet-another-react-lightbox/styles.css";
-
-const Lightbox = dynamic(
-  () => import("yet-another-react-lightbox").then((mod) => mod.default),
-  {
-    ssr: false,
-  },
-);
 
 type ProfilePhotoViewerProps = {
   items: Array<{
@@ -57,8 +45,6 @@ export function ProfilePhotoViewer({
   const [dimensions, setDimensions] = useState<
     Record<string, { width: number; height: number }>
   >({});
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     items.forEach((item) => {
@@ -105,31 +91,27 @@ export function ProfilePhotoViewer({
     });
   }, [items, dimensions]);
 
-  const slides = useMemo(() => {
-    return photos.map((photo) => ({
-      src: photo.src,
-      alt: photo.alt,
-      width: photo.width,
-      height: photo.height,
-    }));
-  }, [photos]);
-
-  const currentPhotoId = currentIndex >= 0 ? items[currentIndex]?.id : null;
-  const currentMetadata = currentPhotoId ? photoMetadata[currentPhotoId] : null;
+  const lightboxItems: PhotoLightboxItem[] = useMemo(() => {
+    return items.map((item) => {
+      const dim = dimensions[item.id] ?? { width: 1600, height: 1066 };
+      return {
+        id: item.id,
+        url: item.url,
+        alt: item.alt,
+        width: dim.width,
+        height: dim.height,
+      };
+    });
+  }, [items, dimensions]);
 
   const handleDownload = useCallback(
-    async (photoId: string, event?: React.MouseEvent) => {
-      if (event) {
-        event.stopPropagation();
-      }
-
+    async (photoId: string) => {
       const metadata = photoMetadata[photoId];
       if (!metadata?.download_url) {
         toast.error("Download URL not available");
         return;
       }
 
-      setIsDownloading(true);
       try {
         const downloadUrl = await getPhotoDownloadUrl(metadata.download_url);
         if (!downloadUrl) {
@@ -166,52 +148,56 @@ export function ProfilePhotoViewer({
         toast.error(
           error instanceof Error ? error.message : "Failed to download photo",
         );
-      } finally {
-        setIsDownloading(false);
       }
     },
     [photoMetadata],
   );
 
   const handleShare = useCallback(
-    async (photoId: string, event?: React.MouseEvent) => {
-      if (event) {
-        event.stopPropagation();
-      }
-
+    async (photoId: string) => {
       const metadata = photoMetadata[photoId];
       if (!metadata) return;
 
-      setIsSharing(true);
       try {
-        const shareUrl = window.location.href;
-        const shareData: ShareData = {
-          title: metadata.event_name
-            ? `Photo from ${metadata.event_name}`
-            : "My Photo",
-          text: metadata.event_name
-            ? `Check out this photo from ${metadata.event_name}`
-            : "Check out this photo",
-          url: shareUrl,
-        };
+        // Create URL with photo ID as hash - ensure it's clean
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${baseUrl}#photo-${photoId}`;
 
         // Use Web Share API if available
-        if (navigator.share && navigator.canShare(shareData)) {
-          await navigator.share(shareData);
-          toast.success("Shared successfully");
+        if (navigator.share) {
+          // Only share the URL to prevent any text from being appended to it
+          // Some browsers/apps may concatenate text and URL incorrectly
+          const shareData: ShareData = {
+            url: shareUrl,
+          };
+
+          if (navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+            toast.success("Shared successfully");
+          } else {
+            // Fallback: copy to clipboard
+            await navigator.clipboard.writeText(shareUrl);
+            toast.success("Link copied to clipboard");
+          }
         } else {
           // Fallback: copy to clipboard
           await navigator.clipboard.writeText(shareUrl);
           toast.success("Link copied to clipboard");
         }
       } catch (error) {
-        // User cancelled or error
+        // User cancelled or error - fallback to clipboard
         if (error instanceof Error && error.name !== "AbortError") {
           console.error("Share error:", error);
-          toast.error("Failed to share");
+          // Try to copy URL as fallback
+          try {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}#photo-${photoId}`;
+            await navigator.clipboard.writeText(shareUrl);
+            toast.success("Link copied to clipboard");
+          } catch {
+            toast.error("Failed to share");
+          }
         }
-      } finally {
-        setIsSharing(false);
       }
     },
     [photoMetadata],
@@ -254,7 +240,10 @@ export function ProfilePhotoViewer({
                 className={cn(
                   "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
                 )}
-                onClick={(e) => handleDownload(photoId, e)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownload(photoId);
+                }}
                 onKeyDown={(event) => {
                   event.stopPropagation();
                 }}
@@ -271,7 +260,10 @@ export function ProfilePhotoViewer({
               className={cn(
                 "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
               )}
-              onClick={(e) => handleShare(photoId, e)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleShare(photoId);
+              }}
               onKeyDown={(event) => {
                 event.stopPropagation();
               }}
@@ -329,46 +321,22 @@ export function ProfilePhotoViewer({
       </div>
 
       {/* Lightbox */}
-      <Lightbox
+      <PhotoLightbox
+        items={lightboxItems}
         open={currentIndex >= 0}
-        index={currentIndex}
-        slides={slides}
-        // render={{
-        //   buttonPrev: undefined,
-        //   buttonNext: undefined,
-        //   buttonClose: () => (
-        //     <button
-        //       key="lightbox-close-button"
-        //       type="button"
-        //       className="yarl__button yarl__button_close"
-        //       aria-label="Close"
-        //       onClick={() => onIndexChange(-1)}
-        //     >
-        //       <svg
-        //         className="yarl__icon"
-        //         viewBox="0 0 24 24"
-        //         fill="none"
-        //         stroke="currentColor"
-        //         strokeWidth="2"
-        //       >
-        //         <title>Close</title>
-        //         <line x1="18" y1="6" x2="6" y2="18" />
-        //         <line x1="6" y1="6" x2="18" y2="18" />
-        //       </svg>
-        //     </button>
-        //   ),
-        // }}
-        plugins={[
-          Fullscreen as any,
-          Slideshow as any,
-          Thumbnails as any,
-          Zoom as any,
-        ]}
-        close={() => onIndexChange(-1)}
+        initialIndex={currentIndex >= 0 ? currentIndex : 0}
+        onClose={() => onIndexChange(-1)}
+        showDownload={true}
+        onDownload={(photoId) => {
+          handleDownload(photoId);
+        }}
+        onShare={(photoId) => {
+          handleShare(photoId);
+        }}
       />
 
       {/* Custom overlay with photo info and actions */}
-      {currentIndex >= 0 && currentMetadata && (
+      {/* {currentIndex >= 0 && currentMetadata && (
         <div className="fixed bottom-0 left-0 right-0 z-9998 bg-background/95 backdrop-blur-sm border-t p-4 md:left-auto md:right-4 md:bottom-4 md:w-80 md:rounded-lg md:border md:shadow-lg pointer-events-auto">
           <div className="flex flex-col gap-3">
             {currentMetadata.event_name && (
@@ -416,7 +384,7 @@ export function ProfilePhotoViewer({
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 }

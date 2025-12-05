@@ -50,7 +50,7 @@ export function AIMatchingButton({ className }: { className?: string }) {
         variant="default"
       >
         <Sparkles className="h-4 w-4" />
-        Find Me with AI
+        Find Me
       </Button>
       <AIMatchingModal open={isOpen} onOpenChange={setIsOpen} />
     </>
