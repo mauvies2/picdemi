@@ -23,7 +23,7 @@ export default async function PhotographerProfilePage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-3 py-4 sm:px-6 sm:py-6">
+    <div className="flex flex-1 flex-col">
       <div className="mx-auto flex w-full flex-col gap-6">
         <div>
           <DashboardHeader title="Profile" />

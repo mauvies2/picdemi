@@ -45,6 +45,8 @@ type PhotoAlbumViewerProps = {
   onUntag?: () => void;
   showAddToCart?: boolean;
   photosInCart?: Set<string>;
+  onAddToCart?: (photoId: string) => void;
+  onRemoveFromCart?: (photoId: string) => void;
   onDownload?: (photoId: string) => void;
   onAddToPhotos?: (photoId: string) => void;
   onRemoveFromPhotos?: (photoId: string) => void;
@@ -68,6 +70,8 @@ export default function PhotoAlbumViewer({
   onUntag,
   showAddToCart = false,
   photosInCart = new Set(),
+  onAddToCart,
+  onRemoveFromCart,
   onDownload,
   onAddToPhotos,
   onRemoveFromPhotos,
@@ -353,15 +357,19 @@ export default function PhotoAlbumViewer({
         onClose={() => setIndex(-1)}
         showDownload={showDownload}
         showAddToPhotos={showAddToPhotos}
+        showAddToCart={showAddToCart}
         showRemove={showRemove}
         showTagTalent={showTagTalent}
         onDownload={onDownload}
         onAddToPhotos={onAddToPhotos}
         onRemoveFromPhotos={onRemoveFromPhotos}
+        onAddToCart={onAddToCart}
+        onRemoveFromCart={onRemoveFromCart}
         onRemove={onRemove}
         onTagTalent={onTagTalent}
         onUntag={onUntag}
         photosInMyPhotos={photosInMyPhotos}
+        photosInCart={photosInCart}
       />
     </>
   );

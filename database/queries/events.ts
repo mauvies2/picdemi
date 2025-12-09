@@ -20,6 +20,7 @@ export interface Event {
   watermark_enabled: boolean;
   created_at?: string;
   updated_at?: string;
+  deleted_at?: string | null;
 }
 
 export interface EventSummary {
@@ -49,6 +50,7 @@ export async function getUserEvents(
       "id, name, date, city, country, activity, is_public, share_code, price_per_photo, watermark_enabled",
     )
     .eq("user_id", userId)
+    .is("deleted_at", null)
     .order("date", { ascending: false })
     .throwOnError();
 
@@ -72,6 +74,7 @@ export async function getEvent(
     .select("*")
     .eq("id", eventId)
     .eq("user_id", userId)
+    .is("deleted_at", null)
     .single()
     .throwOnError();
 
@@ -95,6 +98,7 @@ export async function eventExists(
     .select("id")
     .eq("id", eventId)
     .eq("user_id", userId)
+    .is("deleted_at", null)
     .single();
 
   if (error || !data) {
@@ -152,6 +156,7 @@ export async function getEventByShareCode(
     .from("events")
     .select("*")
     .eq("share_code", shareCode)
+    .is("deleted_at", null)
     .single();
 
   if (error || !data) {
@@ -182,7 +187,8 @@ export async function searchPublicEvents(
       "id, name, date, city, country, state, activity, is_public, share_code, price_per_photo, watermark_enabled",
       { count: "exact" },
     )
-    .eq("is_public", true);
+    .eq("is_public", true)
+    .is("deleted_at", null);
 
   // Text search on name, city, or country
   if (filters.searchText?.trim()) {
@@ -256,7 +262,8 @@ export async function getEventFilterOptions(
   const { data, error } = await supabase
     .from("events")
     .select("city, country")
-    .eq("is_public", true);
+    .eq("is_public", true)
+    .is("deleted_at", null);
 
   if (error) {
     throw new Error(`Failed to get filter options: ${getErrorMessage(error)}`);
@@ -296,7 +303,7 @@ export async function updateEvent(
     watermark_enabled?: boolean;
   },
 ): Promise<void> {
-  // Verify event belongs to user
+  // Verify event belongs to user and is not deleted
   const exists = await eventExists(supabase, eventId, userId);
   if (!exists) {
     throw new Error("Event not found or access denied");
@@ -306,7 +313,8 @@ export async function updateEvent(
     .from("events")
     .update(eventData)
     .eq("id", eventId)
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .is("deleted_at", null);
 
   if (error) {
     throw new Error(`Failed to update event: ${getErrorMessage(error)}`);
@@ -314,18 +322,26 @@ export async function updateEvent(
 }
 
 /**
- * Delete an event
+ * Delete an event (soft delete - sets deleted_at timestamp)
+ * This preserves the event data for historical metrics and analytics
  */
 export async function deleteEvent(
   supabase: SupabaseServerClient,
   eventId: string,
   userId: string,
 ): Promise<void> {
+  // Verify event belongs to user and is not already deleted
+  const exists = await eventExists(supabase, eventId, userId);
+  if (!exists) {
+    throw new Error("Event not found or access denied");
+  }
+
   const { error } = await supabase
     .from("events")
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq("id", eventId)
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .is("deleted_at", null);
 
   if (error) {
     throw new Error(`Failed to delete event: ${getErrorMessage(error)}`);

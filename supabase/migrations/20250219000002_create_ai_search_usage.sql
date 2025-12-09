@@ -122,3 +122,4 @@ comment on column public.ai_search_usage.period_month is 'Month of the usage per
 comment on column public.ai_search_usage.search_count is 'Number of searches performed in this month';
 
 
+

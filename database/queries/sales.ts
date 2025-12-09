@@ -348,6 +348,7 @@ export async function getTopSellingEvents(
   startDate?: string,
   endDate?: string,
 ): Promise<TopSellingEvent[]> {
+  // First, get order items with photos (without joining events to avoid filtering out deleted events)
   const query = supabase
     .from("order_items")
     .select(
@@ -362,11 +363,7 @@ export async function getTopSellingEvents(
         status
       ),
       photos!inner(
-        event_id,
-        events(
-          name,
-          date
-        )
+        event_id
       )
     `,
     )
@@ -381,12 +378,10 @@ export async function getTopSellingEvents(
     );
   }
 
-  // Group by event_id
+  // Group by event_id first
   const grouped = new Map<
     string,
     {
-      event_name: string | null;
-      event_date: string | null;
       sales_count: number;
       revenue_cents: number;
       photos_sold: Set<string>;
@@ -397,25 +392,16 @@ export async function getTopSellingEvents(
     photo_id: string;
     total_price_cents: number;
     quantity: number;
+    created_at: string;
     orders:
       | Array<{ id: string; created_at: string; status: string }>
       | { id: string; created_at: string; status: string };
     photos:
-      | Array<{
-          event_id: string | null;
-          events:
-            | Array<{ name: string | null; date: string | null }>
-            | { name: string | null; date: string | null }
-            | null;
-        }>
-      | {
-          event_id: string | null;
-          events:
-            | Array<{ name: string | null; date: string | null }>
-            | { name: string | null; date: string | null }
-            | null;
-        };
+      | Array<{ event_id: string | null }>
+      | { event_id: string | null };
   }>;
+
+  const eventIds = new Set<string>();
 
   items.forEach((item) => {
     // Handle Supabase returning orders as array or single object
@@ -438,15 +424,9 @@ export async function getTopSellingEvents(
     if (!photo || !photo.event_id) return;
 
     const eventId = photo.event_id;
-
-    // Handle events as array or single object
-    const event = Array.isArray(photo.events)
-      ? (photo.events[0] ?? null)
-      : photo.events;
+    eventIds.add(eventId);
 
     const current = grouped.get(eventId) ?? {
-      event_name: event?.name ?? null,
-      event_date: event?.date ?? null,
       sales_count: 0,
       revenue_cents: 0,
       photos_sold: new Set<string>(),
@@ -460,15 +440,53 @@ export async function getTopSellingEvents(
     });
   });
 
+  // Fetch event details including deleted events (for metrics purposes)
+  // Note: We include deleted events here because we want to show historical metrics
+  const eventDetailsMap = new Map<string, { name: string | null; date: string | null; deleted_at: string | null }>();
+  
+  if (eventIds.size > 0) {
+    const { data: events } = await supabase
+      .from("events")
+      .select("id, name, date, deleted_at")
+      .in("id", Array.from(eventIds));
+
+    if (events) {
+      for (const event of events) {
+        eventDetailsMap.set(event.id, {
+          name: event.name,
+          date: event.date,
+          deleted_at: event.deleted_at,
+        });
+      }
+    }
+  }
+
+  // Build final results with event details
+  // For deleted events, we still show their name (since we're using soft deletes)
   return Array.from(grouped.entries())
-    .map(([event_id, stats]) => ({
-      event_id,
-      event_name: stats.event_name,
-      event_date: stats.event_date,
-      sales_count: stats.sales_count,
-      revenue_cents: stats.revenue_cents,
-      photos_sold: stats.photos_sold.size,
-    }))
+    .map(([event_id, stats]) => {
+      const eventDetails = eventDetailsMap.get(event_id);
+      // If event doesn't exist in DB (shouldn't happen with soft deletes, but handle gracefully)
+      if (!eventDetails) {
+        return {
+          event_id,
+          event_name: "Deleted Event",
+          event_date: null,
+          sales_count: stats.sales_count,
+          revenue_cents: stats.revenue_cents,
+          photos_sold: stats.photos_sold.size,
+        };
+      }
+      
+      return {
+        event_id,
+        event_name: eventDetails.name ?? "Unnamed Event",
+        event_date: eventDetails.date ?? null,
+        sales_count: stats.sales_count,
+        revenue_cents: stats.revenue_cents,
+        photos_sold: stats.photos_sold.size,
+      };
+    })
     .sort((a, b) => b.revenue_cents - a.revenue_cents)
     .slice(0, limit);
 }

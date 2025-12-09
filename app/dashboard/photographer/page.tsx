@@ -192,7 +192,9 @@ export default async function PhotographerDashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <ViewEventButton eventId={topEvent.event_id} />
+                  {topEvent.event_name !== "Deleted Event" && (
+                    <ViewEventButton eventId={topEvent.event_id} />
+                  )}
                 </div>
               </div>
             ) : (

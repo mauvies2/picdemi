@@ -7,6 +7,7 @@ import {
   Heart,
   Maximize2,
   Share2,
+  ShoppingCart,
   Trash2,
   UserPlus,
   Users,
@@ -57,6 +58,7 @@ type PhotoLightboxProps = {
   // Button visibility
   showDownload?: boolean;
   showAddToPhotos?: boolean;
+  showAddToCart?: boolean;
   showRemove?: boolean;
   showTagTalent?: boolean;
   // Callbacks
@@ -64,11 +66,14 @@ type PhotoLightboxProps = {
   onShare?: (photoId: string) => void;
   onAddToPhotos?: (photoId: string) => void;
   onRemoveFromPhotos?: (photoId: string) => void;
+  onAddToCart?: (photoId: string) => void;
+  onRemoveFromCart?: (photoId: string) => void;
   onRemove?: (photoId: string) => void;
   onTagTalent?: (photoId: string) => void;
   onUntag?: () => void;
-  // Track which photos are in "my photos"
+  // Track which photos are in "my photos" and cart
   photosInMyPhotos?: Set<string>;
+  photosInCart?: Set<string>;
 };
 
 export function PhotoLightbox({
@@ -78,20 +83,25 @@ export function PhotoLightbox({
   onClose,
   showDownload = false,
   showAddToPhotos = false,
+  showAddToCart = false,
   showRemove = false,
   showTagTalent = false,
   onDownload,
   onShare,
   onAddToPhotos,
   onRemoveFromPhotos,
+  onAddToCart,
+  onRemoveFromCart,
   onRemove,
   onTagTalent,
   onUntag,
   photosInMyPhotos = new Set(),
+  photosInCart = new Set(),
 }: PhotoLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [addedPhotos, setAddedPhotos] = useState<Set<string>>(new Set());
+  const [addedToCart, setAddedToCart] = useState<Set<string>>(new Set());
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [isUntagging, startUntagging] = useTransition();
 
@@ -106,6 +116,13 @@ export function PhotoLightbox({
       (photosInMyPhotos.has(currentPhoto.id) ||
         addedPhotos.has(currentPhoto.id)),
     [currentPhoto, photosInMyPhotos, addedPhotos],
+  );
+
+  const isInCart = useMemo(
+    () =>
+      currentPhoto &&
+      (photosInCart.has(currentPhoto.id) || addedToCart.has(currentPhoto.id)),
+    [currentPhoto, photosInCart, addedToCart],
   );
 
   const hasTags = useMemo(
@@ -255,6 +272,29 @@ export function PhotoLightbox({
       setAddedPhotos((prev) => new Set(prev).add(currentPhoto.id));
     }
   }, [currentPhoto, onAddToPhotos, onRemoveFromPhotos, isInMyPhotos]);
+
+  const handleAddToCart = useCallback(() => {
+    if (!currentPhoto) return;
+
+    if (isInCart) {
+      // Remove from cart
+      if (onRemoveFromCart) {
+        onRemoveFromCart(currentPhoto.id);
+      }
+      setAddedToCart((prev) => {
+        const next = new Set(prev);
+        next.delete(currentPhoto.id);
+        return next;
+      });
+    } else {
+      // Add to cart
+      if (onAddToCart) {
+        onAddToCart(currentPhoto.id);
+      }
+      // Optimistically update local state
+      setAddedToCart((prev) => new Set(prev).add(currentPhoto.id));
+    }
+  }, [currentPhoto, onAddToCart, onRemoveFromCart, isInCart]);
 
   const handleRemove = useCallback(() => {
     if (!currentPhoto || !onRemove) return;
@@ -423,6 +463,33 @@ export function PhotoLightbox({
               </TooltipTrigger>
               <TooltipContent>
                 <p>{isInMyPhotos ? "Remove from photos" : "Add to photos"}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {/* Add to Cart */}
+          {showAddToCart && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart();
+                  }}
+                  className="h-9 w-9 text-white hover:bg-white/15"
+                  aria-label="Add to cart"
+                >
+                  <ShoppingCart
+                    className="h-5 w-5"
+                    strokeWidth={1.5}
+                    fill={isInCart ? "white" : "none"}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{isInCart ? "Remove from cart" : "Add to cart"}</p>
               </TooltipContent>
             </Tooltip>
           )}
