@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getDashboardPath } from "@/app/actions/roles";
 import { CloseButton } from "@/components/close-button";
 import { ForgotPasswordLink } from "@/components/forgot-password-link";
+import { GoogleSignInButton } from "@/components/google-signin-button";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,13 +117,10 @@ export default async function Login({
           Login with your Google, Facebook or Apple account
         </p>
         <div className="mt-4 flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
+          <GoogleSignInButton
+            plan={params.plan}
             className="flex-1 h-12 border-2 rounded-lg"
-          >
-            <Image src="/google.svg" alt="Google" width={25} height={25} />
-          </Button>
+          />
           <Button
             type="button"
             variant="outline"

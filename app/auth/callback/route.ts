@@ -8,6 +8,7 @@ export async function GET(request: Request) {
   // https://supabase.com/docs/guides/auth/server-side/nextjs
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const plan = requestUrl.searchParams.get("plan");
   const origin = requestUrl.origin;
 
   if (code) {
@@ -20,6 +21,13 @@ export async function GET(request: Request) {
 
     if (!user) {
       return NextResponse.redirect(`${origin}/login`);
+    }
+
+    // If user is logged in and has a plan parameter, redirect to billing checkout
+    if (plan && (plan === "amateur" || plan === "pro")) {
+      return NextResponse.redirect(
+        `${origin}/dashboard/photographer/settings?upgrade=${plan}`,
+      );
     }
 
     const { getProfileActiveRole, getUserRoles } = await import(
