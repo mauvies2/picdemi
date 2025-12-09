@@ -14,8 +14,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-inter-tight);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -168,6 +169,20 @@
   }
 }
 
+/* Apply Inter Tight font to all headings and titles */
+/* Placed outside @layer base to ensure it overrides Tailwind utilities */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family:
+    var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui,
+    sans-serif;
+  color: var(--foreground);
+}
+
 /* 
   ✨ Special Button Gradient (Dreamlight Highlight)
   -------------------------------------------------
@@ -200,4 +215,11 @@
 
 .bg-role-talent:hover {
   background-color: color-mix(in srgb, var(--chart-2) 85%, white);
+}
+
+/* Utility class for applying Inter Tight to titles that aren't headings */
+.font-heading {
+  font-family:
+    var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui,
+    sans-serif;
 }

@@ -43,15 +43,12 @@ export function Nav({ user }: { user: User | null }) {
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
               <Image
-                src="/logo.svg"
-                alt="Oceapic"
-                width={23}
-                height={23}
+                src="/logo_dark.svg"
+                alt="Shootea"
+                width={170}
+                height={70}
                 priority
               />
-              <span className="text-[24px] font-bold tracking-tight font-brand text-[#474747]">
-                OceaPic
-              </span>
             </Link>
           </div>
 

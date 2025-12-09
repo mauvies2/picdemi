@@ -25,7 +25,7 @@ export function MobileHeader() {
           className="h-7 w-7 shrink-0 -translate-x-0.5"
           priority
         />
-        <h1 className="text-xl font-bold select-none">OceaPic</h1>
+        <h1 className="text-xl font-bold select-none">Shootea</h1>
       </Link>
       <div className="flex items-center gap-2">
         {isTalentDashboard && <CartLinkButton />}

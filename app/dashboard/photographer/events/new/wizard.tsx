@@ -63,7 +63,7 @@ const eventSchema = z.object({
 
 type FormValues = z.infer<typeof eventSchema>;
 
-const STORAGE_KEY = "oceapic_new_event_form";
+const STORAGE_KEY = "shootea_new_event_form";
 
 const getDefaultValues = (): FormValues => {
   if (typeof window === "undefined") {

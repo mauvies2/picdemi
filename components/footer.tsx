@@ -12,12 +12,12 @@ export function Footer() {
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/logo.svg"
-                alt="OceaPic"
+                alt="Shootea"
                 width={24}
                 height={24}
                 className="h-6 w-6"
               />
-              <span className="text-xl font-bold tracking-tight">OceaPic</span>
+              <span className="text-xl font-bold tracking-tight">Shootea</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Find yourself in every moment. Connect photographers with athletes
@@ -182,15 +182,15 @@ export function Footer() {
         <div className="mt-12 border-t pt-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} OceaPic. All rights reserved.
+              © {new Date().getFullYear()} Shootea. All rights reserved.
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Mail className="h-4 w-4" />
               <a
-                href="mailto:hello@oceapic.com"
+                href="mailto:hello@shootea.com"
                 className="hover:text-foreground transition-colors"
               >
-                hello@oceapic.com
+                hello@shootea.com
               </a>
             </div>
           </div>

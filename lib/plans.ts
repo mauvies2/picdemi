@@ -24,7 +24,7 @@ export const PLANS: Plan[] = [
     name: "Free",
     price: null,
     priceInterval: null,
-    description: "Perfect for getting started and testing OceaPic",
+    description: "Perfect for getting started and testing Shootea",
     storageGB: 1,
     maxEvents: 3,
     salesFeePercent: 15,

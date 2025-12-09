@@ -221,19 +221,15 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" className="h-svh" {...props}>
       <SidebarHeader>
-        <div className="relative flex items-center px-2 pb-1.5 pt-2">
+        <div className="relative flex items-center px-2">
           <Link href="/" className="flex items-center gap-1">
             <Image
-              src="/logo.svg"
+              src="/logo_dark.svg"
               alt="Logo"
-              width={24}
-              height={24}
-              className="h-7 w-7 shrink-0 -translate-x-0.5"
+              width={170}
+              height={50}
               priority
             />
-            <h1 className="text-2xl font-bold select-none transition-opacity group-data-[collapsible=icon]:opacity-0">
-              OceaPic
-            </h1>
           </Link>
         </div>
       </SidebarHeader>
