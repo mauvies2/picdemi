@@ -177,7 +177,7 @@ export async function updateEventAction(
             event_id: currentEvent.id,
             original_url: path,
             taken_at: new Date(payload.date).toISOString(),
-            city: payload.city,
+            city: payload.city || "",
             country: payload.country,
             state: payload.state,
           });

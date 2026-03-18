@@ -69,7 +69,7 @@ const getDefaultValues = (): FormValues => {
   if (typeof window === "undefined") {
     return {
       name: "",
-      activity: "",
+      activity: "OTHER",
       date: "",
       country: "",
       state: "",
@@ -102,7 +102,7 @@ const getDefaultValues = (): FormValues => {
 
   return {
     name: "",
-    activity: "",
+    activity: "OTHER",
     date: "",
     country: "",
     state: "",

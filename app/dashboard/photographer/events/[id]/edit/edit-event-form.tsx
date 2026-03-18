@@ -111,7 +111,7 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
 
   const defaultValues: FormValues = {
     name: event.name,
-    activity: event.activity,
+    activity: event.activity as FormValues["activity"],
     date: eventDate,
     country: event.country,
     state: event.state || "",

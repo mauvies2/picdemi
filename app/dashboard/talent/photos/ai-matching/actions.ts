@@ -205,7 +205,8 @@ export async function updateMyAISearchProfile(
     embedding = generatedEmbedding;
   }
 
-  const updateData: Parameters<typeof updateAISearchProfile>[2] = {};
+  type UpdatePayload = Parameters<typeof updateAISearchProfile>[3];
+  const updateData: UpdatePayload = {};
   if (input.name !== undefined) {
     updateData.name = input.name;
   }

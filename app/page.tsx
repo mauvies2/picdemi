@@ -21,12 +21,14 @@ import { createClient } from "@/database/server";
 import { PLANS } from "@/lib/plans";
 
 export default async function Home() {
-  // Check if user is authenticated
   const supabase = await createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   const isAuthenticated = !!user;
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
@@ -54,9 +56,9 @@ export default async function Home() {
             </h1>
 
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-              Captoran connects event photographers with talents and
-              participants. Upload thousands of photos, and let AI help everyone
-              find themselves instantly — by face, outfit, or bib number.
+              Shootea connects photographers with talents. Upload thousands of
+              photos, and let AI help find themselves instantly — by face,
+              outfit, or bib number.
             </p>
 
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
@@ -102,7 +104,7 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              How Captoran works
+              How Shootea works
             </h2>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
               From upload to purchase in three simple steps.
@@ -125,7 +127,7 @@ export default async function Home() {
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     Import hundreds or thousands of event photos with a simple
-                    interface. Captoran automatically enriches them with
+                    interface. Shootea automatically enriches them with
                     activity, location, and date metadata.
                   </p>
                 </div>
@@ -289,7 +291,7 @@ export default async function Home() {
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   Drag, drop, done. Upload entire events in minutes and let
-                  Captoran handle organization.
+                  Shootea handle organization.
                 </p>
               </div>
 
@@ -449,7 +451,7 @@ export default async function Home() {
                   <p className="mt-2 text-center text-[11px] text-muted-foreground">
                     Best for{" "}
                     {plan.id === "free"
-                      ? "trying out Captoran"
+                      ? "trying out Shootea"
                       : plan.id === "amateur"
                         ? "growing event photographers"
                         : "high-volume pros & studios"}
@@ -480,7 +482,7 @@ export default async function Home() {
               Ready to see your events in a new light?
             </h2>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              Join photographers and talents who use Captoran to make sure great
+              Join photographers and talents who use Shootea to make sure great
               moments never get lost in someone&apos;s camera roll.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">

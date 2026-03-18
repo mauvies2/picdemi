@@ -66,7 +66,7 @@ export function ProfileForm({
           router.refresh();
         } catch (error) {
           if (error instanceof z.ZodError) {
-            setSubmitError(error.errors[0]?.message || "Validation failed");
+            setSubmitError(error.issues[0]?.message || "Validation failed");
           } else {
             setSubmitError(
               error instanceof Error
@@ -106,7 +106,7 @@ export function ProfileForm({
         validators={{
           onChange: ({ value }) => {
             const result = profileSchema.shape.username.safeParse(value);
-            return result.success ? undefined : result.error.errors[0]?.message;
+            return result.success ? undefined : result.error.issues[0]?.message;
           },
         }}
       >
@@ -154,7 +154,7 @@ export function ProfileForm({
         validators={{
           onChange: ({ value }) => {
             const result = profileSchema.shape.display_name.safeParse(value);
-            return result.success ? undefined : result.error.errors[0]?.message;
+            return result.success ? undefined : result.error.issues[0]?.message;
           },
         }}
       >
@@ -197,7 +197,7 @@ export function ProfileForm({
         validators={{
           onChange: ({ value }) => {
             const result = profileSchema.shape.bio.safeParse(value);
-            return result.success ? undefined : result.error.errors[0]?.message;
+            return result.success ? undefined : result.error.issues[0]?.message;
           },
         }}
       >

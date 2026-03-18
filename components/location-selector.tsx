@@ -86,7 +86,7 @@ export function LocationSelector({
         <Select value={country} onValueChange={handleCountryChange}>
           <SelectTrigger
             id="country"
-            aria-invalid={isCountryInvalid}
+            aria-invalid={!!isCountryInvalid}
             className={cn("w-full", isCountryInvalid && "border-destructive")}
           >
             <SelectValue placeholder="Select a country" />
@@ -111,7 +111,7 @@ export function LocationSelector({
           <Select value={state} onValueChange={handleStateChange}>
             <SelectTrigger
               id="state"
-              aria-invalid={isStateInvalid}
+              aria-invalid={!!isStateInvalid}
               className={cn("w-full", isStateInvalid && "border-destructive")}
             >
               <SelectValue placeholder="Select a state or province" />
@@ -130,7 +130,7 @@ export function LocationSelector({
             value={state}
             onChange={(e) => handleStateChange(e.target.value)}
             placeholder="Enter state or province name"
-            aria-invalid={isStateInvalid}
+            aria-invalid={!!isStateInvalid}
             className={cn(isStateInvalid && "border-destructive")}
             autoComplete="address-level1"
             suppressHydrationWarning
@@ -150,7 +150,7 @@ export function LocationSelector({
             value={city}
             onChange={(e) => onCityChange(e.target.value)}
             placeholder="Enter city name"
-            aria-invalid={isCityInvalid}
+            aria-invalid={!!isCityInvalid}
             className={cn(isCityInvalid && "border-destructive")}
             autoComplete="address-level2"
             suppressHydrationWarning

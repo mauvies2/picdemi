@@ -100,10 +100,12 @@ export async function getProfileData(): Promise<ProfileData> {
   return {
     profile: profile
       ? {
-          display_name: profile.display_name,
+          display_name: profile.display_name ?? null,
           username: profile.username,
-          bio: profile.bio,
-          avatar_url: user.user_metadata?.avatar_url ?? null,
+          bio: profile.bio ?? null,
+          avatar_url: (typeof user.user_metadata?.avatar_url === "string"
+            ? user.user_metadata.avatar_url
+            : null) as string | null,
         }
       : null,
     stats: {

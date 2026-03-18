@@ -42,7 +42,10 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
   const [postalCode, setPostalCode] = useState(initialData?.postal_code ?? "");
   const [payoutMethod, setPayoutMethod] = useState<
     "bank_transfer" | "paypal" | "other" | ""
-  >((initialData?.payout_method as typeof payoutMethod) ?? "");
+  >(
+    (initialData?.payout_method as "bank_transfer" | "paypal" | "other" | "") ??
+      "",
+  );
   const [payoutDetails, setPayoutDetails] = useState("");
   const [payoutDetails2, setPayoutDetails2] = useState("");
   const [payoutDetails3, setPayoutDetails3] = useState("");
@@ -144,14 +147,17 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
         };
       } else {
         // Store country-specific fields
-        const field1Key = bankFields.label1.toLowerCase().replace(/\s/g, "_");
+        const field1Key =
+          bankFields?.label1?.toLowerCase().replace(/\s/g, "_") ?? "";
         payoutDetailsJson[field1Key] = payoutDetails.trim();
-        if (bankFields.label2 && payoutDetails2.trim()) {
-          const field2Key = bankFields.label2.toLowerCase().replace(/\s/g, "_");
+        if (bankFields?.label2 && payoutDetails2.trim()) {
+          const field2Key =
+            bankFields?.label2?.toLowerCase().replace(/\s/g, "_") ?? "";
           payoutDetailsJson[field2Key] = payoutDetails2.trim();
         }
-        if (bankFields.label3 && payoutDetails3.trim()) {
-          const field3Key = bankFields.label3.toLowerCase().replace(/\s/g, "_");
+        if (bankFields?.label3 && payoutDetails3.trim()) {
+          const field3Key =
+            bankFields?.label3?.toLowerCase().replace(/\s/g, "_") ?? "";
           payoutDetailsJson[field3Key] = payoutDetails3.trim();
         }
         // Store country for reference

@@ -72,7 +72,7 @@ interface OrdersListProps {
 }
 
 export function OrdersList({ orders }: OrdersListProps) {
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, _setStatusFilter] = useState<string>("all");
 
   const filteredOrders =
     statusFilter === "all"

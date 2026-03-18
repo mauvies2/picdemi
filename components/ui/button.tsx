@@ -3,7 +3,13 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-type Variant = "default" | "outline" | "ghost" | "destructive";
+type Variant =
+  | "default"
+  | "outline"
+  | "ghost"
+  | "destructive"
+  | "secondary"
+  | "link";
 type Size = "sm" | "md" | "lg" | "icon";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -18,6 +24,8 @@ const variantStylesMap: Record<Variant, string> = {
   ghost: "bg-transparent hover:bg-accent text-foreground",
   destructive:
     "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+  secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/90",
+  link: "text-primary hover:underline",
 };
 
 const sizeStylesMap: Record<Size, string> = {

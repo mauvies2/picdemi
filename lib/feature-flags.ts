@@ -1,6 +1,6 @@
 /**
  * Feature Flags
- * 
+ *
  * Centralized feature flag management.
  * In the future, this can be enhanced to:
  * - Read from environment variables
@@ -23,4 +23,3 @@ export const FEATURE_FLAGS = {
 export function isFeatureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
   return FEATURE_FLAGS[feature];
 }
-

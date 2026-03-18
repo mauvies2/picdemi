@@ -1,5 +1,6 @@
 "use server";
 
+import { getProfile } from "@/database/queries";
 import {
   createPaymentAccount,
   deletePaymentAccount,

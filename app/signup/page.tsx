@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getDashboardPath } from "@/app/actions/roles";
 import { CloseButton } from "@/components/close-button";
+import { FacebookSignInButton } from "@/components/facebook-signin-button";
 import { GoogleSignInButton } from "@/components/google-signin-button";
 import { SubmitButton } from "@/components/submit-button";
 import { Button } from "@/components/ui/button";
@@ -88,13 +89,10 @@ export default async function Signup({
             plan={params.plan}
             className="flex-1 h-12 border-2 rounded-lg bg-gray-100 hover:bg-gray-200"
           />
-          <Button
-            type="button"
-            variant="outline"
+          <FacebookSignInButton
+            plan={params.plan}
             className="flex-1 h-12 border-2 rounded-lg bg-gray-100 hover:bg-gray-200"
-          >
-            <Image src="/facebook.svg" alt="Facebook" width={25} height={25} />
-          </Button>
+          />
           <Button
             type="button"
             variant="outline"

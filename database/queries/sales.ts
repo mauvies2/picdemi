@@ -396,9 +396,7 @@ export async function getTopSellingEvents(
     orders:
       | Array<{ id: string; created_at: string; status: string }>
       | { id: string; created_at: string; status: string };
-    photos:
-      | Array<{ event_id: string | null }>
-      | { event_id: string | null };
+    photos: Array<{ event_id: string | null }> | { event_id: string | null };
   }>;
 
   const eventIds = new Set<string>();
@@ -442,8 +440,11 @@ export async function getTopSellingEvents(
 
   // Fetch event details including deleted events (for metrics purposes)
   // Note: We include deleted events here because we want to show historical metrics
-  const eventDetailsMap = new Map<string, { name: string | null; date: string | null; deleted_at: string | null }>();
-  
+  const eventDetailsMap = new Map<
+    string,
+    { name: string | null; date: string | null; deleted_at: string | null }
+  >();
+
   if (eventIds.size > 0) {
     const { data: events } = await supabase
       .from("events")
@@ -477,7 +478,6 @@ export async function getTopSellingEvents(
           photos_sold: stats.photos_sold.size,
         };
       }
-      
       return {
         event_id,
         event_name: eventDetails.name ?? "Unnamed Event",

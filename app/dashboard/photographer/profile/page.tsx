@@ -40,7 +40,7 @@ export default async function PhotographerProfilePage() {
             <div className="mb-4 sm:mb-6">
               <h2 className="text-lg font-semibold sm:text-xl">User Details</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Control how your photographer profile appears across Captoran:
+                Control how your photographer profile appears across Shootea:
                 your username, public name, and short bio.
               </p>
             </div>

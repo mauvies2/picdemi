@@ -518,105 +518,102 @@ export function PhotoLightbox({
           )}
 
           {/* Tag Talent / Tagged People */}
-          {showTagTalent && (
-            <>
-              {hasTags ? (
-                <Popover
-                  open={isTagPopoverOpen}
-                  onOpenChange={setIsTagPopoverOpen}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 text-white hover:bg-white/15"
-                      aria-label="Tagged people"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    >
-                      <Users className="h-5 w-5" strokeWidth={1.5} />
-                      {currentPhoto.tags && currentPhoto.tags.length > 1 && (
-                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                          {currentPhoto.tags.length}
-                        </span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-64 p-3"
-                    side="bottom"
-                    align="end"
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerEnter={(e) => e.stopPropagation()}
+          {showTagTalent &&
+            (hasTags ? (
+              <Popover
+                open={isTagPopoverOpen}
+                onOpenChange={setIsTagPopoverOpen}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 text-white hover:bg-white/15"
+                    aria-label="Tagged people"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
-                    <div className="space-y-1.5">
-                      {currentPhoto.tags?.map((tag) => (
-                        <div
-                          key={tag.tag_id}
-                          className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm group"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium truncate">
-                              @{tag.talent_username}
-                            </div>
+                    <Users className="h-5 w-5" strokeWidth={1.5} />
+                    {currentPhoto.tags && currentPhoto.tags.length > 1 && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                        {currentPhoto.tags.length}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-64 p-3"
+                  side="bottom"
+                  align="end"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerEnter={(e) => e.stopPropagation()}
+                >
+                  <div className="space-y-1.5">
+                    {currentPhoto.tags?.map((tag) => (
+                      <div
+                        key={tag.tag_id}
+                        className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">
+                            @{tag.talent_username}
                           </div>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleUntag(tag.talent_user_id);
-                            }}
-                            disabled={isUntagging}
-                            className="ml-2 rounded p-1 hover:text-destructive disabled:opacity-50"
-                            aria-label={`Remove tag for ${tag.talent_username}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
                         </div>
-                      ))}
-                      {onTagTalent && (
-                        <div className="border-t pt-1.5 mt-1.5">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleTagTalent();
-                              setIsTagPopoverOpen(false);
-                            }}
-                            className="flex w-full items-center rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-                          >
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Tag new people
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTagTalent();
-                      }}
-                      className="h-9 w-9 text-white hover:bg-white/15"
-                      aria-label="Tag talent"
-                    >
-                      <UserPlus className="h-5 w-5" strokeWidth={1.5} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Tag talent</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </>
-          )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUntag(tag.talent_user_id);
+                          }}
+                          disabled={isUntagging}
+                          className="ml-2 rounded p-1 hover:text-destructive disabled:opacity-50"
+                          aria-label={`Remove tag for ${tag.talent_username}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                    {onTagTalent && (
+                      <div className="border-t pt-1.5 mt-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTagTalent();
+                            setIsTagPopoverOpen(false);
+                          }}
+                          className="flex w-full items-center rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                        >
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          Tag new people
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTagTalent();
+                    }}
+                    className="h-9 w-9 text-white hover:bg-white/15"
+                    aria-label="Tag talent"
+                  >
+                    <UserPlus className="h-5 w-5" strokeWidth={1.5} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Tag talent</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
 
           {/* Fullscreen - always visible */}
           <Button
