@@ -17,7 +17,7 @@ pnpm spell        # Spell check .ts/.tsx files
 
 ## Architecture Overview
 
-**Oceapic** is a marketplace connecting photographers with athletes/event-goers. Photographers create events and upload photos; talent (athletes/models) browse and purchase photos of themselves.
+**Shootea** is a marketplace connecting photographers with athletes/event-goers. Photographers create events and upload photos; talent (athletes/models) browse and purchase photos of themselves.
 
 ### Tech Stack
 
