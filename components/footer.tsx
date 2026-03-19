@@ -5,19 +5,19 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="border-t bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/logo.svg"
-                alt="Shootea"
+                alt="Picdemi"
                 width={24}
                 height={24}
                 className="h-6 w-6"
               />
-              <span className="text-xl font-bold tracking-tight">Shootea</span>
+              <span className="text-xl font-bold tracking-tight">Picdemi</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Find yourself in every moment. Connect photographers with athletes
@@ -182,15 +182,15 @@ export function Footer() {
         <div className="mt-12 border-t pt-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Shootea. All rights reserved.
+              © {new Date().getFullYear()} Picdemi. All rights reserved.
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Mail className="h-4 w-4" />
               <a
-                href="mailto:hello@shootea.com"
+                href="mailto:hello@picdemi.com"
                 className="hover:text-foreground transition-colors"
               >
-                hello@shootea.com
+                hello@picdemi.com
               </a>
             </div>
           </div>

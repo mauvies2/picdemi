@@ -20,6 +20,8 @@ interface AddToCartButtonProps {
   initialInCart?: boolean;
   asDiv?: boolean; // When true, renders as div instead of button (for nested button scenarios)
   customSize?: string; // Override default size classes (e.g., "size-6")
+  onAddToCart?: (photoId: string) => void; // When provided, overrides the default server action
+  onRemoveFromCart?: (photoId: string) => void; // When provided, overrides the default server action
 }
 
 export function AddToCartButton({
@@ -31,6 +33,8 @@ export function AddToCartButton({
   initialInCart = false,
   asDiv = false,
   customSize,
+  onAddToCart,
+  onRemoveFromCart,
 }: AddToCartButtonProps) {
   const [isInCart, setIsInCart] = useState(initialInCart);
   const [isPending, startTransition] = useTransition();
@@ -40,6 +44,11 @@ export function AddToCartButton({
     if (e) {
       e.stopPropagation();
       e.preventDefault();
+    }
+    if (onAddToCart) {
+      onAddToCart(photoId);
+      setIsInCart(true);
+      return;
     }
     startTransition(async () => {
       try {
@@ -59,6 +68,11 @@ export function AddToCartButton({
     if (e) {
       e.stopPropagation();
       e.preventDefault();
+    }
+    if (onRemoveFromCart) {
+      onRemoveFromCart(photoId);
+      setIsInCart(false);
+      return;
     }
     startTransition(async () => {
       try {

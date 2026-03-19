@@ -15,6 +15,7 @@ type ExploreEventCardProps = {
   photoCount: number;
   coverUrl?: string | null;
   pricePerPhoto: number | null;
+  linkPrefix?: string;
 };
 
 export function ExploreEventCard({
@@ -27,6 +28,7 @@ export function ExploreEventCard({
   photoCount,
   coverUrl,
   pricePerPhoto,
+  linkPrefix = "/dashboard/talent/events",
 }: ExploreEventCardProps) {
   const activityLabel =
     activityOptions.find((opt) => opt.value === activity)?.label ?? activity;
@@ -37,7 +39,7 @@ export function ExploreEventCard({
 
   return (
     <Link
-      href={`/dashboard/talent/events/${id}`}
+      href={`${linkPrefix}/${id}`}
       className="group block rounded-xl border border-border bg-card transition-all hover:border-primary/50 hover:shadow-md"
     >
       <div className="overflow-hidden rounded-t-xl bg-muted">

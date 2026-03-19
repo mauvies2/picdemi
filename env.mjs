@@ -18,6 +18,7 @@ export const env = createEnv({
     SITE_URL: z.url(),
     STRIPE_PRICE_AMATEUR: z.string(),
     STRIPE_PRICE_PRO: z.string(),
+    RESEND_API_KEY: z.string().min(1),
   },
   /*
    * Environment variables available on the client (and server).
@@ -49,5 +50,6 @@ export const env = createEnv({
     SITE_URL: process.env.SITE_URL,
     STRIPE_PRICE_AMATEUR: process.env.STRIPE_PRICE_AMATEUR,
     STRIPE_PRICE_PRO: process.env.STRIPE_PRICE_PRO,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
   },
 });

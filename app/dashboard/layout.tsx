@@ -1,10 +1,4 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getActiveRole, switchRole } from "@/app/actions/roles";
-import { AppSidebar } from "@/components/app-sidebar";
-import { DashboardTopHeader } from "@/components/dashboard-top-header";
-import { MobileHeader } from "@/components/mobile-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { createClient } from "@/database/server";
 
 export default async function DashboardLayout({
@@ -21,50 +15,5 @@ export default async function DashboardLayout({
     return redirect("/login");
   }
 
-  const { getProfileFields } = await import("@/database/queries");
-  const profile = await getProfileFields(supabase, user.id, [
-    "display_name",
-    "active_role",
-  ]);
-
-  // Get current pathname to sync role based on URL
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || "";
-
-  // Get current active role
-  let { activeRole } = await getActiveRole();
-
-  // Sync role based on URL path before passing to sidebar
-  if (pathname.startsWith("/dashboard/talent")) {
-    if (activeRole !== "talent") {
-      await switchRole("talent", { skipRevalidation: true });
-      activeRole = "talent";
-    }
-  } else if (pathname.startsWith("/dashboard/photographer")) {
-    if (activeRole !== "photographer") {
-      await switchRole("photographer", { skipRevalidation: true });
-      activeRole = "photographer";
-    }
-  }
-
-  const sidebarUser = {
-    name:
-      profile?.display_name ??
-      user.user_metadata?.full_name ??
-      user.email ??
-      "Member",
-    email: user.email ?? "",
-    avatar: user.user_metadata?.avatar_url ?? null,
-  };
-
-  return (
-    <SidebarProvider>
-      <AppSidebar activeRole={activeRole} user={sidebarUser} />
-      <SidebarInset>
-        <MobileHeader />
-        <DashboardTopHeader user={sidebarUser} activeRole={activeRole} />
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
-  );
+  return <>{children}</>;
 }

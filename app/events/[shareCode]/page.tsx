@@ -1,51 +1,99 @@
 import { notFound } from "next/navigation";
 import { getActiveRole } from "@/app/actions/roles";
-import PhotoAlbumViewer from "@/components/photo-album-viewer";
+import { CartLinkButton } from "@/components/cart-link-button";
 import {
   createPhotoUrls,
   getEventByShareCode,
   getEventPhotosPublic,
+  isPhotoInCart,
+  type SupabaseServerClient,
 } from "@/database/queries";
 import { createClient } from "@/database/server";
+import { supabaseAdmin } from "@/database/supabase-admin";
 import { getBaseUrl } from "@/lib/get-base-url";
+import { PublicEventPhotoViewer } from "./public-event-photo-viewer";
 
-export default async function PublicEventPage({
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export default async function EventPage({
   params,
 }: {
   params: Promise<{ shareCode: string }>;
 }) {
-  const { shareCode } = await params;
+  const { shareCode: slug } = await params;
   const supabase = await createClient();
 
-  // Get event by share code
-  const event = await getEventByShareCode(supabase, shareCode);
+  // Detect whether the slug is a UUID (public event by ID) or a share code
+  const isEventId = UUID_REGEX.test(slug);
 
-  if (!event) {
-    notFound();
+  let event: {
+    id: string;
+    name: string;
+    date: string;
+    city: string;
+    country: string;
+    state: string;
+    activity: string;
+    is_public: boolean;
+    share_code: string | null;
+    price_per_photo: number | null;
+    watermark_enabled: boolean;
+    user_id: string;
+  } | null = null;
+
+  if (isEventId) {
+    // Public event — bypass RLS for anonymous visitors
+    const { data, error } = await supabaseAdmin
+      .from("events")
+      .select("*")
+      .eq("id", slug)
+      .eq("is_public", true)
+      .is("deleted_at", null)
+      .single();
+    if (error || !data) notFound();
+    event = data;
+  } else {
+    // Private event via share code
+    event = await getEventByShareCode(
+      supabaseAdmin as unknown as SupabaseServerClient,
+      slug,
+    );
   }
 
-  // Check if user is talent (watermark only shows for talent users)
-  let useWatermark = false;
+  if (!event) notFound();
+
+  const photos = await getEventPhotosPublic(
+    supabaseAdmin as unknown as SupabaseServerClient,
+    event.id,
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Always watermark on public/share pages — photos are only unwatermarked after purchase
+  const useWatermark = event.watermark_enabled === true;
+  const photosInCart: string[] = [];
+
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
     if (user) {
       const { activeRole } = await getActiveRole();
-      // Only show watermark for talent users if watermark is enabled
-      // Note: Private events via share code can also have watermarks
-      useWatermark =
-        activeRole === "talent" && event.watermark_enabled === true;
+      if (activeRole === "talent") {
+        for (const photo of photos) {
+          const inCart = await isPhotoInCart(
+            supabase as unknown as SupabaseServerClient,
+            user.id,
+            photo.id,
+          );
+          if (inCart) photosInCart.push(photo.id);
+        }
+      }
     }
   } catch {
-    // User not logged in or error - no watermark
-    useWatermark = false;
+    // ignore — photosInCart stays empty
   }
 
-  // Get photos for the event
-  const photos = await getEventPhotosPublic(supabase, event.id);
-
-  // Generate URLs (watermarked or regular signed URLs)
   const paths = photos
     .map((p) => p.original_url)
     .filter((url): url is string => url !== null);
@@ -53,59 +101,70 @@ export default async function PublicEventPage({
 
   if (paths.length > 0) {
     const baseUrl = await getBaseUrl();
-    const photoUrls = await createPhotoUrls(supabase, "photos", paths, {
-      expiresIn: 60 * 60, // 1 hour
-      useWatermark,
-      baseUrl,
-    });
+    const photoUrls = await createPhotoUrls(
+      supabaseAdmin as unknown as SupabaseServerClient,
+      "photos",
+      paths,
+      { expiresIn: 60 * 60, useWatermark, baseUrl },
+    );
     for (const item of photoUrls) {
-      if (item.signedUrl) {
-        signed[item.path] = item.signedUrl;
-      }
+      if (item.signedUrl) signed[item.path] = item.signedUrl;
     }
   }
 
+  const photoItems = photos
+    .map((p) => {
+      const url = p.original_url ? signed[p.original_url] : null;
+      if (!url) return null;
+      return {
+        id: p.id,
+        url,
+        alt: p.original_url || `Photo from ${event.name}`,
+        originalPath: p.original_url,
+      };
+    })
+    .filter(
+      (
+        item,
+      ): item is {
+        id: string;
+        url: string;
+        alt: string;
+        originalPath: string | null;
+      } => item !== null,
+    );
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">{event.name}</h1>
-          <div className="text-sm text-muted-foreground">
-            {new Date(event.date).toDateString().split(" ").slice(1).join(" ")}{" "}
-            • {event.city[0]?.toUpperCase() + event.city.slice(1)}
-            {event.price_per_photo !== null && (
-              <> • ${event.price_per_photo.toFixed(2)} per photo</>
-            )}
+    <div className="min-h-screen max-w-7xl mx-auto bg-background py-6">
+      <div className="container py-3">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">{event.name}</h1>
+            <div className="mt-1 text-sm text-muted-foreground">
+              {new Date(event.date)
+                .toDateString()
+                .split(" ")
+                .slice(1)
+                .join(" ")}{" "}
+              • {event.city[0]?.toUpperCase() + event.city.slice(1)}
+              {event.price_per_photo !== null && (
+                <> • ${event.price_per_photo.toFixed(2)} per photo</>
+              )}
+            </div>
           </div>
+          <CartLinkButton guest={!user} />
         </div>
 
-        {photos.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No photos available yet.</p>
-          </div>
-        ) : (
-          <PhotoAlbumViewer
-            items={photos
-              .map((p) => {
-                const url = p.original_url ? signed[p.original_url] : null;
-                if (!url) return null;
-                return {
-                  id: p.id,
-                  url,
-                  ...(p.original_url && { alt: p.original_url }),
-                };
-              })
-              .filter(
-                (
-                  item,
-                ): item is {
-                  id: string;
-                  url: string;
-                  alt?: string;
-                } => item !== null,
-              )}
-          />
-        )}
+        <PublicEventPhotoViewer
+          photos={photoItems}
+          eventId={event.id}
+          eventName={event.name}
+          eventDate={event.date}
+          pricePerPhoto={event.price_per_photo}
+          photographerId={event.user_id}
+          isAuthenticated={!!user}
+          initialPhotosInCart={photosInCart}
+        />
       </div>
     </div>
   );

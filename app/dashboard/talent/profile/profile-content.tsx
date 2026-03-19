@@ -131,7 +131,7 @@ export function ProfileContent({
           <div className="rounded-full bg-muted p-6 mb-4">
             <Image
               src="/logo.svg"
-              alt="Shootea"
+              alt="Picdemi"
               width={48}
               height={48}
               className="opacity-50"

@@ -1,5 +1,5 @@
 {
-  "name": "shootea",
+  "name": "picdemi",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -44,6 +44,7 @@
     "react-dom": "19.2.1",
     "react-photo-album": "^3.5.1",
     "react-qr-code": "^2.0.18",
+    "resend": "^6.9.4",
     "sharp": "^0.34.5",
     "sonner": "^2.0.7",
     "stripe": "^20.4.1",

@@ -7,26 +7,24 @@ import {
   searchPublicEvents,
 } from "@/database/queries";
 import { createClient } from "@/database/server";
+import { supabaseAdmin } from "@/database/supabase-admin";
 
 export async function searchEventsAction(filters: {
   searchText?: string;
   activities?: string[];
   cities?: string[];
   countries?: string[];
+  dateFrom?: string;
+  dateTo?: string;
   sortBy?: "date_asc" | "date_desc" | "name_asc" | "name_desc";
   limit?: number;
   offset?: number;
 }) {
-  const supabase = await createClient();
-  const result = await searchPublicEvents(supabase, filters);
-
-  // Debug logging
-  console.log("Search filters:", filters);
-  console.log("Found events:", result.events.length, "Total:", result.total);
+  const result = await searchPublicEvents(supabaseAdmin, filters);
 
   // Get cover photos for events
   const eventIds = result.events.map((e) => e.id);
-  const photoRows = await getPhotosForEvents(supabase, eventIds);
+  const photoRows = await getPhotosForEvents(supabaseAdmin, eventIds);
 
   const stats = new Map<
     string,
@@ -55,7 +53,7 @@ export async function searchEventsAction(filters: {
     Array.from(stats.entries()).map(async ([eventId, info]) => {
       if (!info.coverPath) return;
       const signedUrl = await createSignedUrl(
-        supabase,
+        supabaseAdmin,
         "photos",
         info.coverPath,
         60 * 60,

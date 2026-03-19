@@ -3,6 +3,7 @@ import { Geist_Mono, Inter, Inter_Tight } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { GuestCartProvider } from "@/components/guest-cart-provider";
 import Header from "@/components/header";
 import { Main } from "@/components/main";
 
@@ -22,7 +23,7 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  title: "Shootea - Find Yourself in Every Moment",
+  title: "Picdemi - Find Yourself in Every Moment",
   description:
     "Connect photographers with athletes and event-goers. Upload event photos and let AI help users find themselves instantly. Search, purchase, and download high-resolution photos.",
   icons: {
@@ -48,9 +49,11 @@ export default async function RootLayout({
       className={`${inter.variable} ${geistMono.variable} ${interTight.variable}`}
     >
       <body className="antialiased">
-        {!hideHeader && <Header />}
-        <Main>{children}</Main>
-        <Toaster />
+        <GuestCartProvider>
+          {!hideHeader && <Header />}
+          <Main>{children}</Main>
+          <Toaster />
+        </GuestCartProvider>
       </body>
     </html>
   );

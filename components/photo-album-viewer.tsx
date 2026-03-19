@@ -208,6 +208,8 @@ export default function PhotoAlbumViewer({
           onUntag={onUntag}
           showAddToCart={showAddToCart}
           photosInCart={photosInCart}
+          onAddToCart={onAddToCart}
+          onRemoveFromCart={onRemoveFromCart}
           isMobile={isMobile}
         />
       );
@@ -223,6 +225,8 @@ export default function PhotoAlbumViewer({
       openPopovers,
       photosInCart,
       showAddToCart,
+      onAddToCart,
+      onRemoveFromCart,
       selectionActive,
       isMobile,
     ],

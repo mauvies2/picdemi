@@ -29,6 +29,8 @@ interface PhotoIconButtonsProps {
   // Cart
   showAddToCart?: boolean;
   photosInCart?: Set<string>;
+  onAddToCart?: (photoId: string) => void;
+  onRemoveFromCart?: (photoId: string) => void;
   isMobile?: boolean;
   className?: string;
 }
@@ -47,6 +49,8 @@ export function PhotoIconButtons({
   onUntag,
   showAddToCart = false,
   photosInCart = new Set(),
+  onAddToCart,
+  onRemoveFromCart,
   isMobile = false,
   className,
 }: PhotoIconButtonsProps) {
@@ -134,6 +138,8 @@ export function PhotoIconButtons({
                   "rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm hover:bg-background group-hover:opacity-100",
                   photosInCart.has(photoId) && "bg-background opacity-100",
                 )}
+                onAddToCart={onAddToCart}
+                onRemoveFromCart={onRemoveFromCart}
               />
             </div>
           )}

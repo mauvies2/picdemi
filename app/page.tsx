@@ -14,6 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { EventSearchBar } from "@/components/event-search-bar";
 import { Footer } from "@/components/footer";
 import { PricingPlanButton } from "@/components/pricing-plan-button";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
-      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-linear-to-br from-background via-background to-primary/5">
+      <section className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center overflow-hidden bg-linear-to-br from-background via-background to-primary/5">
         {/* Decorative background */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute left-1/4 top-1/4 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
@@ -41,54 +42,28 @@ export default async function Home() {
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/60 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-sm">
+            {/* <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/60 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-sm">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span>
-                AI-powered event photo discovery for talents & creators
-              </span>
-            </div>
+              <span>AI-powered photo discovery for talents & creators</span>
+            </div> */}
 
-            <h1 className="text-balance text-5xl font-semibold tracking-tight sm:text-6xl lg:text-7xl">
-              Your event photos,
+            <h1 className="text-balance text-5xl font-semibold tracking-tight lg:text-7xl">
+              Your best shots
               <span className="block bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-                found in seconds.
+                delivered fast.
               </span>
             </h1>
 
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-              Shootea connects photographers with talents. Upload thousands of
-              photos, and let AI help find themselves instantly — by face,
-              outfit, or bib number.
+              Bridging the gap between photographers and athletes. Discover your
+              photos in seconds through our advanced gallery search.
             </p>
 
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
-              <Link href="/signup">
-                <Button size="lg" className="group px-8 text-base">
-                  Get started free
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button size="lg" variant="outline" className="px-8 text-base">
-                  Log in
-                </Button>
-              </Link>
-            </div>
-
-            {/* Trust indicators */}
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>No credit card required</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>Built for photographers & talents</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>Secure payments & instant downloads</span>
-              </div>
+            <div className="mt-10 flex flex-col items-center w-full">
+              <EventSearchBar variant="hero" className="mx-auto" />
+              <p className="mt-4 text-xs text-muted-foreground/80 tracking-wider">
+                No account needed · Buy in minutes · Instant downloads
+              </p>
             </div>
           </div>
         </div>
@@ -104,7 +79,7 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              How Shootea works
+              How Picdemi works
             </h2>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
               From upload to purchase in three simple steps.
@@ -127,7 +102,7 @@ export default async function Home() {
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     Import hundreds or thousands of event photos with a simple
-                    interface. Shootea automatically enriches them with
+                    interface. Picdemi automatically enriches them with
                     activity, location, and date metadata.
                   </p>
                 </div>
@@ -291,7 +266,7 @@ export default async function Home() {
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   Drag, drop, done. Upload entire events in minutes and let
-                  Shootea handle organization.
+                  Picdemi handle organization.
                 </p>
               </div>
 
@@ -451,7 +426,7 @@ export default async function Home() {
                   <p className="mt-2 text-center text-[11px] text-muted-foreground">
                     Best for{" "}
                     {plan.id === "free"
-                      ? "trying out Shootea"
+                      ? "trying out Picdemi"
                       : plan.id === "amateur"
                         ? "growing event photographers"
                         : "high-volume pros & studios"}
@@ -482,7 +457,7 @@ export default async function Home() {
               Ready to see your events in a new light?
             </h2>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              Join photographers and talents who use Shootea to make sure great
+              Join photographers and talents who use Picdemi to make sure great
               moments never get lost in someone&apos;s camera roll.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">

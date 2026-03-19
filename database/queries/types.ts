@@ -2,9 +2,14 @@
  * Shared types and utilities for database queries
  */
 
-export type SupabaseServerClient = Awaited<
-  ReturnType<typeof import("../server").createClient>
->;
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+/**
+ * Type for Supabase client in server-side queries. Use the package type so both
+ * the cookie-based server client and the service-role admin client are accepted
+ * (avoids duplicate-package version mismatches).
+ */
+export type SupabaseServerClient = SupabaseClient;
 
 /**
  * Helper function to extract error message safely

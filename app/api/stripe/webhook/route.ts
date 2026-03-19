@@ -14,6 +14,12 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { clearCart } from "@/database/queries/carts";
+import { createDownloadToken } from "@/database/queries/download-tokens";
+import {
+  addGuestOrderItems,
+  createGuestOrder,
+  getGuestOrderBySessionId,
+} from "@/database/queries/guest-orders";
 import {
   addOrderItems,
   createOrder,
@@ -23,6 +29,7 @@ import {
 } from "@/database/queries/orders";
 import { supabaseAdmin } from "@/database/supabase-admin";
 import { env } from "@/env.mjs";
+import { sendGuestPurchaseEmail } from "@/lib/email/send-guest-purchase-email";
 import { stripe } from "@/lib/stripe/config";
 import { STRIPE_PRICE_TO_PLAN } from "@/lib/stripe/plans-stripe";
 
@@ -98,6 +105,128 @@ export async function POST(request: Request) {
           // This event just confirms the checkout completed
           console.log(
             `Subscription checkout completed for user ${userId}, session ${session.id}`,
+          );
+          break;
+        }
+
+        // Handle guest checkout (no auth.users dependency)
+        if (session.metadata?.is_guest === "true") {
+          const existingGuestOrder = await getGuestOrderBySessionId(
+            supabaseAdmin,
+            session.id,
+          );
+
+          if (existingGuestOrder) {
+            console.log(`Guest order already exists for session ${session.id}`);
+            break;
+          }
+
+          const guestEmail =
+            session.customer_details?.email ??
+            (typeof session.customer_email === "string"
+              ? session.customer_email
+              : null);
+
+          if (!guestEmail) {
+            console.error("No email in guest checkout session");
+            break;
+          }
+
+          // Decode cart items from Stripe metadata (no DB lookup needed)
+          const cartCount = parseInt(session.metadata?.cart_count ?? "0", 10);
+          const cartItems: Array<{
+            photoId: string;
+            photographerId: string;
+            unitPriceCents: number;
+          }> = [];
+          for (let i = 0; i < cartCount; i++) {
+            const raw = session.metadata?.[`cart_${i}`];
+            if (raw) {
+              const { p, g, c } = JSON.parse(raw);
+              cartItems.push({
+                photoId: p,
+                photographerId: g,
+                unitPriceCents: c,
+              });
+            }
+          }
+          if (cartItems.length === 0) {
+            console.error("No cart items found in guest session metadata");
+            break;
+          }
+
+          const totalAmountCents = cartItems.reduce(
+            (sum, item) => sum + item.unitPriceCents,
+            0,
+          );
+
+          const guestOrder = await createGuestOrder(supabaseAdmin, {
+            guest_email: guestEmail,
+            stripe_checkout_session_id: session.id,
+            stripe_payment_intent_id:
+              typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : undefined,
+            stripe_customer_id:
+              typeof session.customer === "string"
+                ? session.customer
+                : undefined,
+            total_amount_cents: totalAmountCents,
+            currency: session.currency ?? "usd",
+            metadata: { stripe_session_id: session.id },
+          });
+
+          await addGuestOrderItems(
+            supabaseAdmin,
+            guestOrder.id,
+            cartItems.map((item) => ({
+              photo_id: item.photoId,
+              photographer_id: item.photographerId,
+              unit_price_cents: item.unitPriceCents,
+              quantity: 1,
+            })),
+          );
+
+          const downloadToken = await createDownloadToken(supabaseAdmin, {
+            guestOrderId: guestOrder.id,
+          });
+
+          // Determine base URL for links in email
+          const baseUrl = env.SITE_URL;
+
+          // Get event names for the email from DB
+          const photoIds = cartItems.map((i) => i.photoId);
+          const { data: photoRows } = await supabaseAdmin
+            .from("photos")
+            .select("events(name)")
+            .in("id", photoIds);
+          const eventNames = [
+            ...new Set(
+              (photoRows ?? [])
+                .map((r) => {
+                  const ev = Array.isArray(r.events) ? r.events[0] : r.events;
+                  return ev?.name ?? null;
+                })
+                .filter((n): n is string => n !== null),
+            ),
+          ];
+
+          // Send download link email
+          try {
+            await sendGuestPurchaseEmail({
+              to: guestEmail,
+              downloadToken: downloadToken.token,
+              photoCount: cartItems.length,
+              eventNames,
+              baseUrl,
+            });
+          } catch (emailErr) {
+            console.error("Failed to send guest purchase email:", emailErr);
+            // Don't fail the webhook — order already created
+          }
+
+          console.log(
+            `Guest order created: ${guestOrder.id} for ${guestEmail}`,
           );
           break;
         }

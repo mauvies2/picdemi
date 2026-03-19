@@ -6,10 +6,11 @@ export function CloseButton({ className = "" }: { className?: string }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Redirect to /login for reset password page, otherwise to home
   const handleClick = () => {
     if (pathname?.startsWith("/auth/reset-password")) {
       router.push("/login");
+    } else if (window.history.length > 1) {
+      router.back();
     } else {
       router.push("/");
     }

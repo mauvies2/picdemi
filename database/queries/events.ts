@@ -176,6 +176,8 @@ export async function searchPublicEvents(
     activities?: string[];
     cities?: string[];
     countries?: string[];
+    dateFrom?: string;
+    dateTo?: string;
     sortBy?: "date_asc" | "date_desc" | "name_asc" | "name_desc";
     limit?: number;
     offset?: number;
@@ -213,6 +215,14 @@ export async function searchPublicEvents(
     query = query.in("country", filters.countries);
   }
 
+  // Date range filter
+  if (filters.dateFrom) {
+    query = query.gte("date", filters.dateFrom);
+  }
+  if (filters.dateTo) {
+    query = query.lte("date", filters.dateTo);
+  }
+
   // Sort
   const sortBy = filters.sortBy || "date_desc";
   switch (sortBy) {
@@ -241,8 +251,6 @@ export async function searchPublicEvents(
     console.error("Search events error:", error);
     throw new Error(`Failed to search events: ${getErrorMessage(error)}`);
   }
-
-  console.log("Query result - events:", data?.length ?? 0, "count:", count);
 
   return {
     events: (data ?? []) as EventSummary[],

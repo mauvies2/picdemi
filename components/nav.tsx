@@ -44,7 +44,7 @@ export function Nav({ user }: { user: User | null }) {
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/logo_dark.svg"
-                alt="Shootea"
+                alt="Picdemi"
                 width={170}
                 height={70}
                 priority
@@ -71,12 +71,12 @@ export function Nav({ user }: { user: User | null }) {
               <>
                 <Link
                   href={"/login"}
-                  className="hover:text-foreground/70 transition-colors"
+                  className="text-sm hover:text-foreground/70 transition-colors"
                 >
                   Log in
                 </Link>
                 <Link href={"/signup"} tabIndex={-1}>
-                  <Button size="md">Sign up</Button>
+                  <Button size="md">Get started</Button>
                 </Link>
               </>
             )}

@@ -1,7 +1,10 @@
 "use client";
 
-import { Bell, CreditCard, LogOut, Settings, User } from "lucide-react";
+import { Bell, Camera, CreditCard, LogOut, Settings, User } from "lucide-react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useOptimistic, useTransition } from "react";
+import { switchRole } from "@/app/actions/roles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-type RoleSlug = "photographer" | "talent";
+import type { RoleSlug } from "@/lib/roles";
 
 export function DashboardUserMenu({
   user,
@@ -29,6 +31,11 @@ export function DashboardUserMenu({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [optimisticRole, addOptimisticRole] = useOptimistic<RoleSlug, RoleSlug>(
+    activeRole,
+    (_, role) => role,
+  );
+  const [isPending, startTransition] = useTransition();
 
   const handleLogout = async () => {
     await fetch("/auth/signout", { method: "POST" });
@@ -36,17 +43,44 @@ export function DashboardUserMenu({
     router.refresh();
   };
 
+  const handleSwitchRole = (role: RoleSlug) => {
+    if (role === optimisticRole || isPending) return;
+    startTransition(async () => {
+      addOptimisticRole(role);
+      try {
+        const result = await switchRole(role);
+        addOptimisticRole(result.activeRole);
+        router.push(
+          role === "photographer"
+            ? "/dashboard/photographer"
+            : "/dashboard/talent",
+        );
+      } catch {
+        addOptimisticRole(activeRole);
+      } finally {
+        router.refresh();
+      }
+    });
+  };
+
   const profileUrl =
-    activeRole === "photographer"
+    optimisticRole === "photographer"
       ? "/dashboard/photographer/profile"
       : "/dashboard/talent/profile";
   const settingsUrl =
-    activeRole === "photographer"
+    optimisticRole === "photographer"
       ? "/dashboard/photographer/settings"
       : "/dashboard/talent/settings";
 
   const isProfileActive = pathname.startsWith(profileUrl);
   const isSettingsActive = pathname.startsWith(settingsUrl);
+
+  const otherRole: RoleSlug =
+    optimisticRole === "photographer" ? "talent" : "photographer";
+  const otherRoleLabel =
+    otherRole === "photographer" ? "Photographer" : "Talent";
+  const currentRoleLabel =
+    optimisticRole === "photographer" ? "Photographer" : "Talent";
 
   return (
     <DropdownMenu>
@@ -87,38 +121,66 @@ export function DashboardUserMenu({
             </div>
           </div>
         </DropdownMenuLabel>
+
+        {/* Active role indicator */}
+        <div className="px-2 py-1.5">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {optimisticRole === "photographer" ? (
+              <Camera className="h-3 w-3" />
+            ) : (
+              <User className="h-3 w-3" />
+            )}
+            Active role:
+            <span className="font-medium text-foreground">
+              {currentRoleLabel}
+            </span>
+          </span>
+        </div>
+
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem
-            onClick={() => router.push(profileUrl)}
+            asChild
             className={isProfileActive ? "bg-accent" : ""}
           >
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+            <Link href={profileUrl}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => router.push(settingsUrl)}
+            asChild
             className={isSettingsActive ? "bg-accent" : ""}
           >
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+            <Link href={settingsUrl}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {activeRole === "photographer" && (
-            <DropdownMenuItem
-              onClick={() =>
-                router.push("/dashboard/photographer/settings?tab=billing")
-              }
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              <span>Billing</span>
+          {optimisticRole === "photographer" && (
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/photographer/settings?tab=billing">
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>Billing</span>
+              </Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuItem disabled>
             <Bell className="mr-2 h-4 w-4" />
             <span>Notifications</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem
+            onClick={() => handleSwitchRole(otherRole)}
+            disabled={isPending}
+          >
+            <Camera className="mr-2 h-4 w-4" />
+            <span>Switch to {otherRoleLabel}</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

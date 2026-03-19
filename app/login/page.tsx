@@ -20,6 +20,7 @@ export default async function Login({
     plan?: string;
     success?: string;
     reset?: string;
+    token?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -93,6 +94,26 @@ export default async function Login({
     const { getProfileActiveRole, getUserRoles } = await import(
       "@/database/queries"
     );
+
+    // Claim a guest download token if one was passed
+    if (params.token) {
+      try {
+        const { getDownloadTokenByToken, claimDownloadToken } = await import(
+          "@/database/queries/download-tokens"
+        );
+        const { supabaseAdmin } = await import("@/database/supabase-admin");
+        const tokenRow = await getDownloadTokenByToken(
+          supabaseAdmin,
+          params.token,
+        );
+        if (tokenRow && !tokenRow.claimed_by_user_id) {
+          await claimDownloadToken(supabaseAdmin, tokenRow.id, user.id);
+        }
+        return redirect(`/download/${params.token}?claimed=true`);
+      } catch (err) {
+        console.error("Failed to claim download token on login:", err);
+      }
+    }
 
     const activeRole = await getProfileActiveRole(supabase, user.id);
     if (activeRole) {

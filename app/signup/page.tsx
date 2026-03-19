@@ -15,7 +15,7 @@ import { env } from "@/env.mjs";
 export default async function Signup({
   searchParams,
 }: {
-  searchParams: Promise<{ message?: string; plan?: string }>;
+  searchParams: Promise<{ message?: string; plan?: string; token?: string }>;
 }) {
   const params = await searchParams;
   const supabase = await createClient();
@@ -51,13 +51,18 @@ export default async function Signup({
 
     const supabase = await createClient();
 
+    const baseRedirect = env.NEXT_PUBLIC_VERCEL_URL
+      ? `https://${env.NEXT_PUBLIC_VERCEL_URL}`
+      : "http://localhost:3000";
+    const tokenRedirect = params.token
+      ? `${baseRedirect}/auth/callback?token=${params.token}`
+      : baseRedirect;
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: env.NEXT_PUBLIC_VERCEL_URL
-          ? `https://${env.NEXT_PUBLIC_VERCEL_URL}`
-          : "http://localhost:3000",
+        emailRedirectTo: tokenRedirect,
       },
     });
 
@@ -68,10 +73,11 @@ export default async function Signup({
       );
     }
 
-    // Preserve plan parameter if present
+    // Preserve plan and token parameters if present
     const planParam = params.plan ? `&plan=${params.plan}` : "";
+    const tokenParam = params.token ? `&token=${params.token}` : "";
     return redirect(
-      `/login?success=Check email to continue sign in process${planParam}`,
+      `/login?success=Check email to continue sign in process${planParam}${tokenParam}`,
     );
   };
 
