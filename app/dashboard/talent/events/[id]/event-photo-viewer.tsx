@@ -1,19 +1,14 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { toast } from "sonner";
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { toast } from 'sonner';
 import {
   addPhotoToCartAction,
   removePhotoFromCartAction,
-} from "@/app/dashboard/talent/cart/actions";
-import PhotoAlbumViewer, {
-  type PhotoAlbumItem,
-} from "@/components/photo-album-viewer";
-import {
-  addPhotoToMyPhotosAction,
-  removePhotoFromMyPhotosAction,
-} from "./actions";
+} from '@/app/dashboard/talent/cart/actions';
+import PhotoAlbumViewer, { type PhotoAlbumItem } from '@/components/photo-album-viewer';
+import { addPhotoToMyPhotosAction, removePhotoFromMyPhotosAction } from './actions';
 
 type EventPhotoViewerProps = {
   items: PhotoAlbumItem[];
@@ -33,12 +28,10 @@ export function EventPhotoViewer({
     startTransition(async () => {
       try {
         await addPhotoToMyPhotosAction(photoId);
-        toast.success("Added to your photos");
+        toast.success('Added to your photos');
       } catch (error) {
         const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to add photo to your library";
+          error instanceof Error ? error.message : 'Failed to add photo to your library';
         toast.error(message);
       }
     });
@@ -48,12 +41,10 @@ export function EventPhotoViewer({
     startTransition(async () => {
       try {
         await removePhotoFromMyPhotosAction(photoId);
-        toast.success("Removed from your photos");
+        toast.success('Removed from your photos');
       } catch (error) {
         const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to remove photo from your library";
+          error instanceof Error ? error.message : 'Failed to remove photo from your library';
         toast.error(message);
       }
     });
@@ -63,13 +54,10 @@ export function EventPhotoViewer({
     startTransition(async () => {
       try {
         await addPhotoToCartAction(photoId);
-        toast.success("Added to cart");
+        toast.success('Added to cart');
         router.refresh();
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to add photo to cart";
+        const message = error instanceof Error ? error.message : 'Failed to add photo to cart';
         toast.error(message);
       }
     });
@@ -79,13 +67,10 @@ export function EventPhotoViewer({
     startTransition(async () => {
       try {
         await removePhotoFromCartAction(photoId);
-        toast.success("Removed from cart");
+        toast.success('Removed from cart');
         router.refresh();
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to remove photo from cart";
+        const message = error instanceof Error ? error.message : 'Failed to remove photo from cart';
         toast.error(message);
       }
     });

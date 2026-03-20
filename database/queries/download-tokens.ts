@@ -3,8 +3,8 @@
  * Tokens grant access to purchased photos without requiring authentication
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface DownloadToken {
   id: string;
@@ -21,11 +21,11 @@ export async function createDownloadToken(
   data: { guestOrderId?: string; orderId?: string },
 ): Promise<DownloadToken> {
   if (!data.guestOrderId && !data.orderId) {
-    throw new Error("Either guestOrderId or orderId must be provided");
+    throw new Error('Either guestOrderId or orderId must be provided');
   }
 
   const { data: row, error } = await supabase
-    .from("download_tokens")
+    .from('download_tokens')
     .insert({
       guest_order_id: data.guestOrderId ?? null,
       order_id: data.orderId ?? null,
@@ -34,9 +34,7 @@ export async function createDownloadToken(
     .single();
 
   if (error || !row) {
-    throw new Error(
-      `Failed to create download token: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to create download token: ${getErrorMessage(error)}`);
   }
 
   return row as DownloadToken;
@@ -47,9 +45,9 @@ export async function getDownloadTokenByToken(
   token: string,
 ): Promise<DownloadToken | null> {
   const { data, error } = await supabase
-    .from("download_tokens")
-    .select("*")
-    .eq("token", token)
+    .from('download_tokens')
+    .select('*')
+    .eq('token', token)
     .maybeSingle();
 
   if (error) {
@@ -65,14 +63,12 @@ export async function claimDownloadToken(
   userId: string,
 ): Promise<void> {
   const { error } = await supabase
-    .from("download_tokens")
+    .from('download_tokens')
     .update({ claimed_by_user_id: userId })
-    .eq("id", tokenId);
+    .eq('id', tokenId);
 
   if (error) {
-    throw new Error(
-      `Failed to claim download token: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to claim download token: ${getErrorMessage(error)}`);
   }
 }
 
@@ -81,15 +77,13 @@ export async function getDownloadTokenByGuestOrderId(
   guestOrderId: string,
 ): Promise<DownloadToken | null> {
   const { data, error } = await supabase
-    .from("download_tokens")
-    .select("*")
-    .eq("guest_order_id", guestOrderId)
+    .from('download_tokens')
+    .select('*')
+    .eq('guest_order_id', guestOrderId)
     .maybeSingle();
 
   if (error) {
-    throw new Error(
-      `Failed to get download token by guest order: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get download token by guest order: ${getErrorMessage(error)}`);
   }
 
   return (data as DownloadToken) ?? null;

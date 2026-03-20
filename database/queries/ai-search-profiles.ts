@@ -3,8 +3,8 @@
  * For managing talent AI search profiles and presets
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface AISearchProfile {
   id: string;
@@ -48,22 +48,18 @@ export async function getAISearchProfiles(
   userId: string,
 ): Promise<AISearchProfile[]> {
   const { data, error } = await supabase
-    .from("ai_search_profiles")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .from('ai_search_profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
 
   if (error) {
-    throw new Error(
-      `Failed to get AI search profiles: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get AI search profiles: ${getErrorMessage(error)}`);
   }
 
   return (data ?? []).map((profile) => ({
     ...profile,
-    selfie_embedding: profile.selfie_embedding
-      ? (profile.selfie_embedding as number[])
-      : null,
+    selfie_embedding: profile.selfie_embedding ? (profile.selfie_embedding as number[]) : null,
   })) as AISearchProfile[];
 }
 
@@ -76,16 +72,14 @@ export async function getAISearchProfile(
   userId: string,
 ): Promise<AISearchProfile | null> {
   const { data, error } = await supabase
-    .from("ai_search_profiles")
-    .select("*")
-    .eq("id", profileId)
-    .eq("user_id", userId)
+    .from('ai_search_profiles')
+    .select('*')
+    .eq('id', profileId)
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (error) {
-    throw new Error(
-      `Failed to get AI search profile: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get AI search profile: ${getErrorMessage(error)}`);
   }
 
   if (!data) {
@@ -94,9 +88,7 @@ export async function getAISearchProfile(
 
   return {
     ...data,
-    selfie_embedding: data.selfie_embedding
-      ? (data.selfie_embedding as number[])
-      : null,
+    selfie_embedding: data.selfie_embedding ? (data.selfie_embedding as number[]) : null,
   } as AISearchProfile;
 }
 
@@ -109,13 +101,11 @@ export async function createAISearchProfile(
   input: CreateAISearchProfileInput,
 ): Promise<AISearchProfile> {
   const { data, error } = await supabase
-    .from("ai_search_profiles")
+    .from('ai_search_profiles')
     .insert({
       user_id: userId,
       name: input.name,
-      selfie_embedding: input.selfie_embedding
-        ? `[${input.selfie_embedding.join(",")}]`
-        : null,
+      selfie_embedding: input.selfie_embedding ? `[${input.selfie_embedding.join(',')}]` : null,
       activity_type: input.activity_type ?? null,
       country: input.country ?? null,
       region: input.region ?? null,
@@ -126,16 +116,12 @@ export async function createAISearchProfile(
     .single();
 
   if (error) {
-    throw new Error(
-      `Failed to create AI search profile: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to create AI search profile: ${getErrorMessage(error)}`);
   }
 
   return {
     ...data,
-    selfie_embedding: data.selfie_embedding
-      ? (data.selfie_embedding as number[])
-      : null,
+    selfie_embedding: data.selfie_embedding ? (data.selfie_embedding as number[]) : null,
   } as AISearchProfile;
 }
 
@@ -155,7 +141,7 @@ export async function updateAISearchProfile(
   }
   if (input.selfie_embedding !== undefined) {
     updateData.selfie_embedding = input.selfie_embedding
-      ? `[${input.selfie_embedding.join(",")}]`
+      ? `[${input.selfie_embedding.join(',')}]`
       : null;
   }
   if (input.activity_type !== undefined) {
@@ -175,24 +161,20 @@ export async function updateAISearchProfile(
   }
 
   const { data, error } = await supabase
-    .from("ai_search_profiles")
+    .from('ai_search_profiles')
     .update(updateData)
-    .eq("id", profileId)
-    .eq("user_id", userId)
+    .eq('id', profileId)
+    .eq('user_id', userId)
     .select()
     .single();
 
   if (error) {
-    throw new Error(
-      `Failed to update AI search profile: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to update AI search profile: ${getErrorMessage(error)}`);
   }
 
   return {
     ...data,
-    selfie_embedding: data.selfie_embedding
-      ? (data.selfie_embedding as number[])
-      : null,
+    selfie_embedding: data.selfie_embedding ? (data.selfie_embedding as number[]) : null,
   } as AISearchProfile;
 }
 
@@ -205,14 +187,12 @@ export async function deleteAISearchProfile(
   userId: string,
 ): Promise<void> {
   const { error } = await supabase
-    .from("ai_search_profiles")
+    .from('ai_search_profiles')
     .delete()
-    .eq("id", profileId)
-    .eq("user_id", userId);
+    .eq('id', profileId)
+    .eq('user_id', userId);
 
   if (error) {
-    throw new Error(
-      `Failed to delete AI search profile: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to delete AI search profile: ${getErrorMessage(error)}`);
   }
 }

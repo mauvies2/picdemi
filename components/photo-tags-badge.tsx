@@ -1,16 +1,11 @@
-"use client";
+'use client';
 
-import { X } from "lucide-react";
-import { useTransition } from "react";
-import { toast } from "sonner";
-import { untagPhotoForTalentAction } from "@/app/dashboard/photographer/events/[id]/actions";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { X } from 'lucide-react';
+import { useTransition } from 'react';
+import { toast } from 'sonner';
+import { untagPhotoForTalentAction } from '@/app/dashboard/photographer/events/[id]/actions';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 interface PhotoTag {
   tag_id: string;
@@ -27,12 +22,7 @@ interface PhotoTagsBadgeProps {
   className?: string;
 }
 
-export function PhotoTagsBadge({
-  photoId,
-  tags,
-  onUntag,
-  className,
-}: PhotoTagsBadgeProps) {
+export function PhotoTagsBadge({ photoId, tags, onUntag, className }: PhotoTagsBadgeProps) {
   const [isUntagging, startUntagging] = useTransition();
 
   if (tags.length === 0) {
@@ -43,19 +33,17 @@ export function PhotoTagsBadge({
     startUntagging(async () => {
       try {
         await untagPhotoForTalentAction(photoId, talentUserId);
-        toast.success("Tag removed");
+        toast.success('Tag removed');
         onUntag?.();
       } catch (error) {
-        console.error("Error untagging photo:", error);
-        toast.error(
-          error instanceof Error ? error.message : "Failed to remove tag",
-        );
+        console.error('Error untagging photo:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to remove tag');
       }
     });
   };
 
   return (
-    <div className={cn("flex flex-wrap gap-1.5", className)}>
+    <div className={cn('flex flex-wrap gap-1.5', className)}>
       {tags.map((tag) => (
         <TooltipProvider key={tag.tag_id}>
           <Tooltip>

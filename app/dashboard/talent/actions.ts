@@ -1,14 +1,14 @@
-"use server";
+'use server';
 
-import { getCartItemCount } from "@/database/queries/carts";
-import { getUserOrders } from "@/database/queries/orders";
-import { createPhotoUrls } from "@/database/queries/storage";
+import { getCartItemCount } from '@/database/queries/carts';
+import { getUserOrders } from '@/database/queries/orders';
+import { createPhotoUrls } from '@/database/queries/storage';
 import {
   getTaggedPhotosCountForTalent,
   getTaggedPhotosForTalent,
-} from "@/database/queries/talent-photo-tags";
-import { createClient } from "@/database/server";
-import { getBaseUrl } from "@/lib/get-base-url";
+} from '@/database/queries/talent-photo-tags';
+import { createClient } from '@/database/server';
+import { getBaseUrl } from '@/lib/get-base-url';
 
 export async function getTalentDashboardData() {
   const supabase = await createClient();
@@ -17,32 +17,31 @@ export async function getTalentDashboardData() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("User not authenticated");
+    throw new Error('User not authenticated');
   }
 
   // Fetch all data in parallel
-  const [taggedPhotosCount, recentTaggedPhotos, cartItemCount, recentOrders] =
-    await Promise.all([
-      getTaggedPhotosCountForTalent(supabase, user.id),
-      getTaggedPhotosForTalent(supabase, user.id, { limit: 3 }),
-      getCartItemCount(supabase, user.id),
-      getUserOrders(supabase, user.id, 5),
-    ]);
+  const [taggedPhotosCount, recentTaggedPhotos, cartItemCount, recentOrders] = await Promise.all([
+    getTaggedPhotosCountForTalent(supabase, user.id),
+    getTaggedPhotosForTalent(supabase, user.id, { limit: 3 }),
+    getCartItemCount(supabase, user.id),
+    getUserOrders(supabase, user.id, 5),
+  ]);
 
   // Get actual purchased photos count from all completed orders
   let totalPurchasedPhotos = 0;
   const { data: allCompletedOrders } = await supabase
-    .from("orders")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("status", "completed");
+    .from('orders')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('status', 'completed');
 
   if (allCompletedOrders && allCompletedOrders.length > 0) {
     const { count: purchasedCount } = await supabase
-      .from("order_items")
-      .select("*", { count: "exact", head: true })
+      .from('order_items')
+      .select('*', { count: 'exact', head: true })
       .in(
-        "order_id",
+        'order_id',
         allCompletedOrders.map((o) => o.id),
       );
 
@@ -72,7 +71,7 @@ export async function getTalentDashboardData() {
 
     // Generate URLs for each group
     for (const [needsWatermark, paths] of photosByWatermark.entries()) {
-      const photoUrls = await createPhotoUrls(supabase, "photos", paths, {
+      const photoUrls = await createPhotoUrls(supabase, 'photos', paths, {
         expiresIn: 3600,
         useWatermark: needsWatermark,
         baseUrl,
@@ -87,7 +86,7 @@ export async function getTalentDashboardData() {
   const ordersWithItems = await Promise.all(
     recentOrders.map(async (order) => {
       const { data: items } = await supabase
-        .from("order_items")
+        .from('order_items')
         .select(
           `
           id,
@@ -103,7 +102,7 @@ export async function getTalentDashboardData() {
           )
         `,
         )
-        .eq("order_id", order.id)
+        .eq('order_id', order.id)
         .limit(3);
 
       type OrderItemWithPhoto = {
@@ -144,12 +143,8 @@ export async function getTalentDashboardData() {
       return {
         ...order,
         items: (items ?? []).map((item: OrderItemWithPhoto) => {
-          const photo = Array.isArray(item.photos)
-            ? item.photos[0]
-            : item.photos;
-          const event = Array.isArray(photo?.events)
-            ? photo.events[0]
-            : photo?.events;
+          const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
+          const event = Array.isArray(photo?.events) ? photo.events[0] : photo?.events;
           return {
             photo_id: item.photo_id,
             unit_price_cents: item.unit_price_cents,
@@ -171,9 +166,7 @@ export async function getTalentDashboardData() {
     },
     recentTaggedPhotos: recentTaggedPhotos.map((photo) => ({
       ...photo,
-      signed_url: photo.photo_url
-        ? (signedUrlsMap[photo.photo_url] ?? null)
-        : null,
+      signed_url: photo.photo_url ? (signedUrlsMap[photo.photo_url] ?? null) : null,
     })),
     recentOrders: ordersWithItems,
   };

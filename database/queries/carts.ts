@@ -2,8 +2,8 @@
  * Cart-related database queries
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface Cart {
   id: string;
@@ -37,14 +37,14 @@ export async function getOrCreateCart(
 ): Promise<Cart> {
   // Try to get the most recent cart for this user
   const { data: existingCart, error: fetchError } = await supabase
-    .from("carts")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
+    .from('carts')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (fetchError && fetchError.code !== "PGRST116") {
+  if (fetchError && fetchError.code !== 'PGRST116') {
     // PGRST116 is "not found" which is fine
     throw new Error(`Failed to fetch cart: ${getErrorMessage(fetchError)}`);
   }
@@ -55,7 +55,7 @@ export async function getOrCreateCart(
 
   // Create a new cart
   const { data: newCart, error: createError } = await supabase
-    .from("carts")
+    .from('carts')
     .insert({ user_id: userId })
     .select()
     .single();
@@ -76,10 +76,10 @@ export async function getCart(
   userId: string,
 ): Promise<Cart | null> {
   const { data, error } = await supabase
-    .from("carts")
-    .select("*")
-    .eq("id", cartId)
-    .eq("user_id", userId)
+    .from('carts')
+    .select('*')
+    .eq('id', cartId)
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (error) {
@@ -101,10 +101,10 @@ export async function addPhotoToCart(
 ): Promise<void> {
   // Check if item already exists (idempotent)
   const { data: existing } = await supabase
-    .from("cart_items")
-    .select("id")
-    .eq("cart_id", cartId)
-    .eq("photo_id", photoId)
+    .from('cart_items')
+    .select('id')
+    .eq('cart_id', cartId)
+    .eq('photo_id', photoId)
     .maybeSingle();
 
   if (existing) {
@@ -112,7 +112,7 @@ export async function addPhotoToCart(
     return;
   }
 
-  const { error } = await supabase.from("cart_items").insert({
+  const { error } = await supabase.from('cart_items').insert({
     cart_id: cartId,
     photo_id: photoId,
     photographer_id: photographerId,
@@ -133,29 +133,21 @@ export async function removePhotoFromCart(
   photoId: string,
 ): Promise<void> {
   const { error } = await supabase
-    .from("cart_items")
+    .from('cart_items')
     .delete()
-    .eq("cart_id", cartId)
-    .eq("photo_id", photoId);
+    .eq('cart_id', cartId)
+    .eq('photo_id', photoId);
 
   if (error) {
-    throw new Error(
-      `Failed to remove photo from cart: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to remove photo from cart: ${getErrorMessage(error)}`);
   }
 }
 
 /**
  * Clear all items from a cart
  */
-export async function clearCart(
-  supabase: SupabaseServerClient,
-  cartId: string,
-): Promise<void> {
-  const { error } = await supabase
-    .from("cart_items")
-    .delete()
-    .eq("cart_id", cartId);
+export async function clearCart(supabase: SupabaseServerClient, cartId: string): Promise<void> {
+  const { error } = await supabase.from('cart_items').delete().eq('cart_id', cartId);
 
   if (error) {
     throw new Error(`Failed to clear cart: ${getErrorMessage(error)}`);
@@ -173,11 +165,11 @@ export async function getCartItemsWithDetails(
   // Verify cart belongs to user
   const cart = await getCart(supabase, cartId, userId);
   if (!cart) {
-    throw new Error("Cart not found or access denied");
+    throw new Error('Cart not found or access denied');
   }
 
   const { data, error } = await supabase
-    .from("cart_items")
+    .from('cart_items')
     .select(
       `
       id,
@@ -195,24 +187,22 @@ export async function getCartItemsWithDetails(
       )
     `,
     )
-    .eq("cart_id", cartId)
-    .order("created_at", { ascending: false });
+    .eq('cart_id', cartId)
+    .order('created_at', { ascending: false });
 
   if (error) {
     throw new Error(`Failed to get cart items: ${getErrorMessage(error)}`);
   }
 
   // Fetch photographer names separately
-  const photographerIds = [
-    ...new Set((data ?? []).map((item) => item.photographer_id)),
-  ];
+  const photographerIds = [...new Set((data ?? []).map((item) => item.photographer_id))];
   const photographerNamesMap: Record<string, string | null> = {};
 
   if (photographerIds.length > 0) {
     const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, display_name")
-      .in("id", photographerIds);
+      .from('profiles')
+      .select('id, display_name')
+      .in('id', photographerIds);
 
     if (profiles) {
       for (const profile of profiles) {
@@ -254,9 +244,9 @@ export async function getCartItemCount(
 ): Promise<number> {
   // First get all cart IDs for this user
   const { data: carts, error: cartsError } = await supabase
-    .from("carts")
-    .select("id")
-    .eq("user_id", userId);
+    .from('carts')
+    .select('id')
+    .eq('user_id', userId);
 
   if (cartsError) {
     throw new Error(`Failed to get carts: ${getErrorMessage(cartsError)}`);
@@ -270,9 +260,9 @@ export async function getCartItemCount(
   const cartIds = carts.map((cart) => cart.id);
 
   const { count, error } = await supabase
-    .from("cart_items")
-    .select("*", { count: "exact", head: true })
-    .in("cart_id", cartIds);
+    .from('cart_items')
+    .select('*', { count: 'exact', head: true })
+    .in('cart_id', cartIds);
 
   if (error) {
     throw new Error(`Failed to get cart item count: ${getErrorMessage(error)}`);
@@ -291,10 +281,10 @@ export async function isPhotoInCart(
 ): Promise<boolean> {
   // First get the user's cart ID
   const { data: cart } = await supabase
-    .from("carts")
-    .select("id")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
+    .from('carts')
+    .select('id')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
@@ -303,16 +293,14 @@ export async function isPhotoInCart(
   }
 
   const { data, error } = await supabase
-    .from("cart_items")
-    .select("id")
-    .eq("cart_id", cart.id)
-    .eq("photo_id", photoId)
+    .from('cart_items')
+    .select('id')
+    .eq('cart_id', cart.id)
+    .eq('photo_id', photoId)
     .maybeSingle();
 
-  if (error && error.code !== "PGRST116") {
-    throw new Error(
-      `Failed to check if photo is in cart: ${getErrorMessage(error)}`,
-    );
+  if (error && error.code !== 'PGRST116') {
+    throw new Error(`Failed to check if photo is in cart: ${getErrorMessage(error)}`);
   }
 
   return data !== null;

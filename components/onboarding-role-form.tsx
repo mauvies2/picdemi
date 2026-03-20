@@ -1,23 +1,21 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 type Props = {
   saveRole: (formData: FormData) => Promise<void>;
 };
 
 export default function OnboardingRoleForm({ saveRole }: Props) {
-  const [selectedRole, setSelectedRole] = useState<
-    "photographer" | "talent" | null
-  >(null);
-  const [username, setUsername] = useState("");
+  const [selectedRole, setSelectedRole] = useState<'photographer' | 'talent' | null>(null);
+  const [username, setUsername] = useState('');
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Convert to lowercase and remove invalid characters
-    const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
     setUsername(value);
   };
 
@@ -25,17 +23,17 @@ export default function OnboardingRoleForm({ saveRole }: Props) {
 
   return (
     <form action={saveRole} className="grid gap-6">
-      <input type="hidden" name="role" value={selectedRole ?? ""} />
+      <input type="hidden" name="role" value={selectedRole ?? ''} />
       <input type="hidden" name="username" value={username} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <button
           type="button"
-          onClick={() => setSelectedRole("photographer")}
+          onClick={() => setSelectedRole('photographer')}
           className={`h-40 rounded-xl border-2 p-6 text-left transition-colors ${
-            selectedRole === "photographer"
-              ? "border-primary bg-primary/5"
-              : "border-muted hover:border-primary/50"
+            selectedRole === 'photographer'
+              ? 'border-primary bg-primary/5'
+              : 'border-muted hover:border-primary/50'
           }`}
         >
           <div className="text-xl font-semibold">Photographer</div>
@@ -46,11 +44,11 @@ export default function OnboardingRoleForm({ saveRole }: Props) {
 
         <button
           type="button"
-          onClick={() => setSelectedRole("talent")}
+          onClick={() => setSelectedRole('talent')}
           className={`h-40 rounded-xl border-2 p-6 text-left transition-colors ${
-            selectedRole === "talent"
-              ? "border-primary bg-primary/5"
-              : "border-muted hover:border-primary/50"
+            selectedRole === 'talent'
+              ? 'border-primary bg-primary/5'
+              : 'border-muted hover:border-primary/50'
           }`}
         >
           <div className="text-xl font-semibold">Talent / Athlete / Buyer</div>
@@ -77,24 +75,17 @@ export default function OnboardingRoleForm({ saveRole }: Props) {
             className="rounded-full"
           />
           <p className="text-xs text-muted-foreground">
-            This will be how others see you (e.g., in photo tags). 3-30
-            characters, lowercase letters, numbers, underscores, and hyphens
-            only.
+            This will be how others see you (e.g., in photo tags). 3-30 characters, lowercase
+            letters, numbers, underscores, and hyphens only.
           </p>
           {username && !isUsernameValid && (
-            <p className="text-xs text-destructive">
-              Username must be between 3 and 30 characters
-            </p>
+            <p className="text-xs text-destructive">Username must be between 3 and 30 characters</p>
           )}
         </div>
       )}
 
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={!selectedRole || !isUsernameValid}
-          className="px-8"
-        >
+        <Button type="submit" disabled={!selectedRole || !isUsernameValid} className="px-8">
           Continue
         </Button>
       </div>

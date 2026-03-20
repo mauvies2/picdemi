@@ -1,11 +1,11 @@
-import { format } from "date-fns";
-import { Calendar, Mail, User as UserIcon } from "lucide-react";
-import { DashboardHeader } from "@/components/dashboard-header";
-import { ProfileForm } from "@/components/profile-form";
-import { ROLES } from "@/lib/roles";
-import { getProfileData } from "./actions";
-import { PayoutProfileSection } from "./payout-profile-section";
-import { updateProfileAction } from "./update-action";
+import { format } from 'date-fns';
+import { Calendar, Mail, User as UserIcon } from 'lucide-react';
+import { DashboardHeader } from '@/components/dashboard-header';
+import { ProfileForm } from '@/components/profile-form';
+import { ROLES } from '@/lib/roles';
+import { getProfileData } from './actions';
+import { PayoutProfileSection } from './payout-profile-section';
+import { updateProfileAction } from './update-action';
 
 export default async function PhotographerProfilePage() {
   const data = await getProfileData();
@@ -28,8 +28,7 @@ export default async function PhotographerProfilePage() {
         <div>
           <DashboardHeader title="Profile" />
           <p className="text-sm text-muted-foreground">
-            Manage your profile information, account details, and payout
-            settings.
+            Manage your profile information, account details, and payout settings.
           </p>
         </div>
 
@@ -40,8 +39,8 @@ export default async function PhotographerProfilePage() {
             <div className="mb-4 sm:mb-6">
               <h2 className="text-lg font-semibold sm:text-xl">User Details</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Control how your photographer profile appears across Picdemi:
-                your username, public name, and short bio.
+                Control how your photographer profile appears across Picdemi: your username, public
+                name, and short bio.
               </p>
             </div>
 
@@ -61,9 +60,7 @@ export default async function PhotographerProfilePage() {
           <div className="flex flex-col gap-4 sm:gap-6 lg:h-full">
             {/* Account info card */}
             <div className="rounded-2xl border bg-card p-4 shadow-sm sm:p-6 lg:flex-1 lg:flex lg:flex-col">
-              <h2 className="mb-3 text-lg font-semibold sm:text-xl">
-                Account information
-              </h2>
+              <h2 className="mb-3 text-lg font-semibold sm:text-xl">Account information</h2>
               <div className="space-y-4 text-sm lg:flex-1">
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-muted-foreground" />
@@ -75,12 +72,8 @@ export default async function PhotographerProfilePage() {
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-muted-foreground">
-                      Member since
-                    </p>
-                    <p className="font-medium">
-                      {format(new Date(createdAt), "MMMM d, yyyy")}
-                    </p>
+                    <p className="text-xs text-muted-foreground">Member since</p>
+                    <p className="font-medium">{format(new Date(createdAt), 'MMMM d, yyyy')}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -88,9 +81,7 @@ export default async function PhotographerProfilePage() {
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted-foreground">Role</p>
                     <p className="font-medium capitalize">
-                      {profile.active_role === ROLES.TALENT
-                        ? "Talent"
-                        : "Photographer"}
+                      {profile.active_role === ROLES.TALENT ? 'Talent' : 'Photographer'}
                     </p>
                   </div>
                 </div>

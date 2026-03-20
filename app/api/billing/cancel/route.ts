@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { getSubscription } from "@/database/queries/subscriptions";
-import { createClient } from "@/database/server";
-import { stripe } from "@/lib/stripe/config";
+import { NextResponse } from 'next/server';
+import { getSubscription } from '@/database/queries/subscriptions';
+import { createClient } from '@/database/server';
+import { stripe } from '@/lib/stripe/config';
 
 /**
  * Cancel subscription
@@ -17,25 +17,19 @@ export async function POST() {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // Get user's subscription
   const subscription = await getSubscription(supabase, user.id);
 
   if (!subscription || !subscription.stripe_subscription_id) {
-    return NextResponse.json(
-      { error: "No active subscription found" },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: 'No active subscription found' }, { status: 404 });
   }
 
   // Check if subscription is already canceled
-  if (subscription.status === "canceled") {
-    return NextResponse.json(
-      { error: "Subscription is already canceled" },
-      { status: 400 },
-    );
+  if (subscription.status === 'canceled') {
+    return NextResponse.json({ error: 'Subscription is already canceled' }, { status: 400 });
   }
 
   try {
@@ -45,13 +39,10 @@ export async function POST() {
     });
 
     return NextResponse.json({
-      message: "Subscription will be canceled at the end of the billing period",
+      message: 'Subscription will be canceled at the end of the billing period',
     });
   } catch (error) {
-    console.error("Error canceling subscription:", error);
-    return NextResponse.json(
-      { error: "Failed to cancel subscription" },
-      { status: 500 },
-    );
+    console.error('Error canceling subscription:', error);
+    return NextResponse.json({ error: 'Failed to cancel subscription' }, { status: 500 });
   }
 }

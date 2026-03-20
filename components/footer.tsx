@@ -1,6 +1,6 @@
-import { Facebook, Instagram, Mail, Twitter } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { Facebook, Instagram, Mail, Twitter } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export function Footer() {
   return (
@@ -10,18 +10,11 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
-              <Image
-                src="/logo.svg"
-                alt="Picdemi"
-                width={24}
-                height={24}
-                className="h-6 w-6"
-              />
+              <Image src="/logo.svg" alt="Picdemi" width={24} height={24} className="h-6 w-6" />
               <span className="text-xl font-bold tracking-tight">Picdemi</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Find yourself in every moment. Connect photographers with athletes
-              and event-goers.
+              Find yourself in every moment. Connect photographers with athletes and event-goers.
             </p>
             <div className="flex items-center gap-4">
               <a

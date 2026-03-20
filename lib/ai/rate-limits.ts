@@ -2,7 +2,7 @@
  * Rate limiting configuration for AI search based on subscription tiers
  */
 
-import type { PlanId } from "@/lib/plans";
+import type { PlanId } from '@/lib/plans';
 
 export interface RateLimitConfig {
   /**
@@ -23,15 +23,15 @@ export interface RateLimitConfig {
 export const AI_SEARCH_RATE_LIMITS: Record<PlanId, RateLimitConfig> = {
   free: {
     maxSearchesPerMonth: 3,
-    description: "3 searches per month",
+    description: '3 searches per month',
   },
   amateur: {
     maxSearchesPerMonth: 20,
-    description: "20 searches per month",
+    description: '20 searches per month',
   },
   pro: {
     maxSearchesPerMonth: null, // Unlimited
-    description: "Unlimited searches",
+    description: 'Unlimited searches',
   },
 };
 
@@ -45,10 +45,7 @@ export function getRateLimitForPlan(planId: PlanId): RateLimitConfig {
 /**
  * Check if a user has exceeded their rate limit
  */
-export function hasExceededRateLimit(
-  planId: PlanId,
-  currentUsage: number,
-): boolean {
+export function hasExceededRateLimit(planId: PlanId, currentUsage: number): boolean {
   const limit = getRateLimitForPlan(planId);
 
   // Unlimited plans never exceed
@@ -62,10 +59,7 @@ export function hasExceededRateLimit(
 /**
  * Get remaining searches for a user
  */
-export function getRemainingSearches(
-  planId: PlanId,
-  currentUsage: number,
-): number | null {
+export function getRemainingSearches(planId: PlanId, currentUsage: number): number | null {
   const limit = getRateLimitForPlan(planId);
 
   // Unlimited plans return null

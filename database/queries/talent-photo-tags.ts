@@ -2,8 +2,8 @@
  * Talent photo tag-related database queries
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface TalentPhotoTag {
   id: string;
@@ -43,7 +43,7 @@ export async function tagPhotoForTalent(
   talentUserId: string,
   taggedByUserId: string,
 ): Promise<void> {
-  const { error } = await supabase.from("talent_photo_tags").insert({
+  const { error } = await supabase.from('talent_photo_tags').insert({
     photo_id: photoId,
     talent_user_id: talentUserId,
     tagged_by_user_id: taggedByUserId,
@@ -51,13 +51,11 @@ export async function tagPhotoForTalent(
 
   if (error) {
     // Handle duplicate tag gracefully
-    if (error.code === "23505") {
+    if (error.code === '23505') {
       // Unique constraint violation - tag already exists
       return;
     }
-    throw new Error(
-      `Failed to tag photo for talent: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to tag photo for talent: ${getErrorMessage(error)}`);
   }
 }
 
@@ -76,7 +74,7 @@ export async function tagPhotosForTalent(
 
   // Use upsert to handle duplicates gracefully
   const { data, error } = await supabase
-    .from("talent_photo_tags")
+    .from('talent_photo_tags')
     .upsert(
       photoIds.map((photoId) => ({
         photo_id: photoId,
@@ -84,16 +82,14 @@ export async function tagPhotosForTalent(
         tagged_by_user_id: taggedByUserId,
       })),
       {
-        onConflict: "photo_id,talent_user_id",
+        onConflict: 'photo_id,talent_user_id',
         ignoreDuplicates: true,
       },
     )
     .select();
 
   if (error) {
-    throw new Error(
-      `Failed to tag photos for talent: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to tag photos for talent: ${getErrorMessage(error)}`);
   }
 
   return data?.length ?? 0;
@@ -108,15 +104,13 @@ export async function untagPhotoForTalent(
   talentUserId: string,
 ): Promise<void> {
   const { error } = await supabase
-    .from("talent_photo_tags")
+    .from('talent_photo_tags')
     .delete()
-    .eq("photo_id", photoId)
-    .eq("talent_user_id", talentUserId);
+    .eq('photo_id', photoId)
+    .eq('talent_user_id', talentUserId);
 
   if (error) {
-    throw new Error(
-      `Failed to untag photo for talent: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to untag photo for talent: ${getErrorMessage(error)}`);
   }
 }
 
@@ -129,10 +123,10 @@ export async function isPhotoTaggedForTalent(
   talentUserId: string,
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .from("talent_photo_tags")
-    .select("id")
-    .eq("photo_id", photoId)
-    .eq("talent_user_id", talentUserId)
+    .from('talent_photo_tags')
+    .select('id')
+    .eq('photo_id', photoId)
+    .eq('talent_user_id', talentUserId)
     .maybeSingle();
 
   if (error) {
@@ -157,7 +151,7 @@ export async function getTaggedPhotosForTalent(
   const offset = options?.offset ?? 0;
 
   const { data, error } = await supabase
-    .from("talent_photo_tags")
+    .from('talent_photo_tags')
     .select(
       `
       photo_id,
@@ -178,14 +172,12 @@ export async function getTaggedPhotosForTalent(
       )
     `,
     )
-    .eq("talent_user_id", talentUserId)
-    .order("created_at", { ascending: false })
+    .eq('talent_user_id', talentUserId)
+    .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (error) {
-    throw new Error(
-      `Failed to get tagged photos for talent: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get tagged photos for talent: ${getErrorMessage(error)}`);
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: explanation
@@ -220,14 +212,12 @@ export async function getTaggedPhotosCountForTalent(
   talentUserId: string,
 ): Promise<number> {
   const { count, error } = await supabase
-    .from("talent_photo_tags")
-    .select("*", { count: "exact", head: true })
-    .eq("talent_user_id", talentUserId);
+    .from('talent_photo_tags')
+    .select('*', { count: 'exact', head: true })
+    .eq('talent_user_id', talentUserId);
 
   if (error) {
-    throw new Error(
-      `Failed to get tagged photos count: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get tagged photos count: ${getErrorMessage(error)}`);
   }
 
   return count ?? 0;
@@ -246,9 +236,9 @@ export async function getTagsForPhotos(
 
   // First, get all tags
   const { data, error } = await supabase
-    .from("talent_photo_tags")
-    .select("id, photo_id, talent_user_id, created_at")
-    .in("photo_id", photoIds);
+    .from('talent_photo_tags')
+    .select('id, photo_id, talent_user_id, created_at')
+    .in('photo_id', photoIds);
 
   if (error) {
     throw new Error(`Failed to get tags for photos: ${getErrorMessage(error)}`);
@@ -256,21 +246,16 @@ export async function getTagsForPhotos(
 
   // Get unique talent user IDs
   const talentUserIds = [
-    ...new Set(
-      (data ?? []).map((tag: { talent_user_id: string }) => tag.talent_user_id),
-    ),
+    ...new Set((data ?? []).map((tag: { talent_user_id: string }) => tag.talent_user_id)),
   ];
 
   // Fetch profiles for all talent users
-  const profilesMap: Record<
-    string,
-    { display_name: string | null; username: string | null }
-  > = {};
+  const profilesMap: Record<string, { display_name: string | null; username: string | null }> = {};
   if (talentUserIds.length > 0) {
     const { data: profiles, error: profilesError } = await supabase
-      .from("profiles")
-      .select("id, display_name, username")
-      .in("id", talentUserIds);
+      .from('profiles')
+      .select('id, display_name, username')
+      .in('id', talentUserIds);
 
     if (!profilesError && profiles) {
       for (const profile of profiles) {
@@ -296,7 +281,7 @@ export async function getTagsForPhotos(
     tagsByPhoto[photoId].push({
       tag_id: tag.id,
       talent_user_id: tag.talent_user_id,
-      talent_username: profile?.username ?? "unknown",
+      talent_username: profile?.username ?? 'unknown',
       talent_display_name: profile?.display_name ?? null,
       tagged_at: tag.created_at,
     });

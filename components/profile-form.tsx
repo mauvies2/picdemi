@@ -1,31 +1,27 @@
-"use client";
+'use client';
 
-import { useForm } from "@tanstack/react-form";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { useForm } from '@tanstack/react-form';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 const profileSchema = z.object({
   username: z
     .string()
     .trim()
-    .min(3, "Username must be at least 3 characters")
-    .max(30, "Username must be at most 30 characters")
+    .min(3, 'Username must be at least 3 characters')
+    .max(30, 'Username must be at most 30 characters')
     .regex(
       /^[a-z0-9_-]+$/,
-      "Username can only contain lowercase letters, numbers, underscores, and hyphens",
+      'Username can only contain lowercase letters, numbers, underscores, and hyphens',
     ),
-  display_name: z
-    .string()
-    .trim()
-    .max(100, "Display name is too long")
-    .optional(),
-  bio: z.string().trim().max(500, "Bio is too long").optional(),
+  display_name: z.string().trim().max(100, 'Display name is too long').optional(),
+  bio: z.string().trim().max(500, 'Bio is too long').optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -52,9 +48,9 @@ export function ProfileForm({
 
   const form = useForm({
     defaultValues: {
-      username: initialValues.username || "",
-      display_name: initialValues.display_name || "",
-      bio: initialValues.bio || "",
+      username: initialValues.username || '',
+      display_name: initialValues.display_name || '',
+      bio: initialValues.bio || '',
     },
     onSubmit: async ({ value }) => {
       setSubmitError(null);
@@ -66,13 +62,9 @@ export function ProfileForm({
           router.refresh();
         } catch (error) {
           if (error instanceof z.ZodError) {
-            setSubmitError(error.issues[0]?.message || "Validation failed");
+            setSubmitError(error.issues[0]?.message || 'Validation failed');
           } else {
-            setSubmitError(
-              error instanceof Error
-                ? error.message
-                : "Failed to update profile",
-            );
+            setSubmitError(error instanceof Error ? error.message : 'Failed to update profile');
           }
         }
       });
@@ -83,7 +75,7 @@ export function ProfileForm({
     // Convert to lowercase and replace invalid characters
     const normalized = value
       .toLowerCase()
-      .replace(/[^a-z0-9_-]/g, "")
+      .replace(/[^a-z0-9_-]/g, '')
       .slice(0, 30);
     return normalized;
   };
@@ -131,18 +123,14 @@ export function ProfileForm({
                 onBlur={field.handleBlur}
                 placeholder="johndoe"
                 aria-invalid={submitAttempted && !!usernameError}
-                className={cn(
-                  submitAttempted && usernameError && "border-destructive",
-                )}
+                className={cn(submitAttempted && usernameError && 'border-destructive')}
                 disabled={isFormPending}
               />
               <p className="text-xs text-muted-foreground">
-                Your unique username. This is how others will identify you
-                (e.g., @{field.state.value || "username"}).
+                Your unique username. This is how others will identify you (e.g., @
+                {field.state.value || 'username'}).
               </p>
-              {usernameError ? (
-                <p className="text-xs text-destructive">{usernameError}</p>
-              ) : null}
+              {usernameError ? <p className="text-xs text-destructive">{usernameError}</p> : null}
             </div>
           );
         }}
@@ -174,14 +162,11 @@ export function ProfileForm({
                 onBlur={field.handleBlur}
                 placeholder="John Doe"
                 aria-invalid={submitAttempted && !!displayNameError}
-                className={cn(
-                  submitAttempted && displayNameError && "border-destructive",
-                )}
+                className={cn(submitAttempted && displayNameError && 'border-destructive')}
                 disabled={isFormPending}
               />
               <p className="text-xs text-muted-foreground">
-                Your public display name. This is optional and can be different
-                from your username.
+                Your public display name. This is optional and can be different from your username.
               </p>
               {displayNameError ? (
                 <p className="text-xs text-destructive">{displayNameError}</p>
@@ -218,17 +203,13 @@ export function ProfileForm({
                 placeholder="Tell us about yourself..."
                 rows={4}
                 aria-invalid={submitAttempted && !!bioError}
-                className={cn(
-                  submitAttempted && bioError && "border-destructive",
-                )}
+                className={cn(submitAttempted && bioError && 'border-destructive')}
                 disabled={isFormPending}
               />
               <p className="text-xs text-muted-foreground">
                 {field.state.value.length}/500 characters
               </p>
-              {bioError ? (
-                <p className="text-xs text-destructive">{bioError}</p>
-              ) : null}
+              {bioError ? <p className="text-xs text-destructive">{bioError}</p> : null}
             </div>
           );
         }}
@@ -244,7 +225,7 @@ export function ProfileForm({
       {/* Submit Button */}
       <div className="flex justify-end">
         <Button type="submit" disabled={isFormPending}>
-          {isFormPending ? "Saving..." : "Save Changes"}
+          {isFormPending ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
     </form>

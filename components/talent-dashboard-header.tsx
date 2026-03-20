@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { LayoutDashboard, Package, Search, ShoppingBag } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { CartLinkButton } from "@/components/cart-link-button";
-import { DashboardUserMenu } from "@/components/dashboard-user-menu";
-import type { RoleSlug } from "@/lib/roles";
-import { cn } from "@/lib/utils";
+import { LayoutDashboard, Package, Search, ShoppingBag } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import { CartLinkButton } from '@/components/cart-link-button';
+import { DashboardUserMenu } from '@/components/dashboard-user-menu';
+import type { RoleSlug } from '@/lib/roles';
+import { cn } from '@/lib/utils';
 
 const talentNavLinks = [
   {
-    href: "/dashboard/talent",
-    label: "Overview",
+    href: '/dashboard/talent',
+    label: 'Overview',
     icon: LayoutDashboard,
     exact: true,
   },
-  { href: "/dashboard/talent/events", label: "Explore", icon: Search },
-  { href: "/dashboard/talent/photos", label: "Photos of me", icon: Package },
-  { href: "/dashboard/talent/orders", label: "Orders", icon: ShoppingBag },
+  { href: '/dashboard/talent/events', label: 'Explore', icon: Search },
+  { href: '/dashboard/talent/photos', label: 'Photos of me', icon: Package },
+  { href: '/dashboard/talent/orders', label: 'Orders', icon: ShoppingBag },
 ];
 
 export function TalentDashboardHeader({
@@ -45,13 +45,7 @@ export function TalentDashboardHeader({
         <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-6">
           {/* Left: Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2">
-            <Image
-              src="/logo_dark.svg"
-              alt="Picdemi"
-              width={130}
-              height={50}
-              priority
-            />
+            <Image src="/logo_dark.svg" alt="Picdemi" width={130} height={50} priority />
           </Link>
 
           {/* Center: Nav Links (desktop) */}
@@ -61,10 +55,10 @@ export function TalentDashboardHeader({
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
                   isActive(link.href, link.exact)
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
                 )}
               >
                 <link.icon className="h-4 w-4 shrink-0" />
@@ -93,17 +87,9 @@ export function TalentDashboardHeader({
                 aria-hidden="true"
               >
                 {mobileOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
             </button>
@@ -124,10 +110,10 @@ export function TalentDashboardHeader({
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-3 rounded-md text-base font-medium transition-colors",
+                  'flex items-center gap-2 px-4 py-3 rounded-md text-base font-medium transition-colors',
                   isActive(link.href, link.exact)
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
                 )}
                 onClick={() => setMobileOpen(false)}
               >

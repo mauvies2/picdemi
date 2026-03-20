@@ -1,7 +1,7 @@
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from 'react';
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type DropzoneProps = {
   onSelect: (files: File[]) => void;
@@ -10,12 +10,7 @@ type DropzoneProps = {
   className?: string;
 };
 
-function Dropzone({
-  onSelect,
-  accept,
-  multiple = true,
-  className,
-}: DropzoneProps) {
+function Dropzone({ onSelect, accept, multiple = true, className }: DropzoneProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isDragged, setIsDragged] = useState(false);
   const inputId = useId();
@@ -52,9 +47,9 @@ function Dropzone({
       }}
       onDrop={onDrop}
       className={cn(
-        "flex flex-col items-center justify-center bg-muted/10 rounded-2xl border-2 border-dashed border-muted-foreground/10 p-9 text-center transition-colors",
-        "hover:bg-muted/30 focus-visible:outline focus-visible:outline-offset-2",
-        isDragged && "bg-muted/40",
+        'flex flex-col items-center justify-center bg-muted/10 rounded-2xl border-2 border-dashed border-muted-foreground/10 p-9 text-center transition-colors',
+        'hover:bg-muted/30 focus-visible:outline focus-visible:outline-offset-2',
+        isDragged && 'bg-muted/40',
         className,
       )}
     >

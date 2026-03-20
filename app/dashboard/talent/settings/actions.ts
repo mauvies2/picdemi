@@ -1,9 +1,9 @@
-"use server";
+'use server';
 
-import { getUserOrders } from "@/database/queries/orders";
-import { getProfile } from "@/database/queries/profiles";
-import { getTaggedPhotosCountForTalent } from "@/database/queries/talent-photo-tags";
-import { createClient } from "@/database/server";
+import { getUserOrders } from '@/database/queries/orders';
+import { getProfile } from '@/database/queries/profiles';
+import { getTaggedPhotosCountForTalent } from '@/database/queries/talent-photo-tags';
+import { createClient } from '@/database/server';
 
 export async function getProfileData() {
   const supabase = await createClient();
@@ -12,7 +12,7 @@ export async function getProfileData() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("User not authenticated");
+    throw new Error('User not authenticated');
   }
 
   // Fetch profile and stats in parallel
@@ -25,17 +25,17 @@ export async function getProfileData() {
   // Calculate total purchased photos
   let totalPurchasedPhotos = 0;
   const { data: allCompletedOrders } = await supabase
-    .from("orders")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("status", "completed");
+    .from('orders')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('status', 'completed');
 
   if (allCompletedOrders && allCompletedOrders.length > 0) {
     const { count: purchasedCount } = await supabase
-      .from("order_items")
-      .select("*", { count: "exact", head: true })
+      .from('order_items')
+      .select('*', { count: 'exact', head: true })
       .in(
-        "order_id",
+        'order_id',
         allCompletedOrders.map((o) => o.id),
       );
 
@@ -44,7 +44,7 @@ export async function getProfileData() {
 
   return {
     profile,
-    email: user.email ?? "",
+    email: user.email ?? '',
     createdAt: user.created_at ?? new Date().toISOString(),
     stats: {
       taggedPhotosCount,

@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { Menu } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { CartLinkButton } from "@/components/cart-link-button";
-import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
+import { Menu } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { CartLinkButton } from '@/components/cart-link-button';
+import { Button } from '@/components/ui/button';
+import { useSidebar } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 export function MobileHeader() {
   const { toggleSidebar } = useSidebar();
   const pathname = usePathname();
-  const isTalentDashboard = pathname?.startsWith("/dashboard/talent");
+  const isTalentDashboard = pathname?.startsWith('/dashboard/talent');
 
   return (
     <div className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
@@ -33,7 +33,7 @@ export function MobileHeader() {
           type="button"
           variant="ghost"
           size="md"
-          className={cn("size-10 p-0 min-w-0", "hover:bg-accent")}
+          className={cn('size-10 p-0 min-w-0', 'hover:bg-accent')}
           onClick={toggleSidebar}
           aria-label="Toggle Sidebar"
         >

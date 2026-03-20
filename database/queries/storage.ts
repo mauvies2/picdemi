@@ -2,8 +2,8 @@
  * Storage-related database queries
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 /**
  * Create a signed URL for a single file
@@ -12,11 +12,9 @@ export async function createSignedUrl(
   supabase: SupabaseServerClient,
   bucket: string,
   path: string,
-  expiresIn: number = 3600,
+  expiresIn = 3600,
 ): Promise<string | null> {
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(path, expiresIn);
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
 
   if (error || !data?.signedUrl) {
     return null;
@@ -32,26 +30,19 @@ export async function createSignedUrls(
   supabase: SupabaseServerClient,
   bucket: string,
   paths: string[],
-  expiresIn: number = 3600,
+  expiresIn = 3600,
 ): Promise<Array<{ path: string; signedUrl: string | null }>> {
   if (paths.length === 0) {
     return [];
   }
 
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .createSignedUrls(paths, expiresIn);
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrls(paths, expiresIn);
 
   if (error || !data) {
     // Fallback: sign individually
     const results = await Promise.all(
       paths.map(async (path) => {
-        const signedUrl = await createSignedUrl(
-          supabase,
-          bucket,
-          path,
-          expiresIn,
-        );
+        const signedUrl = await createSignedUrl(supabase, bucket, path, expiresIn);
         return {
           path,
           signedUrl,
@@ -63,10 +54,10 @@ export async function createSignedUrls(
 
   return data
     .map((item) => ({
-      path: item.path ?? "",
+      path: item.path ?? '',
       signedUrl: item.signedUrl ?? null,
     }))
-    .filter((item) => item.path !== "") as Array<{
+    .filter((item) => item.path !== '') as Array<{
     path: string;
     signedUrl: string | null;
   }>;
@@ -110,9 +101,7 @@ export async function deleteStorageFiles(
   const { error } = await supabase.storage.from(bucket).remove(paths);
 
   if (error) {
-    throw new Error(
-      `Failed to delete storage files: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to delete storage files: ${getErrorMessage(error)}`);
   }
 }
 

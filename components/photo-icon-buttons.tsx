@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Check, UserPlus } from "lucide-react";
-import { useCallback } from "react";
-import { AddToCartButton } from "@/components/add-to-cart-button";
-import { PhotoTagsIndicator } from "@/components/photo-tags-indicator";
-import { cn } from "@/lib/utils";
+import { Check, UserPlus } from 'lucide-react';
+import { useCallback } from 'react';
+import { AddToCartButton } from '@/components/add-to-cart-button';
+import { PhotoTagsIndicator } from '@/components/photo-tags-indicator';
+import { cn } from '@/lib/utils';
 
 interface PhotoIconButtonsProps {
   photoId: string;
@@ -74,22 +74,19 @@ export function PhotoIconButtons({
 
   return (
     <div
-      className={cn(
-        "absolute inset-0 flex flex-col items-start justify-between p-2",
-        className,
-      )}
+      className={cn('absolute inset-0 flex flex-col items-start justify-between p-2', className)}
     >
       {/* Gradient overlays for better icon contrast */}
       <div
         className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 h-14 bg-linear-to-b from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100",
-          hasAnyOpen && "opacity-100",
+          'pointer-events-none absolute inset-x-0 top-0 h-14 bg-linear-to-b from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100',
+          hasAnyOpen && 'opacity-100',
         )}
       />
       <div
         className={cn(
-          "pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100",
-          hasAnyOpen && "opacity-100",
+          'pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-black/30 via-black/10 to-transparent z-0 opacity-0 transition-opacity group-hover:opacity-100',
+          hasAnyOpen && 'opacity-100',
         )}
       />
 
@@ -99,9 +96,9 @@ export function PhotoIconButtons({
         {canSelect && (
           <div
             className={cn(
-              "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
-              (isSelected || hasAnyOpen) && "opacity-100",
-              isSelected && "bg-background",
+              'pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background',
+              (isSelected || hasAnyOpen) && 'opacity-100',
+              isSelected && 'bg-background',
             )}
             onClick={handleToggleSelect}
             onPointerDown={(event) => {
@@ -118,11 +115,11 @@ export function PhotoIconButtons({
           {showAddToCart && !selectionActive && (
             <div
               className={cn(
-                "pointer-events-auto transition-opacity",
+                'pointer-events-auto transition-opacity',
                 isMobile || photosInCart.has(photoId)
-                  ? "opacity-100"
-                  : "opacity-0 group-hover:opacity-100",
-                hasAnyOpen && "opacity-100",
+                  ? 'opacity-100'
+                  : 'opacity-0 group-hover:opacity-100',
+                hasAnyOpen && 'opacity-100',
               )}
               onPointerDown={(e) => e.stopPropagation()}
             >
@@ -135,8 +132,8 @@ export function PhotoIconButtons({
                 asDiv={true}
                 customSize="size-6"
                 className={cn(
-                  "rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm hover:bg-background group-hover:opacity-100",
-                  photosInCart.has(photoId) && "bg-background opacity-100",
+                  'rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm hover:bg-background group-hover:opacity-100',
+                  photosInCart.has(photoId) && 'bg-background opacity-100',
                 )}
                 onAddToCart={onAddToCart}
                 onRemoveFromCart={onRemoveFromCart}
@@ -153,8 +150,8 @@ export function PhotoIconButtons({
             <button
               type="button"
               className={cn(
-                "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background",
-                hasAnyOpen && "opacity-100",
+                'pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background/70 text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background',
+                hasAnyOpen && 'opacity-100',
               )}
               onClick={handleTagClick}
               onPointerDown={(e) => e.stopPropagation()}

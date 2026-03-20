@@ -1,26 +1,20 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { signInWithGoogle } from "@/app/auth/google/actions";
-import { Button } from "@/components/ui/button";
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { signInWithGoogle } from '@/app/auth/google/actions';
+import { Button } from '@/components/ui/button';
 
 interface GoogleSignInButtonProps {
   plan?: string;
-  variant?:
-    | "default"
-    | "outline"
-    | "ghost"
-    | "link"
-    | "destructive"
-    | "secondary";
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary';
   className?: string;
 }
 
 export function GoogleSignInButton({
   plan,
-  variant = "outline",
+  variant = 'outline',
   className,
 }: GoogleSignInButtonProps) {
   const [isPending, startTransition] = useTransition();
@@ -30,13 +24,11 @@ export function GoogleSignInButton({
     startTransition(async () => {
       const result = await signInWithGoogle(plan);
       if (result.error) {
-        router.push(
-          `/login?message=Could not sign in with Google. Reason: ${result.error}`,
-        );
+        router.push(`/login?message=Could not sign in with Google. Reason: ${result.error}`);
       } else if (result.url) {
         window.location.href = result.url;
       } else {
-        router.push("/login?message=Failed to initiate Google sign-in");
+        router.push('/login?message=Failed to initiate Google sign-in');
       }
     });
   };

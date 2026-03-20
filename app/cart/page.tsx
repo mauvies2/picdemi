@@ -1,5 +1,5 @@
-import { Suspense } from "react";
-import { GuestCartContent } from "./guest-cart-content";
+import { Suspense } from 'react';
+import { GuestCartContent } from './guest-cart-content';
 
 export default function GuestCartPage() {
   return (

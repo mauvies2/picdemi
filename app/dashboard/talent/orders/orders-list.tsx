@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { format } from "date-fns";
+import { format } from 'date-fns';
 import {
   Calendar,
   CheckCircle2,
@@ -9,54 +9,48 @@ import {
   Package,
   ShoppingCart,
   XCircle,
-} from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import type { OrderWithItemCount } from "./actions";
+} from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { OrderWithItemCount } from './actions';
 
-function formatCurrency(cents: number, currency: string = "usd"): string {
+function formatCurrency(cents: number, currency = 'usd'): string {
   const amount = cents / 100;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
     currency: currency.toUpperCase(),
   }).format(amount);
 }
 
 function getStatusBadge(status: string) {
   switch (status) {
-    case "completed":
+    case 'completed':
       return (
         <Badge variant="default" className="bg-green-500 hover:bg-green-600">
           <CheckCircle2 className="mr-1 h-3 w-3" />
           Completed
         </Badge>
       );
-    case "pending":
-    case "processing":
+    case 'pending':
+    case 'processing':
       return (
         <Badge variant="secondary">
           <Clock className="mr-1 h-3 w-3" />
-          {status === "pending" ? "Pending" : "Processing"}
+          {status === 'pending' ? 'Pending' : 'Processing'}
         </Badge>
       );
-    case "failed":
-    case "canceled":
+    case 'failed':
+    case 'canceled':
       return (
         <Badge variant="destructive">
           <XCircle className="mr-1 h-3 w-3" />
-          {status === "failed" ? "Failed" : "Canceled"}
+          {status === 'failed' ? 'Failed' : 'Canceled'}
         </Badge>
       );
-    case "refunded":
+    case 'refunded':
       return (
         <Badge variant="outline" className="border-orange-500 text-orange-600">
           Refunded
@@ -72,21 +66,17 @@ interface OrdersListProps {
 }
 
 export function OrdersList({ orders }: OrdersListProps) {
-  const [statusFilter, _setStatusFilter] = useState<string>("all");
+  const [statusFilter, _setStatusFilter] = useState<string>('all');
 
   const filteredOrders =
-    statusFilter === "all"
-      ? orders
-      : orders.filter((order) => order.status === statusFilter);
+    statusFilter === 'all' ? orders : orders.filter((order) => order.status === statusFilter);
 
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle>Order History</CardTitle>
-          <CardDescription>
-            View and manage your purchase history
-          </CardDescription>
+          <CardDescription>View and manage your purchase history</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
@@ -94,16 +84,14 @@ export function OrdersList({ orders }: OrdersListProps) {
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <ShoppingCart className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="mb-2 text-lg font-semibold">
-              {statusFilter === "all"
-                ? "No orders yet"
-                : `No ${statusFilter} orders`}
+              {statusFilter === 'all' ? 'No orders yet' : `No ${statusFilter} orders`}
             </h3>
             <p className="mb-4 text-sm text-muted-foreground max-w-sm">
-              {statusFilter === "all"
-                ? "When you purchase photos from events, they will appear here. Start exploring events to find photos of yourself!"
+              {statusFilter === 'all'
+                ? 'When you purchase photos from events, they will appear here. Start exploring events to find photos of yourself!'
                 : `You don't have any ${statusFilter} orders at this time.`}
             </p>
-            {statusFilter === "all" && (
+            {statusFilter === 'all' && (
               <Link href="/dashboard/talent/events">
                 <Button>Browse Events</Button>
               </Link>
@@ -126,19 +114,17 @@ export function OrdersList({ orders }: OrdersListProps) {
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      {format(new Date(order.created_at), "MMM d, yyyy")}
+                      {format(new Date(order.created_at), 'MMM d, yyyy')}
                     </div>
                     {order.completed_at && (
                       <div className="flex items-center gap-1">
                         <CheckCircle2 className="h-3 w-3" />
-                        Completed{" "}
-                        {format(new Date(order.completed_at), "MMM d, yyyy")}
+                        Completed {format(new Date(order.completed_at), 'MMM d, yyyy')}
                       </div>
                     )}
                     <div className="flex items-center gap-1">
                       <Package className="h-3 w-3" />
-                      {order.item_count}{" "}
-                      {order.item_count === 1 ? "photo" : "photos"}
+                      {order.item_count} {order.item_count === 1 ? 'photo' : 'photos'}
                     </div>
                   </div>
                 </div>
@@ -147,14 +133,14 @@ export function OrdersList({ orders }: OrdersListProps) {
                     <div className="text-lg font-semibold">
                       {formatCurrency(order.total_amount_cents, order.currency)}
                     </div>
-                    {order.status === "completed" && (
+                    {order.status === 'completed' && (
                       <Button
                         variant="ghost"
                         size="sm"
                         className="mt-1 h-8 text-xs"
                         onClick={() => {
                           // TODO: Implement receipt download
-                          console.log("Download receipt for order", order.id);
+                          console.log('Download receipt for order', order.id);
                         }}
                       >
                         <Download className="mr-1 h-3 w-3" />

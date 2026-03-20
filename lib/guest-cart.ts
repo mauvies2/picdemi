@@ -8,4 +8,4 @@ export interface GuestCartItem {
   previewUrl: string | null;
 }
 
-export const GUEST_CART_KEY = "picdemi_guest_cart";
+export const GUEST_CART_KEY = 'picdemi_guest_cart';

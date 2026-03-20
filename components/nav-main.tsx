@@ -1,13 +1,9 @@
-"use client";
+'use client';
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { ChevronRight, type LucideIcon } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
   // SidebarGroupLabel,
@@ -19,7 +15,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 
 export function NavMains({
   items,
@@ -45,7 +41,7 @@ export function NavMains({
   };
 
   const isItemActive = (url: string, allUrls: string[]) => {
-    if (url === "/dashboard/photographer" || url === "/dashboard/talent") {
+    if (url === '/dashboard/photographer' || url === '/dashboard/talent') {
       // Exact match for dashboard home pages
       return pathname === url;
     }
@@ -82,11 +78,7 @@ export function NavMains({
           return (
             <Collapsible key={item.title} asChild defaultOpen={isActive}>
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={item.title}
-                  isActive={isActive}
-                >
+                <SidebarMenuButton asChild tooltip={item.title} isActive={isActive}>
                   <Link href={item.url} onClick={handleLinkClick}>
                     <item.icon />
                     <span>{item.title}</span>
@@ -103,22 +95,12 @@ export function NavMains({
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {item.items?.map((subItem) => {
-                          const allSubUrls =
-                            item.items?.map((i) => i.url) ?? [];
-                          const isSubItemActive = isItemActive(
-                            subItem.url,
-                            allSubUrls,
-                          );
+                          const allSubUrls = item.items?.map((i) => i.url) ?? [];
+                          const isSubItemActive = isItemActive(subItem.url, allSubUrls);
                           return (
                             <SidebarMenuSubItem key={subItem.title}>
-                              <SidebarMenuSubButton
-                                asChild
-                                isActive={isSubItemActive}
-                              >
-                                <Link
-                                  href={subItem.url}
-                                  onClick={handleLinkClick}
-                                >
+                              <SidebarMenuSubButton asChild isActive={isSubItemActive}>
+                                <Link href={subItem.url} onClick={handleLinkClick}>
                                   <span>{subItem.title}</span>
                                 </Link>
                               </SidebarMenuSubButton>

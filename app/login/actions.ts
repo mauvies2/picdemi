@@ -1,13 +1,13 @@
-"use server";
+'use server';
 
-import { createClient } from "@/database/server";
-import { getBaseUrl } from "@/lib/get-base-url";
+import { createClient } from '@/database/server';
+import { getBaseUrl } from '@/lib/get-base-url';
 
 export async function resetPasswordAction(formData: FormData) {
-  const email = formData.get("email") as string;
+  const email = formData.get('email') as string;
 
   if (!email) {
-    throw new Error("Please enter your email address");
+    throw new Error('Please enter your email address');
   }
 
   const supabase = await createClient();
@@ -19,9 +19,7 @@ export async function resetPasswordAction(formData: FormData) {
 
   if (error) {
     console.error(error);
-    throw new Error(
-      error.message || "Could not send password reset email. Please try again.",
-    );
+    throw new Error(error.message || 'Could not send password reset email. Please try again.');
   }
 
   return { success: true };

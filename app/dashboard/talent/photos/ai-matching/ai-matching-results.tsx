@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { format } from "date-fns";
-import { CheckCircle2, Loader2, XCircle } from "lucide-react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { SimilarityMatch } from "./actions";
+import { format } from 'date-fns';
+import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import type { SimilarityMatch } from './actions';
 
 interface AIMatchingResultsProps {
   matches: SimilarityMatch[];
@@ -41,12 +41,12 @@ export function AIMatchingResults({
     color: string;
   } => {
     if (score >= 0.8) {
-      return { label: "Likely Match", color: "text-green-600" };
+      return { label: 'Likely Match', color: 'text-green-600' };
     }
     if (score >= 0.6) {
-      return { label: "Possible Match", color: "text-yellow-600" };
+      return { label: 'Possible Match', color: 'text-yellow-600' };
     }
-    return { label: "Low Match", color: "text-orange-600" };
+    return { label: 'Low Match', color: 'text-orange-600' };
   };
 
   const selectedCount = selectedPhotoIds.size;
@@ -72,15 +72,13 @@ export function AIMatchingResults({
         <div>
           <p className="text-sm font-medium">
             Found {matches.length} potential match
-            {matches.length === 1 ? "" : "es"}
+            {matches.length === 1 ? '' : 'es'}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             Select the photos that are actually you
           </p>
         </div>
-        {selectedCount > 0 && (
-          <div className="text-sm font-medium">{selectedCount} selected</div>
-        )}
+        {selectedCount > 0 && <div className="text-sm font-medium">{selectedCount} selected</div>}
       </div>
 
       {/* Photo grid */}
@@ -94,26 +92,26 @@ export function AIMatchingResults({
               type="button"
               key={match.photo_id}
               className={cn(
-                "relative group cursor-pointer rounded-lg border-2 overflow-hidden transition-all w-full",
+                'relative group cursor-pointer rounded-lg border-2 overflow-hidden transition-all w-full',
                 isSelected
-                  ? "border-primary ring-2 ring-primary/20"
-                  : "border-border hover:border-primary/50",
+                  ? 'border-primary ring-2 ring-primary/20'
+                  : 'border-border hover:border-primary/50',
               )}
               onClick={() => handleToggleSelect(match.photo_id)}
-              aria-label={`${isSelected ? "Deselect" : "Select"} photo from ${match.event_name ?? "event"}`}
+              aria-label={`${isSelected ? 'Deselect' : 'Select'} photo from ${match.event_name ?? 'event'}`}
             >
               {/* Photo */}
               {match.photo_url ? (
                 <div className="aspect-square relative bg-muted">
                   <Image
                     src={match.photo_url}
-                    alt={`Photo from ${match.event_name ?? "event"}`}
+                    alt={`Photo from ${match.event_name ?? 'event'}`}
                     fill
                     className="object-cover"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     unoptimized={
-                      match.photo_url.startsWith("http://localhost") ||
-                      match.photo_url.startsWith("http://127.0.0.1")
+                      match.photo_url.startsWith('http://localhost') ||
+                      match.photo_url.startsWith('http://127.0.0.1')
                     }
                   />
                 </div>
@@ -129,17 +127,17 @@ export function AIMatchingResults({
                   <div className="flex items-center justify-between">
                     <span
                       className={cn(
-                        "text-xs font-medium px-2 py-1 rounded",
+                        'text-xs font-medium px-2 py-1 rounded',
                         confidence.color,
-                        "bg-background/90",
+                        'bg-background/90',
                       )}
                     >
                       {confidence.label}
                     </span>
                     <div
                       className={cn(
-                        "rounded-full p-1 bg-background/90",
-                        isSelected && "bg-primary",
+                        'rounded-full p-1 bg-background/90',
+                        isSelected && 'bg-primary',
                       )}
                     >
                       {isSelected ? (
@@ -165,9 +163,9 @@ export function AIMatchingResults({
               <div className="absolute top-2 left-2">
                 <span
                   className={cn(
-                    "text-xs font-medium px-2 py-1 rounded",
+                    'text-xs font-medium px-2 py-1 rounded',
                     confidence.color,
-                    "bg-background/90",
+                    'bg-background/90',
                   )}
                 >
                   {Math.round(match.similarity_score * 100)}%
@@ -183,21 +181,16 @@ export function AIMatchingResults({
         <div className="rounded-lg border bg-muted/50 p-4">
           <p className="text-sm font-medium mb-2">
             Selected photos from {selectedCount} event
-            {selectedCount === 1 ? "" : "s"}
+            {selectedCount === 1 ? '' : 's'}
           </p>
           <div className="space-y-1">
             {Array.from(selectedPhotoIds)
               .map((photoId) => matches.find((m) => m.photo_id === photoId))
               .filter((match): match is SimilarityMatch => match !== undefined)
               .map((match, idx) => (
-                <div
-                  key={match.photo_id}
-                  className="text-xs text-muted-foreground"
-                >
-                  {idx + 1}. {match.event_name ?? "Unknown event"}
-                  {match.event_date && (
-                    <> • {format(new Date(match.event_date), "MMM d, yyyy")}</>
-                  )}
+                <div key={match.photo_id} className="text-xs text-muted-foreground">
+                  {idx + 1}. {match.event_name ?? 'Unknown event'}
+                  {match.event_date && <> • {format(new Date(match.event_date), 'MMM d, yyyy')}</>}
                 </div>
               ))}
           </div>
@@ -209,17 +202,14 @@ export function AIMatchingResults({
         <Button variant="outline" onClick={onCancel} disabled={isPending}>
           Cancel
         </Button>
-        <Button
-          onClick={onAddToLibrary}
-          disabled={selectedCount === 0 || isPending}
-        >
+        <Button onClick={onAddToLibrary} disabled={selectedCount === 0 || isPending}>
           {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Adding...
             </>
           ) : (
-            `Add ${selectedCount} Photo${selectedCount === 1 ? "" : "s"} to My Library`
+            `Add ${selectedCount} Photo${selectedCount === 1 ? '' : 's'} to My Library`
           )}
         </Button>
       </div>

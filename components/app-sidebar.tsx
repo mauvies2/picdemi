@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   CalendarDays,
@@ -13,50 +13,39 @@ import {
   User,
   Wallet,
   WalletMinimal,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  type ComponentProps,
-  type FC,
-  useOptimistic,
-  useTransition,
-} from "react";
-import { switchRole } from "@/app/actions/roles";
-import { NavMains } from "./nav-main";
-import { NavSecondary } from "./nav-secondary";
-import { Button } from "./ui/button";
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { type ComponentProps, type FC, useOptimistic, useTransition } from 'react';
+import { switchRole } from '@/app/actions/roles';
+import { NavMains } from './nav-main';
+import { NavSecondary } from './nav-secondary';
+import { Button } from './ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  useSidebar,
-} from "./ui/sidebar";
+} from './ui/dropdown-menu';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar } from './ui/sidebar';
 
-type RoleSlug = "photographer" | "talent";
+type RoleSlug = 'photographer' | 'talent';
 
 const photographerNav = [
-  { title: "Overview", url: "/dashboard/photographer", icon: Home },
+  { title: 'Overview', url: '/dashboard/photographer', icon: Home },
   {
-    title: "Create Event",
-    url: "/dashboard/photographer/events/new",
+    title: 'Create Event',
+    url: '/dashboard/photographer/events/new',
     icon: CalendarPlus,
   },
   {
-    title: "Events",
-    url: "/dashboard/photographer/events",
+    title: 'Events',
+    url: '/dashboard/photographer/events',
     icon: CalendarDays,
   },
-  { title: "Sales", url: "/dashboard/photographer/sales", icon: WalletMinimal },
-  { title: "Earnings", url: "/dashboard/photographer/earnings", icon: Wallet },
+  { title: 'Sales', url: '/dashboard/photographer/sales', icon: WalletMinimal },
+  { title: 'Earnings', url: '/dashboard/photographer/earnings', icon: Wallet },
   // {
   //   title: "Analytics",
   //   url: "/dashboard/photographer/analytics",
@@ -70,22 +59,22 @@ const photographerNav = [
 ];
 
 const talentNav = [
-  { title: "Overview", url: "/dashboard/talent", icon: Home },
-  { title: "Photos of you", url: "/dashboard/talent/photos", icon: Images },
-  { title: "Profile", url: "/dashboard/talent/profile", icon: User },
-  { title: "Explore", url: "/dashboard/talent/events", icon: Compass },
-  { title: "Orders", url: "/dashboard/talent/orders", icon: Package },
+  { title: 'Overview', url: '/dashboard/talent', icon: Home },
+  { title: 'Photos of you', url: '/dashboard/talent/photos', icon: Images },
+  { title: 'Profile', url: '/dashboard/talent/profile', icon: User },
+  { title: 'Explore', url: '/dashboard/talent/events', icon: Compass },
+  { title: 'Orders', url: '/dashboard/talent/orders', icon: Package },
 ];
 
 const navSecondary = [
   {
-    title: "Support",
-    url: "#",
+    title: 'Support',
+    url: '#',
     icon: LifeBuoy,
   },
   {
-    title: "Feedback",
-    url: "#",
+    title: 'Feedback',
+    url: '#',
     icon: Send,
   },
 ];
@@ -110,9 +99,7 @@ const RoleSwitcher: FC<{
         addOptimisticRole(result.activeRole);
         // Redirect to the correct dashboard homepage
         const dashboardPath =
-          role === "photographer"
-            ? "/dashboard/photographer"
-            : "/dashboard/talent";
+          role === 'photographer' ? '/dashboard/photographer' : '/dashboard/talent';
         router.push(dashboardPath);
       } catch (error) {
         console.error(error);
@@ -126,19 +113,19 @@ const RoleSwitcher: FC<{
   const currentRole = optimisticRole;
   const roleStyles: Record<string, { bg: string; color: string }> = {
     photographer: {
-      bg: "bg-role-photographer",
-      color: "text-primary-foreground",
+      bg: 'bg-role-photographer',
+      color: 'text-primary-foreground',
     },
     talent: {
-      bg: "bg-role-talent",
-      color: "text-primary-foreground",
+      bg: 'bg-role-talent',
+      color: 'text-primary-foreground',
     },
   };
 
   const { bg, color } = roleStyles[currentRole] ?? roleStyles.talent;
 
-  if (state === "collapsed") {
-    const Icon = currentRole === "photographer" ? Camera : User;
+  if (state === 'collapsed') {
+    const Icon = currentRole === 'photographer' ? Camera : User;
 
     return (
       <div className="flex justify-center pb-2">
@@ -147,19 +134,17 @@ const RoleSwitcher: FC<{
             <Button
               variant="outline"
               size="sm"
-              className={`h-8 w-8 rounded-full p-2 transition-opacity ${color} ${bg} hover:text-white ${isPending ? "opacity-70" : ""}`}
+              className={`h-8 w-8 rounded-full p-2 transition-opacity ${color} ${bg} hover:text-white ${isPending ? 'opacity-70' : ''}`}
               disabled={isPending}
             >
               <Icon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-40">
-            <DropdownMenuItem onClick={() => onSelect("photographer")}>
+            <DropdownMenuItem onClick={() => onSelect('photographer')}>
               Photographer
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onSelect("talent")}>
-              Talent
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onSelect('talent')}>Talent</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -174,11 +159,11 @@ const RoleSwitcher: FC<{
             variant="outline"
             size="sm"
             className={`w-full justify-start gap-2 transition-opacity ${color} ${bg} border-transparent hover:text-white ${
-              isPending ? "opacity-70" : ""
+              isPending ? 'opacity-70' : ''
             }`}
             disabled={isPending}
           >
-            {currentRole === "photographer" ? (
+            {currentRole === 'photographer' ? (
               <>
                 <Camera className="h-4 w-4" />
                 <span>Photographer</span>
@@ -192,12 +177,8 @@ const RoleSwitcher: FC<{
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-40">
-          <DropdownMenuItem onClick={() => onSelect("photographer")}>
-            Photographer
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSelect("talent")}>
-            Talent
-          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSelect('photographer')}>Photographer</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSelect('talent')}>Talent</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -216,20 +197,14 @@ export function AppSidebar({
     avatar?: string | null;
   };
 }) {
-  const navItems = activeRole === "photographer" ? photographerNav : talentNav;
+  const navItems = activeRole === 'photographer' ? photographerNav : talentNav;
 
   return (
     <Sidebar collapsible="icon" className="h-svh" {...props}>
       <SidebarHeader>
         <div className="relative flex items-center px-2">
           <Link href="/" className="flex items-center gap-1">
-            <Image
-              src="/logo_dark.svg"
-              alt="Logo"
-              width={170}
-              height={50}
-              priority
-            />
+            <Image src="/logo_dark.svg" alt="Logo" width={170} height={50} priority />
           </Link>
         </div>
       </SidebarHeader>

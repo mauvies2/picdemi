@@ -1,12 +1,12 @@
-import { createServerClient } from "@supabase/ssr";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { env } from "@/env.mjs";
+import { createServerClient } from '@supabase/ssr';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { env } from '@/env.mjs';
 
 export async function proxy(request: NextRequest) {
   // Add the pathname to the request headers so server components can access it
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  requestHeaders.set('x-pathname', request.nextUrl.pathname);
 
   const response = NextResponse.next({
     request: {
@@ -44,13 +44,13 @@ export async function proxy(request: NextRequest) {
     // This prevents proxy from blocking all requests
     if (
       error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "refresh_token_already_used"
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === 'refresh_token_already_used'
     ) {
       // Token was already used - clear cookies to force re-auth
-      response.cookies.delete("sb-access-token");
-      response.cookies.delete("sb-refresh-token");
+      response.cookies.delete('sb-access-token');
+      response.cookies.delete('sb-refresh-token');
     }
   }
 
@@ -66,6 +66,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };

@@ -3,15 +3,10 @@
  * Used for unauthenticated purchases — no auth.users dependency
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
-export type GuestOrderStatus =
-  | "pending"
-  | "completed"
-  | "failed"
-  | "canceled"
-  | "refunded";
+export type GuestOrderStatus = 'pending' | 'completed' | 'failed' | 'canceled' | 'refunded';
 
 export interface GuestOrder {
   id: string;
@@ -55,15 +50,13 @@ export async function createPendingGuestCheckout(
   cartItems: PendingGuestCheckoutItem[],
 ): Promise<string> {
   const { data, error } = await supabase
-    .from("pending_guest_checkouts")
+    .from('pending_guest_checkouts')
     .insert({ cart_items: cartItems })
-    .select("id")
+    .select('id')
     .single();
 
   if (error || !data) {
-    throw new Error(
-      `Failed to create pending checkout: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to create pending checkout: ${getErrorMessage(error)}`);
   }
 
   return data.id;
@@ -75,14 +68,12 @@ export async function linkPendingGuestCheckoutToSession(
   stripeSessionId: string,
 ): Promise<void> {
   const { error } = await supabase
-    .from("pending_guest_checkouts")
+    .from('pending_guest_checkouts')
     .update({ stripe_session_id: stripeSessionId })
-    .eq("id", pendingCheckoutId);
+    .eq('id', pendingCheckoutId);
 
   if (error) {
-    throw new Error(
-      `Failed to link pending checkout to session: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to link pending checkout to session: ${getErrorMessage(error)}`);
   }
 }
 
@@ -91,15 +82,13 @@ export async function getPendingGuestCheckout(
   pendingCheckoutId: string,
 ): Promise<{ id: string; cart_items: PendingGuestCheckoutItem[] } | null> {
   const { data, error } = await supabase
-    .from("pending_guest_checkouts")
-    .select("id, cart_items")
-    .eq("id", pendingCheckoutId)
+    .from('pending_guest_checkouts')
+    .select('id, cart_items')
+    .eq('id', pendingCheckoutId)
     .maybeSingle();
 
   if (error) {
-    throw new Error(
-      `Failed to get pending checkout: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get pending checkout: ${getErrorMessage(error)}`);
   }
 
   return data as { id: string; cart_items: PendingGuestCheckoutItem[] } | null;
@@ -109,10 +98,7 @@ export async function deletePendingGuestCheckout(
   supabase: SupabaseServerClient,
   pendingCheckoutId: string,
 ): Promise<void> {
-  await supabase
-    .from("pending_guest_checkouts")
-    .delete()
-    .eq("id", pendingCheckoutId);
+  await supabase.from('pending_guest_checkouts').delete().eq('id', pendingCheckoutId);
 }
 
 export async function createGuestOrder(
@@ -128,15 +114,15 @@ export async function createGuestOrder(
   },
 ): Promise<GuestOrder> {
   const { data: row, error } = await supabase
-    .from("guest_orders")
+    .from('guest_orders')
     .insert({
       guest_email: data.guest_email,
       stripe_checkout_session_id: data.stripe_checkout_session_id,
       stripe_payment_intent_id: data.stripe_payment_intent_id ?? null,
       stripe_customer_id: data.stripe_customer_id ?? null,
       total_amount_cents: data.total_amount_cents,
-      currency: data.currency ?? "usd",
-      status: "completed",
+      currency: data.currency ?? 'usd',
+      status: 'completed',
       completed_at: new Date().toISOString(),
       metadata: data.metadata ?? {},
     })
@@ -169,15 +155,10 @@ export async function addGuestOrderItems(
     total_price_cents: item.unit_price_cents * (item.quantity ?? 1),
   }));
 
-  const { data, error } = await supabase
-    .from("guest_order_items")
-    .insert(orderItems)
-    .select();
+  const { data, error } = await supabase.from('guest_order_items').insert(orderItems).select();
 
   if (error || !data) {
-    throw new Error(
-      `Failed to add guest order items: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to add guest order items: ${getErrorMessage(error)}`);
   }
 
   return data as GuestOrderItem[];
@@ -188,15 +169,13 @@ export async function getGuestOrderBySessionId(
   sessionId: string,
 ): Promise<GuestOrder | null> {
   const { data, error } = await supabase
-    .from("guest_orders")
-    .select("*")
-    .eq("stripe_checkout_session_id", sessionId)
+    .from('guest_orders')
+    .select('*')
+    .eq('stripe_checkout_session_id', sessionId)
     .maybeSingle();
 
   if (error) {
-    throw new Error(
-      `Failed to get guest order by session: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get guest order by session: ${getErrorMessage(error)}`);
   }
 
   return (data as GuestOrder) ?? null;
@@ -207,28 +186,24 @@ export async function getGuestOrderWithItems(
   guestOrderId: string,
 ): Promise<GuestOrderWithItems | null> {
   const { data: order, error: orderError } = await supabase
-    .from("guest_orders")
-    .select("*")
-    .eq("id", guestOrderId)
+    .from('guest_orders')
+    .select('*')
+    .eq('id', guestOrderId)
     .maybeSingle();
 
   if (orderError) {
-    throw new Error(
-      `Failed to get guest order: ${getErrorMessage(orderError)}`,
-    );
+    throw new Error(`Failed to get guest order: ${getErrorMessage(orderError)}`);
   }
 
   if (!order) return null;
 
   const { data: items, error: itemsError } = await supabase
-    .from("guest_order_items")
-    .select("*")
-    .eq("guest_order_id", guestOrderId);
+    .from('guest_order_items')
+    .select('*')
+    .eq('guest_order_id', guestOrderId);
 
   if (itemsError) {
-    throw new Error(
-      `Failed to get guest order items: ${getErrorMessage(itemsError)}`,
-    );
+    throw new Error(`Failed to get guest order items: ${getErrorMessage(itemsError)}`);
   }
 
   return {
@@ -242,16 +217,14 @@ export async function getGuestOrdersByEmail(
   email: string,
 ): Promise<GuestOrder[]> {
   const { data, error } = await supabase
-    .from("guest_orders")
-    .select("*")
-    .eq("guest_email", email)
-    .eq("status", "completed")
-    .order("created_at", { ascending: false });
+    .from('guest_orders')
+    .select('*')
+    .eq('guest_email', email)
+    .eq('status', 'completed')
+    .order('created_at', { ascending: false });
 
   if (error) {
-    throw new Error(
-      `Failed to get guest orders by email: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get guest orders by email: ${getErrorMessage(error)}`);
   }
 
   return (data ?? []) as GuestOrder[];

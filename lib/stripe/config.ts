@@ -2,10 +2,10 @@
  * Stripe configuration
  */
 
-import Stripe from "stripe";
-import { env } from "@/env.mjs";
+import Stripe from 'stripe';
+import { env } from '@/env.mjs';
 
 export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-11-17.clover",
+  apiVersion: '2025-11-17.clover',
   typescript: true,
 });

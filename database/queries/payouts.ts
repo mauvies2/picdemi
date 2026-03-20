@@ -3,10 +3,10 @@
  * For tracking photographer payout requests and processing
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
-export type PayoutStatus = "pending" | "approved" | "paid" | "cancelled";
+export type PayoutStatus = 'pending' | 'approved' | 'paid' | 'cancelled';
 
 export interface Payout {
   id: string;
@@ -27,17 +27,17 @@ export async function getPayouts(
   supabase: SupabaseServerClient,
   photographerId: string,
   status?: PayoutStatus,
-  limit: number = 50,
+  limit = 50,
 ): Promise<Payout[]> {
   let query = supabase
-    .from("payouts")
-    .select("*")
-    .eq("photographer_id", photographerId)
-    .order("created_at", { ascending: false })
+    .from('payouts')
+    .select('*')
+    .eq('photographer_id', photographerId)
+    .order('created_at', { ascending: false })
     .limit(limit);
 
   if (status) {
-    query = query.eq("status", status);
+    query = query.eq('status', status);
   }
 
   const { data, error } = await query;
@@ -58,14 +58,14 @@ export async function getPayout(
   photographerId: string,
 ): Promise<Payout | null> {
   const { data, error } = await supabase
-    .from("payouts")
-    .select("*")
-    .eq("id", payoutId)
-    .eq("photographer_id", photographerId)
+    .from('payouts')
+    .select('*')
+    .eq('id', payoutId)
+    .eq('photographer_id', photographerId)
     .maybeSingle();
 
   if (error) {
-    if (error.code === "PGRST116") {
+    if (error.code === 'PGRST116') {
       return null; // Not found
     }
     throw new Error(`Failed to get payout: ${getErrorMessage(error)}`);
@@ -84,12 +84,12 @@ export async function createPayout(
   paymentAccountId: string,
 ): Promise<Payout> {
   const { data, error } = await supabase
-    .from("payouts")
+    .from('payouts')
     .insert({
       photographer_id: photographerId,
       amount_cents: amountCents,
       payment_account_id: paymentAccountId,
-      status: "pending",
+      status: 'pending',
     })
     .select()
     .single();
@@ -116,16 +116,14 @@ export async function updatePayoutStatus(
   }
 
   const { data, error } = await supabase
-    .from("payouts")
+    .from('payouts')
     .update(updateData)
-    .eq("id", payoutId)
+    .eq('id', payoutId)
     .select()
     .single();
 
   if (error || !data) {
-    throw new Error(
-      `Failed to update payout status: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to update payout status: ${getErrorMessage(error)}`);
   }
 
   return data as Payout;
@@ -139,10 +137,10 @@ export async function getTotalPaidOut(
   photographerId: string,
 ): Promise<number> {
   const { data, error } = await supabase
-    .from("payouts")
-    .select("amount_cents")
-    .eq("photographer_id", photographerId)
-    .eq("status", "paid");
+    .from('payouts')
+    .select('amount_cents')
+    .eq('photographer_id', photographerId)
+    .eq('status', 'paid');
 
   if (error) {
     throw new Error(`Failed to get total paid out: ${getErrorMessage(error)}`);
@@ -159,10 +157,10 @@ export async function getTotalPendingPayouts(
   photographerId: string,
 ): Promise<number> {
   const { data, error } = await supabase
-    .from("payouts")
-    .select("amount_cents")
-    .eq("photographer_id", photographerId)
-    .in("status", ["pending", "approved"]);
+    .from('payouts')
+    .select('amount_cents')
+    .eq('photographer_id', photographerId)
+    .in('status', ['pending', 'approved']);
 
   if (error) {
     throw new Error(`Failed to get pending payouts: ${getErrorMessage(error)}`);

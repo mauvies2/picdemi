@@ -2,14 +2,12 @@
  * Server-side watermarking utilities
  */
 
-import sharp from "sharp";
+import sharp from 'sharp';
 
 /**
  * Add watermark to an image buffer
  */
-export async function addWatermarkToImage(
-  imageBuffer: Buffer,
-): Promise<Buffer> {
+export async function addWatermarkToImage(imageBuffer: Buffer): Promise<Buffer> {
   // Get image metadata
   const image = sharp(imageBuffer);
   const metadata = await image.metadata();
@@ -50,7 +48,7 @@ export async function addWatermarkToImage(
         input: watermarkBuffer,
         top: Math.floor((height - watermarkHeight) / 2),
         left: Math.floor((width - watermarkWidth) / 2),
-        blend: "over",
+        blend: 'over',
       },
     ])
     .toBuffer();

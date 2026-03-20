@@ -177,9 +177,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family:
-    var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui,
-    sans-serif;
+  font-family: var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   color: var(--foreground);
 }
 
@@ -219,7 +217,5 @@ h6 {
 
 /* Utility class for applying Inter Tight to titles that aren't headings */
 .font-heading {
-  font-family:
-    var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui,
-    sans-serif;
+  font-family: var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }

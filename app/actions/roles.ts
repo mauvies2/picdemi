@@ -1,15 +1,15 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { z } from "zod";
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
 import {
   upsertProfileRole as dbUpsertProfileRole,
   upsertUserRole as dbUpsertUserRole,
   getProfileActiveRole,
   getUserRoles,
-} from "@/database/queries";
-import { createClient } from "@/database/server";
+} from '@/database/queries';
+import { createClient } from '@/database/server';
 import {
   ROLES,
   type RoleSlug,
@@ -17,12 +17,12 @@ import {
   roleEnumToSlug,
   roleSlugToEnum,
   type UserRole,
-} from "@/lib/roles";
+} from '@/lib/roles';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 const userRoleSchema = z.enum([ROLES.PHOTOGRAPHER, ROLES.TALENT]);
-const roleSlugSchema = z.enum(["photographer", "talent"]);
+const roleSlugSchema = z.enum(['photographer', 'talent']);
 
 type SwitchRoleResult = {
   activeRole: RoleSlug;
@@ -35,40 +35,33 @@ async function getAuthenticatedClient() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to manage roles.");
+    throw new Error('You must be signed in to manage roles.');
   }
 
   return { supabase, user };
 }
 
-async function enableTalentRoleInternal(
-  supabase: SupabaseServerClient,
-  userId: string,
-) {
+async function enableTalentRoleInternal(supabase: SupabaseServerClient, userId: string) {
   await dbUpsertUserRole(supabase, userId, ROLES.TALENT);
   await dbUpsertProfileRole(supabase, userId, ROLES.TALENT);
 }
 
-export async function completeOnboarding(
-  initialRole: UserRole,
-  username?: string,
-) {
+export async function completeOnboarding(initialRole: UserRole, username?: string) {
   const role = userRoleSchema.parse(initialRole);
   const { supabase, user } = await getAuthenticatedClient();
 
   // Update profile with username
   if (username) {
-    const { updateProfile } = await import("@/database/queries");
+    const { updateProfile } = await import('@/database/queries');
     await updateProfile(supabase, user.id, { username });
   }
 
   await dbUpsertProfileRole(supabase, user.id, role);
   await dbUpsertUserRole(supabase, user.id, role);
 
-  revalidatePath("/dashboard");
+  revalidatePath('/dashboard');
   // Redirect to the role-specific dashboard
-  const dashboardPath =
-    role === ROLES.TALENT ? "/dashboard/talent" : "/dashboard/photographer";
+  const dashboardPath = role === ROLES.TALENT ? '/dashboard/talent' : '/dashboard/photographer';
   redirect(dashboardPath);
 }
 
@@ -76,8 +69,8 @@ export async function enableTalentRole(): Promise<SwitchRoleResult> {
   const { supabase, user } = await getAuthenticatedClient();
   await enableTalentRoleInternal(supabase, user.id);
 
-  revalidatePath("/dashboard");
-  revalidatePath("/dashboard/talent");
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/talent');
 
   return { activeRole: roleEnumToSlug(ROLES.TALENT) };
 }
@@ -98,16 +91,16 @@ export async function switchRole(
   } else {
     const hasRole = existingRoles.includes(targetRole);
     if (!hasRole) {
-      throw new Error("Role is not enabled for this user.");
+      throw new Error('Role is not enabled for this user.');
     }
     await dbUpsertProfileRole(supabase, user.id, targetRole);
   }
 
   // Only revalidate if not called during render (e.g., from user action)
   if (!options?.skipRevalidation) {
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/talent");
-    revalidatePath("/dashboard/photographer");
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/talent');
+    revalidatePath('/dashboard/photographer');
   }
 
   return { activeRole: slug };
@@ -147,7 +140,5 @@ export async function getActiveRole(): Promise<{
  */
 export async function getDashboardPath(): Promise<string> {
   const { activeRole } = await getActiveRole();
-  return activeRole === "talent"
-    ? "/dashboard/talent"
-    : "/dashboard/photographer";
+  return activeRole === 'talent' ? '/dashboard/talent' : '/dashboard/photographer';
 }

@@ -1,6 +1,6 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from 'next/cache';
 import {
   deletePhoto as dbDeletePhoto,
   deleteEvent,
@@ -9,12 +9,12 @@ import {
   eventExists,
   getPhoto,
   getPhotoStoragePaths,
-} from "@/database/queries";
-import { createClient } from "@/database/server";
+} from '@/database/queries';
+import { createClient } from '@/database/server';
 
 export const deleteEventAction = async (eventId: string) => {
   if (!eventId) {
-    throw new Error("Event id is required.");
+    throw new Error('Event id is required.');
   }
 
   const supabase = await createClient();
@@ -23,11 +23,11 @@ export const deleteEventAction = async (eventId: string) => {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to delete an event.");
+    throw new Error('You must be signed in to delete an event.');
   }
 
   if (!(await eventExists(supabase, eventId, user.id))) {
-    throw new Error("Event not found.");
+    throw new Error('Event not found.');
   }
 
   // Get storage paths before deleting photos
@@ -38,22 +38,22 @@ export const deleteEventAction = async (eventId: string) => {
 
   // Delete files from storage
   if (storagePaths.length > 0) {
-    await deleteStorageFiles(supabase, "photos", storagePaths);
+    await deleteStorageFiles(supabase, 'photos', storagePaths);
   }
 
   // Delete event
   await deleteEvent(supabase, eventId, user.id);
 
-  revalidatePath("/dashboard/photographer/events");
+  revalidatePath('/dashboard/photographer/events');
   revalidatePath(`/dashboard/photographer/events/${eventId}`);
 };
 
 export const deletePhoto = async (photoId: string, eventId: string) => {
   if (!photoId) {
-    throw new Error("Photo id is required.");
+    throw new Error('Photo id is required.');
   }
   if (!eventId) {
-    throw new Error("Event id is required.");
+    throw new Error('Event id is required.');
   }
 
   const supabase = await createClient();
@@ -62,13 +62,13 @@ export const deletePhoto = async (photoId: string, eventId: string) => {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to delete a photo.");
+    throw new Error('You must be signed in to delete a photo.');
   }
 
   const photo = await getPhoto(supabase, photoId, eventId, user.id);
 
   if (!photo) {
-    throw new Error("Photo not found.");
+    throw new Error('Photo not found.');
   }
 
   // Delete photo from database
@@ -76,9 +76,9 @@ export const deletePhoto = async (photoId: string, eventId: string) => {
 
   // Delete file from storage
   if (photo.original_url) {
-    await deleteStorageFiles(supabase, "photos", [photo.original_url]);
+    await deleteStorageFiles(supabase, 'photos', [photo.original_url]);
   }
 
-  revalidatePath("/dashboard/photographer/events");
+  revalidatePath('/dashboard/photographer/events');
   revalidatePath(`/dashboard/photographer/events/${eventId}`);
 };

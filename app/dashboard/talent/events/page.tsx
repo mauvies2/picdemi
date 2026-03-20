@@ -1,6 +1,6 @@
-import { EventSearchBar } from "@/components/event-search-bar";
-import { getFilterOptionsAction } from "./actions";
-import { ExplorePageContent } from "./explore-page-content";
+import { EventSearchBar } from '@/components/event-search-bar';
+import { getFilterOptionsAction } from './actions';
+import { ExplorePageContent } from './explore-page-content';
 
 export default async function TalentExplorePage({
   searchParams,
@@ -14,16 +14,16 @@ export default async function TalentExplorePage({
     <div className="space-y-6">
       <div className="flex justify-center">
         <EventSearchBar
-          key={`${where ?? ""}-${activity ?? ""}`}
+          key={`${where ?? ''}-${activity ?? ''}`}
           variant="hero"
-          initialWhere={where ?? ""}
-          initialActivity={activity ?? ""}
+          initialWhere={where ?? ''}
+          initialActivity={activity ?? ''}
           searchHref="/dashboard/talent/events"
         />
       </div>
 
       <ExplorePageContent
-        key={`${where ?? ""}-${activity ?? ""}`}
+        key={`${where ?? ''}-${activity ?? ''}`}
         initialFilterOptions={filterOptions}
         loadOnMount={true}
         enableLocation={!where}

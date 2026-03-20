@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { getUserOrders, type OrderStatus } from "@/database/queries/orders";
-import { getErrorMessage } from "@/database/queries/types";
-import { createClient } from "@/database/server";
+import { getUserOrders, type OrderStatus } from '@/database/queries/orders';
+import { getErrorMessage } from '@/database/queries/types';
+import { createClient } from '@/database/server';
 
 export interface OrderWithItemCount {
   id: string;
@@ -21,7 +21,7 @@ export async function getTalentOrders(): Promise<OrderWithItemCount[]> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("User not authenticated");
+    throw new Error('User not authenticated');
   }
 
   // Get all orders for the user
@@ -34,14 +34,12 @@ export async function getTalentOrders(): Promise<OrderWithItemCount[]> {
   // Get item counts for all orders in a single query
   const orderIds = orders.map((o) => o.id);
   const { data: itemCounts, error } = await supabase
-    .from("order_items")
-    .select("order_id")
-    .in("order_id", orderIds);
+    .from('order_items')
+    .select('order_id')
+    .in('order_id', orderIds);
 
   if (error) {
-    throw new Error(
-      `Failed to get order item counts: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get order item counts: ${getErrorMessage(error)}`);
   }
 
   // Count items per order
@@ -70,23 +68,23 @@ export async function getTalentOrderStats() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("User not authenticated");
+    throw new Error('User not authenticated');
   }
 
   // Get all orders
   const orders = await getUserOrders(supabase, user.id, 1000);
 
   // Calculate stats
-  const completedOrders = orders.filter((o) => o.status === "completed");
+  const completedOrders = orders.filter((o) => o.status === 'completed');
 
   // Count total purchased photos
   let totalPurchasedPhotos = 0;
   if (completedOrders.length > 0) {
     const { count } = await supabase
-      .from("order_items")
-      .select("*", { count: "exact", head: true })
+      .from('order_items')
+      .select('*', { count: 'exact', head: true })
       .in(
-        "order_id",
+        'order_id',
         completedOrders.map((o) => o.id),
       );
     totalPurchasedPhotos = count ?? 0;
@@ -96,9 +94,6 @@ export async function getTalentOrderStats() {
     totalOrders: orders.length,
     completedOrders: completedOrders.length,
     totalPurchasedPhotos,
-    totalSpentCents: completedOrders.reduce(
-      (sum, order) => sum + order.total_amount_cents,
-      0,
-    ),
+    totalSpentCents: completedOrders.reduce((sum, order) => sum + order.total_amount_cents, 0),
   };
 }

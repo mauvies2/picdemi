@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { MoreVertical } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { MoreVertical } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 type EventCardProps = {
   id: string;
@@ -40,9 +40,7 @@ export function EventCard({
   const [isPending] = useTransition();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const formattedDate = date
-    ? new Date(date).toDateString().split(" ").slice(1).join(" ")
-    : "";
+  const formattedDate = date ? new Date(date).toDateString().split(' ').slice(1).join(' ') : '';
 
   const handleDelete = async () => {
     await onDelete();
@@ -89,30 +87,26 @@ export function EventCard({
             <span
               className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider shrink-0 ${
                 isPublic
-                  ? "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950/50 dark:text-green-400"
-                  : "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400"
+                  ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950/50 dark:text-green-400'
+                  : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400'
               }`}
             >
-              {isPublic ? "Public" : "Private"}
+              {isPublic ? 'Public' : 'Private'}
             </span>
           </div>
 
           {/* Second row: Date and Stats */}
           <div className="flex items-center justify-between gap-2">
             {/* Left: Date */}
-            {formattedDate && (
-              <div className="text-xs text-muted-foreground">
-                {formattedDate}
-              </div>
-            )}
+            {formattedDate && <div className="text-xs text-muted-foreground">{formattedDate}</div>}
             {/* Right: Photo count and sales */}
             <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
               <span>
-                {photoCount} {photoCount === 1 ? "photo" : "photos"}
+                {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
               </span>
               <span className="text-muted-foreground/50">•</span>
               <span>
-                {salesCount} {salesCount === 1 ? "sale" : "sales"}
+                {salesCount} {salesCount === 1 ? 'sale' : 'sales'}
               </span>
             </div>
           </div>

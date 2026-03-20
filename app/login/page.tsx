@@ -1,16 +1,16 @@
-import Image from "next/image";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getDashboardPath } from "@/app/actions/roles";
-import { CloseButton } from "@/components/close-button";
-import { FacebookSignInButton } from "@/components/facebook-signin-button";
-import { ForgotPasswordLink } from "@/components/forgot-password-link";
-import { GoogleSignInButton } from "@/components/google-signin-button";
-import { SubmitButton } from "@/components/submit-button";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { createClient } from "@/database/server";
+import Image from 'next/image';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { getDashboardPath } from '@/app/actions/roles';
+import { CloseButton } from '@/components/close-button';
+import { FacebookSignInButton } from '@/components/facebook-signin-button';
+import { ForgotPasswordLink } from '@/components/forgot-password-link';
+import { GoogleSignInButton } from '@/components/google-signin-button';
+import { SubmitButton } from '@/components/submit-button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { createClient } from '@/database/server';
 
 export default async function Login({
   searchParams,
@@ -31,19 +31,15 @@ export default async function Login({
   } = await supabase.auth.getUser();
 
   // If user is logged in and has a plan parameter, redirect to billing checkout
-  if (
-    user &&
-    params.plan &&
-    (params.plan === "amateur" || params.plan === "pro")
-  ) {
+  if (user && params.plan && (params.plan === 'amateur' || params.plan === 'pro')) {
     return redirect(`/dashboard/photographer/settings?upgrade=${params.plan}`);
   }
 
   if (user) {
     const { data: profile } = await supabase
-      .from("profiles")
-      .select("active_role")
-      .eq("id", user.id)
+      .from('profiles')
+      .select('active_role')
+      .eq('id', user.id)
       .maybeSingle();
 
     if (profile?.active_role) {
@@ -52,23 +48,23 @@ export default async function Login({
     }
 
     const { data: roles } = await supabase
-      .from("user_role_memberships")
-      .select("role")
-      .eq("user_id", user.id);
+      .from('user_role_memberships')
+      .select('role')
+      .eq('user_id', user.id);
 
     if (roles && roles.length > 0) {
       const dashboardPath = await getDashboardPath();
       return redirect(dashboardPath);
     }
 
-    return redirect("/onboarding/role");
+    return redirect('/onboarding/role');
   }
 
   const signIn = async (formData: FormData) => {
-    "use server";
+    'use server';
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
     const supabase = await createClient();
 
     const { error } = await supabase.auth.signInWithPassword({
@@ -78,9 +74,7 @@ export default async function Login({
 
     if (error) {
       console.error(error);
-      return redirect(
-        `/login?message=Could not sign in. Reason: ${error.code}`,
-      );
+      return redirect(`/login?message=Could not sign in. Reason: ${error.code}`);
     }
     // After successful login, check role to decide where to send the user.
     const {
@@ -88,30 +82,25 @@ export default async function Login({
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return redirect("/login?message=Could not retrieve user after login");
+      return redirect('/login?message=Could not retrieve user after login');
     }
 
-    const { getProfileActiveRole, getUserRoles } = await import(
-      "@/database/queries"
-    );
+    const { getProfileActiveRole, getUserRoles } = await import('@/database/queries');
 
     // Claim a guest download token if one was passed
     if (params.token) {
       try {
         const { getDownloadTokenByToken, claimDownloadToken } = await import(
-          "@/database/queries/download-tokens"
+          '@/database/queries/download-tokens'
         );
-        const { supabaseAdmin } = await import("@/database/supabase-admin");
-        const tokenRow = await getDownloadTokenByToken(
-          supabaseAdmin,
-          params.token,
-        );
+        const { supabaseAdmin } = await import('@/database/supabase-admin');
+        const tokenRow = await getDownloadTokenByToken(supabaseAdmin, params.token);
         if (tokenRow && !tokenRow.claimed_by_user_id) {
           await claimDownloadToken(supabaseAdmin, tokenRow.id, user.id);
         }
         return redirect(`/download/${params.token}?claimed=true`);
       } catch (err) {
-        console.error("Failed to claim download token on login:", err);
+        console.error('Failed to claim download token on login:', err);
       }
     }
 
@@ -127,7 +116,7 @@ export default async function Login({
       return redirect(dashboardPath);
     }
 
-    return redirect("/onboarding/role");
+    return redirect('/onboarding/role');
   };
 
   return (
@@ -139,19 +128,9 @@ export default async function Login({
           Login with your Google, Facebook or Apple account
         </p>
         <div className="mt-4 flex gap-2">
-          <GoogleSignInButton
-            plan={params.plan}
-            className="flex-1 h-12 border-2 rounded-lg"
-          />
-          <FacebookSignInButton
-            plan={params.plan}
-            className="flex-1 h-12 border-2 rounded-lg"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 h-12 border-2 rounded-lg"
-          >
+          <GoogleSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
+          <FacebookSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
+          <Button type="button" variant="outline" className="flex-1 h-12 border-2 rounded-lg">
             <Image src="/apple.svg" alt="Apple" width={22} height={22} />
           </Button>
         </div>
@@ -171,9 +150,9 @@ export default async function Login({
           {params?.message && (
             <p
               className={`mt-4 border p-4 text-center ${
-                params.reset === "success"
-                  ? "border-green-500 bg-green-100 text-green-800"
-                  : "border-red-500 bg-red-100 text-slate-600"
+                params.reset === 'success'
+                  ? 'border-green-500 bg-green-100 text-green-800'
+                  : 'border-red-500 bg-red-100 text-slate-600'
               }`}
             >
               {params.message}
@@ -208,11 +187,11 @@ export default async function Login({
             Log in
           </SubmitButton>
           <p className="text-center">
-            Don&apos;t have an account?{" "}
+            Don&apos;t have an account?{' '}
             <Link className="text-sky-600 hover:underline" href="/signup">
-              {"Sign up"}
+              Sign up
             </Link>
-            {" here."}
+            here.
           </p>
         </form>
       </div>

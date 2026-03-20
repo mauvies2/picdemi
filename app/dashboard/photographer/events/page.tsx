@@ -1,12 +1,8 @@
-import { DashboardHeader } from "@/components/dashboard-header";
-import {
-  createSignedUrl,
-  getPhotosForEvents,
-  getUserEvents,
-} from "@/database/queries";
-import { createClient } from "@/database/server";
-import { deleteEventAction as deleteEvent } from "./actions";
-import { EventCard } from "./event-card";
+import { DashboardHeader } from '@/components/dashboard-header';
+import { createSignedUrl, getPhotosForEvents, getUserEvents } from '@/database/queries';
+import { createClient } from '@/database/server';
+import { deleteEventAction as deleteEvent } from './actions';
+import { EventCard } from './event-card';
 
 async function getEventSalesCounts(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -18,7 +14,7 @@ async function getEventSalesCounts(
   }
 
   const { data, error } = await supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       photo_id,
@@ -31,12 +27,12 @@ async function getEventSalesCounts(
       )
     `,
     )
-    .eq("photographer_id", photographerId)
-    .eq("orders.status", "completed")
-    .in("photos.event_id", eventIds);
+    .eq('photographer_id', photographerId)
+    .eq('orders.status', 'completed')
+    .in('photos.event_id', eventIds);
 
   if (error) {
-    console.error("Error fetching event sales:", error);
+    console.error('Error fetching event sales:', error);
     return new Map();
   }
 
@@ -77,9 +73,7 @@ export default async function EventsPage() {
     return (
       <div>
         <DashboardHeader title="Events" />
-        <p className="mt-2 text-muted-foreground">
-          Please sign in to view your events.
-        </p>
+        <p className="mt-2 text-muted-foreground">Please sign in to view your events.</p>
       </div>
     );
   }
@@ -137,12 +131,7 @@ export default async function EventsPage() {
   await Promise.all(
     Array.from(stats.entries()).map(async ([eventId, info]) => {
       if (!info.coverPath) return;
-      const signedUrl = await createSignedUrl(
-        supabase,
-        "photos",
-        info.coverPath,
-        60 * 60,
-      );
+      const signedUrl = await createSignedUrl(supabase, 'photos', info.coverPath, 60 * 60);
       if (signedUrl) coverUrls.set(eventId, signedUrl);
     }),
   );
@@ -152,8 +141,8 @@ export default async function EventsPage() {
       <DashboardHeader title="Events" />
       <div className="text-sm text-muted-foreground">
         {events.length
-          ? `${events.length} event${events.length === 1 ? "" : "s"}`
-          : "No events yet."}
+          ? `${events.length} event${events.length === 1 ? '' : 's'}`
+          : 'No events yet.'}
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {events.map((event) => {

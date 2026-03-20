@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/database/server";
-import { env } from "@/env.mjs";
-import { stripe } from "@/lib/stripe/config";
+import { NextResponse } from 'next/server';
+import { createClient } from '@/database/server';
+import { env } from '@/env.mjs';
+import { stripe } from '@/lib/stripe/config';
 
 const PLAN_TO_PRICE: Record<string, string> = {
   amateur: env.STRIPE_PRICE_AMATEUR,
@@ -10,10 +10,10 @@ const PLAN_TO_PRICE: Record<string, string> = {
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
-  const planId = body?.planId as "amateur" | "pro" | undefined;
+  const planId = body?.planId as 'amateur' | 'pro' | undefined;
 
   if (!planId || !PLAN_TO_PRICE[planId]) {
-    return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
   }
 
   const supabase = await createClient();
@@ -26,14 +26,14 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // Check if we already have a Stripe customer and active subscription
   const { data: existingSub } = await supabase
-    .from("subscriptions")
-    .select("stripe_customer_id, stripe_subscription_id, status, plan_id")
-    .eq("user_id", user.id)
+    .from('subscriptions')
+    .select('stripe_customer_id, stripe_subscription_id, status, plan_id')
+    .eq('user_id', user.id)
     .limit(1)
     .maybeSingle();
 
@@ -43,13 +43,11 @@ export async function POST(req: Request) {
   if (
     existingSub?.stripe_subscription_id &&
     existingSub.status &&
-    ["active", "trialing", "past_due"].includes(existingSub.status)
+    ['active', 'trialing', 'past_due'].includes(existingSub.status)
   ) {
     // User already has an active subscription - update it
     try {
-      const subscription = await stripe.subscriptions.retrieve(
-        existingSub.stripe_subscription_id,
-      );
+      const subscription = await stripe.subscriptions.retrieve(existingSub.stripe_subscription_id);
 
       // Update subscription to new plan
       await stripe.subscriptions.update(existingSub.stripe_subscription_id, {
@@ -59,7 +57,7 @@ export async function POST(req: Request) {
             price: PLAN_TO_PRICE[planId],
           },
         ],
-        proration_behavior: "always_invoice",
+        proration_behavior: 'always_invoice',
         metadata: {
           supabase_user_id: user.id,
           plan_id: planId,
@@ -69,14 +67,11 @@ export async function POST(req: Request) {
       // Subscription will be updated via customer.subscription.updated webhook
       return NextResponse.json({
         updated: true,
-        message: "Subscription updated successfully",
+        message: 'Subscription updated successfully',
       });
     } catch (error) {
-      console.error("Error updating subscription:", error);
-      return NextResponse.json(
-        { error: "Failed to update subscription" },
-        { status: 500 },
-      );
+      console.error('Error updating subscription:', error);
+      return NextResponse.json({ error: 'Failed to update subscription' }, { status: 500 });
     }
   }
 
@@ -92,11 +87,11 @@ export async function POST(req: Request) {
     stripeCustomerId = customer.id;
 
     // Insert initial row (status will be updated via webhook)
-    await supabase.from("subscriptions").insert({
+    await supabase.from('subscriptions').insert({
       user_id: user.id,
       stripe_customer_id: stripeCustomerId,
       plan_id: planId,
-      status: "incomplete",
+      status: 'incomplete',
     });
   }
 
@@ -104,7 +99,7 @@ export async function POST(req: Request) {
   const baseUrl = env.SITE_URL;
 
   const sessionStripe = await stripe.checkout.sessions.create({
-    mode: "subscription",
+    mode: 'subscription',
     customer: stripeCustomerId,
     line_items: [
       {

@@ -3,9 +3,9 @@
  * For calculating photographer earnings and balances
  */
 
-import { getTotalPaidOut, getTotalPendingPayouts } from "./payouts";
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import { getTotalPaidOut, getTotalPendingPayouts } from './payouts';
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 // Platform fee percentage (10% = 0.10)
 const PLATFORM_FEE_RATE = 0.1;
@@ -32,7 +32,7 @@ export async function getTotalGrossEarnings(
   photographerId: string,
 ): Promise<number> {
   const { data: orderItems, error: itemsError } = await supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       total_price_cents,
@@ -41,19 +41,14 @@ export async function getTotalGrossEarnings(
       )
     `,
     )
-    .eq("photographer_id", photographerId)
-    .eq("orders.status", "completed");
+    .eq('photographer_id', photographerId)
+    .eq('orders.status', 'completed');
 
   if (itemsError) {
-    throw new Error(
-      `Failed to get total gross earnings: ${getErrorMessage(itemsError)}`,
-    );
+    throw new Error(`Failed to get total gross earnings: ${getErrorMessage(itemsError)}`);
   }
 
-  return (orderItems ?? []).reduce(
-    (sum, item) => sum + (item.total_price_cents as number),
-    0,
-  );
+  return (orderItems ?? []).reduce((sum, item) => sum + (item.total_price_cents as number), 0);
 }
 
 /**
@@ -72,17 +67,15 @@ export async function getEarningsSummary(
   supabase: SupabaseServerClient,
   photographerId: string,
 ): Promise<EarningsSummary> {
-  const [totalGrossEarningsCents, totalPaidOutCents, pendingPayoutsCents] =
-    await Promise.all([
-      getTotalGrossEarnings(supabase, photographerId),
-      getTotalPaidOut(supabase, photographerId),
-      getTotalPendingPayouts(supabase, photographerId),
-    ]);
+  const [totalGrossEarningsCents, totalPaidOutCents, pendingPayoutsCents] = await Promise.all([
+    getTotalGrossEarnings(supabase, photographerId),
+    getTotalPaidOut(supabase, photographerId),
+    getTotalPendingPayouts(supabase, photographerId),
+  ]);
 
   const platformFeeCents = calculatePlatformFee(totalGrossEarningsCents);
   const totalNetEarningsCents = calculateNetEarnings(totalGrossEarningsCents);
-  const withdrawableBalanceCents =
-    totalNetEarningsCents - totalPaidOutCents - pendingPayoutsCents;
+  const withdrawableBalanceCents = totalNetEarningsCents - totalPaidOutCents - pendingPayoutsCents;
 
   return {
     totalGrossEarningsCents,
@@ -115,12 +108,12 @@ export interface PhotographerEarning {
 export async function getPhotographerEarnings(
   supabase: SupabaseServerClient,
   photographerId: string,
-  limit: number = 50,
+  limit = 50,
   startDate?: string,
   endDate?: string,
 ): Promise<PhotographerEarning[]> {
   let query = supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       id,
@@ -143,24 +136,22 @@ export async function getPhotographerEarnings(
       )
     `,
     )
-    .eq("photographer_id", photographerId)
-    .eq("orders.status", "completed")
-    .order("created_at", { ascending: false })
+    .eq('photographer_id', photographerId)
+    .eq('orders.status', 'completed')
+    .order('created_at', { ascending: false })
     .limit(limit);
 
   if (startDate) {
-    query = query.gte("created_at", startDate);
+    query = query.gte('created_at', startDate);
   }
   if (endDate) {
-    query = query.lte("created_at", endDate);
+    query = query.lte('created_at', endDate);
   }
 
   const { data, error } = await query;
 
   if (error) {
-    throw new Error(
-      `Failed to get photographer earnings: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get photographer earnings: ${getErrorMessage(error)}`);
   }
 
   type OrderItemWithRelations = {
@@ -218,12 +209,10 @@ export async function getPhotographerEarnings(
     ...new Set(
       (data ?? [])
         .map((item: OrderItemWithRelations) => {
-          const order = Array.isArray(item.orders)
-            ? item.orders[0]
-            : item.orders;
+          const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
           return order?.user_id;
         })
-        .filter((id): id is string => typeof id === "string"),
+        .filter((id): id is string => typeof id === 'string'),
     ),
   ];
 
@@ -232,7 +221,7 @@ export async function getPhotographerEarnings(
 
   if (buyerIds.length > 0) {
     try {
-      const { data: userEmails } = await supabase.rpc("get_user_emails_batch", {
+      const { data: userEmails } = await supabase.rpc('get_user_emails_batch', {
         user_ids: buyerIds,
       });
 
@@ -249,9 +238,7 @@ export async function getPhotographerEarnings(
   return (data ?? []).map((item: OrderItemWithRelations) => {
     const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
     const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-    const event = Array.isArray(photo?.events)
-      ? photo.events[0]
-      : photo?.events;
+    const event = Array.isArray(photo?.events) ? photo.events[0] : photo?.events;
 
     const grossAmountCents = item.total_price_cents;
     const platformFeeCents = calculatePlatformFee(grossAmountCents);
@@ -264,8 +251,8 @@ export async function getPhotographerEarnings(
       event_id: photo?.event_id ?? null,
       event_name: event?.name ?? null,
       event_date: event?.date ?? null,
-      buyer_id: order?.user_id ?? "",
-      buyer_email: buyerEmailMap[order?.user_id ?? ""] ?? null,
+      buyer_id: order?.user_id ?? '',
+      buyer_email: buyerEmailMap[order?.user_id ?? ''] ?? null,
       gross_amount_cents: grossAmountCents,
       platform_fee_cents: platformFeeCents,
       net_amount_cents: netAmountCents,

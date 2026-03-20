@@ -1,7 +1,7 @@
-import { DashboardHeader } from "@/components/dashboard-header";
-import { getProfile } from "@/database/queries/profiles";
-import { createClient } from "@/database/server";
-import { PayoutProfileForm } from "./payout-profile-form";
+import { DashboardHeader } from '@/components/dashboard-header';
+import { getProfile } from '@/database/queries/profiles';
+import { createClient } from '@/database/server';
+import { PayoutProfileForm } from './payout-profile-form';
 
 export default async function PayoutProfilePage() {
   const supabase = await createClient();
@@ -19,8 +19,8 @@ export default async function PayoutProfilePage() {
       <div>
         <DashboardHeader title="Complete Payout Profile" />
         <p className="text-sm text-muted-foreground">
-          Complete your payout profile to enable withdrawal requests. This
-          information is required for tax compliance and payment processing.
+          Complete your payout profile to enable withdrawal requests. This information is required
+          for tax compliance and payment processing.
         </p>
       </div>
       <PayoutProfileForm initialData={existingProfile} />

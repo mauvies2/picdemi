@@ -1,7 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
-import { type NextRequest, NextResponse } from "next/server";
-import { env } from "@/env.mjs";
-import { addWatermarkToImage } from "@/lib/watermark";
+import { createClient } from '@supabase/supabase-js';
+import { type NextRequest, NextResponse } from 'next/server';
+import { env } from '@/env.mjs';
+import { addWatermarkToImage } from '@/lib/watermark';
 
 /**
  * API route to serve watermarked images
@@ -13,38 +13,38 @@ export async function GET(
 ) {
   try {
     const { path: pathSegments } = await params;
-    const fullPath = pathSegments.join("/");
+    const fullPath = pathSegments.join('/');
 
     // Validate path structure
     if (pathSegments.length < 3) {
-      return new NextResponse("Invalid path", { status: 400 });
+      return new NextResponse('Invalid path', { status: 400 });
     }
 
     // Use service role client for admin access to storage
     // Service role key is REQUIRED for storage access
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!serviceRoleKey || serviceRoleKey.trim() === "") {
+    if (!serviceRoleKey || serviceRoleKey.trim() === '') {
       console.error(
-        "Missing SUPABASE_SERVICE_ROLE_KEY - watermark API requires service role key for storage access",
+        'Missing SUPABASE_SERVICE_ROLE_KEY - watermark API requires service role key for storage access',
       );
       return new NextResponse(
         JSON.stringify({
-          error: "Configuration error",
+          error: 'Configuration error',
           message:
-            "SUPABASE_SERVICE_ROLE_KEY is not configured. Service role key is required for watermark API to access storage.",
+            'SUPABASE_SERVICE_ROLE_KEY is not configured. Service role key is required for watermark API to access storage.',
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         },
       );
     }
 
     const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
     if (!supabaseUrl) {
-      console.error("Missing Supabase URL for watermark API");
-      return new NextResponse("Configuration error", { status: 500 });
+      console.error('Missing Supabase URL for watermark API');
+      return new NextResponse('Configuration error', { status: 500 });
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -56,22 +56,22 @@ export async function GET(
 
     // Download the original image from storage
     const { data: imageData, error: downloadError } = await supabase.storage
-      .from("photos")
+      .from('photos')
       .download(fullPath);
 
     if (downloadError || !imageData) {
-      console.error("Failed to download image:", {
+      console.error('Failed to download image:', {
         path: fullPath,
         error: downloadError?.message,
       });
       return new NextResponse(
         JSON.stringify({
-          error: "Image not found",
-          message: downloadError?.message || "Unknown error",
+          error: 'Image not found',
+          message: downloadError?.message || 'Unknown error',
         }),
         {
           status: 404,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         },
       );
     }
@@ -86,21 +86,21 @@ export async function GET(
     // Determine content type
     const contentType =
       imageData.type ||
-      (fullPath.toLowerCase().endsWith(".png")
-        ? "image/png"
-        : fullPath.toLowerCase().endsWith(".webp")
-          ? "image/webp"
-          : "image/jpeg");
+      (fullPath.toLowerCase().endsWith('.png')
+        ? 'image/png'
+        : fullPath.toLowerCase().endsWith('.webp')
+          ? 'image/webp'
+          : 'image/jpeg');
 
     // Return watermarked image with caching
     return new NextResponse(new Uint8Array(watermarkedBuffer), {
       headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=86400, s-maxage=86400", // Cache for 24 hours
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400', // Cache for 24 hours
       },
     });
   } catch (error) {
-    console.error("Watermark API error:", error);
-    return new NextResponse("Internal server error", { status: 500 });
+    console.error('Watermark API error:', error);
+    return new NextResponse('Internal server error', { status: 500 });
   }
 }

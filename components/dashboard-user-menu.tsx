@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { Bell, Camera, CreditCard, LogOut, Settings, User } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useOptimistic, useTransition } from "react";
-import { switchRole } from "@/app/actions/roles";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Bell, Camera, CreditCard, LogOut, Settings, User } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useOptimistic, useTransition } from 'react';
+import { switchRole } from '@/app/actions/roles';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,8 +15,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { RoleSlug } from "@/lib/roles";
+} from '@/components/ui/dropdown-menu';
+import type { RoleSlug } from '@/lib/roles';
 
 export function DashboardUserMenu({
   user,
@@ -38,8 +38,8 @@ export function DashboardUserMenu({
   const [isPending, startTransition] = useTransition();
 
   const handleLogout = async () => {
-    await fetch("/auth/signout", { method: "POST" });
-    router.push("/");
+    await fetch('/auth/signout', { method: 'POST' });
+    router.push('/');
     router.refresh();
   };
 
@@ -50,11 +50,7 @@ export function DashboardUserMenu({
       try {
         const result = await switchRole(role);
         addOptimisticRole(result.activeRole);
-        router.push(
-          role === "photographer"
-            ? "/dashboard/photographer"
-            : "/dashboard/talent",
-        );
+        router.push(role === 'photographer' ? '/dashboard/photographer' : '/dashboard/talent');
       } catch {
         addOptimisticRole(activeRole);
       } finally {
@@ -64,23 +60,20 @@ export function DashboardUserMenu({
   };
 
   const profileUrl =
-    optimisticRole === "photographer"
-      ? "/dashboard/photographer/profile"
-      : "/dashboard/talent/profile";
+    optimisticRole === 'photographer'
+      ? '/dashboard/photographer/profile'
+      : '/dashboard/talent/profile';
   const settingsUrl =
-    optimisticRole === "photographer"
-      ? "/dashboard/photographer/settings"
-      : "/dashboard/talent/settings";
+    optimisticRole === 'photographer'
+      ? '/dashboard/photographer/settings'
+      : '/dashboard/talent/settings';
 
   const isProfileActive = pathname.startsWith(profileUrl);
   const isSettingsActive = pathname.startsWith(settingsUrl);
 
-  const otherRole: RoleSlug =
-    optimisticRole === "photographer" ? "talent" : "photographer";
-  const otherRoleLabel =
-    otherRole === "photographer" ? "Photographer" : "Talent";
-  const currentRoleLabel =
-    optimisticRole === "photographer" ? "Photographer" : "Talent";
+  const otherRole: RoleSlug = optimisticRole === 'photographer' ? 'talent' : 'photographer';
+  const otherRoleLabel = otherRole === 'photographer' ? 'Photographer' : 'Talent';
+  const currentRoleLabel = optimisticRole === 'photographer' ? 'Photographer' : 'Talent';
 
   return (
     <DropdownMenu>
@@ -93,31 +86,20 @@ export function DashboardUserMenu({
         >
           <Avatar className="h-9 w-9">
             <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
-            <AvatarFallback>
-              {user.name?.charAt(0).toUpperCase() ?? "U"}
-            </AvatarFallback>
+            <AvatarFallback>{user.name?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-56 rounded-lg"
-        side="bottom"
-        align="end"
-        sideOffset={8}
-      >
+      <DropdownMenuContent className="w-56 rounded-lg" side="bottom" align="end" sideOffset={8}>
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8">
               <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
-              <AvatarFallback>
-                {user.name?.charAt(0).toUpperCase() ?? "U"}
-              </AvatarFallback>
+              <AvatarFallback>{user.name?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
-              <span className="truncate text-xs text-muted-foreground">
-                {user.email}
-              </span>
+              <span className="truncate text-xs text-muted-foreground">{user.email}</span>
             </div>
           </div>
         </DropdownMenuLabel>
@@ -125,33 +107,25 @@ export function DashboardUserMenu({
         {/* Active role indicator */}
         <div className="px-2 py-1.5">
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            {optimisticRole === "photographer" ? (
+            {optimisticRole === 'photographer' ? (
               <Camera className="h-3 w-3" />
             ) : (
               <User className="h-3 w-3" />
             )}
             Active role:
-            <span className="font-medium text-foreground">
-              {currentRoleLabel}
-            </span>
+            <span className="font-medium text-foreground">{currentRoleLabel}</span>
           </span>
         </div>
 
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem
-            asChild
-            className={isProfileActive ? "bg-accent" : ""}
-          >
+          <DropdownMenuItem asChild className={isProfileActive ? 'bg-accent' : ''}>
             <Link href={profileUrl}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            asChild
-            className={isSettingsActive ? "bg-accent" : ""}
-          >
+          <DropdownMenuItem asChild className={isSettingsActive ? 'bg-accent' : ''}>
             <Link href={settingsUrl}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
@@ -160,7 +134,7 @@ export function DashboardUserMenu({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {optimisticRole === "photographer" && (
+          {optimisticRole === 'photographer' && (
             <DropdownMenuItem asChild>
               <Link href="/dashboard/photographer/settings?tab=billing">
                 <CreditCard className="mr-2 h-4 w-4" />
@@ -175,10 +149,7 @@ export function DashboardUserMenu({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem
-            onClick={() => handleSwitchRole(otherRole)}
-            disabled={isPending}
-          >
+          <DropdownMenuItem onClick={() => handleSwitchRole(otherRole)} disabled={isPending}>
             <Camera className="mr-2 h-4 w-4" />
             <span>Switch to {otherRoleLabel}</span>
           </DropdownMenuItem>

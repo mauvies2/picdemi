@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from 'next/navigation';
 
-export function CloseButton({ className = "" }: { className?: string }) {
+export function CloseButton({ className = '' }: { className?: string }) {
   const router = useRouter();
   const pathname = usePathname();
 
   const handleClick = () => {
-    if (pathname?.startsWith("/auth/reset-password")) {
-      router.push("/login");
+    if (pathname?.startsWith('/auth/reset-password')) {
+      router.push('/login');
     } else if (window.history.length > 1) {
       router.back();
     } else {
-      router.push("/");
+      router.push('/');
     }
   };
 
@@ -32,11 +32,7 @@ export function CloseButton({ className = "" }: { className?: string }) {
         className="h-7 w-7"
         aria-hidden="true"
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M6 18L18 6M6 6l12 12"
-        />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
   );

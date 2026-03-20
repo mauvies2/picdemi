@@ -1,39 +1,9 @@
-"use client";
+'use client';
 
-import {
-  ArrowLeft,
-  Download,
-  Fullscreen,
-  Heart,
-  Maximize2,
-  Share2,
-  ShoppingCart,
-  Trash2,
-  UserPlus,
-  Users,
-  X,
-} from "lucide-react";
-import Image from "next/image";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
-import { toast } from "sonner";
-import { untagPhotoForTalentAction } from "@/app/dashboard/photographer/events/[id]/actions";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { LightboxToolbar } from '@/components/lightbox-toolbar';
 
 export type PhotoLightboxItem = {
   id: string;
@@ -102,32 +72,17 @@ export function PhotoLightbox({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [addedPhotos, setAddedPhotos] = useState<Set<string>>(new Set());
   const [addedToCart, setAddedToCart] = useState<Set<string>>(new Set());
-  const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
-  const [isUntagging, startUntagging] = useTransition();
-
-  const currentPhoto = useMemo(
-    () => items[currentIndex],
-    [items, currentIndex],
-  );
+  const currentPhoto = useMemo(() => items[currentIndex], [items, currentIndex]);
 
   const isInMyPhotos = useMemo(
     () =>
-      currentPhoto &&
-      (photosInMyPhotos.has(currentPhoto.id) ||
-        addedPhotos.has(currentPhoto.id)),
+      currentPhoto && (photosInMyPhotos.has(currentPhoto.id) || addedPhotos.has(currentPhoto.id)),
     [currentPhoto, photosInMyPhotos, addedPhotos],
   );
 
   const isInCart = useMemo(
-    () =>
-      currentPhoto &&
-      (photosInCart.has(currentPhoto.id) || addedToCart.has(currentPhoto.id)),
+    () => currentPhoto && (photosInCart.has(currentPhoto.id) || addedToCart.has(currentPhoto.id)),
     [currentPhoto, photosInCart, addedToCart],
-  );
-
-  const hasTags = useMemo(
-    () => currentPhoto && (currentPhoto.tags?.length ?? 0) > 0,
-    [currentPhoto],
   );
 
   const handleTagTalent = useCallback(() => {
@@ -135,38 +90,19 @@ export function PhotoLightbox({
     onTagTalent(currentPhoto.id);
   }, [currentPhoto, onTagTalent]);
 
-  const handleUntag = useCallback(
-    (talentUserId: string) => {
-      if (!currentPhoto) return;
-      startUntagging(async () => {
-        try {
-          await untagPhotoForTalentAction(currentPhoto.id, talentUserId);
-          toast.success("Tag removed");
-          onUntag?.();
-        } catch (error) {
-          console.error("Error untagging photo:", error);
-          toast.error(
-            error instanceof Error ? error.message : "Failed to remove tag",
-          );
-        }
-      });
-    },
-    [currentPhoto, onUntag],
-  );
-
   // Reset index when opening and prevent body scroll
   useEffect(() => {
     if (open) {
       setCurrentIndex(initialIndex);
       // Prevent body scroll
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
       // Restore body scroll
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     }
 
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     };
   }, [open, initialIndex]);
 
@@ -184,17 +120,17 @@ export function PhotoLightbox({
     if (!open) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         onClose();
-      } else if (e.key === "ArrowLeft") {
+      } else if (e.key === 'ArrowLeft') {
         handlePrevious();
-      } else if (e.key === "ArrowRight") {
+      } else if (e.key === 'ArrowRight') {
         handleNext();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, onClose, handlePrevious, handleNext]);
 
   // Touch/swipe support
@@ -232,9 +168,8 @@ export function PhotoLightbox({
       setIsFullscreen(!!document.fullscreenElement);
     };
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   const handleFullscreen = useCallback(async () => {
@@ -316,7 +251,7 @@ export function PhotoLightbox({
     if (navigator.share) {
       navigator
         .share({
-          title: currentPhoto.alt || "Photo",
+          title: currentPhoto.alt || 'Photo',
           url: currentPhoto.url,
         })
         .catch(() => {
@@ -339,7 +274,7 @@ export function PhotoLightbox({
 
   const handleBackdropKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
+      if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         onClose();
       }
@@ -352,299 +287,46 @@ export function PhotoLightbox({
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col bg-black"
-      style={{ height: "100vh", width: "100vw" }}
+      style={{ height: '100vh', width: '100vw' }}
       onClick={handleBackdropClick}
       onKeyDown={handleBackdropKeyDown}
       role="dialog"
       aria-modal="true"
       tabIndex={-1}
     >
-      {/* Header Bar */}
-      <div
-        className="absolute top-0 left-0 right-0 z-30 flex h-16 items-center px-4"
-        style={{
-          justifyContent: isFullscreen ? "flex-end" : "space-between",
-        }}
-      >
-        {/* Gradient overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/60 via-black/25  to-transparent" />
-
-        {/* Counter - inside toolbar */}
-        {items.length > 1 && (
-          <div className="absolute left-1/2 -translate-x-1/2 text-sm text-white pointer-events-none">
-            {currentIndex + 1} / {items.length}
-          </div>
-        )}
-
-        {/* Close button - far left */}
-        {!isFullscreen && (
-          <div className="relative z-10">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="h-12 w-12 text-white hover:bg-white/15"
-              aria-label="Close"
-            >
-              <X className="h-7 w-7" strokeWidth={1.5} />
-            </Button>
-          </div>
-        )}
-
-        {/* Right side buttons */}
-        <div className="relative z-10 flex items-center gap-2">
-          {/* Share - always visible */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleShare();
-                }}
-                className="h-9 w-9 text-white hover:bg-white/15"
-                aria-label="Share"
-              >
-                <Share2 className="h-5 w-5" strokeWidth={1.5} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Share</p>
-            </TooltipContent>
-          </Tooltip>
-
-          {/* Download */}
-          {showDownload && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDownload();
-                  }}
-                  className="h-9 w-9 text-white hover:bg-white/15"
-                  aria-label="Download"
-                >
-                  <Download className="h-5 w-5" strokeWidth={1.5} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Download</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          {/* Add to Photos */}
-          {showAddToPhotos && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToPhotos();
-                  }}
-                  className="h-9 w-9 text-white hover:bg-white/15"
-                  aria-label="Add to photos"
-                >
-                  <Heart
-                    className="h-5 w-5"
-                    strokeWidth={1.5}
-                    fill={isInMyPhotos ? "white" : "none"}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{isInMyPhotos ? "Remove from photos" : "Add to photos"}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          {/* Add to Cart */}
-          {showAddToCart && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToCart();
-                  }}
-                  className="h-9 w-9 text-white hover:bg-white/15"
-                  aria-label="Add to cart"
-                >
-                  <ShoppingCart
-                    className="h-5 w-5"
-                    strokeWidth={1.5}
-                    fill={isInCart ? "white" : "none"}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{isInCart ? "Remove from cart" : "Add to cart"}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          {/* Remove */}
-          {showRemove && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove();
-                  }}
-                  className="h-9 w-9 text-white hover:bg-white/15"
-                  aria-label="Remove"
-                >
-                  <Trash2 className="h-5 w-5" strokeWidth={1.5} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Remove</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          {/* Tag Talent / Tagged People */}
-          {showTagTalent &&
-            (hasTags ? (
-              <Popover
-                open={isTagPopoverOpen}
-                onOpenChange={setIsTagPopoverOpen}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 text-white hover:bg-white/15"
-                    aria-label="Tagged people"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    <Users className="h-5 w-5" strokeWidth={1.5} />
-                    {currentPhoto.tags && currentPhoto.tags.length > 1 && (
-                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                        {currentPhoto.tags.length}
-                      </span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-64 p-3"
-                  side="bottom"
-                  align="end"
-                  onClick={(e) => e.stopPropagation()}
-                  onPointerEnter={(e) => e.stopPropagation()}
-                >
-                  <div className="space-y-1.5">
-                    {currentPhoto.tags?.map((tag) => (
-                      <div
-                        key={tag.tag_id}
-                        className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm group"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">
-                            @{tag.talent_username}
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleUntag(tag.talent_user_id);
-                          }}
-                          disabled={isUntagging}
-                          className="ml-2 rounded p-1 hover:text-destructive disabled:opacity-50"
-                          aria-label={`Remove tag for ${tag.talent_username}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                    {onTagTalent && (
-                      <div className="border-t pt-1.5 mt-1.5">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleTagTalent();
-                            setIsTagPopoverOpen(false);
-                          }}
-                          className="flex w-full items-center rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          Tag new people
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleTagTalent();
-                    }}
-                    className="h-9 w-9 text-white hover:bg-white/15"
-                    aria-label="Tag talent"
-                  >
-                    <UserPlus className="h-5 w-5" strokeWidth={1.5} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Tag talent</p>
-                </TooltipContent>
-              </Tooltip>
-            ))}
-
-          {/* Fullscreen - always visible */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleFullscreen();
-            }}
-            className="h-9 w-9 text-white hover:bg-white/15"
-            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          >
-            {isFullscreen ? (
-              <Fullscreen className="h-5 w-5" strokeWidth={1.5} />
-            ) : (
-              <Maximize2 className="h-5 w-5" strokeWidth={1.5} />
-            )}
-          </Button>
-        </div>
-      </div>
+      <LightboxToolbar
+        currentPhoto={currentPhoto}
+        itemCount={items.length}
+        currentIndex={currentIndex}
+        isFullscreen={isFullscreen}
+        isInMyPhotos={isInMyPhotos}
+        isInCart={isInCart}
+        showDownload={showDownload}
+        showAddToPhotos={showAddToPhotos}
+        showAddToCart={showAddToCart}
+        showRemove={showRemove}
+        showTagTalent={showTagTalent}
+        onClose={onClose}
+        onShare={handleShare}
+        onDownload={handleDownload}
+        onAddToPhotos={handleAddToPhotos}
+        onAddToCart={handleAddToCart}
+        onRemove={handleRemove}
+        onTagTalent={handleTagTalent}
+        onUntag={onUntag}
+        onFullscreen={handleFullscreen}
+      />
 
       {/* Image Container */}
       <div
         className="relative flex items-center justify-center overflow-hidden"
         style={{
-          height: "100vh",
+          height: '100vh',
           marginTop: 0,
-          paddingTop: isFullscreen ? "4.5rem" : "0",
-          paddingBottom: isFullscreen ? "0.5rem" : "0",
-          paddingLeft: isFullscreen ? "0.5rem" : "0",
-          paddingRight: isFullscreen ? "0.5rem" : "0",
+          paddingTop: isFullscreen ? '4.5rem' : '0',
+          paddingBottom: isFullscreen ? '0.5rem' : '0',
+          paddingLeft: isFullscreen ? '0.5rem' : '0',
+          paddingRight: isFullscreen ? '0.5rem' : '0',
         }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -669,15 +351,14 @@ export function PhotoLightbox({
         <div className="relative w-full h-full" style={{ minHeight: 0 }}>
           <Image
             src={currentPhoto.url}
-            alt={currentPhoto.alt || "Photo"}
+            alt={currentPhoto.alt || 'Photo'}
             fill
             className="object-contain pointer-events-none"
             priority
             sizes="100vw"
             draggable={false}
             unoptimized={
-              currentPhoto.url.includes("/api/") ||
-              currentPhoto.url.includes("localhost")
+              currentPhoto.url.includes('/api/') || currentPhoto.url.includes('localhost')
             }
           />
         </div>

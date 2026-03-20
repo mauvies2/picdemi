@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/database/server";
+import { NextResponse } from 'next/server';
+import { createClient } from '@/database/server';
 
 export async function POST() {
   const supabase = await createClient();

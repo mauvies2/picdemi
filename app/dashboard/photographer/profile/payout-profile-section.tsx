@@ -1,15 +1,9 @@
-"use client";
+'use client';
 
-import {
-  AlertCircle,
-  CheckCircle2,
-  CreditCard,
-  MapPin,
-  Pencil,
-} from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import type { Profile } from "@/database/queries/profiles";
+import { AlertCircle, CheckCircle2, CreditCard, MapPin, Pencil } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import type { Profile } from '@/database/queries/profiles';
 
 interface PayoutProfileSectionProps {
   profile: Profile | null;
@@ -18,37 +12,35 @@ interface PayoutProfileSectionProps {
 export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
   const isComplete = profile?.is_payout_profile_complete ?? false;
   const payoutMethod = profile?.payout_method;
-  const payoutDetails = profile?.payout_details_json as
-    | Record<string, unknown>
-    | null
-    | undefined;
+  const payoutDetails = profile?.payout_details_json as Record<string, unknown> | null | undefined;
 
   const getPayoutMethodLabel = (method: string | null | undefined) => {
     switch (method) {
-      case "bank_transfer":
-        return "Bank Transfer";
-      case "paypal":
-        return "PayPal";
-      case "other":
-        return "Other";
+      case 'bank_transfer':
+        return 'Bank Transfer';
+      case 'paypal':
+        return 'PayPal';
+      case 'other':
+        return 'Other';
       default:
-        return "Not set";
+        return 'Not set';
     }
   };
 
   const getPayoutDetailsDisplay = () => {
-    if (!payoutDetails) return "Not configured";
+    if (!payoutDetails) return 'Not configured';
 
-    if (payoutMethod === "paypal") {
-      return (payoutDetails.email as string) || "Not configured";
-    } else if (payoutMethod === "bank_transfer") {
+    if (payoutMethod === 'paypal') {
+      return (payoutDetails.email as string) || 'Not configured';
+    }
+    if (payoutMethod === 'bank_transfer') {
       if (payoutDetails.iban) {
         const iban = payoutDetails.iban as string;
         return `IBAN: ${iban.substring(0, 4)}****${iban.substring(iban.length - 4)}`;
       }
-      return "Bank account configured";
+      return 'Bank account configured';
     }
-    return "Configured";
+    return 'Configured';
   };
 
   return (
@@ -63,7 +55,7 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
         <Link href="/dashboard/photographer/profile/payout-profile">
           <Button variant="outline" size="sm">
             <Pencil className="mr-2 h-4 w-4" />
-            {isComplete ? "Edit" : "Complete"}
+            {isComplete ? 'Edit' : 'Complete'}
           </Button>
         </Link>
       </div>
@@ -78,8 +70,8 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
                   Payout profile incomplete
                 </p>
                 <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-                  Complete your payout profile to enable withdrawal requests.
-                  This includes your address and payment method.
+                  Complete your payout profile to enable withdrawal requests. This includes your
+                  address and payment method.
                 </p>
               </div>
             </div>
@@ -108,9 +100,7 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
             )}
 
             {/* Address */}
-            {(profile?.address_line1 ||
-              profile?.city ||
-              profile?.country_code) && (
+            {(profile?.address_line1 || profile?.city || profile?.country_code) && (
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 rounded-full bg-primary/10 p-1.5">
                   <MapPin className="h-4 w-4 text-primary" />
@@ -127,7 +117,7 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
                       profile.country_code,
                     ]
                       .filter(Boolean)
-                      .join(", ")}
+                      .join(', ')}
                   </p>
                 </div>
               </div>
@@ -141,9 +131,7 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-muted-foreground">Payout Method</p>
-                  <p className="text-sm font-medium">
-                    {getPayoutMethodLabel(payoutMethod)}
-                  </p>
+                  <p className="text-sm font-medium">{getPayoutMethodLabel(payoutMethod)}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {getPayoutDetailsDisplay()}
                   </p>

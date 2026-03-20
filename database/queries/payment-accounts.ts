@@ -3,10 +3,10 @@
  * For managing photographer payment methods (bank accounts, PayPal, etc.)
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
-export type PaymentAccountType = "bank_account" | "paypal" | "wise" | "other";
+export type PaymentAccountType = 'bank_account' | 'paypal' | 'wise' | 'other';
 
 export interface PaymentAccount {
   id: string;
@@ -30,16 +30,14 @@ export async function getPaymentAccounts(
   photographerId: string,
 ): Promise<PaymentAccount[]> {
   const { data, error } = await supabase
-    .from("payment_accounts")
-    .select("*")
-    .eq("photographer_id", photographerId)
-    .order("is_default", { ascending: false })
-    .order("created_at", { ascending: false });
+    .from('payment_accounts')
+    .select('*')
+    .eq('photographer_id', photographerId)
+    .order('is_default', { ascending: false })
+    .order('created_at', { ascending: false });
 
   if (error) {
-    throw new Error(
-      `Failed to get payment accounts: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get payment accounts: ${getErrorMessage(error)}`);
   }
 
   return (data ?? []) as PaymentAccount[];
@@ -54,14 +52,14 @@ export async function getPaymentAccount(
   photographerId: string,
 ): Promise<PaymentAccount | null> {
   const { data, error } = await supabase
-    .from("payment_accounts")
-    .select("*")
-    .eq("id", accountId)
-    .eq("photographer_id", photographerId)
+    .from('payment_accounts')
+    .select('*')
+    .eq('id', accountId)
+    .eq('photographer_id', photographerId)
     .maybeSingle();
 
   if (error) {
-    if (error.code === "PGRST116") {
+    if (error.code === 'PGRST116') {
       return null; // Not found
     }
     throw new Error(`Failed to get payment account: ${getErrorMessage(error)}`);
@@ -78,19 +76,17 @@ export async function getDefaultPaymentAccount(
   photographerId: string,
 ): Promise<PaymentAccount | null> {
   const { data, error } = await supabase
-    .from("payment_accounts")
-    .select("*")
-    .eq("photographer_id", photographerId)
-    .eq("is_default", true)
+    .from('payment_accounts')
+    .select('*')
+    .eq('photographer_id', photographerId)
+    .eq('is_default', true)
     .maybeSingle();
 
   if (error) {
-    if (error.code === "PGRST116") {
+    if (error.code === 'PGRST116') {
       return null; // Not found
     }
-    throw new Error(
-      `Failed to get default payment account: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get default payment account: ${getErrorMessage(error)}`);
   }
 
   return data as PaymentAccount | null;
@@ -114,14 +110,14 @@ export async function createPaymentAccount(
   // If this is set as default, unset other defaults first
   if (accountData.is_default) {
     await supabase
-      .from("payment_accounts")
+      .from('payment_accounts')
       .update({ is_default: false })
-      .eq("photographer_id", photographerId)
-      .eq("is_default", true);
+      .eq('photographer_id', photographerId)
+      .eq('is_default', true);
   }
 
   const { data, error } = await supabase
-    .from("payment_accounts")
+    .from('payment_accounts')
     .insert({
       photographer_id: photographerId,
       type: accountData.type,
@@ -136,9 +132,7 @@ export async function createPaymentAccount(
     .single();
 
   if (error || !data) {
-    throw new Error(
-      `Failed to create payment account: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to create payment account: ${getErrorMessage(error)}`);
   }
 
   return data as PaymentAccount;
@@ -162,25 +156,23 @@ export async function updatePaymentAccount(
   // If setting as default, unset other defaults first
   if (updates.is_default) {
     await supabase
-      .from("payment_accounts")
+      .from('payment_accounts')
       .update({ is_default: false })
-      .eq("photographer_id", photographerId)
-      .eq("is_default", true)
-      .neq("id", accountId);
+      .eq('photographer_id', photographerId)
+      .eq('is_default', true)
+      .neq('id', accountId);
   }
 
   const { data, error } = await supabase
-    .from("payment_accounts")
+    .from('payment_accounts')
     .update(updates)
-    .eq("id", accountId)
-    .eq("photographer_id", photographerId)
+    .eq('id', accountId)
+    .eq('photographer_id', photographerId)
     .select()
     .single();
 
   if (error || !data) {
-    throw new Error(
-      `Failed to update payment account: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to update payment account: ${getErrorMessage(error)}`);
   }
 
   return data as PaymentAccount;
@@ -195,15 +187,13 @@ export async function deletePaymentAccount(
   photographerId: string,
 ): Promise<void> {
   const { error } = await supabase
-    .from("payment_accounts")
+    .from('payment_accounts')
     .delete()
-    .eq("id", accountId)
-    .eq("photographer_id", photographerId);
+    .eq('id', accountId)
+    .eq('photographer_id', photographerId);
 
   if (error) {
-    throw new Error(
-      `Failed to delete payment account: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to delete payment account: ${getErrorMessage(error)}`);
   }
 }
 
@@ -217,25 +207,23 @@ export async function setDefaultPaymentAccount(
 ): Promise<PaymentAccount> {
   // Unset all other defaults
   await supabase
-    .from("payment_accounts")
+    .from('payment_accounts')
     .update({ is_default: false })
-    .eq("photographer_id", photographerId)
-    .eq("is_default", true)
-    .neq("id", accountId);
+    .eq('photographer_id', photographerId)
+    .eq('is_default', true)
+    .neq('id', accountId);
 
   // Set this one as default
   const { data, error } = await supabase
-    .from("payment_accounts")
+    .from('payment_accounts')
     .update({ is_default: true })
-    .eq("id", accountId)
-    .eq("photographer_id", photographerId)
+    .eq('id', accountId)
+    .eq('photographer_id', photographerId)
     .select()
     .single();
 
   if (error || !data) {
-    throw new Error(
-      `Failed to set default payment account: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to set default payment account: ${getErrorMessage(error)}`);
   }
 
   return data as PaymentAccount;

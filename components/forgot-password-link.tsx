@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ForgotPasswordDialog } from "./forgot-password-dialog";
+import { useState } from 'react';
+import { ForgotPasswordDialog } from './forgot-password-dialog';
 
 export function ForgotPasswordLink({ emailId }: { emailId: string }) {
   const [open, setOpen] = useState(false);
-  const [initialEmail, setInitialEmail] = useState("");
+  const [initialEmail, setInitialEmail] = useState('');
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     // Get email value when dialog opens
     const emailInput = document.getElementById(emailId) as HTMLInputElement;
-    setInitialEmail(emailInput?.value || "");
+    setInitialEmail(emailInput?.value || '');
     setOpen(true);
   };
 
@@ -24,11 +24,7 @@ export function ForgotPasswordLink({ emailId }: { emailId: string }) {
       >
         Forgot password?
       </button>
-      <ForgotPasswordDialog
-        open={open}
-        onOpenChange={setOpen}
-        initialEmail={initialEmail}
-      />
+      <ForgotPasswordDialog open={open} onOpenChange={setOpen} initialEmail={initialEmail} />
     </>
   );
 }

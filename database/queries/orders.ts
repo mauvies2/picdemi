@@ -3,16 +3,16 @@
  * For tracking completed purchases integrated with Stripe
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export type OrderStatus =
-  | "pending"
-  | "processing"
-  | "completed"
-  | "failed"
-  | "canceled"
-  | "refunded";
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'canceled'
+  | 'refunded';
 
 export interface Order {
   id: string;
@@ -63,16 +63,16 @@ export async function createOrder(
   },
 ): Promise<Order> {
   const { data, error } = await supabase
-    .from("orders")
+    .from('orders')
     .insert({
       user_id: userId,
       cart_id: orderData.cart_id ?? null,
       stripe_payment_intent_id: orderData.stripe_payment_intent_id ?? null,
       stripe_customer_id: orderData.stripe_customer_id ?? null,
       stripe_checkout_session_id: orderData.stripe_checkout_session_id ?? null,
-      status: orderData.status ?? "pending",
+      status: orderData.status ?? 'pending',
       total_amount_cents: orderData.total_amount_cents,
-      currency: orderData.currency ?? "usd",
+      currency: orderData.currency ?? 'usd',
       metadata: orderData.metadata ?? {},
     })
     .select()
@@ -107,10 +107,7 @@ export async function addOrderItems(
     total_price_cents: item.unit_price_cents * (item.quantity ?? 1),
   }));
 
-  const { data, error } = await supabase
-    .from("order_items")
-    .insert(orderItems)
-    .select();
+  const { data, error } = await supabase.from('order_items').insert(orderItems).select();
 
   if (error || !data) {
     throw new Error(`Failed to add order items: ${getErrorMessage(error)}`);
@@ -129,13 +126,13 @@ export async function getOrder(
 ): Promise<OrderWithItems | null> {
   // First get the order
   const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .select("*")
-    .eq("id", orderId)
+    .from('orders')
+    .select('*')
+    .eq('id', orderId)
     .single();
 
   if (orderError || !order) {
-    if (orderError?.code === "PGRST116") {
+    if (orderError?.code === 'PGRST116') {
       return null; // Not found
     }
     throw new Error(`Failed to get order: ${getErrorMessage(orderError)}`);
@@ -145,28 +142,26 @@ export async function getOrder(
   if (order.user_id !== userId) {
     // Check if user is a photographer for any items in this order
     const { data: items } = await supabase
-      .from("order_items")
-      .select("photographer_id")
-      .eq("order_id", orderId)
-      .eq("photographer_id", userId)
+      .from('order_items')
+      .select('photographer_id')
+      .eq('order_id', orderId)
+      .eq('photographer_id', userId)
       .limit(1);
 
     if (!items || items.length === 0) {
-      throw new Error("Access denied: Order not found or access denied");
+      throw new Error('Access denied: Order not found or access denied');
     }
   }
 
   // Get order items
   const { data: items, error: itemsError } = await supabase
-    .from("order_items")
-    .select("*")
-    .eq("order_id", orderId)
-    .order("created_at", { ascending: true });
+    .from('order_items')
+    .select('*')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: true });
 
   if (itemsError) {
-    throw new Error(
-      `Failed to get order items: ${getErrorMessage(itemsError)}`,
-    );
+    throw new Error(`Failed to get order items: ${getErrorMessage(itemsError)}`);
   }
 
   return {
@@ -183,18 +178,16 @@ export async function getOrderByPaymentIntentId(
   paymentIntentId: string,
 ): Promise<Order | null> {
   const { data, error } = await supabase
-    .from("orders")
-    .select("*")
-    .eq("stripe_payment_intent_id", paymentIntentId)
+    .from('orders')
+    .select('*')
+    .eq('stripe_payment_intent_id', paymentIntentId)
     .single();
 
   if (error) {
-    if (error.code === "PGRST116") {
+    if (error.code === 'PGRST116') {
       return null; // Not found
     }
-    throw new Error(
-      `Failed to get order by payment intent: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get order by payment intent: ${getErrorMessage(error)}`);
   }
 
   return data as Order;
@@ -208,18 +201,16 @@ export async function getOrderByCheckoutSessionId(
   checkoutSessionId: string,
 ): Promise<Order | null> {
   const { data, error } = await supabase
-    .from("orders")
-    .select("*")
-    .eq("stripe_checkout_session_id", checkoutSessionId)
+    .from('orders')
+    .select('*')
+    .eq('stripe_checkout_session_id', checkoutSessionId)
     .single();
 
   if (error) {
-    if (error.code === "PGRST116") {
+    if (error.code === 'PGRST116') {
       return null; // Not found
     }
-    throw new Error(
-      `Failed to get order by checkout session: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get order by checkout session: ${getErrorMessage(error)}`);
   }
 
   return data as Order;
@@ -238,9 +229,9 @@ export async function updateOrderStatus(
   if (metadata) {
     // Merge with existing metadata
     const { data: existing } = await supabase
-      .from("orders")
-      .select("metadata")
-      .eq("id", orderId)
+      .from('orders')
+      .select('metadata')
+      .eq('id', orderId)
       .single();
 
     updateData.metadata = {
@@ -250,9 +241,9 @@ export async function updateOrderStatus(
   }
 
   const { data, error } = await supabase
-    .from("orders")
+    .from('orders')
     .update(updateData)
-    .eq("id", orderId)
+    .eq('id', orderId)
     .select()
     .single();
 
@@ -269,13 +260,13 @@ export async function updateOrderStatus(
 export async function getUserOrders(
   supabase: SupabaseServerClient,
   userId: string,
-  limit: number = 50,
+  limit = 50,
 ): Promise<Order[]> {
   const { data, error } = await supabase
-    .from("orders")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
+    .from('orders')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
     .limit(limit);
 
   if (error) {
@@ -293,29 +284,27 @@ export async function getPhotographerOrders(
   photographerId: string,
   startDate?: string,
   endDate?: string,
-  limit: number = 50,
+  limit = 50,
 ): Promise<Order[]> {
   let query = supabase
-    .from("orders")
-    .select("*, order_items!inner(photographer_id)")
-    .eq("order_items.photographer_id", photographerId)
-    .eq("status", "completed")
-    .order("created_at", { ascending: false })
+    .from('orders')
+    .select('*, order_items!inner(photographer_id)')
+    .eq('order_items.photographer_id', photographerId)
+    .eq('status', 'completed')
+    .order('created_at', { ascending: false })
     .limit(limit);
 
   if (startDate) {
-    query = query.gte("created_at", startDate);
+    query = query.gte('created_at', startDate);
   }
   if (endDate) {
-    query = query.lte("created_at", endDate);
+    query = query.lte('created_at', endDate);
   }
 
   const { data, error } = await query;
 
   if (error) {
-    throw new Error(
-      `Failed to get photographer orders: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get photographer orders: ${getErrorMessage(error)}`);
   }
 
   // Filter out duplicate orders (since we're joining with order_items)

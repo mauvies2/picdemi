@@ -1,5 +1,5 @@
-import { Resend } from "resend";
-import { env } from "@/env.mjs";
+import { Resend } from 'resend';
+import { env } from '@/env.mjs';
 
 const resend = new Resend(env.RESEND_API_KEY);
 
@@ -19,15 +19,14 @@ export async function sendGuestPurchaseEmail({
   const downloadUrl = `${baseUrl}/download/${downloadToken}`;
   const signupUrl = `${baseUrl}/signup?token=${downloadToken}`;
 
-  const eventsText =
-    eventNames.length > 0 ? eventNames.join(", ") : "your event";
+  const eventsText = eventNames.length > 0 ? eventNames.join(', ') : 'your event';
 
-  const photoLabel = photoCount === 1 ? "photo" : "photos";
+  const photoLabel = photoCount === 1 ? 'photo' : 'photos';
 
   await resend.emails.send({
-    from: "Picdemi <noreply@picdemi.com>",
+    from: 'Picdemi <noreply@picdemi.com>',
     to,
-    subject: "Your Picdemi photos are ready to download!",
+    subject: 'Your Picdemi photos are ready to download!',
     html: `
 <!DOCTYPE html>
 <html>
@@ -51,7 +50,7 @@ export async function sendGuestPurchaseEmail({
           <tr>
             <td style="padding: 32px 40px;">
               <h2 style="margin: 0 0 12px; font-size: 20px; font-weight: 600; color: #111827;">
-                Your ${photoLabel} ${photoCount === 1 ? "is" : "are"} ready! 🎉
+                Your ${photoLabel} ${photoCount === 1 ? 'is' : 'are'} ready! 🎉
               </h2>
               <p style="margin: 0 0 24px; color: #6b7280; line-height: 1.6;">
                 You purchased ${photoCount} ${photoLabel} from <strong>${eventsText}</strong>.

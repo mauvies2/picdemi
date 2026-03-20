@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { Country, State } from "country-state-city";
-import { useMemo } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Country, State } from 'country-state-city';
+import { useMemo } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 interface LocationSelectorProps {
   country: string;
@@ -44,25 +44,21 @@ export function LocationSelector({
 }: LocationSelectorProps) {
   // Get all countries sorted by name
   const countries = useMemo(() => {
-    return Country.getAllCountries().sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
+    return Country.getAllCountries().sort((a, b) => a.name.localeCompare(b.name));
   }, []);
 
   // Get states for selected country
   const states = useMemo(() => {
     if (!country) return [];
-    return State.getStatesOfCountry(country).sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
+    return State.getStatesOfCountry(country).sort((a, b) => a.name.localeCompare(b.name));
   }, [country]);
 
   const handleCountryChange = (value: string) => {
     onCountryChange(value);
     // Reset state and city when country changes
     if (value !== country) {
-      onStateChange("");
-      onCityChange("");
+      onStateChange('');
+      onCityChange('');
     }
   };
 
@@ -70,7 +66,7 @@ export function LocationSelector({
     onStateChange(value);
     // Reset city when state changes
     if (value !== state) {
-      onCityChange("");
+      onCityChange('');
     }
   };
 
@@ -79,7 +75,7 @@ export function LocationSelector({
   const isCityInvalid = showFeedback && cityError;
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {/* Country */}
       <div className="grid gap-2">
         <Label htmlFor="country">Country</Label>
@@ -87,7 +83,7 @@ export function LocationSelector({
           <SelectTrigger
             id="country"
             aria-invalid={!!isCountryInvalid}
-            className={cn("w-full", isCountryInvalid && "border-destructive")}
+            className={cn('w-full', isCountryInvalid && 'border-destructive')}
           >
             <SelectValue placeholder="Select a country" />
           </SelectTrigger>
@@ -112,7 +108,7 @@ export function LocationSelector({
             <SelectTrigger
               id="state"
               aria-invalid={!!isStateInvalid}
-              className={cn("w-full", isStateInvalid && "border-destructive")}
+              className={cn('w-full', isStateInvalid && 'border-destructive')}
             >
               <SelectValue placeholder="Select a state or province" />
             </SelectTrigger>
@@ -131,7 +127,7 @@ export function LocationSelector({
             onChange={(e) => handleStateChange(e.target.value)}
             placeholder="Enter state or province name"
             aria-invalid={!!isStateInvalid}
-            className={cn(isStateInvalid && "border-destructive")}
+            className={cn(isStateInvalid && 'border-destructive')}
             autoComplete="address-level1"
             suppressHydrationWarning
           />
@@ -151,7 +147,7 @@ export function LocationSelector({
             onChange={(e) => onCityChange(e.target.value)}
             placeholder="Enter city name"
             aria-invalid={!!isCityInvalid}
-            className={cn(isCityInvalid && "border-destructive")}
+            className={cn(isCityInvalid && 'border-destructive')}
             autoComplete="address-level2"
             suppressHydrationWarning
           />

@@ -1,13 +1,13 @@
-"use server";
+'use server';
 
 import {
   createSignedUrl,
   getEventFilterOptions,
   getPhotosForEvents,
   searchPublicEvents,
-} from "@/database/queries";
-import { createClient } from "@/database/server";
-import { supabaseAdmin } from "@/database/supabase-admin";
+} from '@/database/queries';
+import { createClient } from '@/database/server';
+import { supabaseAdmin } from '@/database/supabase-admin';
 
 export async function searchEventsAction(filters: {
   searchText?: string;
@@ -16,7 +16,7 @@ export async function searchEventsAction(filters: {
   countries?: string[];
   dateFrom?: string;
   dateTo?: string;
-  sortBy?: "date_asc" | "date_desc" | "name_asc" | "name_desc";
+  sortBy?: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc';
   limit?: number;
   offset?: number;
 }) {
@@ -52,12 +52,7 @@ export async function searchEventsAction(filters: {
   await Promise.all(
     Array.from(stats.entries()).map(async ([eventId, info]) => {
       if (!info.coverPath) return;
-      const signedUrl = await createSignedUrl(
-        supabaseAdmin,
-        "photos",
-        info.coverPath,
-        60 * 60,
-      );
+      const signedUrl = await createSignedUrl(supabaseAdmin, 'photos', info.coverPath, 60 * 60);
       if (signedUrl) coverUrls.set(eventId, signedUrl);
     }),
   );

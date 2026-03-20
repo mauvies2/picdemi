@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import type { User } from "@supabase/supabase-js";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { UserAvatar } from "./user-avatar";
+import type { User } from '@supabase/supabase-js';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { UserAvatar } from './user-avatar';
 
 const links = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
 ];
 
 export function Nav({ user }: { user: User | null }) {
@@ -19,19 +19,19 @@ export function Nav({ user }: { user: User | null }) {
 
   useEffect(() => {
     if (open) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     }
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     };
   }, [open]);
 
   if (
-    pathname?.startsWith("/signup") ||
-    pathname?.startsWith("/login") ||
-    pathname?.startsWith("/dashboard")
+    pathname?.startsWith('/signup') ||
+    pathname?.startsWith('/login') ||
+    pathname?.startsWith('/dashboard')
   ) {
     return null;
   }
@@ -42,13 +42,7 @@ export function Nav({ user }: { user: User | null }) {
         <div className="mx-auto flex h-(--header-height) max-w-[1600px] items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
-              <Image
-                src="/logo_dark.svg"
-                alt="Picdemi"
-                width={170}
-                height={70}
-                priority
-              />
+              <Image src="/logo_dark.svg" alt="Picdemi" width={170} height={70} priority />
             </Link>
           </div>
 
@@ -69,13 +63,10 @@ export function Nav({ user }: { user: User | null }) {
               <UserAvatar user={user} />
             ) : (
               <>
-                <Link
-                  href={"/login"}
-                  className="text-sm hover:text-foreground/70 transition-colors"
-                >
+                <Link href="/login" className="text-sm hover:text-foreground/70 transition-colors">
                   Log in
                 </Link>
-                <Link href={"/signup"} tabIndex={-1}>
+                <Link href="/signup" tabIndex={-1}>
                   <Button size="md">Get started</Button>
                 </Link>
               </>
@@ -99,17 +90,9 @@ export function Nav({ user }: { user: User | null }) {
               aria-hidden="true"
             >
               {open ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               )}
             </svg>
           </button>

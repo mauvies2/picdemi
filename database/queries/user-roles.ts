@@ -2,9 +2,9 @@
  * User role-related database queries
  */
 
-import type { UserRole } from "@/lib/roles";
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { UserRole } from '@/lib/roles';
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface UserRoleMembership {
   user_id: string;
@@ -20,9 +20,9 @@ export async function getUserRoles(
   userId: string,
 ): Promise<UserRole[]> {
   const { data, error } = await supabase
-    .from("user_role_memberships")
-    .select("role")
-    .eq("user_id", userId);
+    .from('user_role_memberships')
+    .select('role')
+    .eq('user_id', userId);
 
   if (error) {
     throw new Error(`Failed to get user roles: ${getErrorMessage(error)}`);
@@ -39,9 +39,9 @@ export async function getUserRole(
   userId: string,
 ): Promise<UserRole | null> {
   const { data, error } = await supabase
-    .from("user_role_memberships")
-    .select("role")
-    .eq("user_id", userId)
+    .from('user_role_memberships')
+    .select('role')
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (error) {
@@ -59,10 +59,10 @@ export async function upsertUserRole(
   userId: string,
   role: UserRole,
 ): Promise<void> {
-  const { error } = await supabase.from("user_role_memberships").upsert(
+  const { error } = await supabase.from('user_role_memberships').upsert(
     { user_id: userId, role },
     {
-      onConflict: "user_id,role",
+      onConflict: 'user_id,role',
       ignoreDuplicates: false,
     },
   );

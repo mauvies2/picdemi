@@ -1,9 +1,9 @@
-"use server";
+'use server';
 
-import { getUserEvents } from "@/database/queries/events";
-import { getProfile } from "@/database/queries/profiles";
-import { getSalesSummary } from "@/database/queries/sales";
-import { createClient } from "@/database/server";
+import { getUserEvents } from '@/database/queries/events';
+import { getProfile } from '@/database/queries/profiles';
+import { getSalesSummary } from '@/database/queries/sales';
+import { createClient } from '@/database/server';
 
 export async function getProfileData() {
   const supabase = await createClient();
@@ -12,7 +12,7 @@ export async function getProfileData() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("User not authenticated");
+    throw new Error('User not authenticated');
   }
 
   // Calculate date range for all-time stats
@@ -30,13 +30,13 @@ export async function getProfileData() {
 
   // Count total photos
   const { count: totalPhotosCount } = await supabase
-    .from("photos")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id);
+    .from('photos')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id);
 
   return {
     profile,
-    email: user.email ?? "",
+    email: user.email ?? '',
     createdAt: user.created_at ?? new Date().toISOString(),
     stats: {
       totalEvents: events.length,

@@ -1,12 +1,12 @@
-import { CheckCircle2, Download, UserPlus } from "lucide-react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { getDownloadTokenByGuestOrderId } from "@/database/queries/download-tokens";
-import { getGuestOrderBySessionId } from "@/database/queries/guest-orders";
-import { supabaseAdmin } from "@/database/supabase-admin";
-import { stripe } from "@/lib/stripe/config";
-import { ClearGuestCart } from "./clear-guest-cart";
+import { CheckCircle2, Download, UserPlus } from 'lucide-react';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { getDownloadTokenByGuestOrderId } from '@/database/queries/download-tokens';
+import { getGuestOrderBySessionId } from '@/database/queries/guest-orders';
+import { supabaseAdmin } from '@/database/supabase-admin';
+import { stripe } from '@/lib/stripe/config';
+import { ClearGuestCart } from './clear-guest-cart';
 
 export default async function GuestCheckoutSuccessPage({
   searchParams,
@@ -16,7 +16,7 @@ export default async function GuestCheckoutSuccessPage({
   const { session_id } = await searchParams;
 
   if (!session_id) {
-    redirect("/events");
+    redirect('/events');
   }
 
   // Verify the Stripe session
@@ -24,13 +24,13 @@ export default async function GuestCheckoutSuccessPage({
   let photoCount = 0;
   try {
     const session = await stripe.checkout.sessions.retrieve(session_id, {
-      expand: ["line_items"],
+      expand: ['line_items'],
     });
 
     sessionEmail = session.customer_details?.email ?? null;
     photoCount = session.line_items?.data.length ?? 0;
   } catch {
-    redirect("/events");
+    redirect('/events');
   }
 
   // Find the guest order and download token
@@ -52,14 +52,14 @@ export default async function GuestCheckoutSuccessPage({
 
         <h1 className="text-2xl font-semibold">Payment successful!</h1>
         <p className="mt-3 text-muted-foreground">
-          You purchased{" "}
+          You purchased{' '}
           <strong>
-            {photoCount} {photoCount === 1 ? "photo" : "photos"}
+            {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
           </strong>
           .
           {sessionEmail && (
             <>
-              {" "}
+              {' '}
               A download link has been sent to <strong>{sessionEmail}</strong>.
             </>
           )}
@@ -67,10 +67,7 @@ export default async function GuestCheckoutSuccessPage({
 
         {/* Download CTA */}
         {downloadToken ? (
-          <Link
-            href={`/download/${downloadToken.token}`}
-            className="mt-8 block"
-          >
+          <Link href={`/download/${downloadToken.token}`} className="mt-8 block">
             <Button size="lg" className="w-full gap-2">
               <Download className="h-5 w-5" />
               View &amp; Download Your Photos
@@ -91,16 +88,11 @@ export default async function GuestCheckoutSuccessPage({
             <div>
               <p className="font-medium text-sm">Save your photos forever</p>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Create a free account to keep all purchased photos in your
-                personal library — no expiry, easy re-download, and AI-powered
-                search to find yourself in new events.
+                Create a free account to keep all purchased photos in your personal library — no
+                expiry, easy re-download, and AI-powered search to find yourself in new events.
               </p>
               <Link
-                href={
-                  downloadToken
-                    ? `/signup?token=${downloadToken.token}`
-                    : "/signup"
-                }
+                href={downloadToken ? `/signup?token=${downloadToken.token}` : '/signup'}
                 className="mt-3 inline-block"
               >
                 <Button variant="outline" size="sm" className="gap-1.5">

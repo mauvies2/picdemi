@@ -1,9 +1,9 @@
-"use server";
+'use server';
 
-import { getSubscription } from "@/database/queries/subscriptions";
-import { createClient } from "@/database/server";
-import { env } from "@/env.mjs";
-import { stripe } from "@/lib/stripe/config";
+import { getSubscription } from '@/database/queries/subscriptions';
+import { createClient } from '@/database/server';
+import { env } from '@/env.mjs';
+import { stripe } from '@/lib/stripe/config';
 
 const PLAN_TO_PRICE: Record<string, string> = {
   amateur: env.STRIPE_PRICE_AMATEUR,
@@ -14,7 +14,7 @@ const PLAN_TO_PRICE: Record<string, string> = {
  * Create checkout session for subscription upgrade/change
  */
 export async function createBillingCheckoutAction(
-  planId: "amateur" | "pro",
+  planId: 'amateur' | 'pro',
 ): Promise<{ url: string } | { updated: boolean }> {
   const supabase = await createClient();
 
@@ -25,11 +25,11 @@ export async function createBillingCheckoutAction(
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
   if (!planId || !PLAN_TO_PRICE[planId]) {
-    throw new Error("Invalid plan");
+    throw new Error('Invalid plan');
   }
 
   // Check if we already have a Stripe customer and active subscription
@@ -41,7 +41,7 @@ export async function createBillingCheckoutAction(
   if (
     subscription?.stripe_subscription_id &&
     subscription.status &&
-    ["active", "trialing", "past_due"].includes(subscription.status)
+    ['active', 'trialing', 'past_due'].includes(subscription.status)
   ) {
     // User already has an active subscription - update it
     try {
@@ -57,7 +57,7 @@ export async function createBillingCheckoutAction(
             price: PLAN_TO_PRICE[planId],
           },
         ],
-        proration_behavior: "always_invoice",
+        proration_behavior: 'always_invoice',
         metadata: {
           supabase_user_id: user.id,
           plan_id: planId,
@@ -69,8 +69,8 @@ export async function createBillingCheckoutAction(
         updated: true,
       };
     } catch (error) {
-      console.error("Error updating subscription:", error);
-      throw new Error("Failed to update subscription");
+      console.error('Error updating subscription:', error);
+      throw new Error('Failed to update subscription');
     }
   }
 
@@ -86,11 +86,11 @@ export async function createBillingCheckoutAction(
     stripeCustomerId = customer.id;
 
     // Insert initial row (status will be updated via webhook)
-    await supabase.from("subscriptions").insert({
+    await supabase.from('subscriptions').insert({
       user_id: user.id,
       stripe_customer_id: stripeCustomerId,
       plan_id: planId,
-      status: "incomplete",
+      status: 'incomplete',
     });
   }
 
@@ -98,7 +98,7 @@ export async function createBillingCheckoutAction(
   const baseUrl = env.SITE_URL;
 
   const sessionStripe = await stripe.checkout.sessions.create({
-    mode: "subscription",
+    mode: 'subscription',
     customer: stripeCustomerId,
     line_items: [
       {
@@ -114,7 +114,7 @@ export async function createBillingCheckoutAction(
     },
   });
 
-  return { url: sessionStripe.url ?? "" };
+  return { url: sessionStripe.url ?? '' };
 }
 
 /**
@@ -130,19 +130,19 @@ export async function cancelSubscriptionAction(): Promise<void> {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
   // Get user's subscription
   const subscription = await getSubscription(supabase, user.id);
 
   if (!subscription || !subscription.stripe_subscription_id) {
-    throw new Error("No active subscription found");
+    throw new Error('No active subscription found');
   }
 
   // Check if subscription is already canceled
-  if (subscription.status === "canceled") {
-    throw new Error("Subscription is already canceled");
+  if (subscription.status === 'canceled') {
+    throw new Error('Subscription is already canceled');
   }
 
   try {
@@ -151,7 +151,7 @@ export async function cancelSubscriptionAction(): Promise<void> {
       cancel_at_period_end: true,
     });
   } catch (error) {
-    console.error("Error canceling subscription:", error);
-    throw new Error("Failed to cancel subscription");
+    console.error('Error canceling subscription:', error);
+    throw new Error('Failed to cancel subscription');
   }
 }

@@ -1,13 +1,13 @@
-"use server";
+'use server';
 
 import {
   createPhotoUrls,
   getTaggedPhotosCountForTalent,
   getTaggedPhotosForTalent,
   isPhotoInCart,
-} from "@/database/queries";
-import { createClient } from "@/database/server";
-import { getBaseUrl } from "@/lib/get-base-url";
+} from '@/database/queries';
+import { createClient } from '@/database/server';
+import { getBaseUrl } from '@/lib/get-base-url';
 
 export interface TaggedPhotoGroup {
   event_id: string | null;
@@ -49,7 +49,7 @@ export async function listMyTaggedPhotos(options?: {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to view your tagged photos.");
+    throw new Error('You must be signed in to view your tagged photos.');
   }
 
   const limit = options?.limit ?? 50;
@@ -97,7 +97,7 @@ export async function listMyTaggedPhotos(options?: {
 
     // Generate URLs for each group
     for (const [needsWatermark, paths] of photosByWatermark.entries()) {
-      const photoUrls = await createPhotoUrls(supabase, "photos", paths, {
+      const photoUrls = await createPhotoUrls(supabase, 'photos', paths, {
         expiresIn: 3600,
         useWatermark: needsWatermark,
         baseUrl,
@@ -112,8 +112,8 @@ export async function listMyTaggedPhotos(options?: {
   const groupsMap = new Map<string, TaggedPhotoGroup>();
 
   for (const photo of taggedPhotos) {
-    const eventKey = photo.event_id ?? "no-event";
-    const eventName = photo.event_name ?? "Uncategorized";
+    const eventKey = photo.event_id ?? 'no-event';
+    const eventName = photo.event_name ?? 'Uncategorized';
     const eventDate = photo.event_date ?? null;
     const eventCity = photo.event_city ?? null;
     const eventCountry = photo.event_country ?? null;
@@ -142,8 +142,8 @@ export async function listMyTaggedPhotos(options?: {
     };
 
     const photoDate = photo.taken_at
-      ? new Date(photo.taken_at).toISOString().split("T")[0]
-      : "unknown";
+      ? new Date(photo.taken_at).toISOString().split('T')[0]
+      : 'unknown';
 
     let dateGroup = group.dates.find((d) => d.date === photoDate);
     if (!dateGroup) {
@@ -153,10 +153,8 @@ export async function listMyTaggedPhotos(options?: {
 
     dateGroup.photos.push({
       photo_id: photo.photo_id,
-      photo_url: photo.photo_url ?? "",
-      signed_url: photo.photo_url
-        ? (signedUrlsMap[photo.photo_url] ?? null)
-        : null,
+      photo_url: photo.photo_url ?? '',
+      signed_url: photo.photo_url ? (signedUrlsMap[photo.photo_url] ?? null) : null,
       taken_at: photo.taken_at,
       tagged_at: photo.tagged_at,
     });
@@ -168,8 +166,7 @@ export async function listMyTaggedPhotos(options?: {
     // Sort photos within each date by tagged_at
     for (const dateGroup of group.dates) {
       dateGroup.photos.sort(
-        (a, b) =>
-          new Date(b.tagged_at).getTime() - new Date(a.tagged_at).getTime(),
+        (a, b) => new Date(b.tagged_at).getTime() - new Date(a.tagged_at).getTime(),
       );
     }
   }

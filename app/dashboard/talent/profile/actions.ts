@@ -1,13 +1,13 @@
-"use server";
+'use server';
 
-import { getProfile } from "@/database/queries/profiles";
-import { createSignedUrls } from "@/database/queries/storage";
+import { getProfile } from '@/database/queries/profiles';
+import { createSignedUrls } from '@/database/queries/storage';
 import {
   getTalentPurchasedEventsCount,
   getTalentPurchasedPhotos,
   getTalentPurchasedPhotosCount,
-} from "@/database/queries/talent-library";
-import { createClient } from "@/database/server";
+} from '@/database/queries/talent-library';
+import { createClient } from '@/database/server';
 
 export interface ProfileData {
   profile: {
@@ -45,17 +45,16 @@ export async function getProfileData(): Promise<ProfileData> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("User not authenticated");
+    throw new Error('User not authenticated');
   }
 
   // Fetch data in parallel
-  const [profile, purchasedPhotosCount, eventsCount, purchasedPhotos] =
-    await Promise.all([
-      getProfile(supabase, user.id),
-      getTalentPurchasedPhotosCount(supabase, user.id),
-      getTalentPurchasedEventsCount(supabase, user.id),
-      getTalentPurchasedPhotos(supabase, user.id, { limit: 500 }),
-    ]);
+  const [profile, purchasedPhotosCount, eventsCount, purchasedPhotos] = await Promise.all([
+    getProfile(supabase, user.id),
+    getTalentPurchasedPhotosCount(supabase, user.id),
+    getTalentPurchasedEventsCount(supabase, user.id),
+    getTalentPurchasedPhotos(supabase, user.id, { limit: 500 }),
+  ]);
 
   // Generate signed URLs for previews (1 hour expiry)
   const photoPaths = purchasedPhotos
@@ -66,7 +65,7 @@ export async function getProfileData(): Promise<ProfileData> {
   if (photoPaths.length > 0) {
     const signedUrls = await createSignedUrls(
       supabase,
-      "photos",
+      'photos',
       photoPaths,
       60 * 60, // 1 hour
     );
@@ -80,9 +79,7 @@ export async function getProfileData(): Promise<ProfileData> {
   // Map photos with URLs
   const photosWithUrls = purchasedPhotos.map((photo) => ({
     photo_id: photo.photo_id,
-    preview_url: photo.original_url
-      ? (signedUrlsMap[photo.original_url] ?? null)
-      : null,
+    preview_url: photo.original_url ? (signedUrlsMap[photo.original_url] ?? null) : null,
     download_url: photo.original_url, // Store path for download action
     taken_at: photo.taken_at,
     purchased_at: photo.purchased_at,
@@ -103,7 +100,7 @@ export async function getProfileData(): Promise<ProfileData> {
           display_name: profile.display_name ?? null,
           username: profile.username,
           bio: profile.bio ?? null,
-          avatar_url: (typeof user.user_metadata?.avatar_url === "string"
+          avatar_url: (typeof user.user_metadata?.avatar_url === 'string'
             ? user.user_metadata.avatar_url
             : null) as string | null,
         }
@@ -119,21 +116,19 @@ export async function getProfileData(): Promise<ProfileData> {
 /**
  * Generate a download URL for a purchased photo (no watermark, high-res)
  */
-export async function getPhotoDownloadUrl(
-  photoPath: string,
-): Promise<string | null> {
+export async function getPhotoDownloadUrl(photoPath: string): Promise<string | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("User not authenticated");
+    throw new Error('User not authenticated');
   }
 
   // Verify the user has purchased this photo
   const { data: orderItems } = await supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       id,
@@ -146,21 +141,16 @@ export async function getPhotoDownloadUrl(
       )
     `,
     )
-    .eq("orders.user_id", user.id)
-    .eq("orders.status", "completed")
-    .eq("photos.original_url", photoPath)
+    .eq('orders.user_id', user.id)
+    .eq('orders.status', 'completed')
+    .eq('photos.original_url', photoPath)
     .limit(1);
 
   if (!orderItems || orderItems.length === 0) {
-    throw new Error("Photo not found or not purchased");
+    throw new Error('Photo not found or not purchased');
   }
 
   // Generate signed URL for download (24 hour expiry for downloads)
-  const results = await createSignedUrls(
-    supabase,
-    "photos",
-    [photoPath],
-    24 * 60 * 60,
-  );
+  const results = await createSignedUrls(supabase, 'photos', [photoPath], 24 * 60 * 60);
   return results[0]?.signedUrl ?? null;
 }

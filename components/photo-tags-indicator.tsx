@@ -1,15 +1,11 @@
-"use client";
+'use client';
 
-import { Trash2, UserPlus, Users } from "lucide-react";
-import { useTransition } from "react";
-import { toast } from "sonner";
-import { untagPhotoForTalentAction } from "@/app/dashboard/photographer/events/[id]/actions";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { Trash2, UserPlus, Users } from 'lucide-react';
+import { useTransition } from 'react';
+import { toast } from 'sonner';
+import { untagPhotoForTalentAction } from '@/app/dashboard/photographer/events/[id]/actions';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface PhotoTag {
   tag_id: string;
@@ -48,13 +44,11 @@ export function PhotoTagsIndicator({
     startUntagging(async () => {
       try {
         await untagPhotoForTalentAction(photoId, talentUserId);
-        toast.success("Tag removed");
+        toast.success('Tag removed');
         onUntag?.();
       } catch (error) {
-        console.error("Error untagging photo:", error);
-        toast.error(
-          error instanceof Error ? error.message : "Failed to remove tag",
-        );
+        console.error('Error untagging photo:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to remove tag');
       }
     });
   };
@@ -69,15 +63,15 @@ export function PhotoTagsIndicator({
         <button
           type="button"
           className={cn(
-            "pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background border-0 p-0",
-            _isDropdownOpen && "opacity-100",
+            'pointer-events-auto flex size-6 items-center justify-center rounded-full bg-background text-foreground/90 opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-background border-0 p-0',
+            _isDropdownOpen && 'opacity-100',
             className,
           )}
           onClick={(e) => {
             e.stopPropagation();
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               e.stopPropagation();
             }
@@ -111,9 +105,7 @@ export function PhotoTagsIndicator({
               className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm group"
             >
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium truncate">
-                  @{tag.talent_username}
-                </div>
+                <div className="text-sm font-medium truncate">@{tag.talent_username}</div>
               </div>
               <button
                 type="button"

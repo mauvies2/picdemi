@@ -2,8 +2,8 @@
  * Sales-related database queries
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface Sale {
   id: string;
@@ -62,7 +62,7 @@ export async function getSalesSummary(
 ): Promise<SalesSummary> {
   // Query order_items for this photographer with completed orders
   const query = supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       total_price_cents,
@@ -75,8 +75,8 @@ export async function getSalesSummary(
       )
     `,
     )
-    .eq("photographer_id", photographerId)
-    .eq("orders.status", "completed");
+    .eq('photographer_id', photographerId)
+    .eq('orders.status', 'completed');
 
   const { data, error } = await query;
 
@@ -106,14 +106,8 @@ export async function getSalesSummary(
     });
   }
 
-  const totalRevenueCents = filteredItems.reduce(
-    (sum, item) => sum + item.total_price_cents,
-    0,
-  );
-  const totalPhotosSold = filteredItems.reduce(
-    (sum, item) => sum + item.quantity,
-    0,
-  );
+  const totalRevenueCents = filteredItems.reduce((sum, item) => sum + item.total_price_cents, 0);
+  const totalPhotosSold = filteredItems.reduce((sum, item) => sum + item.quantity, 0);
   const uniqueOrders = new Set(
     filteredItems
       .map((item) => {
@@ -123,8 +117,7 @@ export async function getSalesSummary(
       .filter((id): id is string => Boolean(id)),
   );
   const totalSales = uniqueOrders.size;
-  const averageOrderValueCents =
-    totalSales > 0 ? Math.round(totalRevenueCents / totalSales) : 0;
+  const averageOrderValueCents = totalSales > 0 ? Math.round(totalRevenueCents / totalSales) : 0;
 
   return {
     totalRevenueCents,
@@ -143,10 +136,10 @@ export async function getSalesOverTime(
   photographerId: string,
   startDate?: string,
   endDate?: string,
-  groupBy: "day" | "week" | "month" = "day",
+  groupBy: 'day' | 'week' | 'month' = 'day',
 ): Promise<SalesByDate[]> {
   const query = supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       total_price_cents,
@@ -159,9 +152,9 @@ export async function getSalesOverTime(
       )
     `,
     )
-    .eq("photographer_id", photographerId)
-    .eq("orders.status", "completed")
-    .order("created_at", { ascending: true });
+    .eq('photographer_id', photographerId)
+    .eq('orders.status', 'completed')
+    .order('created_at', { ascending: true });
 
   const { data, error } = await query;
 
@@ -195,15 +188,15 @@ export async function getSalesOverTime(
     const date = new Date(orderDate);
     let key: string;
 
-    if (groupBy === "day") {
-      key = date.toISOString().split("T")[0];
-    } else if (groupBy === "week") {
+    if (groupBy === 'day') {
+      key = date.toISOString().split('T')[0];
+    } else if (groupBy === 'week') {
       const weekStart = new Date(date);
       weekStart.setDate(date.getDate() - date.getDay());
-      key = weekStart.toISOString().split("T")[0];
+      key = weekStart.toISOString().split('T')[0];
     } else {
       // month
-      key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }
 
     const current = grouped.get(key) ?? { revenue: 0, count: 0 };
@@ -228,12 +221,12 @@ export async function getSalesOverTime(
 export async function getTopSellingPhotos(
   supabase: SupabaseServerClient,
   photographerId: string,
-  limit: number = 10,
+  limit = 10,
   startDate?: string,
   endDate?: string,
 ): Promise<TopSellingPhoto[]> {
   let query = supabase
-    .from("cart_items")
+    .from('cart_items')
     .select(
       `
       photo_id,
@@ -249,21 +242,19 @@ export async function getTopSellingPhotos(
       )
     `,
     )
-    .eq("photographer_id", photographerId);
+    .eq('photographer_id', photographerId);
 
   if (startDate) {
-    query = query.gte("created_at", startDate);
+    query = query.gte('created_at', startDate);
   }
   if (endDate) {
-    query = query.lte("created_at", endDate);
+    query = query.lte('created_at', endDate);
   }
 
   const { data, error } = await query;
 
   if (error) {
-    throw new Error(
-      `Failed to get top selling photos: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get top selling photos: ${getErrorMessage(error)}`);
   }
 
   // Group by photo_id
@@ -303,11 +294,7 @@ export async function getTopSellingPhotos(
 
   items.forEach((item) => {
     const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-    const event = photo
-      ? Array.isArray(photo.events)
-        ? photo.events[0]
-        : photo.events
-      : null;
+    const event = photo ? (Array.isArray(photo.events) ? photo.events[0] : photo.events) : null;
 
     const current = grouped.get(item.photo_id) ?? {
       photo_url: photo?.original_url ?? null,
@@ -344,13 +331,13 @@ export async function getTopSellingPhotos(
 export async function getTopSellingEvents(
   supabase: SupabaseServerClient,
   photographerId: string,
-  limit: number = 10,
+  limit = 10,
   startDate?: string,
   endDate?: string,
 ): Promise<TopSellingEvent[]> {
   // First, get order items with photos (without joining events to avoid filtering out deleted events)
   const query = supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       photo_id,
@@ -367,15 +354,13 @@ export async function getTopSellingEvents(
       )
     `,
     )
-    .eq("photographer_id", photographerId)
-    .eq("orders.status", "completed");
+    .eq('photographer_id', photographerId)
+    .eq('orders.status', 'completed');
 
   const { data, error } = await query;
 
   if (error) {
-    throw new Error(
-      `Failed to get top selling events: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get top selling events: ${getErrorMessage(error)}`);
   }
 
   // Group by event_id first
@@ -403,9 +388,7 @@ export async function getTopSellingEvents(
 
   items.forEach((item) => {
     // Handle Supabase returning orders as array or single object
-    const order = Array.isArray(item.orders)
-      ? (item.orders[0] ?? null)
-      : item.orders;
+    const order = Array.isArray(item.orders) ? (item.orders[0] ?? null) : item.orders;
 
     // Filter by orders.created_at if date filters are provided
     if (startDate || endDate) {
@@ -415,9 +398,7 @@ export async function getTopSellingEvents(
     }
 
     // Handle Supabase returning photos as array or single object
-    const photo = Array.isArray(item.photos)
-      ? (item.photos[0] ?? null)
-      : item.photos;
+    const photo = Array.isArray(item.photos) ? (item.photos[0] ?? null) : item.photos;
 
     if (!photo || !photo.event_id) return;
 
@@ -447,9 +428,9 @@ export async function getTopSellingEvents(
 
   if (eventIds.size > 0) {
     const { data: events } = await supabase
-      .from("events")
-      .select("id, name, date, deleted_at")
-      .in("id", Array.from(eventIds));
+      .from('events')
+      .select('id, name, date, deleted_at')
+      .in('id', Array.from(eventIds));
 
     if (events) {
       for (const event of events) {
@@ -471,7 +452,7 @@ export async function getTopSellingEvents(
       if (!eventDetails) {
         return {
           event_id,
-          event_name: "Deleted Event",
+          event_name: 'Deleted Event',
           event_date: null,
           sales_count: stats.sales_count,
           revenue_cents: stats.revenue_cents,
@@ -480,7 +461,7 @@ export async function getTopSellingEvents(
       }
       return {
         event_id,
-        event_name: eventDetails.name ?? "Unnamed Event",
+        event_name: eventDetails.name ?? 'Unnamed Event',
         event_date: eventDetails.date ?? null,
         sales_count: stats.sales_count,
         revenue_cents: stats.revenue_cents,
@@ -498,12 +479,12 @@ export async function getTopSellingEvents(
 export async function getRecentSales(
   supabase: SupabaseServerClient,
   photographerId: string,
-  limit: number = 20,
+  limit = 20,
   startDate?: string,
   endDate?: string,
 ): Promise<Sale[]> {
   const query = supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       id,
@@ -528,9 +509,9 @@ export async function getRecentSales(
       )
     `,
     )
-    .eq("photographer_id", photographerId)
-    .eq("orders.status", "completed")
-    .order("created_at", { ascending: false })
+    .eq('photographer_id', photographerId)
+    .eq('orders.status', 'completed')
+    .order('created_at', { ascending: false })
     .limit(limit);
 
   const { data, error } = await query;
@@ -591,12 +572,10 @@ export async function getRecentSales(
     ...new Set(
       filteredItems
         .map((item) => {
-          const order = Array.isArray(item.orders)
-            ? item.orders[0]
-            : item.orders;
+          const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
           return order?.user_id;
         })
-        .filter((id): id is string => typeof id === "string"),
+        .filter((id): id is string => typeof id === 'string'),
     ),
   ];
 
@@ -606,7 +585,7 @@ export async function getRecentSales(
   if (buyerIds.length > 0) {
     try {
       // Try to use the batch RPC function if it exists
-      const { data: userEmails } = await supabase.rpc("get_user_emails_batch", {
+      const { data: userEmails } = await supabase.rpc('get_user_emails_batch', {
         user_ids: buyerIds,
       });
 
@@ -639,8 +618,8 @@ export async function getRecentSales(
       event_id: photo?.event_id ?? null,
       event_name: event?.name ?? null,
       event_date: event?.date ?? null,
-      buyer_id: order?.user_id ?? "",
-      buyer_email: buyerEmailMap[order?.user_id ?? ""] ?? null,
+      buyer_id: order?.user_id ?? '',
+      buyer_email: buyerEmailMap[order?.user_id ?? ''] ?? null,
     };
   }) as Sale[];
 }

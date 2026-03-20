@@ -1,48 +1,43 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import type { ProfileData } from "./actions";
-import { ProfilePhotoViewer } from "./profile-photo-viewer";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import type { ProfileData } from './actions';
+import { ProfilePhotoViewer } from './profile-photo-viewer';
 
 type ProfileContentProps = {
   initialData: ProfileData;
   showSuccessMessage?: boolean;
 };
 
-export function ProfileContent({
-  initialData,
-  showSuccessMessage = false,
-}: ProfileContentProps) {
+export function ProfileContent({ initialData, showSuccessMessage = false }: ProfileContentProps) {
   const { profile, stats, photos } = initialData;
   const [index, setIndex] = useState<number>(-1);
   const router = useRouter();
 
   useEffect(() => {
     if (showSuccessMessage) {
-      toast.success("Purchase successful! Your photos are now available.", {
+      toast.success('Purchase successful! Your photos are now available.', {
         duration: 5000,
       });
       // Clean up URL
-      router.replace("/dashboard/talent/profile", { scroll: false });
+      router.replace('/dashboard/talent/profile', { scroll: false });
     }
   }, [showSuccessMessage, router]);
 
-  const displayName = profile?.display_name || profile?.username || "User";
+  const displayName = profile?.display_name || profile?.username || 'User';
 
   const photoItems = useMemo(() => {
     return photos
       .map((photo) => ({
         id: photo.photo_id,
-        url: photo.preview_url ?? "",
-        alt: photo.event_name
-          ? `Photo from ${photo.event_name}`
-          : "Purchased photo",
+        url: photo.preview_url ?? '',
+        alt: photo.event_name ? `Photo from ${photo.event_name}` : 'Purchased photo',
       }))
       .filter((item) => item.url);
   }, [photos]);
@@ -78,10 +73,7 @@ export function ProfileContent({
           {/* Avatar */}
           <div className="flex justify-center sm:justify-start">
             <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-2 border-border">
-              <AvatarImage
-                src={profile?.avatar_url ?? undefined}
-                alt={displayName}
-              />
+              <AvatarImage src={profile?.avatar_url ?? undefined} alt={displayName} />
               <AvatarFallback className="text-3xl sm:text-4xl font-semibold">
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -108,9 +100,7 @@ export function ProfileContent({
                 <span className="text-sm text-muted-foreground">photos</span>
               </div>
               <div className="text-center sm:text-left">
-                <span className="block text-lg sm:text-xl font-semibold">
-                  {stats.eventsCount}
-                </span>
+                <span className="block text-lg sm:text-xl font-semibold">{stats.eventsCount}</span>
                 <span className="text-sm text-muted-foreground">events</span>
               </div>
             </div>
@@ -129,18 +119,12 @@ export function ProfileContent({
       {photos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="rounded-full bg-muted p-6 mb-4">
-            <Image
-              src="/logo.svg"
-              alt="Picdemi"
-              width={48}
-              height={48}
-              className="opacity-50"
-            />
+            <Image src="/logo.svg" alt="Picdemi" width={48} height={48} className="opacity-50" />
           </div>
           <h3 className="text-lg font-semibold mb-2">No photos yet</h3>
           <p className="text-sm text-muted-foreground mb-4 max-w-md">
-            You haven&apos;t purchased any photos yet. Explore events to find
-            yourself and purchase your favorite shots.
+            You haven&apos;t purchased any photos yet. Explore events to find yourself and purchase
+            your favorite shots.
           </p>
           <Link href="/dashboard/talent/events">
             <Button>Explore Events</Button>

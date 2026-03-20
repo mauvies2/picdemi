@@ -1,11 +1,11 @@
-import { redirect } from "next/navigation";
-import { getActiveRole } from "@/app/actions/roles";
-import { DashboardHeader } from "@/components/dashboard-header";
-import { createClient } from "@/database/server";
-import { getCurrentCart } from "./actions";
-import { CartContent } from "./cart-content";
+import { redirect } from 'next/navigation';
+import { getActiveRole } from '@/app/actions/roles';
+import { DashboardHeader } from '@/components/dashboard-header';
+import { createClient } from '@/database/server';
+import { getCurrentCart } from './actions';
+import { CartContent } from './cart-content';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 interface CartPageProps {
   searchParams: Promise<{ status?: string }>;
@@ -18,21 +18,21 @@ export default async function CartPage({ searchParams }: CartPageProps) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return redirect("/login");
+    return redirect('/login');
   }
 
   // Ensure user is in talent role
   const { activeRole } = await getActiveRole();
-  if (activeRole !== "talent") {
-    return redirect("/dashboard");
+  if (activeRole !== 'talent') {
+    return redirect('/dashboard');
   }
 
   const params = await searchParams;
   const status = params.status;
 
   // If success, redirect to profile page after a moment
-  if (status === "success") {
-    return redirect("/dashboard/talent/profile?purchased=true");
+  if (status === 'success') {
+    return redirect('/dashboard/talent/profile?purchased=true');
   }
 
   const cartData = await getCurrentCart();

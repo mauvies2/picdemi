@@ -1,14 +1,10 @@
-import { notFound } from "next/navigation";
-import { getActiveRole } from "@/app/actions/roles";
-import { DashboardHeader } from "@/components/dashboard-header";
-import {
-  createPhotoUrls,
-  getEventPhotosPublic,
-  isPhotoInCart,
-} from "@/database/queries";
-import { createClient } from "@/database/server";
-import { getBaseUrl } from "@/lib/get-base-url";
-import { EventPhotoViewer } from "./event-photo-viewer";
+import { notFound } from 'next/navigation';
+import { getActiveRole } from '@/app/actions/roles';
+import { DashboardHeader } from '@/components/dashboard-header';
+import { createPhotoUrls, getEventPhotosPublic, isPhotoInCart } from '@/database/queries';
+import { createClient } from '@/database/server';
+import { getBaseUrl } from '@/lib/get-base-url';
+import { EventPhotoViewer } from './event-photo-viewer';
 
 export default async function ExploreEventDetailPage({
   params,
@@ -20,10 +16,10 @@ export default async function ExploreEventDetailPage({
 
   // Get event by ID - must be public
   const { data: event, error } = await supabase
-    .from("events")
-    .select("*")
-    .eq("id", id)
-    .eq("is_public", true)
+    .from('events')
+    .select('*')
+    .eq('id', id)
+    .eq('is_public', true)
     .single();
 
   if (error || !event) {
@@ -45,11 +41,10 @@ export default async function ExploreEventDetailPage({
     if (user) {
       const { activeRole } = await getActiveRole();
       // Only show watermark for talent users if watermark is enabled
-      useWatermark =
-        activeRole === "talent" && event.watermark_enabled === true;
+      useWatermark = activeRole === 'talent' && event.watermark_enabled === true;
 
       // Check which photos are in cart (only for talent users)
-      if (activeRole === "talent") {
+      if (activeRole === 'talent') {
         const photoIds = photos.map((p) => p.id);
         for (const photoId of photoIds) {
           const inCart = await isPhotoInCart(supabase, user.id, photoId);
@@ -65,14 +60,12 @@ export default async function ExploreEventDetailPage({
   }
 
   // Generate URLs (watermarked or regular signed URLs)
-  const paths = photos
-    .map((p) => p.original_url)
-    .filter((url): url is string => url !== null);
+  const paths = photos.map((p) => p.original_url).filter((url): url is string => url !== null);
   const signed: Record<string, string> = {};
 
   if (paths.length > 0) {
     const baseUrl = await getBaseUrl();
-    const photoUrls = await createPhotoUrls(supabase, "photos", paths, {
+    const photoUrls = await createPhotoUrls(supabase, 'photos', paths, {
       expiresIn: 60 * 60, // 1 hour
       useWatermark,
       baseUrl,
@@ -109,11 +102,9 @@ export default async function ExploreEventDetailPage({
       <div>
         <DashboardHeader title={event.name} />
         <div className="text-sm text-muted-foreground">
-          {new Date(event.date).toDateString().split(" ").slice(1).join(" ")} •{" "}
+          {new Date(event.date).toDateString().split(' ').slice(1).join(' ')} •{' '}
           {event.city[0]?.toUpperCase() + event.city.slice(1)}
-          {event.price_per_photo !== null && (
-            <> • ${event.price_per_photo.toFixed(2)} per photo</>
-          )}
+          {event.price_per_photo !== null && <> • ${event.price_per_photo.toFixed(2)} per photo</>}
         </div>
       </div>
 

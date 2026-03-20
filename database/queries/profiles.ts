@@ -2,9 +2,9 @@
  * Profile-related database queries
  */
 
-import type { UserRole } from "@/lib/roles";
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { UserRole } from '@/lib/roles';
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface Profile {
   id: string;
@@ -19,7 +19,7 @@ export interface Profile {
   address_line2?: string | null;
   state_or_region?: string | null;
   postal_code?: string | null;
-  payout_method?: "bank_transfer" | "paypal" | "other" | null;
+  payout_method?: 'bank_transfer' | 'paypal' | 'other' | null;
   payout_details_json?: Record<string, unknown> | null;
   is_payout_profile_complete?: boolean;
   created_at?: string;
@@ -38,7 +38,7 @@ export interface ProfileSelect {
   address_line2?: string | null;
   state_or_region?: string | null;
   postal_code?: string | null;
-  payout_method?: "bank_transfer" | "paypal" | "other" | null;
+  payout_method?: 'bank_transfer' | 'paypal' | 'other' | null;
   payout_details_json?: Record<string, unknown> | null;
   is_payout_profile_complete?: boolean;
 }
@@ -51,9 +51,9 @@ export async function getProfile(
   userId: string,
 ): Promise<Profile | null> {
   const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
     .maybeSingle();
 
   if (error) {
@@ -71,11 +71,11 @@ export async function getProfileFields<T extends keyof ProfileSelect>(
   userId: string,
   fields: T[],
 ): Promise<Pick<ProfileSelect, T> | null> {
-  const selectFields = fields.join(", ");
+  const selectFields = fields.join(', ');
   const { data, error } = await supabase
-    .from("profiles")
+    .from('profiles')
     .select(selectFields)
-    .eq("id", userId)
+    .eq('id', userId)
     .maybeSingle();
 
   if (error) {
@@ -93,9 +93,9 @@ export async function getProfileActiveRole(
   userId: string,
 ): Promise<UserRole | null> {
   const { data, error } = await supabase
-    .from("profiles")
-    .select("active_role")
-    .eq("id", userId)
+    .from('profiles')
+    .select('active_role')
+    .eq('id', userId)
     .maybeSingle();
 
   if (error) {
@@ -113,17 +113,11 @@ async function generateUsernameFromEmail(
   userId: string,
 ): Promise<string> {
   // Get user email using RPC function
-  const { data: userEmails, error: emailError } = await supabase.rpc(
-    "get_user_emails_batch",
-    { user_ids: [userId] },
-  );
+  const { data: userEmails, error: emailError } = await supabase.rpc('get_user_emails_batch', {
+    user_ids: [userId],
+  });
 
-  if (
-    emailError ||
-    !userEmails ||
-    userEmails.length === 0 ||
-    !userEmails[0]?.email
-  ) {
+  if (emailError || !userEmails || userEmails.length === 0 || !userEmails[0]?.email) {
     throw new Error(
       `Failed to get user email for username generation: ${getErrorMessage(emailError)}`,
     );
@@ -131,9 +125,9 @@ async function generateUsernameFromEmail(
 
   // Generate username from email
   const email = userEmails[0].email;
-  let baseUsername = email.toLowerCase().split("@")[0];
-  baseUsername = baseUsername.replace(/\./g, "_");
-  baseUsername = baseUsername.replace(/[^a-z0-9_-]/g, "");
+  let baseUsername = email.toLowerCase().split('@')[0];
+  baseUsername = baseUsername.replace(/\./g, '_');
+  baseUsername = baseUsername.replace(/[^a-z0-9_-]/g, '');
 
   // Ensure minimum length
   if (baseUsername.length < 3) {
@@ -150,9 +144,9 @@ async function generateUsernameFromEmail(
   let counter = 0;
   while (true) {
     const { data: existing } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("username", finalUsername)
+      .from('profiles')
+      .select('id')
+      .eq('username', finalUsername)
       .maybeSingle();
 
     if (!existing) {
@@ -192,10 +186,10 @@ export async function upsertProfileRole(
   }
 
   // Upsert with username and role (always include username to satisfy NOT NULL constraint)
-  const { error } = await supabase.from("profiles").upsert(
+  const { error } = await supabase.from('profiles').upsert(
     { id: userId, active_role: role, username },
     {
-      onConflict: "id",
+      onConflict: 'id',
       ignoreDuplicates: false,
     },
   );
@@ -214,26 +208,23 @@ export async function updateProfile(
   updates: Partial<
     Pick<
       Profile,
-      | "display_name"
-      | "username"
-      | "bio"
-      | "full_name"
-      | "country_code"
-      | "city"
-      | "address_line1"
-      | "address_line2"
-      | "state_or_region"
-      | "postal_code"
-      | "payout_method"
-      | "payout_details_json"
-      | "is_payout_profile_complete"
+      | 'display_name'
+      | 'username'
+      | 'bio'
+      | 'full_name'
+      | 'country_code'
+      | 'city'
+      | 'address_line1'
+      | 'address_line2'
+      | 'state_or_region'
+      | 'postal_code'
+      | 'payout_method'
+      | 'payout_details_json'
+      | 'is_payout_profile_complete'
     >
   >,
 ): Promise<void> {
-  const { error } = await supabase
-    .from("profiles")
-    .update(updates)
-    .eq("id", userId);
+  const { error } = await supabase.from('profiles').update(updates).eq('id', userId);
 
   if (error) {
     throw new Error(`Failed to update profile: ${getErrorMessage(error)}`);
@@ -248,10 +239,10 @@ export async function upsertProfile(
   userId: string,
   profile: Partial<Profile>,
 ): Promise<void> {
-  const { error } = await supabase.from("profiles").upsert(
+  const { error } = await supabase.from('profiles').upsert(
     { id: userId, ...profile },
     {
-      onConflict: "id",
+      onConflict: 'id',
       ignoreDuplicates: false,
     },
   );

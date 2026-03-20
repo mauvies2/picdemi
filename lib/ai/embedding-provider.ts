@@ -44,12 +44,10 @@ export class MockEmbeddingProvider implements EmbeddingProvider {
 
   constructor(options?: EmbeddingOptions) {
     this.dimension = options?.dimension ?? 512;
-    this.modelVersion = options?.modelVersion ?? "v1.0";
+    this.modelVersion = options?.modelVersion ?? 'v1.0';
   }
 
-  async generateEmbedding(
-    imageData: ArrayBuffer | Blob | string,
-  ): Promise<number[]> {
+  async generateEmbedding(imageData: ArrayBuffer | Blob | string): Promise<number[]> {
     // TODO: Replace with actual AI model inference
     // For now, generate a deterministic pseudo-random vector based on image hash
 
@@ -73,14 +71,12 @@ export class MockEmbeddingProvider implements EmbeddingProvider {
   /**
    * Generate a hash-like value from image data
    */
-  private async hashImageData(
-    imageData: ArrayBuffer | Blob | string,
-  ): Promise<number> {
+  private async hashImageData(imageData: ArrayBuffer | Blob | string): Promise<number> {
     let buffer: ArrayBuffer;
 
-    if (typeof imageData === "string") {
+    if (typeof imageData === 'string') {
       // Assume base64 string
-      const binaryString = atob(imageData.split(",")[1] ?? imageData);
+      const binaryString = atob(imageData.split(',')[1] ?? imageData);
       buffer = new ArrayBuffer(binaryString.length);
       const view = new Uint8Array(buffer);
       for (let i = 0; i < binaryString.length; i++) {
@@ -118,9 +114,7 @@ export class MockEmbeddingProvider implements EmbeddingProvider {
    * Normalize vector to unit length
    */
   private normalizeVector(vector: number[]): number[] {
-    const magnitude = Math.sqrt(
-      vector.reduce((sum, val) => sum + val * val, 0),
-    );
+    const magnitude = Math.sqrt(vector.reduce((sum, val) => sum + val * val, 0));
     if (magnitude === 0) {
       return vector;
     }
@@ -145,7 +139,7 @@ export function getEmbeddingProvider(): EmbeddingProvider {
   // In production, initialize with actual AI provider based on env config
   return new MockEmbeddingProvider({
     dimension: 512,
-    modelVersion: "v1.0",
+    modelVersion: 'v1.0',
   });
 }
 
@@ -161,11 +155,7 @@ export async function generateImageEmbedding(
 
   return {
     embedding,
-    modelVersion:
-      provider instanceof MockEmbeddingProvider
-        ? provider.getModelVersion()
-        : "v1.0",
-    dimension:
-      provider instanceof MockEmbeddingProvider ? provider.getDimension() : 512,
+    modelVersion: provider instanceof MockEmbeddingProvider ? provider.getModelVersion() : 'v1.0',
+    dimension: provider instanceof MockEmbeddingProvider ? provider.getDimension() : 512,
   };
 }

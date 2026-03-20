@@ -1,17 +1,13 @@
-"use server";
+'use server';
 
 import {
   type EarningsSummary,
   getEarningsSummary,
   getPhotographerEarnings,
   type PhotographerEarning,
-} from "@/database/queries/earnings";
-import {
-  createPayout,
-  getPayouts,
-  type Payout,
-} from "@/database/queries/payouts";
-import { createClient } from "@/database/server";
+} from '@/database/queries/earnings';
+import { createPayout, getPayouts, type Payout } from '@/database/queries/payouts';
+import { createClient } from '@/database/server';
 
 /**
  * Get earnings summary for current photographer
@@ -23,7 +19,7 @@ export async function getEarningsSummaryAction(): Promise<EarningsSummary> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
   return getEarningsSummary(supabase, user.id);
@@ -33,7 +29,7 @@ export async function getEarningsSummaryAction(): Promise<EarningsSummary> {
  * Get photographer earnings list
  */
 export async function getPhotographerEarningsAction(
-  limit: number = 50,
+  limit = 50,
   startDate?: string,
   endDate?: string,
 ): Promise<PhotographerEarning[]> {
@@ -43,7 +39,7 @@ export async function getPhotographerEarningsAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
   return getPhotographerEarnings(supabase, user.id, limit, startDate, endDate);
@@ -53,7 +49,7 @@ export async function getPhotographerEarningsAction(
  * Get payouts for current photographer
  */
 export async function getPayoutsAction(
-  status?: "pending" | "approved" | "paid" | "cancelled",
+  status?: 'pending' | 'approved' | 'paid' | 'cancelled',
 ): Promise<Payout[]> {
   const supabase = await createClient();
   const {
@@ -61,7 +57,7 @@ export async function getPayoutsAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
   return getPayouts(supabase, user.id, status);
@@ -80,24 +76,22 @@ export async function createPayoutRequestAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
   // Check if payout profile is complete
-  const { getProfile } = await import("@/database/queries/profiles");
+  const { getProfile } = await import('@/database/queries/profiles');
   const profile = await getProfile(supabase, user.id);
   if (!profile?.is_payout_profile_complete) {
-    throw new Error(
-      "Please complete your payout profile before requesting withdrawals",
-    );
+    throw new Error('Please complete your payout profile before requesting withdrawals');
   }
 
   if (amountCents <= 0) {
-    throw new Error("Payout amount must be greater than 0");
+    throw new Error('Payout amount must be greater than 0');
   }
 
   if (!paymentAccountId) {
-    throw new Error("Payment account is required");
+    throw new Error('Payment account is required');
   }
 
   // Check available balance

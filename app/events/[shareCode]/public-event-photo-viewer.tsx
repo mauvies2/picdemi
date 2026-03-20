@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useCallback, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { addPhotoToCartAction } from "@/app/dashboard/talent/cart/actions";
-import { useGuestCart } from "@/components/guest-cart-provider";
-import PhotoAlbumViewer from "@/components/photo-album-viewer";
-import type { GuestCartItem } from "@/lib/guest-cart";
+import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { addPhotoToCartAction } from '@/app/dashboard/talent/cart/actions';
+import { useGuestCart } from '@/components/guest-cart-provider';
+import PhotoAlbumViewer from '@/components/photo-album-viewer';
+import type { GuestCartItem } from '@/lib/guest-cart';
 
 interface PhotoItem {
   id: string;
@@ -36,15 +36,11 @@ export function PublicEventPhotoViewer({
   initialPhotosInCart,
 }: PublicEventPhotoViewerProps) {
   const guestCart = useGuestCart();
-  const [authCartPhotos, setAuthCartPhotos] = useState<Set<string>>(
-    new Set(initialPhotosInCart),
-  );
+  const [authCartPhotos, setAuthCartPhotos] = useState<Set<string>>(new Set(initialPhotosInCart));
 
   const photosInCart = useMemo(() => {
     if (isAuthenticated) return authCartPhotos;
-    return new Set(
-      photos.filter((p) => guestCart.hasItem(p.id)).map((p) => p.id),
-    );
+    return new Set(photos.filter((p) => guestCart.hasItem(p.id)).map((p) => p.id));
   }, [isAuthenticated, authCartPhotos, photos, guestCart]);
 
   const handleAddToCart = useCallback(
@@ -56,18 +52,16 @@ export function PublicEventPhotoViewer({
         try {
           await addPhotoToCartAction(photoId);
           setAuthCartPhotos((prev) => new Set([...prev, photoId]));
-          toast.success("Added to cart", {
+          toast.success('Added to cart', {
             action: {
-              label: "View cart",
+              label: 'View cart',
               onClick: () => {
-                window.location.href = "/dashboard/talent/cart";
+                window.location.href = '/dashboard/talent/cart';
               },
             },
           });
         } catch (err) {
-          toast.error(
-            err instanceof Error ? err.message : "Failed to add to cart",
-          );
+          toast.error(err instanceof Error ? err.message : 'Failed to add to cart');
         }
       } else {
         const item: GuestCartItem = {
@@ -80,11 +74,11 @@ export function PublicEventPhotoViewer({
           previewUrl: photo.url,
         };
         guestCart.addItem(item);
-        toast.success("Added to cart", {
+        toast.success('Added to cart', {
           action: {
-            label: "View cart",
+            label: 'View cart',
             onClick: () => {
-              window.location.href = "/cart";
+              window.location.href = '/cart';
             },
           },
         });

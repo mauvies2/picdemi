@@ -2,8 +2,8 @@
  * Photo-related database queries
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface Photo {
   id: string;
@@ -44,16 +44,14 @@ export async function getPhotosForEvents(
   }
 
   const { data, error } = await supabase
-    .from("photos")
-    .select("event_id, original_url, taken_at")
-    .in("event_id", eventIds)
-    .order("taken_at", { ascending: true })
+    .from('photos')
+    .select('event_id, original_url, taken_at')
+    .in('event_id', eventIds)
+    .order('taken_at', { ascending: true })
     .throwOnError();
 
   if (error) {
-    throw new Error(
-      `Failed to get photos for events: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get photos for events: ${getErrorMessage(error)}`);
   }
 
   return (data ?? []) as PhotoSummary[];
@@ -68,11 +66,11 @@ export async function getEventPhotos(
   userId: string,
 ): Promise<PhotoDetail[]> {
   const { data, error } = await supabase
-    .from("photos")
-    .select("id, original_url, taken_at, city, country")
-    .eq("event_id", eventId)
-    .eq("user_id", userId)
-    .order("taken_at", { ascending: true })
+    .from('photos')
+    .select('id, original_url, taken_at, city, country')
+    .eq('event_id', eventId)
+    .eq('user_id', userId)
+    .order('taken_at', { ascending: true })
     .throwOnError();
 
   if (error) {
@@ -90,10 +88,10 @@ export async function getEventPhotosPublic(
   eventId: string,
 ): Promise<PhotoDetail[]> {
   const { data, error } = await supabase
-    .from("photos")
-    .select("id, original_url, taken_at, city, country")
-    .eq("event_id", eventId)
-    .order("taken_at", { ascending: true });
+    .from('photos')
+    .select('id, original_url, taken_at, city, country')
+    .eq('event_id', eventId)
+    .order('taken_at', { ascending: true });
 
   if (error) {
     throw new Error(`Failed to get event photos: ${getErrorMessage(error)}`);
@@ -111,22 +109,18 @@ export async function getPhotoStoragePaths(
   userId: string,
 ): Promise<string[]> {
   const { data, error } = await supabase
-    .from("photos")
-    .select("original_url")
-    .eq("event_id", eventId)
-    .eq("user_id", userId);
+    .from('photos')
+    .select('original_url')
+    .eq('event_id', eventId)
+    .eq('user_id', userId);
 
   if (error) {
-    throw new Error(
-      `Failed to get photo storage paths: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get photo storage paths: ${getErrorMessage(error)}`);
   }
 
   return (data ?? [])
     .map((photo) => photo.original_url)
-    .filter(
-      (path): path is string => typeof path === "string" && path.length > 0,
-    );
+    .filter((path): path is string => typeof path === 'string' && path.length > 0);
 }
 
 /**
@@ -139,11 +133,11 @@ export async function getPhoto(
   userId: string,
 ): Promise<Photo | null> {
   const { data, error } = await supabase
-    .from("photos")
-    .select("id, original_url")
-    .eq("id", photoId)
-    .eq("event_id", eventId)
-    .eq("user_id", userId)
+    .from('photos')
+    .select('id, original_url')
+    .eq('id', photoId)
+    .eq('event_id', eventId)
+    .eq('user_id', userId)
     .single();
 
   if (error || !data) {
@@ -168,7 +162,7 @@ export async function createPhoto(
     state: string | null;
   },
 ): Promise<void> {
-  const { error } = await supabase.from("photos").insert({
+  const { error } = await supabase.from('photos').insert({
     user_id: userId,
     ...photoData,
   });
@@ -186,11 +180,7 @@ export async function deletePhoto(
   photoId: string,
   userId: string,
 ): Promise<void> {
-  const { error } = await supabase
-    .from("photos")
-    .delete()
-    .eq("id", photoId)
-    .eq("user_id", userId);
+  const { error } = await supabase.from('photos').delete().eq('id', photoId).eq('user_id', userId);
 
   if (error) {
     throw new Error(`Failed to delete photo: ${getErrorMessage(error)}`);
@@ -206,10 +196,10 @@ export async function deleteEventPhotos(
   userId: string,
 ): Promise<void> {
   const { error } = await supabase
-    .from("photos")
+    .from('photos')
     .delete()
-    .eq("event_id", eventId)
-    .eq("user_id", userId);
+    .eq('event_id', eventId)
+    .eq('user_id', userId);
 
   if (error) {
     throw new Error(`Failed to delete event photos: ${getErrorMessage(error)}`);

@@ -1,23 +1,18 @@
-"use client";
+'use client';
 
-import { DollarSign, Image, ShoppingCart, TrendingUp } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { DollarSign, Image, ShoppingCart, TrendingUp } from 'lucide-react';
+import { useEffect, useState, useTransition } from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import type {
-  Sale,
-  SalesByDate,
-  SalesSummary,
-  TopSellingEvent,
-} from "@/database/queries/sales";
-import { cn } from "@/lib/utils";
-import { getSalesDataAction } from "./actions";
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { Sale, SalesByDate, SalesSummary, TopSellingEvent } from '@/database/queries/sales';
+import { cn } from '@/lib/utils';
+import { getSalesDataAction } from './actions';
 
 function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -25,21 +20,21 @@ function formatPrice(cents: number): string {
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 
 function formatDateTime(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
 }
 
@@ -51,27 +46,14 @@ interface SummaryCardProps {
   className?: string;
 }
 
-function SummaryCard({
-  title,
-  value,
-  icon,
-  trend,
-  className,
-}: SummaryCardProps) {
+function SummaryCard({ title, value, icon, trend, className }: SummaryCardProps) {
   return (
-    <div
-      className={cn(
-        "rounded-lg border border-border bg-card p-6 shadow-sm",
-        className,
-      )}
-    >
+    <div className={cn('rounded-lg border border-border bg-card p-6 shadow-sm', className)}>
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="mt-2 text-3xl font-bold">{value}</p>
-          {trend && (
-            <p className="mt-1 text-xs text-muted-foreground">{trend}</p>
-          )}
+          {trend && <p className="mt-1 text-xs text-muted-foreground">{trend}</p>}
         </div>
         <div className="rounded-full bg-primary/10 p-3">{icon}</div>
       </div>
@@ -103,19 +85,16 @@ function SalesChart({ data }: SalesChartProps) {
         {displayData.map((item) => {
           const height = (item.revenue_cents / maxRevenue) * 100;
           return (
-            <div
-              key={item.date}
-              className="flex min-w-0 flex-1 flex-col items-center gap-1"
-            >
+            <div key={item.date} className="flex min-w-0 flex-1 flex-col items-center gap-1">
               <div
                 className="w-full rounded-t bg-primary transition-all hover:bg-primary/80"
                 style={{ height: `${Math.max(height, 2)}%` }}
-                title={`${formatDate(item.date)}: ${formatPrice(item.revenue_cents)} (${item.sales_count} sale${item.sales_count !== 1 ? "s" : ""})`}
+                title={`${formatDate(item.date)}: ${formatPrice(item.revenue_cents)} (${item.sales_count} sale${item.sales_count !== 1 ? 's' : ''})`}
               />
               <span className="text-xs text-muted-foreground">
-                {new Date(item.date).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
+                {new Date(item.date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
                 })}
               </span>
             </div>
@@ -123,9 +102,7 @@ function SalesChart({ data }: SalesChartProps) {
         })}
       </div>
       {data.length > 30 && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          Showing last 30 days of data
-        </p>
+        <p className="mt-2 text-xs text-muted-foreground">Showing last 30 days of data</p>
       )}
     </div>
   );
@@ -158,13 +135,10 @@ function TopEvents({ events }: TopEventsProps) {
               #{index + 1}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium">
-                {event.event_name || "Untitled Event"}
-              </p>
+              <p className="text-sm font-medium">{event.event_name || 'Untitled Event'}</p>
               <p className="text-xs text-muted-foreground">
-                {event.photos_sold} photo{event.photos_sold !== 1 ? "s" : ""} •{" "}
-                {event.sales_count} sale{event.sales_count !== 1 ? "s" : ""} •{" "}
-                {formatPrice(event.revenue_cents)}
+                {event.photos_sold} photo{event.photos_sold !== 1 ? 's' : ''} • {event.sales_count}{' '}
+                sale{event.sales_count !== 1 ? 's' : ''} • {formatPrice(event.revenue_cents)}
               </p>
             </div>
           </div>
@@ -212,17 +186,11 @@ function RecentSales({ sales }: RecentSalesProps) {
           <tbody>
             {sales.map((sale) => (
               <tr key={sale.id} className="border-b border-border">
-                <td className="px-4 py-3 text-sm">
-                  {formatDateTime(sale.created_at)}
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  {sale.event_name || "Untitled Event"}
-                </td>
+                <td className="px-4 py-3 text-sm">{formatDateTime(sale.created_at)}</td>
+                <td className="px-4 py-3 text-sm">{sale.event_name || 'Untitled Event'}</td>
                 <td className="px-4 py-3 text-sm text-muted-foreground">
                   {sale.buyer_email || (
-                    <span className="italic">
-                      Customer {sale.buyer_id.slice(0, 8)}
-                    </span>
+                    <span className="italic">Customer {sale.buyer_id.slice(0, 8)}</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right text-sm font-medium">
@@ -238,7 +206,7 @@ function RecentSales({ sales }: RecentSalesProps) {
 }
 
 export function SalesContent() {
-  const [timeRange, setTimeRange] = useState<string>("30");
+  const [timeRange, setTimeRange] = useState<string>('30');
   const [salesData, setSalesData] = useState<{
     summary: SalesSummary;
     salesOverTime: SalesByDate[];
@@ -251,23 +219,20 @@ export function SalesContent() {
     const endDate = new Date();
     let startDate: Date | undefined;
 
-    if (timeRange === "all") {
+    if (timeRange === 'all') {
       startDate = undefined;
     } else {
-      const days = parseInt(timeRange, 10);
+      const days = Number.parseInt(timeRange, 10);
       startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
     }
 
     startTransition(async () => {
       try {
-        const data = await getSalesDataAction(
-          startDate?.toISOString(),
-          endDate.toISOString(),
-        );
+        const data = await getSalesDataAction(startDate?.toISOString(), endDate.toISOString());
         setSalesData(data);
       } catch (error) {
-        console.error("Failed to load sales data:", error);
+        console.error('Failed to load sales data:', error);
       }
     });
   }, [timeRange]);
@@ -295,7 +260,7 @@ export function SalesContent() {
       {isLoading && !salesData ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {["revenue", "sales", "average", "photos"].map((id) => (
+            {['revenue', 'sales', 'average', 'photos'].map((id) => (
               <Skeleton key={id} className="h-32" />
             ))}
           </div>

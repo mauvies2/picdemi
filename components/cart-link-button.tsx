@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { ShoppingCart } from "lucide-react";
-import Link from "next/link";
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { getCartItemCountAction } from "@/app/dashboard/talent/cart/actions";
-import { useGuestCart } from "@/components/guest-cart-provider";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { ShoppingCart } from 'lucide-react';
+import Link from 'next/link';
+import { useCallback, useEffect, useState, useTransition } from 'react';
+import { getCartItemCountAction } from '@/app/dashboard/talent/cart/actions';
+import { useGuestCart } from '@/components/guest-cart-provider';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 function AuthCartLinkButton() {
   const [cartItemCount, setCartItemCount] = useState<number>(0);
@@ -29,8 +29,8 @@ function AuthCartLinkButton() {
 
   useEffect(() => {
     const handleFocus = () => fetchCartCount();
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [fetchCartCount]);
 
   return <CartIconButton href="/dashboard/talent/cart" count={cartItemCount} />;
@@ -54,11 +54,11 @@ function CartIconButton({ href, count }: { href: string; count: number }) {
         {count > 0 && (
           <span
             className={cn(
-              "absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold",
-              "bg-primary text-primary-foreground",
+              'absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold',
+              'bg-primary text-primary-foreground',
             )}
           >
-            {count > 99 ? "99+" : count}
+            {count > 99 ? '99+' : count}
           </span>
         )}
       </Button>

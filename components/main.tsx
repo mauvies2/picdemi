@@ -1,21 +1,17 @@
-"use client";
+'use client';
 
-import { usePathname } from "next/navigation";
+import { usePathname } from 'next/navigation';
 
 export function Main({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuth =
-    pathname?.startsWith("/signup") ||
-    pathname?.startsWith("/login") ||
-    pathname?.startsWith("/auth/reset-password");
-  const isDashboard = pathname?.startsWith("/dashboard");
+    pathname?.startsWith('/signup') ||
+    pathname?.startsWith('/login') ||
+    pathname?.startsWith('/auth/reset-password');
+  const isDashboard = pathname?.startsWith('/dashboard');
 
   return (
-    <main
-      className={
-        isAuth || isDashboard ? "w-screen h-screen" : "px-4 max-w-[1600px]"
-      }
-    >
+    <main className={isAuth || isDashboard ? 'w-screen h-screen' : 'px-4 max-w-[1600px]'}>
       {children}
     </main>
   );

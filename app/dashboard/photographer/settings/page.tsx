@@ -1,6 +1,6 @@
-import { CreditCard, Database } from "lucide-react";
-import { DashboardHeader } from "@/components/dashboard-header";
-import { Button } from "@/components/ui/button";
+import { CreditCard, Database } from 'lucide-react';
+import { DashboardHeader } from '@/components/dashboard-header';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -8,14 +8,14 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { getSubscription } from "@/database/queries";
-import { createClient } from "@/database/server";
-import { formatPlanPrice, PLANS, type PlanId } from "@/lib/plans";
-import { getDashboardData } from "../actions";
-import { UpgradeHandler } from "./upgrade-handler";
-import { UpgradePlanButton } from "./upgrade-plan-button";
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { getSubscription } from '@/database/queries';
+import { createClient } from '@/database/server';
+import { formatPlanPrice, PLANS, type PlanId } from '@/lib/plans';
+import { getDashboardData } from '../actions';
+import { UpgradeHandler } from './upgrade-handler';
+import { UpgradePlanButton } from './upgrade-plan-button';
 
 function formatStorage(gb: number): string {
   if (gb < 1) {
@@ -34,15 +34,12 @@ export default async function PhotographerSettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let currentPlanId: PlanId = "free";
+  let currentPlanId: PlanId = 'free';
   if (user) {
     const subscription = await getSubscription(supabase, user.id);
     // Only show subscription as current plan if it's active, trialing, or past_due
     // Don't show incomplete subscriptions as the current plan
-    if (
-      subscription?.status &&
-      ["active", "trialing", "past_due"].includes(subscription.status)
-    ) {
+    if (subscription?.status && ['active', 'trialing', 'past_due'].includes(subscription.status)) {
       currentPlanId = subscription.plan_id as PlanId;
     }
   }
@@ -62,9 +59,7 @@ export default async function PhotographerSettingsPage() {
               <CreditCard className="h-5 w-5" />
               <CardTitle>Billing & Plan</CardTitle>
             </div>
-            <CardDescription>
-              Manage your subscription and billing information
-            </CardDescription>
+            <CardDescription>Manage your subscription and billing information</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Current Plan */}
@@ -73,11 +68,10 @@ export default async function PhotographerSettingsPage() {
                 <p className="font-medium">Current Plan</p>
                 <p className="text-sm text-muted-foreground">
                   {currentPlan.name} Plan
-                  {currentPlan.price !== null &&
-                    ` • ${formatPlanPrice(currentPlan)}`}
+                  {currentPlan.price !== null && ` • ${formatPlanPrice(currentPlan)}`}
                 </p>
               </div>
-              {currentPlanId !== "pro" && <UpgradePlanButton planId="pro" />}
+              {currentPlanId !== 'pro' && <UpgradePlanButton planId="pro" />}
             </div>
 
             {/* Storage Usage */}
@@ -89,15 +83,11 @@ export default async function PhotographerSettingsPage() {
                     <p className="text-sm font-medium">Storage Usage</p>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {formatStorage(storage.usedGB)} /{" "}
-                    {formatStorage(currentPlan.storageGB)}
+                    {formatStorage(storage.usedGB)} / {formatStorage(currentPlan.storageGB)}
                   </p>
                 </div>
                 <Progress
-                  value={Math.min(
-                    (storage.usedGB / currentPlan.storageGB) * 100,
-                    100,
-                  )}
+                  value={Math.min((storage.usedGB / currentPlan.storageGB) * 100, 100)}
                   className="h-2"
                 />
                 <p className="text-xs text-muted-foreground">
@@ -128,38 +118,30 @@ export default async function PhotographerSettingsPage() {
             <div className="space-y-4">
               <p className="text-sm font-medium">Available Plans</p>
               <div className="grid gap-4 sm:grid-cols-2">
-                {PLANS.filter((plan) => plan.id !== currentPlanId).map(
-                  (plan) => (
-                    <div
-                      key={plan.id}
-                      className="rounded-lg border p-4 transition-all hover:border-primary/50"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{plan.name}</h4>
-                            {plan.popular && (
-                              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                                Popular
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            {plan.description}
-                          </p>
-                          <p className="mt-2 text-lg font-bold">
-                            {formatPlanPrice(plan)}
-                          </p>
+                {PLANS.filter((plan) => plan.id !== currentPlanId).map((plan) => (
+                  <div
+                    key={plan.id}
+                    className="rounded-lg border p-4 transition-all hover:border-primary/50"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold">{plan.name}</h4>
+                          {plan.popular && (
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                              Popular
+                            </span>
+                          )}
                         </div>
-                      </div>
-                      <div className="mt-4">
-                        <UpgradePlanButton
-                          planId={plan.id as "amateur" | "pro"}
-                        />
+                        <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
+                        <p className="mt-2 text-lg font-bold">{formatPlanPrice(plan)}</p>
                       </div>
                     </div>
-                  ),
-                )}
+                    <div className="mt-4">
+                      <UpgradePlanButton planId={plan.id as 'amateur' | 'pro'} />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>

@@ -1,23 +1,16 @@
-"use client";
+'use client';
 
-import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import {
-  type CSSProperties,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { createPortal } from "react-dom";
-import { activityOptions } from "@/app/dashboard/photographer/events/new/activity-options";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface EventSearchBarProps {
-  variant?: "hero" | "compact";
+  variant?: 'hero' | 'compact';
   initialWhere?: string;
   initialActivity?: string;
   onSearch?: (where: string, activity: string) => void;
@@ -52,12 +45,11 @@ function ActivityDropdown({
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
-    const goUp =
-      spaceBelow < DROPDOWN_MAX_H + DROPDOWN_GAP && rect.top > spaceBelow;
+    const goUp = spaceBelow < DROPDOWN_MAX_H + DROPDOWN_GAP && rect.top > spaceBelow;
 
     setOpenUpward(goUp);
     setStyle({
-      position: "fixed",
+      position: 'fixed',
       left: rect.left,
       width: Math.max(rect.width, compact ? 200 : 220),
       zIndex: 9999,
@@ -71,11 +63,11 @@ function ActivityDropdown({
     <div
       style={style}
       className={cn(
-        "bg-background border shadow-xl overflow-y-auto py-1",
-        "max-h-60",
+        'bg-background border shadow-xl overflow-y-auto py-1',
+        'max-h-60',
         openUpward
-          ? "rounded-t-2xl rounded-b-lg animate-[dropdown-up_0.15s_ease-out]"
-          : "rounded-2xl animate-[dropdown-down_0.15s_ease-out]",
+          ? 'rounded-t-2xl rounded-b-lg animate-[dropdown-up_0.15s_ease-out]'
+          : 'rounded-2xl animate-[dropdown-down_0.15s_ease-out]',
       )}
     >
       {filtered.map((opt) => (
@@ -96,23 +88,17 @@ function ActivityDropdown({
   );
 }
 
-function useActivityCombobox(
-  initialActivity: string,
-  sortedActivities: ActivityOption[],
-) {
-  const initialLabel =
-    sortedActivities.find((a) => a.value === initialActivity)?.label ?? "";
+function useActivityCombobox(initialActivity: string, sortedActivities: ActivityOption[]) {
+  const initialLabel = sortedActivities.find((a) => a.value === initialActivity)?.label ?? '';
   const [inputValue, setInputValue] = useState(initialLabel);
-  const [selectedValue, setSelectedValue] = useState(initialActivity || "");
+  const [selectedValue, setSelectedValue] = useState(initialActivity || '');
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
     if (!inputValue.trim()) return sortedActivities;
-    return sortedActivities.filter((a) =>
-      a.label.toLowerCase().includes(inputValue.toLowerCase()),
-    );
+    return sortedActivities.filter((a) => a.label.toLowerCase().includes(inputValue.toLowerCase()));
   }, [inputValue, sortedActivities]);
 
   useEffect(() => {
@@ -121,8 +107,8 @@ function useActivityCombobox(
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const select = useCallback((opt: ActivityOption) => {
@@ -133,16 +119,14 @@ function useActivityCombobox(
   }, []);
 
   const clear = useCallback(() => {
-    setInputValue("");
-    setSelectedValue("");
+    setInputValue('');
+    setSelectedValue('');
     setError(false);
   }, []);
 
   const validate = useCallback((): string | null => {
-    if (!inputValue.trim()) return "";
-    const match = sortedActivities.find(
-      (a) => a.label.toLowerCase() === inputValue.toLowerCase(),
-    );
+    if (!inputValue.trim()) return '';
+    const match = sortedActivities.find((a) => a.label.toLowerCase() === inputValue.toLowerCase());
     if (!match) {
       setError(true);
       setTimeout(() => setError(false), 600);
@@ -167,11 +151,11 @@ function useActivityCombobox(
 }
 
 export function EventSearchBar({
-  variant = "hero",
-  initialWhere = "",
-  initialActivity = "",
+  variant = 'hero',
+  initialWhere = '',
+  initialActivity = '',
   onSearch,
-  searchHref = "/events",
+  searchHref = '/events',
   className,
 }: EventSearchBarProps) {
   const router = useRouter();
@@ -193,14 +177,14 @@ export function EventSearchBar({
       return;
     }
     const params = new URLSearchParams();
-    if (where.trim()) params.set("where", where.trim());
-    if (validatedActivity) params.set("activity", validatedActivity);
+    if (where.trim()) params.set('where', where.trim());
+    if (validatedActivity) params.set('activity', validatedActivity);
     router.push(`${searchHref}?${params.toString()}`);
   }, [activity, where, onSearch, searchHref, router]);
 
-  if (variant === "hero") {
+  if (variant === 'hero') {
     return (
-      <div className={cn("w-full max-w-xl", className)}>
+      <div className={cn('w-full max-w-xl', className)}>
         <div className="rounded-2xl pl-3 sm:rounded-full border-2 bg-background shadow-md">
           <div className="flex flex-col sm:flex-row sm:items-stretch">
             {/* Where */}
@@ -215,7 +199,7 @@ export function EventSearchBar({
                 placeholder="Add location or event name"
                 value={where}
                 onChange={(e) => setWhere(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 className="w-full h-auto outline-none p-0 mt-0.5 text-base text-muted-foreground font-medium focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/40"
               />
             </div>
@@ -243,24 +227,22 @@ export function EventSearchBar({
                 }}
                 onFocus={() => activity.setOpen(true)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
-                  if (e.key === "Escape") activity.setOpen(false);
+                  if (e.key === 'Enter') handleSearch();
+                  if (e.key === 'Escape') activity.setOpen(false);
                 }}
                 className={cn(
-                  "mt-0.5 text-base text-muted-foreground bg-transparent outline-none w-full placeholder:text-muted-foreground/40 transition-all",
+                  'mt-0.5 text-base text-muted-foreground bg-transparent outline-none w-full placeholder:text-muted-foreground/40 transition-all',
                   activity.error &&
-                    "animate-[shake_0.35s_ease-in-out] text-destructive placeholder:text-destructive/40",
+                    'animate-[shake_0.35s_ease-in-out] text-destructive placeholder:text-destructive/40',
                 )}
               />
-              {activity.open &&
-                activity.filtered.length > 0 &&
-                typeof document !== "undefined" && (
-                  <ActivityDropdown
-                    filtered={activity.filtered}
-                    anchorRef={activity.containerRef}
-                    onSelect={activity.select}
-                  />
-                )}
+              {activity.open && activity.filtered.length > 0 && typeof document !== 'undefined' && (
+                <ActivityDropdown
+                  filtered={activity.filtered}
+                  anchorRef={activity.containerRef}
+                  onSelect={activity.select}
+                />
+              )}
             </div>
 
             {/* Search button */}
@@ -303,7 +285,7 @@ export function EventSearchBar({
   return (
     <div
       className={cn(
-        "flex items-center gap-1.5 rounded-full border bg-muted/40 px-3 py-1.5 hover:bg-muted/60 transition-colors",
+        'flex items-center gap-1.5 rounded-full border bg-muted/40 px-3 py-1.5 hover:bg-muted/60 transition-colors',
         className,
       )}
     >
@@ -313,7 +295,7 @@ export function EventSearchBar({
         placeholder="Where..."
         value={where}
         onChange={(e) => setWhere(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
         className="h-6 w-24 border-0 p-0 text-sm focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/50"
       />
       <div className="w-px h-4 bg-border shrink-0" />
@@ -329,24 +311,22 @@ export function EventSearchBar({
           }}
           onFocus={() => activity.setOpen(true)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") handleSearch();
-            if (e.key === "Escape") activity.setOpen(false);
+            if (e.key === 'Enter') handleSearch();
+            if (e.key === 'Escape') activity.setOpen(false);
           }}
           className={cn(
-            "h-6 w-24 text-sm bg-transparent outline-none placeholder:text-muted-foreground/50",
-            activity.error && "text-destructive",
+            'h-6 w-24 text-sm bg-transparent outline-none placeholder:text-muted-foreground/50',
+            activity.error && 'text-destructive',
           )}
         />
-        {activity.open &&
-          activity.filtered.length > 0 &&
-          typeof document !== "undefined" && (
-            <ActivityDropdown
-              filtered={activity.filtered}
-              anchorRef={activity.containerRef}
-              onSelect={activity.select}
-              compact
-            />
-          )}
+        {activity.open && activity.filtered.length > 0 && typeof document !== 'undefined' && (
+          <ActivityDropdown
+            filtered={activity.filtered}
+            anchorRef={activity.containerRef}
+            onSelect={activity.select}
+            compact
+          />
+        )}
       </div>
       <Button
         onClick={handleSearch}

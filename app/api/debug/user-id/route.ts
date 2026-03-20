@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/database/server";
+import { NextResponse } from 'next/server';
+import { createClient } from '@/database/server';
 
 /**
  * Debug endpoint to get the current user's ID
@@ -15,10 +15,7 @@ export async function GET() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    return NextResponse.json(
-      { error: "Not authenticated. Please log in first." },
-      { status: 401 },
-    );
+    return NextResponse.json({ error: 'Not authenticated. Please log in first.' }, { status: 401 });
   }
 
   return NextResponse.json({

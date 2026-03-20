@@ -3,8 +3,8 @@
  * Use ROLES.PHOTOGRAPHER and ROLES.TALENT instead of string literals.
  */
 export const ROLES = {
-  PHOTOGRAPHER: "PHOTOGRAPHER",
-  TALENT: "TALENT",
+  PHOTOGRAPHER: 'PHOTOGRAPHER',
+  TALENT: 'TALENT',
 } as const;
 
 /**
@@ -20,19 +20,19 @@ export type UserRole = (typeof USER_ROLES)[number];
 /**
  * Type representing a role slug (lowercase, URL-friendly).
  */
-export type RoleSlug = "photographer" | "talent";
+export type RoleSlug = 'photographer' | 'talent';
 
 /**
  * Convert a role slug to a role enum value.
  */
 export const roleSlugToEnum = (slug: RoleSlug): UserRole =>
-  slug === "photographer" ? ROLES.PHOTOGRAPHER : ROLES.TALENT;
+  slug === 'photographer' ? ROLES.PHOTOGRAPHER : ROLES.TALENT;
 
 /**
  * Convert a role enum value to a role slug.
  */
 export const roleEnumToSlug = (role: UserRole): RoleSlug =>
-  role === ROLES.PHOTOGRAPHER ? "photographer" : "talent";
+  role === ROLES.PHOTOGRAPHER ? 'photographer' : 'talent';
 
 /**
  * Resolve role switch logic to determine if talent role needs to be enabled.

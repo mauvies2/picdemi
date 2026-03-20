@@ -1,6 +1,6 @@
-"use server";
+'use server';
 
-import { getActiveRole } from "@/app/actions/roles";
+import { getActiveRole } from '@/app/actions/roles';
 import {
   createPhotoUrls,
   addPhotoToCart as dbAddPhotoToCart,
@@ -10,9 +10,9 @@ import {
   getCartItemsWithDetails,
   getOrCreateCart,
   isPhotoInCart,
-} from "@/database/queries";
-import { createClient } from "@/database/server";
-import { getBaseUrl } from "@/lib/get-base-url";
+} from '@/database/queries';
+import { createClient } from '@/database/server';
+import { getBaseUrl } from '@/lib/get-base-url';
 
 export interface CartItemDetail {
   photoId: string;
@@ -40,13 +40,13 @@ export async function getCurrentCart(): Promise<CartData> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to view your cart.");
+    throw new Error('You must be signed in to view your cart.');
   }
 
   // Verify user is talent
   const { activeRole } = await getActiveRole();
-  if (activeRole !== "talent") {
-    throw new Error("Only talent users can access the cart.");
+  if (activeRole !== 'talent') {
+    throw new Error('Only talent users can access the cart.');
   }
 
   const cart = await getOrCreateCart(supabase, user.id);
@@ -60,7 +60,7 @@ export async function getCurrentCart(): Promise<CartData> {
   const previewUrlsMap: Record<string, string | null> = {};
   if (photoPaths.length > 0) {
     const baseUrl = await getBaseUrl();
-    const photoUrls = await createPhotoUrls(supabase, "photos", photoPaths, {
+    const photoUrls = await createPhotoUrls(supabase, 'photos', photoPaths, {
       expiresIn: 3600,
       useWatermark: false, // No watermark for cart previews
       baseUrl,
@@ -70,17 +70,12 @@ export async function getCurrentCart(): Promise<CartData> {
     }
   }
 
-  const subtotalCents = items.reduce(
-    (sum, item) => sum + item.unit_price_cents,
-    0,
-  );
+  const subtotalCents = items.reduce((sum, item) => sum + item.unit_price_cents, 0);
 
   return {
     items: items.map((item) => ({
       photoId: item.photo_id,
-      previewUrl: item.photo_url
-        ? (previewUrlsMap[item.photo_url] ?? null)
-        : null,
+      previewUrl: item.photo_url ? (previewUrlsMap[item.photo_url] ?? null) : null,
       photographerId: item.photographer_id,
       photographerName: item.photographer_name,
       unitPriceCents: item.unit_price_cents,
@@ -102,81 +97,71 @@ export async function addPhotoToCartAction(photoId: string): Promise<void> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to add items to your cart.");
+    throw new Error('You must be signed in to add items to your cart.');
   }
 
   // Verify user is talent
   const { activeRole } = await getActiveRole();
-  if (activeRole !== "talent") {
-    throw new Error("Only talent users can add items to the cart.");
+  if (activeRole !== 'talent') {
+    throw new Error('Only talent users can add items to the cart.');
   }
 
   // Get photo details to determine photographer and price
   const { data: photo, error: photoError } = await supabase
-    .from("photos")
-    .select("id, user_id, event_id")
-    .eq("id", photoId)
+    .from('photos')
+    .select('id, user_id, event_id')
+    .eq('id', photoId)
     .single();
 
   if (photoError || !photo) {
-    throw new Error("Photo not found.");
+    throw new Error('Photo not found.');
   }
 
   const photographerId = photo.user_id;
   if (!photo.event_id) {
-    throw new Error("Photo is not associated with an event.");
+    throw new Error('Photo is not associated with an event.');
   }
 
   // Get event to determine price (no user check needed for public events)
   const { data: event, error: eventError } = await supabase
-    .from("events")
-    .select("id, price_per_photo")
-    .eq("id", photo.event_id)
+    .from('events')
+    .select('id, price_per_photo')
+    .eq('id', photo.event_id)
     .single();
 
   if (eventError || !event) {
-    throw new Error("Event not found.");
+    throw new Error('Event not found.');
   }
 
   // Allow free photos (price_per_photo can be null or 0)
   // Convert price to cents (avoid floating point issues)
   // If price is null or 0, set to 0 cents (free)
-  const unitPriceCents = event.price_per_photo
-    ? Math.round(event.price_per_photo * 100)
-    : 0;
+  const unitPriceCents = event.price_per_photo ? Math.round(event.price_per_photo * 100) : 0;
 
   // Get or create cart
   const cart = await getOrCreateCart(supabase, user.id);
 
   // Add photo to cart
-  await dbAddPhotoToCart(
-    supabase,
-    cart.id,
-    photoId,
-    photographerId,
-    unitPriceCents,
-  );
+  await dbAddPhotoToCart(supabase, cart.id, photoId, photographerId, unitPriceCents);
 }
 
 /**
  * Remove a photo from the current user's cart
  */
-export async function removePhotoFromCartAction(
-  photoId: string,
-): Promise<void> {
+export async function removePhotoFromCartAction(photoId: string): Promise<void> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to remove items from your cart.");
+    throw new Error('You must be signed in to remove items from your cart.');
   }
 
   // Verify user is talent
   const { activeRole } = await getActiveRole();
-  if (activeRole !== "talent") {
-    throw new Error("Only talent users can modify the cart.");
+  if (activeRole !== 'talent') {
+    throw new Error('Only talent users can modify the cart.');
   }
 
   const cart = await getOrCreateCart(supabase, user.id);
@@ -193,13 +178,13 @@ export async function clearCartAction(): Promise<void> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to clear your cart.");
+    throw new Error('You must be signed in to clear your cart.');
   }
 
   // Verify user is talent
   const { activeRole } = await getActiveRole();
-  if (activeRole !== "talent") {
-    throw new Error("Only talent users can clear the cart.");
+  if (activeRole !== 'talent') {
+    throw new Error('Only talent users can clear the cart.');
   }
 
   const cart = await getOrCreateCart(supabase, user.id);
@@ -222,7 +207,7 @@ export async function getCartItemCountAction(): Promise<number> {
   // Only return count if user is talent
   try {
     const { activeRole } = await getActiveRole();
-    if (activeRole !== "talent") {
+    if (activeRole !== 'talent') {
       return 0;
     }
   } catch {
@@ -235,9 +220,7 @@ export async function getCartItemCountAction(): Promise<number> {
 /**
  * Check if a photo is in the current user's cart
  */
-export async function checkPhotoInCartAction(
-  photoId: string,
-): Promise<boolean> {
+export async function checkPhotoInCartAction(photoId: string): Promise<boolean> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -250,7 +233,7 @@ export async function checkPhotoInCartAction(
   // Only check if user is talent
   try {
     const { activeRole } = await getActiveRole();
-    if (activeRole !== "talent") {
+    if (activeRole !== 'talent') {
       return false;
     }
   } catch {
@@ -270,13 +253,13 @@ export async function createCheckoutSessionAction(): Promise<{ url: string }> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to checkout.");
+    throw new Error('You must be signed in to checkout.');
   }
 
   // Verify user is talent
   const { activeRole } = await getActiveRole();
-  if (activeRole !== "talent") {
-    throw new Error("Only talent users can checkout.");
+  if (activeRole !== 'talent') {
+    throw new Error('Only talent users can checkout.');
   }
 
   // Get user's cart
@@ -286,24 +269,22 @@ export async function createCheckoutSessionAction(): Promise<{ url: string }> {
   const cartItems = await getCartItemsWithDetails(supabase, cart.id, user.id);
 
   if (cartItems.length === 0) {
-    throw new Error("Cart is empty");
+    throw new Error('Cart is empty');
   }
 
   // Import Stripe here to avoid circular dependencies
-  const { stripe } = await import("@/lib/stripe/config");
-  const { getBaseUrl } = await import("@/lib/get-base-url");
+  const { stripe } = await import('@/lib/stripe/config');
+  const { getBaseUrl } = await import('@/lib/get-base-url');
 
   // Create Stripe Checkout Session
   const session = await stripe.checkout.sessions.create({
-    mode: "payment",
+    mode: 'payment',
     line_items: cartItems.map((item) => ({
       price_data: {
-        currency: "usd",
+        currency: 'usd',
         product_data: {
-          name: item.event_name ? `Photo from ${item.event_name}` : "Photo",
-          description: item.event_name
-            ? `Photo from ${item.event_name}`
-            : undefined,
+          name: item.event_name ? `Photo from ${item.event_name}` : 'Photo',
+          description: item.event_name ? `Photo from ${item.event_name}` : undefined,
         },
         unit_amount: item.unit_price_cents,
       },
@@ -318,7 +299,7 @@ export async function createCheckoutSessionAction(): Promise<{ url: string }> {
   });
 
   if (!session.url) {
-    throw new Error("No checkout URL returned");
+    throw new Error('No checkout URL returned');
   }
 
   return { url: session.url };

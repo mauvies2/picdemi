@@ -1,19 +1,11 @@
-"use client";
+'use client';
 
-import { format } from "date-fns";
-import {
-  Calendar,
-  Image as ImageIcon,
-  Loader2,
-  ShoppingCart,
-  Trash2,
-  User,
-  X,
-} from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { format } from 'date-fns';
+import { Calendar, Image as ImageIcon, Loader2, ShoppingCart, Trash2, User, X } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,15 +16,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import {
   type CartData,
   clearCartAction,
   createCheckoutSessionAction,
   getCurrentCart,
   removePhotoFromCartAction,
-} from "./actions";
+} from './actions';
 
 interface CartContentProps {
   initialCartData: CartData;
@@ -52,11 +44,10 @@ export function CartContent({ initialCartData }: CartContentProps) {
         await removePhotoFromCartAction(photoId);
         const updated = await getCurrentCart();
         setCartData(updated);
-        toast.success("Removed from cart");
+        toast.success('Removed from cart');
         router.refresh();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to remove item";
+        const message = error instanceof Error ? error.message : 'Failed to remove item';
         toast.error(message);
       } finally {
         setRemovingId(null);
@@ -70,11 +61,10 @@ export function CartContent({ initialCartData }: CartContentProps) {
         await clearCartAction();
         const updated = await getCurrentCart();
         setCartData(updated);
-        toast.success("Cart cleared");
+        toast.success('Cart cleared');
         router.refresh();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to clear cart";
+        const message = error instanceof Error ? error.message : 'Failed to clear cart';
         toast.error(message);
       }
     });
@@ -82,7 +72,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
 
   const handleCheckout = () => {
     if (cartData.items.length === 0) {
-      toast.error("Your cart is empty");
+      toast.error('Your cart is empty');
       return;
     }
 
@@ -93,8 +83,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
         // Redirect to Stripe Checkout
         window.location.href = url;
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to start checkout";
+        const message = error instanceof Error ? error.message : 'Failed to start checkout';
         toast.error(message);
         setIsCheckingOut(false);
       }
@@ -116,20 +105,13 @@ export function CartContent({ initialCartData }: CartContentProps) {
         </div>
         <h3 className="text-2xl font-semibold mb-2">Your cart is empty</h3>
         <p className="text-sm text-muted-foreground mb-6 max-w-md">
-          Start adding photos to your cart from events you've attended or
-          discovered.
+          Start adding photos to your cart from events you've attended or discovered.
         </p>
         <div className="flex gap-3">
-          <Button
-            onClick={() => router.push("/dashboard/talent/events")}
-            variant="default"
-          >
+          <Button onClick={() => router.push('/dashboard/talent/events')} variant="default">
             Browse Events
           </Button>
-          <Button
-            onClick={() => router.push("/dashboard/talent/photos")}
-            variant="outline"
-          >
+          <Button onClick={() => router.push('/dashboard/talent/photos')} variant="outline">
             View My Photos
           </Button>
         </div>
@@ -142,16 +124,12 @@ export function CartContent({ initialCartData }: CartContentProps) {
       {/* Header with clear cart - spans full width */}
       <div className="flex items-center justify-between mb-2 md:mb-0">
         <p className="text-sm text-muted-foreground mt-1">
-          {cartData.itemCount} {cartData.itemCount === 1 ? "item" : "items"}
+          {cartData.itemCount} {cartData.itemCount === 1 ? 'item' : 'items'}
         </p>
         {cartData.items.length > 0 && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground"
-              >
+              <Button variant="ghost" size="sm" className="text-muted-foreground">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Clear cart
               </Button>
@@ -160,8 +138,8 @@ export function CartContent({ initialCartData }: CartContentProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Clear cart?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to remove all items from your cart? This
-                  action cannot be undone.
+                  Are you sure you want to remove all items from your cart? This action cannot be
+                  undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -193,7 +171,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
                   {item.previewUrl ? (
                     <Image
                       src={item.previewUrl}
-                      alt={item.eventTitle || "Photo"}
+                      alt={item.eventTitle || 'Photo'}
                       fill
                       className="object-cover transition-transform group-hover:scale-105"
                       sizes="128px"
@@ -217,17 +195,13 @@ export function CartContent({ initialCartData }: CartContentProps) {
                       {item.photographerName && (
                         <div className="flex items-center gap-1.5">
                           <User className="h-3.5 w-3.5" />
-                          <span className="line-clamp-1">
-                            {item.photographerName}
-                          </span>
+                          <span className="line-clamp-1">{item.photographerName}</span>
                         </div>
                       )}
                       {item.eventDate && (
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3.5 w-3.5" />
-                          <span>
-                            {format(new Date(item.eventDate), "MMM d, yyyy")}
-                          </span>
+                          <span>{format(new Date(item.eventDate), 'MMM d, yyyy')}</span>
                         </div>
                       )}
                     </div>
@@ -273,9 +247,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
             <div className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Subtotal
-                  </span>
+                  <span className="text-sm font-medium text-muted-foreground">Subtotal</span>
                   <span className="text-2xl font-bold text-foreground">
                     {formatPrice(cartData.subtotalCents)}
                   </span>
@@ -300,7 +272,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
                       Processing...
                     </>
                   ) : (
-                    "Proceed to Checkout"
+                    'Proceed to Checkout'
                   )}
                 </Button>
                 <p className="text-xs text-center text-muted-foreground mt-3">
@@ -316,9 +288,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card shadow-lg">
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-muted-foreground">
-              Subtotal
-            </span>
+            <span className="text-sm font-medium text-muted-foreground">Subtotal</span>
             <span className="text-lg font-bold text-foreground">
               {formatPrice(cartData.subtotalCents)}
             </span>
@@ -335,7 +305,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
                 Processing...
               </>
             ) : (
-              "Proceed to Checkout"
+              'Proceed to Checkout'
             )}
           </Button>
         </div>

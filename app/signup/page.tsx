@@ -1,16 +1,16 @@
-import Image from "next/image";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getDashboardPath } from "@/app/actions/roles";
-import { CloseButton } from "@/components/close-button";
-import { FacebookSignInButton } from "@/components/facebook-signin-button";
-import { GoogleSignInButton } from "@/components/google-signin-button";
-import { SubmitButton } from "@/components/submit-button";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { createClient } from "@/database/server";
-import { env } from "@/env.mjs";
+import Image from 'next/image';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { getDashboardPath } from '@/app/actions/roles';
+import { CloseButton } from '@/components/close-button';
+import { FacebookSignInButton } from '@/components/facebook-signin-button';
+import { GoogleSignInButton } from '@/components/google-signin-button';
+import { SubmitButton } from '@/components/submit-button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { createClient } from '@/database/server';
+import { env } from '@/env.mjs';
 
 export default async function Signup({
   searchParams,
@@ -25,11 +25,7 @@ export default async function Signup({
   } = await supabase.auth.getUser();
 
   // If user is logged in and has a plan parameter, redirect to settings page
-  if (
-    user &&
-    params.plan &&
-    (params.plan === "amateur" || params.plan === "pro")
-  ) {
+  if (user && params.plan && (params.plan === 'amateur' || params.plan === 'pro')) {
     return redirect(`/dashboard/photographer/settings?upgrade=${params.plan}`);
   }
 
@@ -39,21 +35,21 @@ export default async function Signup({
   }
 
   const signUp = async (formData: FormData) => {
-    "use server";
+    'use server';
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
 
     if (password !== confirmPassword) {
-      return redirect(`/signup?message=Passwords do not match`);
+      return redirect('/signup?message=Passwords do not match');
     }
 
     const supabase = await createClient();
 
     const baseRedirect = env.NEXT_PUBLIC_VERCEL_URL
       ? `https://${env.NEXT_PUBLIC_VERCEL_URL}`
-      : "http://localhost:3000";
+      : 'http://localhost:3000';
     const tokenRedirect = params.token
       ? `${baseRedirect}/auth/callback?token=${params.token}`
       : baseRedirect;
@@ -68,14 +64,12 @@ export default async function Signup({
 
     if (error) {
       console.error(error);
-      return redirect(
-        `/signup?message=Could not signup user. Reason: ${error.code}`,
-      );
+      return redirect(`/signup?message=Could not signup user. Reason: ${error.code}`);
     }
 
     // Preserve plan and token parameters if present
-    const planParam = params.plan ? `&plan=${params.plan}` : "";
-    const tokenParam = params.token ? `&token=${params.token}` : "";
+    const planParam = params.plan ? `&plan=${params.plan}` : '';
+    const tokenParam = params.token ? `&token=${params.token}` : '';
     return redirect(
       `/login?success=Check email to continue sign in process${planParam}${tokenParam}`,
     );
@@ -160,15 +154,15 @@ export default async function Signup({
             Create Account
           </SubmitButton>
           <p className="text-center text-muted-foreground">
-            Already have account?{" "}
+            Already have account?{' '}
             <Link className="text-sky-600 hover:underline" href="/login">
-              {"Log in"}
+              Log in
             </Link>
-            {" here."}
+            here.
           </p>
           <p className="mt-4 text-center text-xs">
-            By continuing, you agree to Supabase's Terms of Service and Privacy
-            Policy, and to receive periodic emails with updates.
+            By continuing, you agree to Supabase's Terms of Service and Privacy Policy, and to
+            receive periodic emails with updates.
           </p>
         </form>
       </div>

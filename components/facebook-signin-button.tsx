@@ -1,26 +1,20 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { signInWithFacebook } from "@/app/auth/facebook/actions";
-import { Button } from "@/components/ui/button";
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { signInWithFacebook } from '@/app/auth/facebook/actions';
+import { Button } from '@/components/ui/button';
 
 interface FacebookSignInButtonProps {
   plan?: string;
-  variant?:
-    | "default"
-    | "outline"
-    | "ghost"
-    | "link"
-    | "destructive"
-    | "secondary";
+  variant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary';
   className?: string;
 }
 
 export function FacebookSignInButton({
   plan,
-  variant = "outline",
+  variant = 'outline',
   className,
 }: FacebookSignInButtonProps) {
   const [isPending, startTransition] = useTransition();
@@ -30,13 +24,11 @@ export function FacebookSignInButton({
     startTransition(async () => {
       const result = await signInWithFacebook(plan);
       if (result.error) {
-        router.push(
-          `/login?message=Could not sign in with Facebook. Reason: ${result.error}`,
-        );
+        router.push(`/login?message=Could not sign in with Facebook. Reason: ${result.error}`);
       } else if (result.url) {
         window.location.href = result.url;
       } else {
-        router.push("/login?message=Failed to initiate Facebook sign-in");
+        router.push('/login?message=Failed to initiate Facebook sign-in');
       }
     });
   };

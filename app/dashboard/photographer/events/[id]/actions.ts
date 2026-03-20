@@ -1,19 +1,19 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from 'next/cache';
 import {
   isPhotoTaggedForTalent,
   tagPhotosForTalent,
   untagPhotoForTalent,
-} from "@/database/queries";
-import { createClient } from "@/database/server";
+} from '@/database/queries';
+import { createClient } from '@/database/server';
 
 /**
  * Find users by partial text match (email or display name)
  */
 export async function searchTalentUsers(
   searchText: string,
-  limit: number = 10,
+  limit = 10,
 ): Promise<
   Array<{
     id: string;
@@ -27,7 +27,7 @@ export async function searchTalentUsers(
   } = await supabase.auth.getUser();
 
   if (!currentUser) {
-    throw new Error("You must be signed in to search for talent.");
+    throw new Error('You must be signed in to search for talent.');
   }
 
   if (!searchText.trim()) {
@@ -35,19 +35,19 @@ export async function searchTalentUsers(
   }
 
   // Use RPC function to search for users by partial text
-  const { data, error } = await supabase.rpc("search_users_by_text", {
+  const { data, error } = await supabase.rpc('search_users_by_text', {
     search_text: searchText.trim(),
     result_limit: limit,
   });
 
   if (error) {
-    console.error("Error searching users:", error);
-    console.error("Search text was:", searchText.trim());
+    console.error('Error searching users:', error);
+    console.error('Search text was:', searchText.trim());
     throw new Error(`Failed to search users: ${error.message}`);
   }
 
   if (!data) {
-    console.warn("No data returned from search_users_by_text");
+    console.warn('No data returned from search_users_by_text');
     return [];
   }
 
@@ -57,9 +57,9 @@ export async function searchTalentUsers(
 
   if (userIds.length > 0) {
     const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, username")
-      .in("id", userIds);
+      .from('profiles')
+      .select('id, username')
+      .in('id', userIds);
 
     if (profiles) {
       for (const profile of profiles) {
@@ -68,13 +68,11 @@ export async function searchTalentUsers(
     }
   }
 
-  return data.map(
-    (user: { id: string; email: string; display_name: string | null }) => ({
-      id: user.id,
-      username: usernameMap[user.id] ?? "unknown",
-      display_name: user.display_name || null,
-    }),
-  );
+  return data.map((user: { id: string; email: string; display_name: string | null }) => ({
+    id: user.id,
+    username: usernameMap[user.id] ?? 'unknown',
+    display_name: user.display_name || null,
+  }));
 }
 
 /**
@@ -110,14 +108,14 @@ export async function getPhotoTags(photoIds: string[]): Promise<
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to view photo tags.");
+    throw new Error('You must be signed in to view photo tags.');
   }
 
   if (photoIds.length === 0) {
     return {};
   }
 
-  const { getTagsForPhotos } = await import("@/database/queries");
+  const { getTagsForPhotos } = await import('@/database/queries');
   const tagsByPhoto = await getTagsForPhotos(supabase, photoIds);
 
   // Tags already have username from getTagsForPhotos, so we can return them directly
@@ -137,7 +135,7 @@ export async function tagPhotosForTalentAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to tag photos.");
+    throw new Error('You must be signed in to tag photos.');
   }
 
   if (photoIds.length === 0) {
@@ -147,25 +145,18 @@ export async function tagPhotosForTalentAction(
   // Verify all photos belong to the current user
   // We'll check ownership via a query that ensures user_id matches
   const { data: photos, error: photosError } = await supabase
-    .from("photos")
-    .select("id")
-    .in("id", photoIds)
-    .eq("user_id", user.id);
+    .from('photos')
+    .select('id')
+    .in('id', photoIds)
+    .eq('user_id', user.id);
 
   if (photosError || !photos || photos.length !== photoIds.length) {
-    throw new Error(
-      "One or more photos not found or you don't have permission.",
-    );
+    throw new Error("One or more photos not found or you don't have permission.");
   }
 
-  const taggedCount = await tagPhotosForTalent(
-    supabase,
-    photoIds,
-    talentUserId,
-    user.id,
-  );
+  const taggedCount = await tagPhotosForTalent(supabase, photoIds, talentUserId, user.id);
 
-  revalidatePath("/dashboard/photographer/events");
+  revalidatePath('/dashboard/photographer/events');
   revalidatePath(`/dashboard/photographer/events/${photoIds[0]}`); // Revalidate event page
 
   return { success: true, taggedCount };
@@ -184,15 +175,15 @@ export async function untagPhotoForTalentAction(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to untag photos.");
+    throw new Error('You must be signed in to untag photos.');
   }
 
   // Verify photo belongs to the current user
   const { data: photo, error: photoError } = await supabase
-    .from("photos")
-    .select("id")
-    .eq("id", photoId)
-    .eq("user_id", user.id)
+    .from('photos')
+    .select('id')
+    .eq('id', photoId)
+    .eq('user_id', user.id)
     .single();
 
   if (photoError || !photo) {
@@ -201,7 +192,7 @@ export async function untagPhotoForTalentAction(
 
   await untagPhotoForTalent(supabase, photoId, talentUserId);
 
-  revalidatePath("/dashboard/photographer/events");
+  revalidatePath('/dashboard/photographer/events');
   revalidatePath(`/dashboard/photographer/events/${photoId}`);
 
   return { success: true };

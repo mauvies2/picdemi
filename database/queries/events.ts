@@ -2,8 +2,8 @@
  * Event-related database queries
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface Event {
   id: string;
@@ -45,13 +45,13 @@ export async function getUserEvents(
   userId: string,
 ): Promise<EventSummary[]> {
   const { data, error } = await supabase
-    .from("events")
+    .from('events')
     .select(
-      "id, name, date, city, country, activity, is_public, share_code, price_per_photo, watermark_enabled",
+      'id, name, date, city, country, activity, is_public, share_code, price_per_photo, watermark_enabled',
     )
-    .eq("user_id", userId)
-    .is("deleted_at", null)
-    .order("date", { ascending: false })
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('date', { ascending: false })
     .throwOnError();
 
   if (error) {
@@ -70,11 +70,11 @@ export async function getEvent(
   userId: string,
 ): Promise<Event | null> {
   const { data, error } = await supabase
-    .from("events")
-    .select("*")
-    .eq("id", eventId)
-    .eq("user_id", userId)
-    .is("deleted_at", null)
+    .from('events')
+    .select('*')
+    .eq('id', eventId)
+    .eq('user_id', userId)
+    .is('deleted_at', null)
     .single()
     .throwOnError();
 
@@ -94,11 +94,11 @@ export async function eventExists(
   userId: string,
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .from("events")
-    .select("id")
-    .eq("id", eventId)
-    .eq("user_id", userId)
-    .is("deleted_at", null)
+    .from('events')
+    .select('id')
+    .eq('id', eventId)
+    .eq('user_id', userId)
+    .is('deleted_at', null)
     .single();
 
   if (error || !data) {
@@ -128,18 +128,16 @@ export async function createEvent(
   },
 ): Promise<{ id: string }> {
   const { data, error } = await supabase
-    .from("events")
+    .from('events')
     .insert({
       user_id: userId,
       ...eventData,
     })
-    .select("id")
+    .select('id')
     .single();
 
   if (error || !data) {
-    throw new Error(
-      `Failed to create event: ${error ? getErrorMessage(error) : "Unknown error"}`,
-    );
+    throw new Error(`Failed to create event: ${error ? getErrorMessage(error) : 'Unknown error'}`);
   }
 
   return { id: data.id };
@@ -153,10 +151,10 @@ export async function getEventByShareCode(
   shareCode: string,
 ): Promise<Event | null> {
   const { data, error } = await supabase
-    .from("events")
-    .select("*")
-    .eq("share_code", shareCode)
-    .is("deleted_at", null)
+    .from('events')
+    .select('*')
+    .eq('share_code', shareCode)
+    .is('deleted_at', null)
     .single();
 
   if (error || !data) {
@@ -178,19 +176,19 @@ export async function searchPublicEvents(
     countries?: string[];
     dateFrom?: string;
     dateTo?: string;
-    sortBy?: "date_asc" | "date_desc" | "name_asc" | "name_desc";
+    sortBy?: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc';
     limit?: number;
     offset?: number;
   },
 ): Promise<{ events: EventSummary[]; total: number }> {
   let query = supabase
-    .from("events")
+    .from('events')
     .select(
-      "id, name, date, city, country, state, activity, is_public, share_code, price_per_photo, watermark_enabled",
-      { count: "exact" },
+      'id, name, date, city, country, state, activity, is_public, share_code, price_per_photo, watermark_enabled',
+      { count: 'exact' },
     )
-    .eq("is_public", true)
-    .is("deleted_at", null);
+    .eq('is_public', true)
+    .is('deleted_at', null);
 
   // Text search on name, city, or country
   if (filters.searchText?.trim()) {
@@ -202,41 +200,41 @@ export async function searchPublicEvents(
 
   // Activity filter
   if (filters.activities && filters.activities.length > 0) {
-    query = query.in("activity", filters.activities);
+    query = query.in('activity', filters.activities);
   }
 
   // City filter
   if (filters.cities && filters.cities.length > 0) {
-    query = query.in("city", filters.cities);
+    query = query.in('city', filters.cities);
   }
 
   // Country filter
   if (filters.countries && filters.countries.length > 0) {
-    query = query.in("country", filters.countries);
+    query = query.in('country', filters.countries);
   }
 
   // Date range filter
   if (filters.dateFrom) {
-    query = query.gte("date", filters.dateFrom);
+    query = query.gte('date', filters.dateFrom);
   }
   if (filters.dateTo) {
-    query = query.lte("date", filters.dateTo);
+    query = query.lte('date', filters.dateTo);
   }
 
   // Sort
-  const sortBy = filters.sortBy || "date_desc";
+  const sortBy = filters.sortBy || 'date_desc';
   switch (sortBy) {
-    case "date_asc":
-      query = query.order("date", { ascending: true });
+    case 'date_asc':
+      query = query.order('date', { ascending: true });
       break;
-    case "date_desc":
-      query = query.order("date", { ascending: false });
+    case 'date_desc':
+      query = query.order('date', { ascending: false });
       break;
-    case "name_asc":
-      query = query.order("name", { ascending: true });
+    case 'name_asc':
+      query = query.order('name', { ascending: true });
       break;
-    case "name_desc":
-      query = query.order("name", { ascending: false });
+    case 'name_desc':
+      query = query.order('name', { ascending: false });
       break;
   }
 
@@ -248,7 +246,7 @@ export async function searchPublicEvents(
   const { data, error, count } = await query;
 
   if (error) {
-    console.error("Search events error:", error);
+    console.error('Search events error:', error);
     throw new Error(`Failed to search events: ${getErrorMessage(error)}`);
   }
 
@@ -261,17 +259,15 @@ export async function searchPublicEvents(
 /**
  * Get unique values for filters (cities, countries)
  */
-export async function getEventFilterOptions(
-  supabase: SupabaseServerClient,
-): Promise<{
+export async function getEventFilterOptions(supabase: SupabaseServerClient): Promise<{
   cities: string[];
   countries: string[];
 }> {
   const { data, error } = await supabase
-    .from("events")
-    .select("city, country")
-    .eq("is_public", true)
-    .is("deleted_at", null);
+    .from('events')
+    .select('city, country')
+    .eq('is_public', true)
+    .is('deleted_at', null);
 
   if (error) {
     throw new Error(`Failed to get filter options: ${getErrorMessage(error)}`);
@@ -314,15 +310,15 @@ export async function updateEvent(
   // Verify event belongs to user and is not deleted
   const exists = await eventExists(supabase, eventId, userId);
   if (!exists) {
-    throw new Error("Event not found or access denied");
+    throw new Error('Event not found or access denied');
   }
 
   const { error } = await supabase
-    .from("events")
+    .from('events')
     .update(eventData)
-    .eq("id", eventId)
-    .eq("user_id", userId)
-    .is("deleted_at", null);
+    .eq('id', eventId)
+    .eq('user_id', userId)
+    .is('deleted_at', null);
 
   if (error) {
     throw new Error(`Failed to update event: ${getErrorMessage(error)}`);
@@ -341,15 +337,15 @@ export async function deleteEvent(
   // Verify event belongs to user and is not already deleted
   const exists = await eventExists(supabase, eventId, userId);
   if (!exists) {
-    throw new Error("Event not found or access denied");
+    throw new Error('Event not found or access denied');
   }
 
   const { error } = await supabase
-    .from("events")
+    .from('events')
     .update({ deleted_at: new Date().toISOString() })
-    .eq("id", eventId)
-    .eq("user_id", userId)
-    .is("deleted_at", null);
+    .eq('id', eventId)
+    .eq('user_id', userId)
+    .is('deleted_at', null);
 
   if (error) {
     throw new Error(`Failed to delete event: ${getErrorMessage(error)}`);

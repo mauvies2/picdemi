@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { CreditCard, Plus, Star, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
+import { CreditCard, Plus, Star, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -11,69 +11,63 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
-import type {
-  PaymentAccount,
-  PaymentAccountType,
-} from "@/database/queries/payment-accounts";
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import type { PaymentAccount, PaymentAccountType } from '@/database/queries/payment-accounts';
 import {
   type BankAccountFields,
   COMMON_COUNTRIES,
   getBankAccountFields,
-} from "./bank-account-fields";
+} from './bank-account-fields';
 import {
   createPaymentAccountAction,
   deletePaymentAccountAction,
   getPaymentAccountsAction,
   getPhotographerCountryAction,
   setDefaultPaymentAccountAction,
-} from "./payment-accounts-actions";
+} from './payment-accounts-actions';
 
 function getPaymentTypeLabel(type: PaymentAccountType): string {
   switch (type) {
-    case "bank_account":
-      return "Bank Account";
-    case "paypal":
-      return "PayPal";
-    case "wise":
-      return "Wise";
-    case "other":
-      return "Other";
+    case 'bank_account':
+      return 'Bank Account';
+    case 'paypal':
+      return 'PayPal';
+    case 'wise':
+      return 'Wise';
+    case 'other':
+      return 'Other';
     default:
       return type;
   }
 }
 
 function formatAccountDetails(account: PaymentAccount): string {
-  if (account.type === "paypal" || account.type === "wise") {
+  if (account.type === 'paypal' || account.type === 'wise') {
     const email = account.account_details?.email as string | undefined;
-    return email || "Not provided";
+    return email || 'Not provided';
   }
-  if (account.type === "bank_account") {
+  if (account.type === 'bank_account') {
     const bankName = account.account_details?.bank_name as string | undefined;
-    const last4 = account.account_details?.account_number_last4 as
-      | string
-      | undefined;
+    const last4 = account.account_details?.account_number_last4 as string | undefined;
     const country = account.country_code;
-    const countryName =
-      COMMON_COUNTRIES.find((c) => c.code === country)?.name || country;
+    const countryName = COMMON_COUNTRIES.find((c) => c.code === country)?.name || country;
     if (bankName && last4) {
-      return `${bankName} ••••${last4}${countryName ? ` (${countryName})` : ""}`;
+      return `${bankName} ••••${last4}${countryName ? ` (${countryName})` : ''}`;
     }
-    return `Bank account${countryName ? ` (${countryName})` : ""}`;
+    return `Bank account${countryName ? ` (${countryName})` : ''}`;
   }
-  return "Account details";
+  return 'Account details';
 }
 
 interface PaymentAccountFormProps {
@@ -82,28 +76,18 @@ interface PaymentAccountFormProps {
   initialData?: PaymentAccount;
 }
 
-function PaymentAccountForm({
-  onSuccess,
-  onCancel,
-  initialData,
-}: PaymentAccountFormProps) {
-  const [type, setType] = useState<PaymentAccountType>(
-    initialData?.type ?? "bank_account",
-  );
-  const [displayName, setDisplayName] = useState(
-    initialData?.display_name ?? "",
-  );
+function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccountFormProps) {
+  const [type, setType] = useState<PaymentAccountType>(initialData?.type ?? 'bank_account');
+  const [displayName, setDisplayName] = useState(initialData?.display_name ?? '');
   const [accountHolderName, setAccountHolderName] = useState(
-    initialData?.account_holder_name ?? "",
+    initialData?.account_holder_name ?? '',
   );
-  const [countryCode, setCountryCode] = useState<string>(
-    initialData?.country_code ?? "",
-  );
+  const [countryCode, setCountryCode] = useState<string>(initialData?.country_code ?? '');
   const [isLoadingCountry, setIsLoadingCountry] = useState(!initialData);
 
   // Load photographer's country from profile if not provided
   useEffect(() => {
-    if (!initialData && !countryCode && type === "bank_account") {
+    if (!initialData && !countryCode && type === 'bank_account') {
       getPhotographerCountryAction()
         .then((country) => {
           if (country) {
@@ -118,17 +102,15 @@ function PaymentAccountForm({
       setIsLoadingCountry(false);
     }
   }, [initialData, countryCode, type]);
-  const [email, setEmail] = useState(
-    (initialData?.account_details?.email as string) ?? "",
-  );
+  const [email, setEmail] = useState((initialData?.account_details?.email as string) ?? '');
   const [bankName, setBankName] = useState(
-    (initialData?.account_details?.bank_name as string) ?? "",
+    (initialData?.account_details?.bank_name as string) ?? '',
   );
-  const [field1, setField1] = useState("");
-  const [field2, setField2] = useState("");
-  const [field3, setField3] = useState("");
+  const [field1, setField1] = useState('');
+  const [field2, setField2] = useState('');
+  const [field3, setField3] = useState('');
   const [otherDetails, setOtherDetails] = useState(
-    (initialData?.account_details?.other as string) ?? "",
+    (initialData?.account_details?.other as string) ?? '',
   );
   const [isDefault, setIsDefault] = useState(initialData?.is_default ?? false);
   const [error, setError] = useState<string | null>(null);
@@ -142,25 +124,25 @@ function PaymentAccountForm({
     setError(null);
 
     if (!displayName.trim()) {
-      setError("Display name is required");
+      setError('Display name is required');
       return;
     }
 
     let accountDetails: Record<string, unknown> = {};
 
-    if (type === "paypal" || type === "wise") {
+    if (type === 'paypal' || type === 'wise') {
       if (!email.trim()) {
-        setError("Email is required");
+        setError('Email is required');
         return;
       }
       accountDetails = { email: email.trim() };
-    } else if (type === "bank_account") {
+    } else if (type === 'bank_account') {
       if (!countryCode) {
-        setError("Country is required for bank accounts");
+        setError('Country is required for bank accounts');
         return;
       }
       if (!bankName.trim()) {
-        setError("Bank name is required");
+        setError('Bank name is required');
         return;
       }
       if (!field1.trim()) {
@@ -182,24 +164,21 @@ function PaymentAccountForm({
         country_code: countryCode,
       };
 
-      if (bankFields.label1 === "IBAN") {
+      if (bankFields.label1 === 'IBAN') {
         // For IBAN, store the full IBAN (we'll mask it in display)
-        details.iban = field1.trim().replace(/\s/g, "");
+        details.iban = field1.trim().replace(/\s/g, '');
         const accountNum = field1.slice(-4); // Last 4 chars for display
         details.account_number_last4 = accountNum;
       } else {
         // For other formats, store field values
-        details[bankFields.label1.toLowerCase().replace(/\s/g, "_")] =
-          field1.trim();
+        details[bankFields.label1.toLowerCase().replace(/\s/g, '_')] = field1.trim();
         if (bankFields.label2) {
           const accountNum = field2.trim();
           details.account_number_last4 = accountNum.slice(-4);
-          details[bankFields.label2.toLowerCase().replace(/\s/g, "_")] =
-            accountNum;
+          details[bankFields.label2.toLowerCase().replace(/\s/g, '_')] = accountNum;
         }
         if (bankFields.label3) {
-          details[bankFields.label3.toLowerCase().replace(/\s/g, "_")] =
-            field3.trim();
+          details[bankFields.label3.toLowerCase().replace(/\s/g, '_')] = field3.trim();
         }
       }
 
@@ -220,11 +199,7 @@ function PaymentAccountForm({
         });
         onSuccess();
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to create payment account",
-        );
+        setError(err instanceof Error ? err.message : 'Failed to create payment account');
       }
     });
   };
@@ -234,10 +209,7 @@ function PaymentAccountForm({
       <div className="space-y-4 py-4">
         <div className="space-y-2">
           <Label htmlFor="type">Payment Method</Label>
-          <Select
-            value={type}
-            onValueChange={(value) => setType(value as PaymentAccountType)}
-          >
+          <Select value={type} onValueChange={(value) => setType(value as PaymentAccountType)}>
             <SelectTrigger id="type">
               <SelectValue />
             </SelectTrigger>
@@ -273,7 +245,7 @@ function PaymentAccountForm({
           />
         </div>
 
-        {(type === "paypal" || type === "wise") && (
+        {(type === 'paypal' || type === 'wise') && (
           <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
             <Input
@@ -288,7 +260,7 @@ function PaymentAccountForm({
           </div>
         )}
 
-        {type === "bank_account" && (
+        {type === 'bank_account' && (
           <>
             <div className="space-y-2">
               <Label htmlFor="countryCode">Country *</Label>
@@ -296,19 +268,15 @@ function PaymentAccountForm({
                 value={countryCode}
                 onValueChange={(value) => {
                   setCountryCode(value);
-                  setField1("");
-                  setField2("");
-                  setField3("");
+                  setField1('');
+                  setField2('');
+                  setField3('');
                 }}
                 disabled={isPending || isLoadingCountry}
               >
                 <SelectTrigger id="countryCode">
                   <SelectValue
-                    placeholder={
-                      isLoadingCountry
-                        ? "Loading your country..."
-                        : "Select country"
-                    }
+                    placeholder={isLoadingCountry ? 'Loading your country...' : 'Select country'}
                   />
                 </SelectTrigger>
                 <SelectContent>
@@ -368,7 +336,7 @@ function PaymentAccountForm({
                           : e.target.value;
                         setField2(formatted);
                       }}
-                      placeholder={bankFields.placeholder2 || ""}
+                      placeholder={bankFields.placeholder2 || ''}
                       disabled={isPending}
                       required
                     />
@@ -387,7 +355,7 @@ function PaymentAccountForm({
                           : e.target.value;
                         setField3(formatted);
                       }}
-                      placeholder={bankFields.placeholder3 || ""}
+                      placeholder={bankFields.placeholder3 || ''}
                       disabled={isPending}
                       required
                     />
@@ -398,7 +366,7 @@ function PaymentAccountForm({
           </>
         )}
 
-        {type === "other" && (
+        {type === 'other' && (
           <div className="space-y-2">
             <Label htmlFor="otherDetails">Account Details</Label>
             <Textarea
@@ -428,16 +396,11 @@ function PaymentAccountForm({
         {error && <p className="text-sm text-destructive">{error}</p>}
       </div>
       <DialogFooter>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isPending}
-        >
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
           Cancel
         </Button>
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving..." : "Save Account"}
+          {isPending ? 'Saving...' : 'Save Account'}
         </Button>
       </DialogFooter>
     </form>
@@ -456,7 +419,7 @@ export function PaymentAccountsSection() {
         const data = await getPaymentAccountsAction();
         setAccounts(data);
       } catch (error) {
-        console.error("Failed to load payment accounts:", error);
+        console.error('Failed to load payment accounts:', error);
       } finally {
         setIsLoading(false);
       }
@@ -468,7 +431,7 @@ export function PaymentAccountsSection() {
   }, [loadAccounts]);
 
   const handleDelete = async (accountId: string) => {
-    if (!confirm("Are you sure you want to delete this payment account?")) {
+    if (!confirm('Are you sure you want to delete this payment account?')) {
       return;
     }
 
@@ -477,10 +440,8 @@ export function PaymentAccountsSection() {
         await deletePaymentAccountAction(accountId);
         loadAccounts();
       } catch (error) {
-        console.error("Failed to delete payment account:", error);
-        alert(
-          error instanceof Error ? error.message : "Failed to delete account",
-        );
+        console.error('Failed to delete payment account:', error);
+        alert(error instanceof Error ? error.message : 'Failed to delete account');
       }
     });
   };
@@ -491,12 +452,8 @@ export function PaymentAccountsSection() {
         await setDefaultPaymentAccountAction(accountId);
         loadAccounts();
       } catch (error) {
-        console.error("Failed to set default account:", error);
-        alert(
-          error instanceof Error
-            ? error.message
-            : "Failed to set default account",
-        );
+        console.error('Failed to set default account:', error);
+        alert(error instanceof Error ? error.message : 'Failed to set default account');
       }
     });
   };
@@ -506,9 +463,7 @@ export function PaymentAccountsSection() {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">Payment Accounts</h3>
-          <p className="text-sm text-muted-foreground">
-            Manage where you receive payouts
-          </p>
+          <p className="text-sm text-muted-foreground">Manage where you receive payouts</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -521,8 +476,8 @@ export function PaymentAccountsSection() {
             <DialogHeader>
               <DialogTitle>Add Payment Account</DialogTitle>
               <DialogDescription>
-                Add a payment method to receive payouts. Your account details
-                are encrypted and secure.
+                Add a payment method to receive payouts. Your account details are encrypted and
+                secure.
               </DialogDescription>
             </DialogHeader>
             <PaymentAccountForm
@@ -570,13 +525,10 @@ export function PaymentAccountsSection() {
                   )}
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {getPaymentTypeLabel(account.type)} •{" "}
-                  {formatAccountDetails(account)}
+                  {getPaymentTypeLabel(account.type)} • {formatAccountDetails(account)}
                 </p>
                 {account.account_holder_name && (
-                  <p className="text-xs text-muted-foreground">
-                    {account.account_holder_name}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{account.account_holder_name}</p>
                 )}
               </div>
               <div className="flex items-center gap-2">

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { DollarSign, TrendingUp, Wallet, XCircle } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
+import { DollarSign, TrendingUp, Wallet, XCircle } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState, useTransition } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,60 +12,57 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import type {
-  EarningsSummary,
-  PhotographerEarning,
-} from "@/database/queries/earnings";
-import type { PaymentAccount } from "@/database/queries/payment-accounts";
-import type { Payout } from "@/database/queries/payouts";
-import { cn } from "@/lib/utils";
-import { getPayoutProfileStatusAction } from "../profile/payout-profile/actions";
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { EarningsSummary, PhotographerEarning } from '@/database/queries/earnings';
+import type { PaymentAccount } from '@/database/queries/payment-accounts';
+import type { Payout } from '@/database/queries/payouts';
+import { cn } from '@/lib/utils';
+import { getPayoutProfileStatusAction } from '../profile/payout-profile/actions';
 import {
   createPayoutRequestAction,
   getEarningsSummaryAction,
   getPayoutsAction,
   getPhotographerEarningsAction,
-} from "./actions";
-import { getPaymentAccountsAction } from "./payment-accounts-actions";
-import { PaymentAccountsSection } from "./payment-accounts-section";
-import { PayoutProfileBanner } from "./payout-profile-banner";
+} from './actions';
+import { getPaymentAccountsAction } from './payment-accounts-actions';
+import { PaymentAccountsSection } from './payment-accounts-section';
+import { PayoutProfileBanner } from './payout-profile-banner';
 
 function formatPrice(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
     minimumFractionDigits: 2,
   }).format(cents / 100);
 }
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 
 function formatDateTime(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
 }
 
@@ -77,33 +74,16 @@ interface SummaryCardProps {
   className?: string;
 }
 
-function SummaryCard({
-  title,
-  value,
-  icon,
-  description,
-  className,
-}: SummaryCardProps) {
+function SummaryCard({ title, value, icon, description, className }: SummaryCardProps) {
   return (
-    <div
-      className={cn(
-        "rounded-xl border bg-card p-4 sm:p-6 shadow-sm",
-        className,
-      )}
-    >
+    <div className={cn('rounded-xl border bg-card p-4 sm:p-6 shadow-sm', className)}>
       <div className="flex items-center justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-            {title}
-          </p>
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground">{title}</p>
           <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">{value}</p>
-          {description && (
-            <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-          )}
+          {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
         </div>
-        <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
-          {icon}
-        </div>
+        <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">{icon}</div>
       </div>
     </div>
   );
@@ -121,8 +101,8 @@ function PayoutRequestDialog({
   isPayoutProfileComplete,
 }: PayoutRequestDialogProps) {
   const [open, setOpen] = useState(false);
-  const [amount, setAmount] = useState("");
-  const [paymentAccountId, setPaymentAccountId] = useState<string>("");
+  const [amount, setAmount] = useState('');
+  const [paymentAccountId, setPaymentAccountId] = useState<string>('');
   const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -140,7 +120,7 @@ function PayoutRequestDialog({
           }
         })
         .catch((err) => {
-          console.error("Failed to load payment accounts:", err);
+          console.error('Failed to load payment accounts:', err);
         });
     }
   }, [open]);
@@ -150,21 +130,19 @@ function PayoutRequestDialog({
     setError(null);
 
     if (!paymentAccountId) {
-      setError("Please select a payment account");
+      setError('Please select a payment account');
       return;
     }
 
-    const amountCents = Math.round(parseFloat(amount) * 100);
+    const amountCents = Math.round(Number.parseFloat(amount) * 100);
 
     if (!amount || Number.isNaN(amountCents) || amountCents <= 0) {
-      setError("Please enter a valid amount");
+      setError('Please enter a valid amount');
       return;
     }
 
     if (amountCents > availableBalance) {
-      setError(
-        `Amount exceeds available balance of ${formatPrice(availableBalance)}`,
-      );
+      setError(`Amount exceeds available balance of ${formatPrice(availableBalance)}`);
       return;
     }
 
@@ -172,15 +150,11 @@ function PayoutRequestDialog({
       try {
         await createPayoutRequestAction(amountCents, paymentAccountId);
         setOpen(false);
-        setAmount("");
-        setPaymentAccountId("");
+        setAmount('');
+        setPaymentAccountId('');
         onSuccess();
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to create payout request",
-        );
+        setError(err instanceof Error ? err.message : 'Failed to create payout request');
       }
     });
   };
@@ -199,13 +173,11 @@ function PayoutRequestDialog({
           <DialogTitle>Request Payout</DialogTitle>
           <DialogDescription>
             {!isPayoutProfileComplete ? (
-              "Please complete your payout profile first to request withdrawals."
+              'Please complete your payout profile first to request withdrawals.'
             ) : (
               <>
-                Enter the amount you want to withdraw. Available balance:{" "}
-                <span className="font-semibold">
-                  {formatPrice(availableBalance)}
-                </span>
+                Enter the amount you want to withdraw. Available balance:{' '}
+                <span className="font-semibold">{formatPrice(availableBalance)}</span>
               </>
             )}
           </DialogDescription>
@@ -214,9 +186,7 @@ function PayoutRequestDialog({
           <div className="space-y-4 py-4">
             {!isPayoutProfileComplete ? (
               <div className="rounded-lg border border-dashed p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Payout profile incomplete
-                </p>
+                <p className="text-sm text-muted-foreground mb-2">Payout profile incomplete</p>
                 <p className="text-xs text-muted-foreground mb-4">
                   Complete your payout profile to enable withdrawal requests.
                 </p>
@@ -228,9 +198,7 @@ function PayoutRequestDialog({
               </div>
             ) : paymentAccounts.length === 0 ? (
               <div className="rounded-lg border border-dashed p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-2">
-                  No payment accounts found
-                </p>
+                <p className="text-sm text-muted-foreground mb-2">No payment accounts found</p>
                 <p className="text-xs text-muted-foreground">
                   Please add a payment account before requesting a payout.
                 </p>
@@ -251,7 +219,7 @@ function PayoutRequestDialog({
                       {paymentAccounts.map((account) => (
                         <SelectItem key={account.id} value={account.id}>
                           {account.display_name}
-                          {account.is_default && " (Default)"}
+                          {account.is_default && ' (Default)'}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -287,11 +255,8 @@ function PayoutRequestDialog({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={isPending || paymentAccounts.length === 0}
-            >
-              {isPending ? "Submitting..." : "Submit Request"}
+            <Button type="submit" disabled={isPending || paymentAccounts.length === 0}>
+              {isPending ? 'Submitting...' : 'Submit Request'}
             </Button>
           </DialogFooter>
         </form>
@@ -316,16 +281,16 @@ function PayoutHistory({ payouts }: PayoutHistoryProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "paid":
-        return "text-green-600 dark:text-green-400";
-      case "approved":
-        return "text-blue-600 dark:text-blue-400";
-      case "pending":
-        return "text-yellow-600 dark:text-yellow-400";
-      case "cancelled":
-        return "text-red-600 dark:text-red-400";
+      case 'paid':
+        return 'text-green-600 dark:text-green-400';
+      case 'approved':
+        return 'text-blue-600 dark:text-blue-400';
+      case 'pending':
+        return 'text-yellow-600 dark:text-yellow-400';
+      case 'cancelled':
+        return 'text-red-600 dark:text-red-400';
       default:
-        return "text-muted-foreground";
+        return 'text-muted-foreground';
     }
   };
 
@@ -340,17 +305,9 @@ function PayoutHistory({ payouts }: PayoutHistoryProps) {
           >
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <p className="font-semibold">
-                  {formatPrice(payout.amount_cents)}
-                </p>
-                <span
-                  className={cn(
-                    "text-xs font-medium",
-                    getStatusColor(payout.status),
-                  )}
-                >
-                  {payout.status.charAt(0).toUpperCase() +
-                    payout.status.slice(1)}
+                <p className="font-semibold">{formatPrice(payout.amount_cents)}</p>
+                <span className={cn('text-xs font-medium', getStatusColor(payout.status))}>
+                  {payout.status.charAt(0).toUpperCase() + payout.status.slice(1)}
                 </span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -362,9 +319,7 @@ function PayoutHistory({ payouts }: PayoutHistoryProps) {
                 </p>
               )}
               {payout.admin_notes && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Note: {payout.admin_notes}
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Note: {payout.admin_notes}</p>
               )}
             </div>
           </div>
@@ -418,17 +373,11 @@ function EarningsTable({ earnings }: EarningsTableProps) {
           <tbody>
             {earnings.map((earning) => (
               <tr key={earning.id} className="border-b border-border">
-                <td className="px-4 py-3 text-sm">
-                  {formatDate(earning.created_at)}
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  {earning.event_name || "Untitled Event"}
-                </td>
+                <td className="px-4 py-3 text-sm">{formatDate(earning.created_at)}</td>
+                <td className="px-4 py-3 text-sm">{earning.event_name || 'Untitled Event'}</td>
                 <td className="px-4 py-3 text-sm text-muted-foreground">
                   {earning.buyer_email || (
-                    <span className="italic">
-                      Customer {earning.buyer_id.slice(0, 8)}
-                    </span>
+                    <span className="italic">Customer {earning.buyer_id.slice(0, 8)}</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right text-sm">
@@ -459,19 +408,18 @@ export function EarningsContent() {
   useEffect(() => {
     startTransition(async () => {
       try {
-        const [summaryData, earningsData, payoutsData, profileStatus] =
-          await Promise.all([
-            getEarningsSummaryAction(),
-            getPhotographerEarningsAction(20),
-            getPayoutsAction(),
-            getPayoutProfileStatusAction(),
-          ]);
+        const [summaryData, earningsData, payoutsData, profileStatus] = await Promise.all([
+          getEarningsSummaryAction(),
+          getPhotographerEarningsAction(20),
+          getPayoutsAction(),
+          getPayoutProfileStatusAction(),
+        ]);
         setSummary(summaryData);
         setEarnings(earningsData);
         setPayouts(payoutsData);
         setIsPayoutProfileComplete(profileStatus.isComplete);
       } catch (error) {
-        console.error("Failed to load earnings data:", error);
+        console.error('Failed to load earnings data:', error);
       }
     });
   }, []);
@@ -479,19 +427,18 @@ export function EarningsContent() {
   const loadData = () => {
     startTransition(async () => {
       try {
-        const [summaryData, earningsData, payoutsData, profileStatus] =
-          await Promise.all([
-            getEarningsSummaryAction(),
-            getPhotographerEarningsAction(20),
-            getPayoutsAction(),
-            getPayoutProfileStatusAction(),
-          ]);
+        const [summaryData, earningsData, payoutsData, profileStatus] = await Promise.all([
+          getEarningsSummaryAction(),
+          getPhotographerEarningsAction(20),
+          getPayoutsAction(),
+          getPayoutProfileStatusAction(),
+        ]);
         setSummary(summaryData);
         setEarnings(earningsData);
         setPayouts(payoutsData);
         setIsPayoutProfileComplete(profileStatus.isComplete);
       } catch (error) {
-        console.error("Failed to load earnings data:", error);
+        console.error('Failed to load earnings data:', error);
       }
     });
   };
@@ -499,9 +446,7 @@ export function EarningsContent() {
   return (
     <div className="space-y-6">
       {/* Payout Profile Banner */}
-      {!isPayoutProfileComplete && (
-        <PayoutProfileBanner isComplete={isPayoutProfileComplete} />
-      )}
+      {!isPayoutProfileComplete && <PayoutProfileBanner isComplete={isPayoutProfileComplete} />}
 
       {/* Summary Cards */}
       {isLoading && !summary ? (
@@ -516,9 +461,7 @@ export function EarningsContent() {
             <SummaryCard
               title="Total Earnings"
               value={formatPrice(summary.totalGrossEarningsCents)}
-              icon={
-                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              }
+              icon={<DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />}
               description="All-time gross revenue"
             />
             <SummaryCard
@@ -530,9 +473,7 @@ export function EarningsContent() {
             <SummaryCard
               title="Net Earnings"
               value={formatPrice(summary.totalNetEarningsCents)}
-              icon={
-                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              }
+              icon={<TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />}
               description="After platform fees"
             />
             <SummaryCard
@@ -553,8 +494,7 @@ export function EarningsContent() {
                 <h3 className="text-lg font-semibold">Request Payout</h3>
               </div>
               <p className="mb-4 text-sm text-muted-foreground">
-                Withdraw your available balance. Payouts are processed manually
-                by our team.
+                Withdraw your available balance. Payouts are processed manually by our team.
               </p>
               <PayoutRequestDialog
                 availableBalance={summary.withdrawableBalanceCents}

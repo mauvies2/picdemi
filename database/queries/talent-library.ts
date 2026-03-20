@@ -2,8 +2,8 @@
  * Talent Library - queries for purchased photos
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface PurchasedPhoto {
   photo_id: string;
@@ -37,15 +37,13 @@ export async function getTalentPurchasedPhotos(
 
   // Get all completed orders for this user
   const { data: completedOrders, error: ordersError } = await supabase
-    .from("orders")
-    .select("id")
-    .eq("user_id", talentUserId)
-    .eq("status", "completed");
+    .from('orders')
+    .select('id')
+    .eq('user_id', talentUserId)
+    .eq('status', 'completed');
 
   if (ordersError) {
-    throw new Error(
-      `Failed to get completed orders: ${getErrorMessage(ordersError)}`,
-    );
+    throw new Error(`Failed to get completed orders: ${getErrorMessage(ordersError)}`);
   }
 
   if (!completedOrders || completedOrders.length === 0) {
@@ -56,7 +54,7 @@ export async function getTalentPurchasedPhotos(
 
   // Get order items with photo and event details
   const { data, error } = await supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       photo_id,
@@ -76,20 +74,16 @@ export async function getTalentPurchasedPhotos(
       )
     `,
     )
-    .in("order_id", orderIds)
-    .order("created_at", { ascending: false })
+    .in('order_id', orderIds)
+    .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (error) {
-    throw new Error(
-      `Failed to get purchased photos: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get purchased photos: ${getErrorMessage(error)}`);
   }
 
   // Get photographer profiles
-  const photographerIds = [
-    ...new Set((data ?? []).map((item) => item.photographer_id)),
-  ];
+  const photographerIds = [...new Set((data ?? []).map((item) => item.photographer_id))];
   const photographerProfilesMap: Record<
     string,
     { username: string | null; display_name: string | null }
@@ -97,9 +91,9 @@ export async function getTalentPurchasedPhotos(
 
   if (photographerIds.length > 0) {
     const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, username, display_name")
-      .in("id", photographerIds);
+      .from('profiles')
+      .select('id, username, display_name')
+      .in('id', photographerIds);
 
     if (profiles) {
       for (const profile of profiles) {
@@ -160,11 +154,7 @@ export async function getTalentPurchasedPhotos(
         | null;
     }) => {
       const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-      const event = photo
-        ? Array.isArray(photo.events)
-          ? photo.events[0]
-          : photo.events
-        : null;
+      const event = photo ? (Array.isArray(photo.events) ? photo.events[0] : photo.events) : null;
       const photographer = photographerProfilesMap[item.photographer_id] ?? {
         username: null,
         display_name: null,
@@ -198,15 +188,13 @@ export async function getTalentPurchasedPhotosCount(
 ): Promise<number> {
   // Get all completed orders for this user
   const { data: completedOrders, error: ordersError } = await supabase
-    .from("orders")
-    .select("id")
-    .eq("user_id", talentUserId)
-    .eq("status", "completed");
+    .from('orders')
+    .select('id')
+    .eq('user_id', talentUserId)
+    .eq('status', 'completed');
 
   if (ordersError) {
-    throw new Error(
-      `Failed to get completed orders: ${getErrorMessage(ordersError)}`,
-    );
+    throw new Error(`Failed to get completed orders: ${getErrorMessage(ordersError)}`);
   }
 
   if (!completedOrders || completedOrders.length === 0) {
@@ -216,14 +204,12 @@ export async function getTalentPurchasedPhotosCount(
   const orderIds = completedOrders.map((o) => o.id);
 
   const { count, error } = await supabase
-    .from("order_items")
-    .select("*", { count: "exact", head: true })
-    .in("order_id", orderIds);
+    .from('order_items')
+    .select('*', { count: 'exact', head: true })
+    .in('order_id', orderIds);
 
   if (error) {
-    throw new Error(
-      `Failed to get purchased photos count: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get purchased photos count: ${getErrorMessage(error)}`);
   }
 
   return count ?? 0;
@@ -238,15 +224,13 @@ export async function getTalentPurchasedEventsCount(
 ): Promise<number> {
   // Get all completed orders for this user
   const { data: completedOrders, error: ordersError } = await supabase
-    .from("orders")
-    .select("id")
-    .eq("user_id", talentUserId)
-    .eq("status", "completed");
+    .from('orders')
+    .select('id')
+    .eq('user_id', talentUserId)
+    .eq('status', 'completed');
 
   if (ordersError) {
-    throw new Error(
-      `Failed to get completed orders: ${getErrorMessage(ordersError)}`,
-    );
+    throw new Error(`Failed to get completed orders: ${getErrorMessage(ordersError)}`);
   }
 
   if (!completedOrders || completedOrders.length === 0) {
@@ -257,7 +241,7 @@ export async function getTalentPurchasedEventsCount(
 
   // Get unique event IDs from purchased photos
   const { data, error } = await supabase
-    .from("order_items")
+    .from('order_items')
     .select(
       `
       photos!inner(
@@ -265,22 +249,15 @@ export async function getTalentPurchasedEventsCount(
       )
     `,
     )
-    .in("order_id", orderIds);
+    .in('order_id', orderIds);
 
   if (error) {
-    throw new Error(
-      `Failed to get purchased events count: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to get purchased events count: ${getErrorMessage(error)}`);
   }
 
   const eventIds = new Set<string>();
   (data ?? []).forEach(
-    (item: {
-      photos:
-        | Array<{ event_id: string | null }>
-        | { event_id: string | null }
-        | null;
-    }) => {
+    (item: { photos: Array<{ event_id: string | null }> | { event_id: string | null } | null }) => {
       const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
       if (photo?.event_id) {
         eventIds.add(photo.event_id);

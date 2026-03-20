@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { updateProfile } from "@/database/queries/profiles";
-import { createClient } from "@/database/server";
+import { revalidatePath } from 'next/cache';
+import { updateProfile } from '@/database/queries/profiles';
+import { createClient } from '@/database/server';
 
 export async function updateProfileAction(values: {
   username: string;
@@ -15,19 +15,19 @@ export async function updateProfileAction(values: {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("User not authenticated");
+    throw new Error('User not authenticated');
   }
 
   // Check if username is already taken by another user
   const { data: existingProfile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("username", values.username)
-    .neq("id", user.id)
+    .from('profiles')
+    .select('id')
+    .eq('username', values.username)
+    .neq('id', user.id)
     .maybeSingle();
 
   if (existingProfile) {
-    throw new Error("Username is already taken");
+    throw new Error('Username is already taken');
   }
 
   await updateProfile(supabase, user.id, {
@@ -36,5 +36,5 @@ export async function updateProfileAction(values: {
     bio: values.bio?.trim() || null,
   });
 
-  revalidatePath("/dashboard/talent/profile");
+  revalidatePath('/dashboard/talent/profile');
 }

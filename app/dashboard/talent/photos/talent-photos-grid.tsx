@@ -1,17 +1,15 @@
-"use client";
+'use client';
 
-import { format } from "date-fns";
-import { Loader2, ShoppingCart } from "lucide-react";
-import Link from "next/link";
-import { useCallback, useMemo, useState, useTransition } from "react";
-import { toast } from "sonner";
-import { addPhotoToCartAction } from "@/app/dashboard/talent/cart/actions";
-import PhotoAlbumViewer, {
-  type PhotoAlbumItem,
-} from "@/components/photo-album-viewer";
-import { Button } from "@/components/ui/button";
-import { listMyTaggedPhotos, type TaggedPhotoGroup } from "./actions";
-import { AIMatchingButton } from "./ai-matching/ai-matching-button";
+import { format } from 'date-fns';
+import { Loader2, ShoppingCart } from 'lucide-react';
+import Link from 'next/link';
+import { useCallback, useMemo, useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { addPhotoToCartAction } from '@/app/dashboard/talent/cart/actions';
+import PhotoAlbumViewer, { type PhotoAlbumItem } from '@/components/photo-album-viewer';
+import { Button } from '@/components/ui/button';
+import { listMyTaggedPhotos, type TaggedPhotoGroup } from './actions';
+import { AIMatchingButton } from './ai-matching/ai-matching-button';
 
 interface TalentPhotosGridProps {
   initialGroups: TaggedPhotoGroup[];
@@ -26,10 +24,7 @@ export function TalentPhotosGrid({
 }: TalentPhotosGridProps) {
   const [groups, setGroups] = useState(initialGroups);
   const [offset, setOffset] = useState(
-    initialGroups.reduce(
-      (sum, g) => sum + g.dates.reduce((s, d) => s + d.photos.length, 0),
-      0,
-    ),
+    initialGroups.reduce((sum, g) => sum + g.dates.reduce((s, d) => s + d.photos.length, 0), 0),
   );
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoading, startTransition] = useTransition();
@@ -39,9 +34,7 @@ export function TalentPhotosGrid({
   const handleToggleSelect = useCallback((photoId: string) => {
     setSelectedIds((current) => {
       const exists = current.includes(photoId);
-      const next = exists
-        ? current.filter((id) => id !== photoId)
-        : [...current, photoId];
+      const next = exists ? current.filter((id) => id !== photoId) : [...current, photoId];
       setIsSelecting(next.length > 0);
       return next;
     });
@@ -60,23 +53,20 @@ export function TalentPhotosGrid({
           await addPhotoToCartAction(photoId);
         }
         toast.success(
-          `Added ${selectedIds.length} photo${selectedIds.length === 1 ? "" : "s"} to cart`,
+          `Added ${selectedIds.length} photo${selectedIds.length === 1 ? '' : 's'} to cart`,
         );
         setSelectedIds([]);
         setIsSelecting(false);
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to add photos to cart";
+        const message = error instanceof Error ? error.message : 'Failed to add photos to cart';
         toast.error(message);
       }
     });
   }, [selectedIds]);
 
   const selectedCountLabel = useMemo(() => {
-    if (selectedIds.length === 0) return "No photos selected";
-    if (selectedIds.length === 1) return "1 photo selected";
+    if (selectedIds.length === 0) return 'No photos selected';
+    if (selectedIds.length === 1) return '1 photo selected';
     return `${selectedIds.length} photos selected`;
   }, [selectedIds.length]);
 
@@ -132,8 +122,8 @@ export function TalentPhotosGrid({
 
     // Sort dates (newest first)
     const sortedDates = Array.from(dateMap.entries()).sort((a, b) => {
-      if (a[0] === "unknown") return 1;
-      if (b[0] === "unknown") return -1;
+      if (a[0] === 'unknown') return 1;
+      if (b[0] === 'unknown') return -1;
       return b[0].localeCompare(a[0]);
     });
 
@@ -150,7 +140,7 @@ export function TalentPhotosGrid({
             items.push({
               id: photo.photo_id,
               url: photo.signed_url,
-              alt: `Photo from ${event.event_name || "event"}`,
+              alt: `Photo from ${event.event_name || 'event'}`,
             });
           }
         }
@@ -168,14 +158,13 @@ export function TalentPhotosGrid({
           (prev) =>
             prev +
             result.groups.reduce(
-              (sum, g) =>
-                sum + g.dates.reduce((s, d) => s + d.photos.length, 0),
+              (sum, g) => sum + g.dates.reduce((s, d) => s + d.photos.length, 0),
               0,
             ),
         );
         setHasMore(result.hasMore);
       } catch (error) {
-        console.error("Failed to load more photos:", error);
+        console.error('Failed to load more photos:', error);
       }
     });
   };
@@ -184,8 +173,7 @@ export function TalentPhotosGrid({
     return (
       <div className="rounded-xl border border-dashed p-12 text-center">
         <p className="text-muted-foreground">
-          No photos tagged yet. Photographers will tag you in photos from
-          events.
+          No photos tagged yet. Photographers will tag you in photos from events.
         </p>
       </div>
     );
@@ -196,15 +184,8 @@ export function TalentPhotosGrid({
       <div className="mt-4 flex justify-end items-center gap-3">
         {isSelecting ? (
           <>
-            <div className="text-sm font-medium text-muted-foreground">
-              {selectedCountLabel}
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={clearSelection}
-            >
+            <div className="text-sm font-medium text-muted-foreground">{selectedCountLabel}</div>
+            <Button type="button" variant="outline" size="sm" onClick={clearSelection}>
               Clear
             </Button>
             <Button
@@ -219,12 +200,7 @@ export function TalentPhotosGrid({
             </Button>
           </>
         ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setIsSelecting(true)}
-          >
+          <Button type="button" variant="outline" size="sm" onClick={() => setIsSelecting(true)}>
             Select
           </Button>
         )}
@@ -238,18 +214,15 @@ export function TalentPhotosGrid({
             {/* Date Header */}
             <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-2 pt-4 border-b border-border/50">
               <h2 className="text-xl font-semibold text-foreground">
-                {dateKey === "unknown"
-                  ? "Unknown date"
-                  : format(new Date(dateKey), "EEEE, MMMM d, yyyy")}
+                {dateKey === 'unknown'
+                  ? 'Unknown date'
+                  : format(new Date(dateKey), 'EEEE, MMMM d, yyyy')}
               </h2>
             </div>
 
             {/* Events within this date */}
             {events.map((event) => (
-              <div
-                key={event.event_id ?? `no-event-${dateKey}`}
-                className="space-y-3"
-              >
+              <div key={event.event_id ?? `no-event-${dateKey}`} className="space-y-3">
                 {/* Event Info */}
                 <div className="flex flex-wrap items-baseline gap-1.5">
                   {event.event_id ? (
@@ -257,11 +230,11 @@ export function TalentPhotosGrid({
                       href={`/dashboard/talent/events/${event.event_id}`}
                       className="text-sm font-semibold text-foreground hover:underline"
                     >
-                      {event.event_name ?? "Uncategorized"}
+                      {event.event_name ?? 'Uncategorized'}
                     </Link>
                   ) : (
                     <span className="text-sm font-semibold text-foreground">
-                      {event.event_name ?? "Uncategorized"}
+                      {event.event_name ?? 'Uncategorized'}
                     </span>
                   )}
                   {event.event_city && event.event_country && (
@@ -295,18 +268,14 @@ export function TalentPhotosGrid({
         {/* Load More Button */}
         {hasMore && (
           <div className="flex justify-center pt-8">
-            <Button
-              onClick={handleLoadMore}
-              disabled={isLoading}
-              variant="outline"
-            >
+            <Button onClick={handleLoadMore} disabled={isLoading} variant="outline">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Loading...
                 </>
               ) : (
-                "Load more"
+                'Load more'
               )}
             </Button>
           </div>

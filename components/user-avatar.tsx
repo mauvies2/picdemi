@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import type { User } from "@supabase/supabase-js";
-import { LayoutDashboard, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/database/client";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Button } from "./ui/button";
+import type { User } from '@supabase/supabase-js';
+import { LayoutDashboard, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/database/client';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Button } from './ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from './ui/dropdown-menu';
 
 interface Props {
   user: User;
@@ -23,22 +23,17 @@ export function UserAvatar({ user }: Props) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    router.push("/");
+    router.push('/');
     router.refresh();
   };
 
   const goToDashboard = () => {
-    router.push("/dashboard");
+    router.push('/dashboard');
   };
 
   return (
     <div className="flex items-center gap-3">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={goToDashboard}
-        className="hidden sm:flex"
-      >
+      <Button variant="outline" size="sm" onClick={goToDashboard} className="hidden sm:flex">
         <LayoutDashboard className="mr-2 h-4 w-4" />
         Go to dashboard
       </Button>
@@ -50,20 +45,14 @@ export function UserAvatar({ user }: Props) {
           >
             <Avatar>
               <AvatarImage src={user.user_metadata.avatar_url} alt="User" />
-              <AvatarFallback>
-                {user.email?.charAt(0).toUpperCase()}
-              </AvatarFallback>
+              <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <div className="px-2 py-1.5">
-            <p className="text-sm font-medium">
-              {user.user_metadata?.full_name || user.email}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">
-              {user.email}
-            </p>
+            <p className="text-sm font-medium">{user.user_metadata?.full_name || user.email}</p>
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
           <DropdownMenuItem onClick={goToDashboard} className="sm:hidden">
             <LayoutDashboard className="mr-2 h-4 w-4" />

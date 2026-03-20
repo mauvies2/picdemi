@@ -1,25 +1,12 @@
-"use client";
+'use client';
 
-import {
-  type KeyboardEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import {
-  type Photo,
-  type RenderPhotoContext,
-  RowsPhotoAlbum,
-} from "react-photo-album";
-import { PhotoIconButtons } from "@/components/photo-icon-buttons";
-import {
-  PhotoLightbox,
-  type PhotoLightboxItem,
-} from "@/components/photo-lightbox";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
-import "react-photo-album/rows.css";
+import { type KeyboardEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { type Photo, type RenderPhotoContext, RowsPhotoAlbum } from 'react-photo-album';
+import { PhotoIconButtons } from '@/components/photo-icon-buttons';
+import { PhotoLightbox, type PhotoLightboxItem } from '@/components/photo-lightbox';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import 'react-photo-album/rows.css';
 
 export type PhotoAlbumItem = {
   id: string;
@@ -84,9 +71,9 @@ export default function PhotoAlbumViewer({
   photosInMyPhotos = new Set(),
 }: PhotoAlbumViewerProps) {
   const [index, setIndex] = useState<number>(-1);
-  const [dimensions, setDimensions] = useState<
-    Record<string, { width: number; height: number }>
-  >({});
+  const [dimensions, setDimensions] = useState<Record<string, { width: number; height: number }>>(
+    {},
+  );
   const [openPopovers, setOpenPopovers] = useState<Set<string>>(new Set());
   const selectedSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
   const canSelect = Boolean(onToggleSelect);
@@ -94,8 +81,8 @@ export default function PhotoAlbumViewer({
   const isMobile = useIsMobile();
 
   const extractPhotoId = useCallback((photo: Photo & { id?: string }) => {
-    if (typeof photo.id === "string" && photo.id.length > 0) return photo.id;
-    if (typeof photo.key === "string" && photo.key.length > 0) return photo.key;
+    if (typeof photo.id === 'string' && photo.id.length > 0) return photo.id;
+    if (typeof photo.key === 'string' && photo.key.length > 0) return photo.key;
     return photo.src;
   }, []);
 
@@ -139,7 +126,7 @@ export default function PhotoAlbumViewer({
           id: p.id,
           key: p.id,
           src: p.url,
-          alt: p.alt ?? "photo",
+          alt: p.alt ?? 'photo',
           width: dims?.width ?? p.width ?? 1600,
           height: dims?.height ?? p.height ?? 1066,
         };
@@ -169,10 +156,7 @@ export default function PhotoAlbumViewer({
   );
 
   const renderExtras = useCallback(
-    (
-      _props: object,
-      { photo }: RenderPhotoContext<Photo & { id?: string }>,
-    ) => {
+    (_props: object, { photo }: RenderPhotoContext<Photo & { id?: string }>) => {
       const photoId = extractPhotoId(photo);
       const isSelected = selectedSet.has(photoId);
       const photoItem = items.find((item) => item.id === photoId);
@@ -251,11 +235,7 @@ export default function PhotoAlbumViewer({
             button: (props, { photo }) => {
               const photoId = extractPhotoId(photo as Photo & { id?: string });
               const isSelected = selectedSet.has(photoId);
-              const {
-                onClick,
-                className: propsClassName,
-                ...restProps
-              } = props;
+              const { onClick, className: propsClassName, ...restProps } = props;
               return (
                 // biome-ignore lint/a11y/useSemanticElements: Intentionally using div to avoid nested buttons
                 <div
@@ -263,26 +243,22 @@ export default function PhotoAlbumViewer({
                   onClick={
                     onClick
                       ? (e: React.MouseEvent<HTMLDivElement>) => {
-                          onClick(
-                            e as unknown as React.MouseEvent<HTMLButtonElement>,
-                          );
+                          onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
                         }
                       : undefined
                   }
                   tabIndex={0}
                   role="button"
-                  data-selected={isSelected ? "" : undefined}
+                  data-selected={isSelected ? '' : undefined}
                   className={cn(
-                    "group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0",
-                    canSelect ? "cursor-pointer" : "cursor-zoom-in",
+                    'group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0',
+                    canSelect ? 'cursor-pointer' : 'cursor-zoom-in',
                     propsClassName,
                   )}
                   onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-                    if (event.key === "Enter" || event.key === " ") {
+                    if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
-                      onClick?.(
-                        event as unknown as React.MouseEvent<HTMLButtonElement>,
-                      );
+                      onClick?.(event as unknown as React.MouseEvent<HTMLButtonElement>);
                     }
                   }}
                 />
@@ -291,12 +267,7 @@ export default function PhotoAlbumViewer({
             link: (props, { photo }) => {
               const photoId = extractPhotoId(photo as Photo & { id?: string });
               const isSelected = selectedSet.has(photoId);
-              const {
-                onClick,
-                href,
-                className: propsClassName,
-                ...restProps
-              } = props;
+              const { onClick, href, className: propsClassName, ...restProps } = props;
               return (
                 // biome-ignore lint/a11y/useSemanticElements: Intentionally using div to avoid nested buttons
                 <div
@@ -305,27 +276,23 @@ export default function PhotoAlbumViewer({
                     onClick
                       ? (e: React.MouseEvent<HTMLDivElement>) => {
                           e.preventDefault();
-                          onClick(
-                            e as unknown as React.MouseEvent<HTMLAnchorElement>,
-                          );
+                          onClick(e as unknown as React.MouseEvent<HTMLAnchorElement>);
                         }
                       : undefined
                   }
                   tabIndex={0}
                   role="link"
-                  data-selected={isSelected ? "" : undefined}
+                  data-selected={isSelected ? '' : undefined}
                   aria-label={href}
                   className={cn(
-                    "group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0",
-                    canSelect ? "cursor-pointer" : "cursor-zoom-in",
+                    'group relative flex h-full w-full overflow-hidden rounded-lg bg-muted p-0 text-left focus:outline-none focus:ring-2 focus:ring-ring/30 selection:ring-0',
+                    canSelect ? 'cursor-pointer' : 'cursor-zoom-in',
                     propsClassName,
                   )}
                   onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-                    if (event.key === "Enter" || event.key === " ") {
+                    if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
-                      onClick?.(
-                        event as unknown as React.MouseEvent<HTMLAnchorElement>,
-                      );
+                      onClick?.(event as unknown as React.MouseEvent<HTMLAnchorElement>);
                     }
                   }}
                 />
@@ -338,8 +305,8 @@ export default function PhotoAlbumViewer({
               const isSelected = selectedSet.has(photoId);
               return {
                 className: cn(
-                  "h-full w-full object-cover",
-                  canSelect && isSelected ? "opacity-75" : "",
+                  'h-full w-full object-cover',
+                  canSelect && isSelected ? 'opacity-75' : '',
                 ),
               };
             },

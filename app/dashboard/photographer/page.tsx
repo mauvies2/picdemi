@@ -1,22 +1,16 @@
-import { format } from "date-fns";
-import {
-  Calendar,
-  DollarSign,
-  HardDrive,
-  Image as ImageIcon,
-  TrendingUp,
-} from "lucide-react";
-import { DashboardHeader } from "@/components/dashboard-header";
-import { cn } from "@/lib/utils";
-import { getDashboardData } from "./actions";
-import { PerformanceChart } from "./performance-chart";
-import { QuickActions } from "./quick-actions";
-import { ViewEventButton } from "./view-event-button";
+import { format } from 'date-fns';
+import { Calendar, DollarSign, HardDrive, Image as ImageIcon, TrendingUp } from 'lucide-react';
+import { DashboardHeader } from '@/components/dashboard-header';
+import { cn } from '@/lib/utils';
+import { getDashboardData } from './actions';
+import { PerformanceChart } from './performance-chart';
+import { QuickActions } from './quick-actions';
+import { ViewEventButton } from './view-event-button';
 
 function formatCurrency(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
     minimumFractionDigits: 2,
   }).format(cents / 100);
 }
@@ -49,8 +43,7 @@ export default async function PhotographerDashboardPage() {
                   {formatCurrency(salesSummary.totalRevenueCents)}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {salesSummary.totalSales}{" "}
-                  {salesSummary.totalSales === 1 ? "sale" : "sales"}
+                  {salesSummary.totalSales} {salesSummary.totalSales === 1 ? 'sale' : 'sales'}
                 </p>
               </div>
               <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
@@ -81,14 +74,10 @@ export default async function PhotographerDashboardPage() {
           <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  Total Events
-                </p>
-                <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">
-                  {totalEvents}
-                </p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Events</p>
+                <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">{totalEvents}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {totalEvents === 1 ? "event" : "events"} created
+                  {totalEvents === 1 ? 'event' : 'events'} created
                 </p>
               </div>
               <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
@@ -101,23 +90,20 @@ export default async function PhotographerDashboardPage() {
           <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between h-full gap-6">
               <div className="flex flex-col flex-1 justify-between h-full">
-                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  Storage
-                </p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Storage</p>
                 <div className="space-y-1 w-full">
                   <div className="text-xs text-muted-foreground">
-                    {formatStorage(storage.usedGB)} /{" "}
-                    {formatStorage(storage.limitGB)}
+                    {formatStorage(storage.usedGB)} / {formatStorage(storage.limitGB)}
                   </div>
                   <div className="h-1.5 sm:h-2 w-full rounded-full bg-muted overflow-hidden">
                     <div
                       className={cn(
-                        "h-full transition-all",
+                        'h-full transition-all',
                         storage.usedPercent >= 90
-                          ? "bg-destructive"
+                          ? 'bg-destructive'
                           : storage.usedPercent >= 70
-                            ? "bg-yellow-500"
-                            : "bg-primary",
+                            ? 'bg-yellow-500'
+                            : 'bg-primary',
                       )}
                       style={{ width: `${storage.usedPercent}%` }}
                     />
@@ -140,9 +126,7 @@ export default async function PhotographerDashboardPage() {
           <div className="lg:col-span-2 rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold">
-                  Performance
-                </h2>
+                <h2 className="text-lg sm:text-xl font-semibold">Performance</h2>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   Sales over the last 30 days
                 </p>
@@ -160,48 +144,40 @@ export default async function PhotographerDashboardPage() {
             {/* Top Event */}
             {topEvent ? (
               <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
-                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
-                  Top Event
-                </h2>
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Top Event</h2>
                 <div className="space-y-3">
                   <div>
                     <p className="font-medium text-base sm:text-lg">
-                      {topEvent.event_name || "Unnamed Event"}
+                      {topEvent.event_name || 'Unnamed Event'}
                     </p>
                     {topEvent.event_date && (
                       <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                        {format(new Date(topEvent.event_date), "MMM d, yyyy")}
+                        {format(new Date(topEvent.event_date), 'MMM d, yyyy')}
                       </p>
                     )}
                   </div>
                   <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-3 border-t">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Revenue
-                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Revenue</p>
                       <p className="text-base sm:text-lg font-semibold mt-1">
                         {formatCurrency(topEvent.revenue_cents)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Photos Sold
-                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Photos Sold</p>
                       <p className="text-base sm:text-lg font-semibold mt-1">
                         {topEvent.photos_sold}
                       </p>
                     </div>
                   </div>
-                  {topEvent.event_name !== "Deleted Event" && (
+                  {topEvent.event_name !== 'Deleted Event' && (
                     <ViewEventButton eventId={topEvent.event_id} />
                   )}
                 </div>
               </div>
             ) : (
               <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
-                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
-                  Top Event
-                </h2>
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Top Event</h2>
                 <p className="text-xs sm:text-sm text-muted-foreground">
                   No sales yet. Create your first event to get started!
                 </p>

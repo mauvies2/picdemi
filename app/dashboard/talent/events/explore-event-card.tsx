@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { format } from "date-fns";
-import Image from "next/image";
-import Link from "next/link";
-import { activityOptions } from "@/app/dashboard/photographer/events/new/activity-options";
+import { format } from 'date-fns';
+import Image from 'next/image';
+import Link from 'next/link';
+import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
 
 type ExploreEventCardProps = {
   id: string;
@@ -28,14 +28,12 @@ export function ExploreEventCard({
   photoCount,
   coverUrl,
   pricePerPhoto,
-  linkPrefix = "/dashboard/talent/events",
+  linkPrefix = '/dashboard/talent/events',
 }: ExploreEventCardProps) {
-  const activityLabel =
-    activityOptions.find((opt) => opt.value === activity)?.label ?? activity;
-  const formattedDate = format(new Date(date), "MMM d, yyyy");
+  const activityLabel = activityOptions.find((opt) => opt.value === activity)?.label ?? activity;
+  const formattedDate = format(new Date(date), 'MMM d, yyyy');
   const location = `${city}, ${country}`;
-  const priceText =
-    pricePerPhoto !== null ? `$${pricePerPhoto.toFixed(2)}/photo` : "Free";
+  const priceText = pricePerPhoto !== null ? `$${pricePerPhoto.toFixed(2)}/photo` : 'Free';
 
   return (
     <Link
@@ -56,7 +54,7 @@ export function ExploreEventCard({
               <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-3">
                 <div className="text-xs font-medium text-white drop-shadow-sm">
-                  {photoCount} {photoCount === 1 ? "photo" : "photos"}
+                  {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
                 </div>
               </div>
             </>

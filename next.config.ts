@@ -1,35 +1,35 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   experimental: {
     serverActions: {
-      bodySizeLimit: "500mb",
+      bodySizeLimit: '500mb',
     },
-    proxyClientMaxBodySize: "500mb",
+    proxyClientMaxBodySize: '500mb',
   },
   images: {
     remotePatterns: (() => {
       const patterns: Array<{
-        protocol: "http" | "https";
+        protocol: 'http' | 'https';
         hostname: string;
       }> = [
         {
-          protocol: "https",
-          hostname: "placehold.co",
+          protocol: 'https',
+          hostname: 'placehold.co',
         },
       ];
       // Allow localhost for development (watermark API routes)
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === 'development') {
         patterns.push(
           {
-            protocol: "http",
-            hostname: "localhost",
+            protocol: 'http',
+            hostname: 'localhost',
           },
           {
-            protocol: "http",
-            hostname: "127.0.0.1",
+            protocol: 'http',
+            hostname: '127.0.0.1',
           },
         );
       }
@@ -39,7 +39,7 @@ const nextConfig: NextConfig = {
         if (supabaseUrl) {
           const hostname = new URL(supabaseUrl).hostname;
           patterns.push({
-            protocol: "https",
+            protocol: 'https',
             hostname,
           });
         }

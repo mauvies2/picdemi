@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { Loader2, Minus, Plus, ShoppingCart } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { Loader2, Minus, Plus, ShoppingCart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import {
   addPhotoToCartAction,
   removePhotoFromCartAction,
-} from "@/app/dashboard/talent/cart/actions";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+} from '@/app/dashboard/talent/cart/actions';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface AddToCartButtonProps {
   photoId: string;
   className?: string;
-  variant?: "default" | "outline" | "ghost" | "secondary";
-  size?: "sm" | "md" | "lg" | "icon";
+  variant?: 'default' | 'outline' | 'ghost' | 'secondary';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   showText?: boolean;
   initialInCart?: boolean;
   asDiv?: boolean; // When true, renders as div instead of button (for nested button scenarios)
@@ -27,8 +27,8 @@ interface AddToCartButtonProps {
 export function AddToCartButton({
   photoId,
   className,
-  variant = "default",
-  size = "sm",
+  variant = 'default',
+  size = 'sm',
   showText = true,
   initialInCart = false,
   asDiv = false,
@@ -54,11 +54,10 @@ export function AddToCartButton({
       try {
         await addPhotoToCartAction(photoId);
         setIsInCart(true);
-        toast.success("Added to cart");
+        toast.success('Added to cart');
         router.refresh();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to add to cart";
+        const message = error instanceof Error ? error.message : 'Failed to add to cart';
         toast.error(message);
       }
     });
@@ -78,29 +77,26 @@ export function AddToCartButton({
       try {
         await removePhotoFromCartAction(photoId);
         setIsInCart(false);
-        toast.success("Removed from cart");
+        toast.success('Removed from cart');
         router.refresh();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to remove from cart";
+        const message = error instanceof Error ? error.message : 'Failed to remove from cart';
         toast.error(message);
       }
     });
   };
 
   const baseClasses = cn(
-    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+    'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
     // Use customSize if provided, otherwise use default size classes
-    customSize || (size === "sm" && "size-8"),
-    !customSize && size === "md" && "size-10",
-    !customSize && size === "lg" && "size-12",
-    variant === "default" &&
-      "bg-primary text-primary-foreground hover:bg-primary/90",
-    variant === "outline" &&
-      "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-    variant === "ghost" && "hover:bg-accent hover:text-accent-foreground",
-    variant === "secondary" &&
-      "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+    customSize || (size === 'sm' && 'size-8'),
+    !customSize && size === 'md' && 'size-10',
+    !customSize && size === 'lg' && 'size-12',
+    variant === 'default' && 'bg-primary text-primary-foreground hover:bg-primary/90',
+    variant === 'outline' &&
+      'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+    variant === 'ghost' && 'hover:bg-accent hover:text-accent-foreground',
+    variant === 'secondary' && 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
     className,
   );
 
@@ -109,10 +105,10 @@ export function AddToCartButton({
       return (
         // biome-ignore lint/a11y/useSemanticElements: Intentionally using div to avoid nested buttons
         <div
-          className={cn(baseClasses, "cursor-pointer relative")}
+          className={cn(baseClasses, 'cursor-pointer relative')}
           onClick={handleRemoveFromCart}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               handleRemoveFromCart();
             }
@@ -140,10 +136,10 @@ export function AddToCartButton({
     return (
       // biome-ignore lint/a11y/useSemanticElements: Intentionally using div to avoid nested buttons
       <div
-        className={cn(baseClasses, "cursor-pointer")}
+        className={cn(baseClasses, 'cursor-pointer')}
         onClick={handleAddToCart}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
+          if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             handleAddToCart();
           }
@@ -171,10 +167,8 @@ export function AddToCartButton({
   if (isInCart) {
     return (
       <Button
-        variant={
-          variant === "default" || variant === "secondary" ? "outline" : variant
-        }
-        size={size === "icon" ? "sm" : size}
+        variant={variant === 'default' || variant === 'secondary' ? 'outline' : variant}
+        size={size === 'icon' ? 'sm' : size}
         onClick={handleRemoveFromCart}
         disabled={isPending}
         className={className}
@@ -196,8 +190,8 @@ export function AddToCartButton({
 
   return (
     <Button
-      variant={variant === "secondary" ? "outline" : variant}
-      size={size === "icon" ? "sm" : size}
+      variant={variant === 'secondary' ? 'outline' : variant}
+      size={size === 'icon' ? 'sm' : size}
       onClick={handleAddToCart}
       disabled={isPending}
       className={className}

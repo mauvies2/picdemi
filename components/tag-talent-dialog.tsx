@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Loader2, User, X } from "lucide-react";
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { toast } from "sonner";
+import { Loader2, User, X } from 'lucide-react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import {
   searchTalentUsers,
   tagPhotosForTalentAction,
-} from "@/app/dashboard/photographer/events/[id]/actions";
-import { Button } from "@/components/ui/button";
+} from '@/app/dashboard/photographer/events/[id]/actions';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -15,10 +15,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useDebounce } from "@/hooks/use-debounce";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface TagTalentDialogProps {
   open: boolean;
@@ -27,13 +27,8 @@ interface TagTalentDialogProps {
   onSuccess?: () => void;
 }
 
-export function TagTalentDialog({
-  open,
-  onOpenChange,
-  photoIds,
-  onSuccess,
-}: TagTalentDialogProps) {
-  const [searchText, setSearchText] = useState("");
+export function TagTalentDialog({ open, onOpenChange, photoIds, onSuccess }: TagTalentDialogProps) {
+  const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<
     Array<{
       id: string;
@@ -67,18 +62,15 @@ export function TagTalentDialog({
         const results = await searchTalentUsers(debouncedSearch, 10);
         // Filter out already selected talents from results
         const filteredResults = results.filter(
-          (result) =>
-            !selectedTalents.some((selected) => selected.id === result.id),
+          (result) => !selectedTalents.some((selected) => selected.id === result.id),
         );
-        console.log("Search results for:", debouncedSearch, filteredResults);
+        console.log('Search results for:', debouncedSearch, filteredResults);
         setSearchResults(filteredResults);
         setShowResults(true);
       } catch (error) {
-        console.error("Error searching for talent:", error);
+        console.error('Error searching for talent:', error);
         toast.error(
-          error instanceof Error
-            ? `Search failed: ${error.message}`
-            : "Failed to search for users",
+          error instanceof Error ? `Search failed: ${error.message}` : 'Failed to search for users',
         );
         setSearchResults([]);
       } finally {
@@ -86,7 +78,7 @@ export function TagTalentDialog({
       }
     };
 
-    performSearch();
+    void performSearch();
   }, [debouncedSearch, selectedTalents]);
 
   const handleSelectTalent = useCallback(
@@ -96,11 +88,11 @@ export function TagTalentDialog({
         return;
       }
       setSelectedTalents((prev) => [...prev, talent]);
-      setSearchText("");
+      setSearchText('');
       setSearchResults([]);
       setShowResults(false);
       // Blur the input to close any open dropdowns
-      const input = document.getElementById("search");
+      const input = document.getElementById('search');
       if (input instanceof HTMLInputElement) {
         input.blur();
       }
@@ -119,9 +111,7 @@ export function TagTalentDialog({
       try {
         // Tag all selected talents
         const results = await Promise.all(
-          selectedTalents.map((talent) =>
-            tagPhotosForTalentAction(photoIds, talent.id),
-          ),
+          selectedTalents.map((talent) => tagPhotosForTalentAction(photoIds, talent.id)),
         );
 
         const successCount = results.filter((r) => r.success).length;
@@ -129,28 +119,26 @@ export function TagTalentDialog({
 
         if (successCount > 0) {
           toast.success(
-            `Tagged ${totalTagged} photo${totalTagged !== 1 ? "s" : ""} for ${successCount} talent${successCount !== 1 ? "s" : ""}`,
+            `Tagged ${totalTagged} photo${totalTagged !== 1 ? 's' : ''} for ${successCount} talent${successCount !== 1 ? 's' : ''}`,
           );
           onOpenChange(false);
-          setSearchText("");
+          setSearchText('');
           setSelectedTalents([]);
           setSearchResults([]);
           onSuccess?.();
         } else {
-          toast.error("Failed to tag photos");
+          toast.error('Failed to tag photos');
         }
       } catch (error) {
-        console.error("Error tagging photos:", error);
-        toast.error(
-          error instanceof Error ? error.message : "Failed to tag photos",
-        );
+        console.error('Error tagging photos:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to tag photos');
       }
     });
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      setSearchText("");
+      setSearchText('');
       setSelectedTalents([]);
       setSearchResults([]);
       setShowResults(false);
@@ -164,8 +152,8 @@ export function TagTalentDialog({
         <DialogHeader>
           <DialogTitle>Tag Talent</DialogTitle>
           <DialogDescription>
-            Search for a talent user by username to tag {photoIds.length}{" "}
-            {photoIds.length === 1 ? "photo" : "photos"}.
+            Search for a talent user by username to tag {photoIds.length}{' '}
+            {photoIds.length === 1 ? 'photo' : 'photos'}.
           </DialogDescription>
         </DialogHeader>
 
@@ -199,29 +187,23 @@ export function TagTalentDialog({
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               )}
-              {showResults &&
-                searchResults.length > 0 &&
-                searchText.length >= 2 && (
-                  <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
-                    <div className="max-h-60 overflow-auto p-1">
-                      {searchResults.map((user) => (
-                        <button
-                          key={user.id}
-                          type="button"
-                          className="w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
-                          onClick={() => handleSelectTalent(user)}
-                        >
-                          <div className="font-medium">
-                            {user.display_name || "No name"}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            @{user.username}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+              {showResults && searchResults.length > 0 && searchText.length >= 2 && (
+                <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
+                  <div className="max-h-60 overflow-auto p-1">
+                    {searchResults.map((user) => (
+                      <button
+                        key={user.id}
+                        type="button"
+                        className="w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                        onClick={() => handleSelectTalent(user)}
+                      >
+                        <div className="font-medium">{user.display_name || 'No name'}</div>
+                        <div className="text-xs text-muted-foreground">@{user.username}</div>
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -241,7 +223,7 @@ export function TagTalentDialog({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">
-                        {talent.display_name || "No name"}
+                        {talent.display_name || 'No name'}
                       </div>
                       <div className="text-xs text-muted-foreground truncate">
                         @{talent.username}
@@ -264,18 +246,12 @@ export function TagTalentDialog({
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={isTagging}
-          >
+          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isTagging}>
             Cancel
           </Button>
           <Button
             onClick={handleTag}
-            disabled={
-              selectedTalents.length === 0 || isTagging || photoIds.length === 0
-            }
+            disabled={selectedTalents.length === 0 || isTagging || photoIds.length === 0}
           >
             {isTagging ? (
               <>
@@ -283,7 +259,7 @@ export function TagTalentDialog({
                 Tagging...
               </>
             ) : (
-              `Tag ${photoIds.length} photo${photoIds.length !== 1 ? "s" : ""}${selectedTalents.length > 0 ? ` for ${selectedTalents.length} talent${selectedTalents.length !== 1 ? "s" : ""}` : ""}`
+              `Tag ${photoIds.length} photo${photoIds.length !== 1 ? 's' : ''}${selectedTalents.length > 0 ? ` for ${selectedTalents.length} talent${selectedTalents.length !== 1 ? 's' : ''}` : ''}`
             )}
           </Button>
         </DialogFooter>

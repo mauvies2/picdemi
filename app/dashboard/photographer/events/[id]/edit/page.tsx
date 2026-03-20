@@ -1,14 +1,10 @@
-import { redirect } from "next/navigation";
-import { DashboardHeader } from "@/components/dashboard-header";
-import { createSignedUrls, getEvent, getEventPhotos } from "@/database/queries";
-import { createClient } from "@/database/server";
-import { EditEventForm } from "./edit-event-form";
+import { redirect } from 'next/navigation';
+import { DashboardHeader } from '@/components/dashboard-header';
+import { createSignedUrls, getEvent, getEventPhotos } from '@/database/queries';
+import { createClient } from '@/database/server';
+import { EditEventForm } from './edit-event-form';
 
-export default async function EditEventPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const {
@@ -16,28 +12,26 @@ export default async function EditEventPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect('/login');
   }
 
   const event = await getEvent(supabase, id, user.id);
 
   if (!event) {
-    redirect("/dashboard/photographer/events");
+    redirect('/dashboard/photographer/events');
   }
 
   // Get existing photos
   const photos = await getEventPhotos(supabase, id, user.id);
 
   // Generate signed URLs for photos
-  const paths = photos
-    .map((p) => p.original_url)
-    .filter((url): url is string => url !== null);
+  const paths = photos.map((p) => p.original_url).filter((url): url is string => url !== null);
   const signedUrls: Record<string, string> = {};
 
   if (paths.length > 0) {
     const signed = await createSignedUrls(
       supabase,
-      "photos",
+      'photos',
       paths,
       60 * 60, // 1 hour
     );

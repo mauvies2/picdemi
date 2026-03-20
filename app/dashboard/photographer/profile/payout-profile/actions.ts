@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { updateProfile } from "@/database/queries/profiles";
-import { createClient } from "@/database/server";
+import { revalidatePath } from 'next/cache';
+import { updateProfile } from '@/database/queries/profiles';
+import { createClient } from '@/database/server';
 
 export async function updatePayoutProfileAction(updates: {
   full_name: string;
@@ -12,7 +12,7 @@ export async function updatePayoutProfileAction(updates: {
   address_line2: string | null;
   state_or_region: string | null;
   postal_code: string;
-  payout_method: "bank_transfer" | "paypal" | "other";
+  payout_method: 'bank_transfer' | 'paypal' | 'other';
   payout_details_json: Record<string, unknown>;
   is_payout_profile_complete: boolean;
 }): Promise<void> {
@@ -22,12 +22,12 @@ export async function updatePayoutProfileAction(updates: {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
   await updateProfile(supabase, user.id, updates);
-  revalidatePath("/dashboard/photographer/profile");
-  revalidatePath("/dashboard/photographer/earnings");
+  revalidatePath('/dashboard/photographer/profile');
+  revalidatePath('/dashboard/photographer/earnings');
 }
 
 export async function getPayoutProfileStatusAction(): Promise<{
@@ -39,10 +39,10 @@ export async function getPayoutProfileStatusAction(): Promise<{
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
 
-  const { getProfile } = await import("@/database/queries/profiles");
+  const { getProfile } = await import('@/database/queries/profiles');
   const profile = await getProfile(supabase, user.id);
 
   return {

@@ -3,8 +3,8 @@
  * For finding photos similar to a selfie embedding using pgvector
  */
 
-import type { SupabaseServerClient } from "./types";
-import { getErrorMessage } from "./types";
+import type { SupabaseServerClient } from './types';
+import { getErrorMessage } from './types';
 
 export interface SimilaritySearchResult {
   photo_id: string;
@@ -77,7 +77,7 @@ export async function findSimilarPhotos(
   // For now, we'll fetch embeddings and calculate similarity in the application layer
   // This is not ideal for large datasets but works for MVP
   const { data: embeddings, error: embeddingsError } = await supabase
-    .from("photo_embeddings")
+    .from('photo_embeddings')
     .select(
       `
       photo_id,
@@ -99,13 +99,11 @@ export async function findSimilarPhotos(
       )
     `,
     )
-    .not("embedding", "is", null)
+    .not('embedding', 'is', null)
     .limit(1000); // Limit initial fetch to prevent memory issues
 
   if (embeddingsError) {
-    throw new Error(
-      `Failed to fetch photo embeddings: ${getErrorMessage(embeddingsError)}`,
-    );
+    throw new Error(`Failed to fetch photo embeddings: ${getErrorMessage(embeddingsError)}`);
   }
 
   // Fetch photographer profiles separately
@@ -125,9 +123,9 @@ export async function findSimilarPhotos(
 
   if (photographerIds.size > 0) {
     const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, username, display_name")
-      .in("id", Array.from(photographerIds));
+      .from('profiles')
+      .select('id, username, display_name')
+      .in('id', Array.from(photographerIds));
 
     if (profiles) {
       for (const profile of profiles) {
@@ -145,9 +143,7 @@ export async function findSimilarPhotos(
   if (filters?.activity_type) {
     filteredEmbeddings = filteredEmbeddings.filter((item) => {
       const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-      const event = Array.isArray(photo?.events)
-        ? photo.events[0]
-        : photo?.events;
+      const event = Array.isArray(photo?.events) ? photo.events[0] : photo?.events;
       return event?.activity === filters.activity_type;
     });
   }
@@ -155,9 +151,7 @@ export async function findSimilarPhotos(
   if (filters?.country) {
     filteredEmbeddings = filteredEmbeddings.filter((item) => {
       const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-      const event = Array.isArray(photo?.events)
-        ? photo.events[0]
-        : photo?.events;
+      const event = Array.isArray(photo?.events) ? photo.events[0] : photo?.events;
       return event?.country === filters.country;
     });
   }
@@ -165,9 +159,7 @@ export async function findSimilarPhotos(
   if (filters?.region) {
     filteredEmbeddings = filteredEmbeddings.filter((item) => {
       const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-      const event = Array.isArray(photo?.events)
-        ? photo.events[0]
-        : photo?.events;
+      const event = Array.isArray(photo?.events) ? photo.events[0] : photo?.events;
       return event?.state === filters.region;
     });
   }
@@ -176,9 +168,7 @@ export async function findSimilarPhotos(
     const dateFrom = filters.date_from;
     filteredEmbeddings = filteredEmbeddings.filter((item) => {
       const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-      const event = Array.isArray(photo?.events)
-        ? photo.events[0]
-        : photo?.events;
+      const event = Array.isArray(photo?.events) ? photo.events[0] : photo?.events;
       return event?.date && dateFrom && event.date >= dateFrom;
     });
   }
@@ -187,9 +177,7 @@ export async function findSimilarPhotos(
     const dateTo = filters.date_to;
     filteredEmbeddings = filteredEmbeddings.filter((item) => {
       const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-      const event = Array.isArray(photo?.events)
-        ? photo.events[0]
-        : photo?.events;
+      const event = Array.isArray(photo?.events) ? photo.events[0] : photo?.events;
       return event?.date && dateTo && event.date <= dateTo;
     });
   }
@@ -211,11 +199,7 @@ export async function findSimilarPhotos(
 
   for (const item of filteredEmbeddings) {
     const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-    const event = photo
-      ? Array.isArray(photo.events)
-        ? photo.events[0]
-        : photo.events
-      : null;
+    const event = photo ? (Array.isArray(photo.events) ? photo.events[0] : photo.events) : null;
 
     if (!photo || !event) continue;
 
@@ -223,9 +207,7 @@ export async function findSimilarPhotos(
     if (!photoEmbedding) continue;
 
     // Get photographer profile from map
-    const photographer = photo.user_id
-      ? photographerProfilesMap[photo.user_id]
-      : null;
+    const photographer = photo.user_id ? photographerProfilesMap[photo.user_id] : null;
 
     // Calculate cosine similarity
     const similarity = cosineSimilarity(selfieEmbedding, photoEmbedding);
@@ -257,7 +239,7 @@ export async function findSimilarPhotos(
  */
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
   if (vecA.length !== vecB.length) {
-    throw new Error("Vectors must have the same length");
+    throw new Error('Vectors must have the same length');
   }
 
   let dotProduct = 0;
@@ -291,24 +273,22 @@ export async function storePhotoEmbedding(
   supabase: SupabaseServerClient,
   photoId: string,
   embedding: number[],
-  modelVersion: string = "v1.0",
+  modelVersion = 'v1.0',
 ): Promise<void> {
-  const embeddingString = `[${embedding.join(",")}]`;
+  const embeddingString = `[${embedding.join(',')}]`;
 
-  const { error } = await supabase.from("photo_embeddings").upsert(
+  const { error } = await supabase.from('photo_embeddings').upsert(
     {
       photo_id: photoId,
       embedding: embeddingString,
       model_version: modelVersion,
     },
     {
-      onConflict: "photo_id,model_version",
+      onConflict: 'photo_id,model_version',
     },
   );
 
   if (error) {
-    throw new Error(
-      `Failed to store photo embedding: ${getErrorMessage(error)}`,
-    );
+    throw new Error(`Failed to store photo embedding: ${getErrorMessage(error)}`);
   }
 }

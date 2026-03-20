@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { AlertCircle, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { AlertCircle, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 interface PayoutProfileBannerProps {
   isComplete: boolean;
@@ -22,9 +22,8 @@ export function PayoutProfileBanner({ isComplete }: PayoutProfileBannerProps) {
             Complete your payout profile
           </h3>
           <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-            You can sell photos and earn money, but you need to complete your
-            payout profile to request withdrawals. This includes your address
-            and payment method.
+            You can sell photos and earn money, but you need to complete your payout profile to
+            request withdrawals. This includes your address and payment method.
           </p>
           <div className="mt-3">
             <Link href="/dashboard/photographer/profile/payout-profile">

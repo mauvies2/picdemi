@@ -1,13 +1,7 @@
-"use client";
+'use client';
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import { GUEST_CART_KEY, type GuestCartItem } from "@/lib/guest-cart";
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { GUEST_CART_KEY, type GuestCartItem } from '@/lib/guest-cart';
 
 interface GuestCartContextValue {
   items: GuestCartItem[];

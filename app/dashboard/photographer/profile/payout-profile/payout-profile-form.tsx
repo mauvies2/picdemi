@@ -1,23 +1,20 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, useTransition } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import type { Profile } from "@/database/queries/profiles";
-import {
-  COMMON_COUNTRIES,
-  getBankAccountFields,
-} from "../../earnings/bank-account-fields";
-import { updatePayoutProfileAction } from "./actions";
+} from '@/components/ui/select';
+import type { Profile } from '@/database/queries/profiles';
+import { COMMON_COUNTRIES, getBankAccountFields } from '../../earnings/bank-account-fields';
+import { updatePayoutProfileAction } from './actions';
 
 interface PayoutProfileFormProps {
   initialData?: Profile | null;
@@ -25,30 +22,19 @@ interface PayoutProfileFormProps {
 
 export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
   const router = useRouter();
-  const [fullName, setFullName] = useState(initialData?.full_name ?? "");
-  const [countryCode, setCountryCode] = useState(
-    initialData?.country_code ?? "",
+  const [fullName, setFullName] = useState(initialData?.full_name ?? '');
+  const [countryCode, setCountryCode] = useState(initialData?.country_code ?? '');
+  const [city, setCity] = useState(initialData?.city ?? '');
+  const [addressLine1, setAddressLine1] = useState(initialData?.address_line1 ?? '');
+  const [addressLine2, setAddressLine2] = useState(initialData?.address_line2 ?? '');
+  const [stateOrRegion, setStateOrRegion] = useState(initialData?.state_or_region ?? '');
+  const [postalCode, setPostalCode] = useState(initialData?.postal_code ?? '');
+  const [payoutMethod, setPayoutMethod] = useState<'bank_transfer' | 'paypal' | 'other' | ''>(
+    (initialData?.payout_method as 'bank_transfer' | 'paypal' | 'other' | '') ?? '',
   );
-  const [city, setCity] = useState(initialData?.city ?? "");
-  const [addressLine1, setAddressLine1] = useState(
-    initialData?.address_line1 ?? "",
-  );
-  const [addressLine2, setAddressLine2] = useState(
-    initialData?.address_line2 ?? "",
-  );
-  const [stateOrRegion, setStateOrRegion] = useState(
-    initialData?.state_or_region ?? "",
-  );
-  const [postalCode, setPostalCode] = useState(initialData?.postal_code ?? "");
-  const [payoutMethod, setPayoutMethod] = useState<
-    "bank_transfer" | "paypal" | "other" | ""
-  >(
-    (initialData?.payout_method as "bank_transfer" | "paypal" | "other" | "") ??
-      "",
-  );
-  const [payoutDetails, setPayoutDetails] = useState("");
-  const [payoutDetails2, setPayoutDetails2] = useState("");
-  const [payoutDetails3, setPayoutDetails3] = useState("");
+  const [payoutDetails, setPayoutDetails] = useState('');
+  const [payoutDetails2, setPayoutDetails2] = useState('');
+  const [payoutDetails3, setPayoutDetails3] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -57,25 +43,22 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
   // Load existing payout details if available
   useEffect(() => {
     if (initialData?.payout_details_json) {
-      const details = initialData.payout_details_json as Record<
-        string,
-        unknown
-      >;
-      if (initialData.payout_method === "paypal") {
-        setPayoutDetails((details.email as string) ?? "");
-      } else if (initialData.payout_method === "bank_transfer") {
+      const details = initialData.payout_details_json as Record<string, unknown>;
+      if (initialData.payout_method === 'paypal') {
+        setPayoutDetails((details.email as string) ?? '');
+      } else if (initialData.payout_method === 'bank_transfer') {
         // Extract bank details based on what's stored
         if (details.iban) {
           setPayoutDetails(details.iban as string);
         } else {
           // Try to get first field value
           const firstKey = Object.keys(details)[0];
-          if (firstKey && firstKey !== "country_code") {
+          if (firstKey && firstKey !== 'country_code') {
             setPayoutDetails(details[firstKey] as string);
           }
         }
         // Try to get second field
-        const keys = Object.keys(details).filter((k) => k !== "country_code");
+        const keys = Object.keys(details).filter((k) => k !== 'country_code');
         if (keys.length > 1) {
           setPayoutDetails2(details[keys[1]] as string);
         }
@@ -83,7 +66,7 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
           setPayoutDetails3(details[keys[2]] as string);
         }
       } else {
-        setPayoutDetails((details.other as string) ?? "");
+        setPayoutDetails((details.other as string) ?? '');
       }
     }
   }, [initialData]);
@@ -94,41 +77,41 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
 
     // Validate required fields
     if (!fullName.trim()) {
-      setError("Full name is required");
+      setError('Full name is required');
       return;
     }
     if (!countryCode) {
-      setError("Country is required");
+      setError('Country is required');
       return;
     }
     if (!city.trim()) {
-      setError("City is required");
+      setError('City is required');
       return;
     }
     if (!addressLine1.trim()) {
-      setError("Address line 1 is required");
+      setError('Address line 1 is required');
       return;
     }
     if (!postalCode.trim()) {
-      setError("Postal code is required");
+      setError('Postal code is required');
       return;
     }
     if (!payoutMethod) {
-      setError("Payout method is required");
+      setError('Payout method is required');
       return;
     }
 
     // Validate payout details based on method
     let payoutDetailsJson: Record<string, unknown> = {};
-    if (payoutMethod === "paypal") {
-      if (!payoutDetails.trim() || !payoutDetails.includes("@")) {
-        setError("Valid PayPal email is required");
+    if (payoutMethod === 'paypal') {
+      if (!payoutDetails.trim() || !payoutDetails.includes('@')) {
+        setError('Valid PayPal email is required');
         return;
       }
       payoutDetailsJson = { email: payoutDetails.trim() };
-    } else if (payoutMethod === "bank_transfer") {
+    } else if (payoutMethod === 'bank_transfer') {
       if (!payoutDetails.trim()) {
-        setError(`${bankFields?.label1 || "Bank account details"} is required`);
+        setError(`${bankFields?.label1 || 'Bank account details'} is required`);
         return;
       }
       if (bankFields?.label2 && !payoutDetails2.trim()) {
@@ -141,23 +124,20 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
       }
 
       // Store bank details - format depends on country
-      if (bankFields?.label1 === "IBAN") {
+      if (bankFields?.label1 === 'IBAN') {
         payoutDetailsJson = {
-          iban: payoutDetails.trim().replace(/\s/g, "").toUpperCase(),
+          iban: payoutDetails.trim().replace(/\s/g, '').toUpperCase(),
         };
       } else {
         // Store country-specific fields
-        const field1Key =
-          bankFields?.label1?.toLowerCase().replace(/\s/g, "_") ?? "";
+        const field1Key = bankFields?.label1?.toLowerCase().replace(/\s/g, '_') ?? '';
         payoutDetailsJson[field1Key] = payoutDetails.trim();
         if (bankFields?.label2 && payoutDetails2.trim()) {
-          const field2Key =
-            bankFields?.label2?.toLowerCase().replace(/\s/g, "_") ?? "";
+          const field2Key = bankFields?.label2?.toLowerCase().replace(/\s/g, '_') ?? '';
           payoutDetailsJson[field2Key] = payoutDetails2.trim();
         }
         if (bankFields?.label3 && payoutDetails3.trim()) {
-          const field3Key =
-            bankFields?.label3?.toLowerCase().replace(/\s/g, "_") ?? "";
+          const field3Key = bankFields?.label3?.toLowerCase().replace(/\s/g, '_') ?? '';
           payoutDetailsJson[field3Key] = payoutDetails3.trim();
         }
         // Store country for reference
@@ -165,7 +145,7 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
       }
     } else {
       if (!payoutDetails.trim()) {
-        setError("Account details are required");
+        setError('Account details are required');
         return;
       }
       payoutDetailsJson = { other: payoutDetails.trim() };
@@ -181,14 +161,14 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
           address_line2: addressLine2.trim() || null,
           state_or_region: stateOrRegion.trim() || null,
           postal_code: postalCode.trim(),
-          payout_method: payoutMethod as "bank_transfer" | "paypal" | "other",
+          payout_method: payoutMethod as 'bank_transfer' | 'paypal' | 'other',
           payout_details_json: payoutDetailsJson,
           is_payout_profile_complete: true,
         });
-        router.push("/dashboard/photographer/profile");
+        router.push('/dashboard/photographer/profile');
         router.refresh();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to save profile");
+        setError(err instanceof Error ? err.message : 'Failed to save profile');
       }
     });
   };
@@ -312,9 +292,9 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
               value={payoutMethod}
               onValueChange={(value) => {
                 setPayoutMethod(value as typeof payoutMethod);
-                setPayoutDetails("");
-                setPayoutDetails2("");
-                setPayoutDetails3("");
+                setPayoutDetails('');
+                setPayoutDetails2('');
+                setPayoutDetails3('');
               }}
               disabled={isPending}
               required
@@ -333,18 +313,18 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
           {payoutMethod && (
             <div className="space-y-2">
               <Label htmlFor="payoutDetails">
-                {payoutMethod === "paypal"
-                  ? "PayPal Email *"
-                  : payoutMethod === "bank_transfer" && bankFields
+                {payoutMethod === 'paypal'
+                  ? 'PayPal Email *'
+                  : payoutMethod === 'bank_transfer' && bankFields
                     ? `${bankFields.label1} *`
-                    : "Account Details *"}
+                    : 'Account Details *'}
               </Label>
               <Input
                 id="payoutDetails"
-                type={payoutMethod === "paypal" ? "email" : "text"}
+                type={payoutMethod === 'paypal' ? 'email' : 'text'}
                 value={payoutDetails}
                 onChange={(e) => {
-                  if (payoutMethod === "bank_transfer" && bankFields?.format1) {
+                  if (payoutMethod === 'bank_transfer' && bankFields?.format1) {
                     const formatted = bankFields.format1(e.target.value);
                     setPayoutDetails(formatted);
                   } else {
@@ -352,16 +332,16 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
                   }
                 }}
                 placeholder={
-                  payoutMethod === "paypal"
-                    ? "your@email.com"
-                    : payoutMethod === "bank_transfer" && bankFields
+                  payoutMethod === 'paypal'
+                    ? 'your@email.com'
+                    : payoutMethod === 'bank_transfer' && bankFields
                       ? bankFields.placeholder1
-                      : "Account details"
+                      : 'Account details'
                 }
                 disabled={isPending}
                 required
               />
-              {payoutMethod === "bank_transfer" && bankFields?.label2 && (
+              {payoutMethod === 'bank_transfer' && bankFields?.label2 && (
                 <div className="mt-2 space-y-2">
                   <Label htmlFor="payoutDetails2">{bankFields.label2} *</Label>
                   <Input
@@ -374,13 +354,13 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
                         : e.target.value;
                       setPayoutDetails2(formatted);
                     }}
-                    placeholder={bankFields.placeholder2 || ""}
+                    placeholder={bankFields.placeholder2 || ''}
                     disabled={isPending}
                     required
                   />
                 </div>
               )}
-              {payoutMethod === "bank_transfer" && bankFields?.label3 && (
+              {payoutMethod === 'bank_transfer' && bankFields?.label3 && (
                 <div className="mt-2 space-y-2">
                   <Label htmlFor="payoutDetails3">{bankFields.label3} *</Label>
                   <Input
@@ -393,18 +373,18 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
                         : e.target.value;
                       setPayoutDetails3(formatted);
                     }}
-                    placeholder={bankFields.placeholder3 || ""}
+                    placeholder={bankFields.placeholder3 || ''}
                     disabled={isPending}
                     required
                   />
                 </div>
               )}
               <p className="text-xs text-muted-foreground">
-                {payoutMethod === "paypal"
+                {payoutMethod === 'paypal'
                   ? "We'll send payments to this PayPal email"
-                  : payoutMethod === "bank_transfer"
-                    ? "Your bank account details for receiving payments"
-                    : "Provide details for your preferred payout method"}
+                  : payoutMethod === 'bank_transfer'
+                    ? 'Your bank account details for receiving payments'
+                    : 'Provide details for your preferred payout method'}
               </p>
             </div>
           )}
@@ -418,16 +398,11 @@ export function PayoutProfileForm({ initialData }: PayoutProfileFormProps) {
       )}
 
       <div className="flex justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-          disabled={isPending}
-        >
+        <Button type="button" variant="outline" onClick={() => router.back()} disabled={isPending}>
           Cancel
         </Button>
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving..." : "Complete Profile"}
+          {isPending ? 'Saving...' : 'Complete Profile'}
         </Button>
       </div>
     </form>

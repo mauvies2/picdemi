@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { ArrowRight, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { createBillingCheckoutAction } from "@/app/dashboard/photographer/billing/actions";
-import { Button } from "@/components/ui/button";
+import { ArrowRight, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
+import { createBillingCheckoutAction } from '@/app/dashboard/photographer/billing/actions';
+import { Button } from '@/components/ui/button';
 
 interface PricingPlanButtonProps {
-  planId: "free" | "amateur" | "pro";
+  planId: 'free' | 'amateur' | 'pro';
   isFree: boolean;
   isAuthenticated?: boolean;
   className?: string;
@@ -48,7 +48,7 @@ export function PricingPlanButton({
           size="lg"
           className="w-full justify-center gap-2 text-sm font-medium tracking-tight bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          {planId === "amateur" ? "Get Amateur" : "Go Pro"}
+          {planId === 'amateur' ? 'Get Amateur' : 'Go Pro'}
           <ArrowRight className="h-4 w-4" />
         </Button>
       </Link>
@@ -59,20 +59,18 @@ export function PricingPlanButton({
   const handleUpgrade = () => {
     startTransition(async () => {
       try {
-        const result = await createBillingCheckoutAction(
-          planId as "amateur" | "pro",
-        );
+        const result = await createBillingCheckoutAction(planId as 'amateur' | 'pro');
 
-        if ("url" in result) {
+        if ('url' in result) {
           // Redirect to Stripe Checkout
           window.location.href = result.url;
         } else if (result.updated) {
           // Subscription was updated directly
-          router.push("/dashboard/photographer/settings?updated=true");
+          router.push('/dashboard/photographer/settings?updated=true');
         }
       } catch (error) {
         // On error, redirect to signup as fallback
-        console.error("Checkout error:", error);
+        console.error('Checkout error:', error);
         router.push(`/signup?plan=${planId}`);
       }
     });
@@ -85,12 +83,12 @@ export function PricingPlanButton({
       onClick={handleUpgrade}
       disabled={isPending}
       className={[
-        "w-full justify-center gap-2 text-sm font-medium tracking-tight",
-        "bg-primary text-primary-foreground hover:bg-primary/90",
+        'w-full justify-center gap-2 text-sm font-medium tracking-tight',
+        'bg-primary text-primary-foreground hover:bg-primary/90',
         className,
       ]
         .filter(Boolean)
-        .join(" ")}
+        .join(' ')}
     >
       {isPending ? (
         <>
@@ -99,7 +97,7 @@ export function PricingPlanButton({
         </>
       ) : (
         <>
-          {planId === "amateur" ? "Get Amateur" : "Go Pro"}
+          {planId === 'amateur' ? 'Get Amateur' : 'Go Pro'}
           <ArrowRight className="h-4 w-4" />
         </>
       )}

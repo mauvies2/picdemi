@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { format } from "date-fns";
+import { format } from 'date-fns';
 import {
   Calendar,
   Image as ImageIcon,
@@ -9,14 +9,14 @@ import {
   Trash2,
   UserPlus,
   X,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import { createGuestCheckoutSessionAction } from "@/app/cart/actions";
-import { useGuestCart } from "@/components/guest-cart-provider";
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { createGuestCheckoutSessionAction } from '@/app/cart/actions';
+import { useGuestCart } from '@/components/guest-cart-provider';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,14 +27,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 export function GuestCartContent() {
   const { items, removeItem, clearCart, subtotalCents } = useGuestCart();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const canceled = searchParams.get("canceled") === "true";
+  const canceled = searchParams.get('canceled') === 'true';
   const [isPending, startTransition] = useTransition();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
@@ -45,18 +45,13 @@ export function GuestCartContent() {
         const { url } = await createGuestCheckoutSessionAction(items);
         window.location.href = url;
       } catch (err) {
-        toast.error(
-          err instanceof Error
-            ? err.message
-            : "Checkout failed. Please try again.",
-        );
+        toast.error(err instanceof Error ? err.message : 'Checkout failed. Please try again.');
         setIsCheckingOut(false);
       }
     });
   };
 
-  const formatPrice = (cents: number) =>
-    cents === 0 ? "Free" : `$${(cents / 100).toFixed(2)}`;
+  const formatPrice = (cents: number) => (cents === 0 ? 'Free' : `$${(cents / 100).toFixed(2)}`);
 
   if (items.length === 0) {
     return (
@@ -71,7 +66,7 @@ export function GuestCartContent() {
         <p className="text-sm text-muted-foreground mb-6 max-w-md">
           Browse events to find and add your photos.
         </p>
-        <Button onClick={() => router.push("/events")}>Browse Events</Button>
+        <Button onClick={() => router.push('/events')}>Browse Events</Button>
       </div>
     );
   }
@@ -104,7 +99,7 @@ export function GuestCartContent() {
       {/* Header row */}
       <div className="flex items-center justify-between mb-1">
         <p className="text-sm text-muted-foreground">
-          {items.length} {items.length === 1 ? "item" : "items"}
+          {items.length} {items.length === 1 ? 'item' : 'items'}
         </p>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -151,7 +146,7 @@ export function GuestCartContent() {
                 {item.previewUrl ? (
                   <Image
                     src={item.previewUrl}
-                    alt={item.eventName ?? "Photo"}
+                    alt={item.eventName ?? 'Photo'}
                     fill
                     className="object-cover transition-transform group-hover:scale-105"
                     sizes="128px"
@@ -174,9 +169,7 @@ export function GuestCartContent() {
                   {item.eventDate && (
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Calendar className="h-3.5 w-3.5" />
-                      <span>
-                        {format(new Date(item.eventDate), "MMM d, yyyy")}
-                      </span>
+                      <span>{format(new Date(item.eventDate), 'MMM d, yyyy')}</span>
                     </div>
                   )}
                 </div>
@@ -205,16 +198,13 @@ export function GuestCartContent() {
           <div className="sticky top-4 self-start rounded-lg border border-border bg-card p-6 shadow-lg">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-muted-foreground">
-                  Subtotal
-                </span>
+                <span className="text-sm font-medium text-muted-foreground">Subtotal</span>
                 <span className="text-2xl font-bold text-foreground">
                   {formatPrice(subtotalCents)}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Your email will be collected during checkout to send your
-                download link.
+                Your email will be collected during checkout to send your download link.
               </p>
               <div className="pt-4 border-t border-border">
                 <Button
@@ -229,7 +219,7 @@ export function GuestCartContent() {
                       Processing...
                     </>
                   ) : (
-                    "Proceed to Checkout"
+                    'Proceed to Checkout'
                   )}
                 </Button>
                 <p className="text-xs text-center text-muted-foreground mt-3">
@@ -245,12 +235,8 @@ export function GuestCartContent() {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card shadow-lg">
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-muted-foreground">
-              Subtotal
-            </span>
-            <span className="text-lg font-bold text-foreground">
-              {formatPrice(subtotalCents)}
-            </span>
+            <span className="text-sm font-medium text-muted-foreground">Subtotal</span>
+            <span className="text-lg font-bold text-foreground">{formatPrice(subtotalCents)}</span>
           </div>
           <Button
             className="w-full"
@@ -264,7 +250,7 @@ export function GuestCartContent() {
                 Processing...
               </>
             ) : (
-              "Proceed to Checkout"
+              'Proceed to Checkout'
             )}
           </Button>
         </div>

@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import {
   createAISearchProfile,
@@ -6,25 +6,19 @@ import {
   getAISearchProfile,
   getAISearchProfiles,
   updateAISearchProfile,
-} from "@/database/queries/ai-search-profiles";
-import {
-  getAISearchUsageCount,
-  incrementAISearchUsage,
-} from "@/database/queries/ai-search-usage";
+} from '@/database/queries/ai-search-profiles';
+import { getAISearchUsageCount, incrementAISearchUsage } from '@/database/queries/ai-search-usage';
 import {
   findSimilarPhotos,
   type SimilaritySearchFilters,
-} from "@/database/queries/ai-similarity-search";
-import { getProfile } from "@/database/queries/profiles";
-import { getSubscription } from "@/database/queries/subscriptions";
-import { tagPhotosForTalent } from "@/database/queries/talent-photo-tags";
-import { createClient } from "@/database/server";
-import { generateImageEmbedding } from "@/lib/ai/embedding-provider";
-import {
-  getRateLimitForPlan,
-  hasExceededRateLimit,
-} from "@/lib/ai/rate-limits";
-import type { PlanId } from "@/lib/plans";
+} from '@/database/queries/ai-similarity-search';
+import { getProfile } from '@/database/queries/profiles';
+import { getSubscription } from '@/database/queries/subscriptions';
+import { tagPhotosForTalent } from '@/database/queries/talent-photo-tags';
+import { createClient } from '@/database/server';
+import { generateImageEmbedding } from '@/lib/ai/embedding-provider';
+import { getRateLimitForPlan, hasExceededRateLimit } from '@/lib/ai/rate-limits';
+import type { PlanId } from '@/lib/plans';
 
 export interface AISearchProfile {
   id: string;
@@ -82,7 +76,7 @@ export async function getMyAISearchProfiles(): Promise<AISearchProfile[]> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to view AI search profiles.");
+    throw new Error('You must be signed in to view AI search profiles.');
   }
 
   const profiles = await getAISearchProfiles(supabase, user.id);
@@ -103,16 +97,14 @@ export async function getMyAISearchProfiles(): Promise<AISearchProfile[]> {
 /**
  * Get a single AI search profile
  */
-export async function getMyAISearchProfile(
-  profileId: string,
-): Promise<AISearchProfile | null> {
+export async function getMyAISearchProfile(profileId: string): Promise<AISearchProfile | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to view AI search profiles.");
+    throw new Error('You must be signed in to view AI search profiles.');
   }
 
   const profile = await getAISearchProfile(supabase, profileId, user.id);
@@ -145,15 +137,13 @@ export async function createMyAISearchProfile(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to create AI search profiles.");
+    throw new Error('You must be signed in to create AI search profiles.');
   }
 
   // Generate embedding from selfie if provided
   let embedding: number[] | null = null;
   if (input.selfieFile) {
-    const { embedding: generatedEmbedding } = await generateImageEmbedding(
-      input.selfieFile,
-    );
+    const { embedding: generatedEmbedding } = await generateImageEmbedding(input.selfieFile);
     embedding = generatedEmbedding;
   }
 
@@ -193,15 +183,13 @@ export async function updateMyAISearchProfile(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to update AI search profiles.");
+    throw new Error('You must be signed in to update AI search profiles.');
   }
 
   // Generate embedding from selfie if provided
   let embedding: number[] | undefined;
   if (input.selfieFile) {
-    const { embedding: generatedEmbedding } = await generateImageEmbedding(
-      input.selfieFile,
-    );
+    const { embedding: generatedEmbedding } = await generateImageEmbedding(input.selfieFile);
     embedding = generatedEmbedding;
   }
 
@@ -229,12 +217,7 @@ export async function updateMyAISearchProfile(
     updateData.date_to = input.date_to;
   }
 
-  const profile = await updateAISearchProfile(
-    supabase,
-    profileId,
-    user.id,
-    updateData,
-  );
+  const profile = await updateAISearchProfile(supabase, profileId, user.id, updateData);
 
   return {
     id: profile.id,
@@ -252,16 +235,14 @@ export async function updateMyAISearchProfile(
 /**
  * Delete an AI search profile
  */
-export async function deleteMyAISearchProfile(
-  profileId: string,
-): Promise<void> {
+export async function deleteMyAISearchProfile(profileId: string): Promise<void> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to delete AI search profiles.");
+    throw new Error('You must be signed in to delete AI search profiles.');
   }
 
   await deleteAISearchProfile(supabase, profileId, user.id);
@@ -282,12 +263,12 @@ export async function checkAISearchAvailability(): Promise<{
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to check AI search availability.");
+    throw new Error('You must be signed in to check AI search availability.');
   }
 
   // Get user's subscription
   const subscription = await getSubscription(supabase, user.id);
-  const planId: PlanId = subscription?.plan_id ?? "free";
+  const planId: PlanId = subscription?.plan_id ?? 'free';
 
   // Get current usage
   const currentUsage = await getAISearchUsageCount(supabase, user.id);
@@ -323,7 +304,7 @@ export async function runAISimilaritySearch(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to run AI similarity search.");
+    throw new Error('You must be signed in to run AI similarity search.');
   }
 
   // Check rate limit before proceeding
@@ -341,17 +322,16 @@ export async function runAISimilaritySearch(
   if (profileId) {
     const profile = await getAISearchProfile(supabase, profileId, user.id);
     if (!profile) {
-      throw new Error("AI search profile not found.");
+      throw new Error('AI search profile not found.');
     }
     if (!profile.selfie_embedding) {
-      throw new Error("Profile does not have a selfie embedding.");
+      throw new Error('Profile does not have a selfie embedding.');
     }
     embedding = profile.selfie_embedding;
 
     // Merge profile filters with provided filters (provided filters take precedence)
     searchFilters = {
-      activity_type:
-        filters?.activity_type ?? profile.activity_type ?? undefined,
+      activity_type: filters?.activity_type ?? profile.activity_type ?? undefined,
       country: filters?.country ?? profile.country ?? undefined,
       region: filters?.region ?? profile.region ?? undefined,
       date_from: filters?.date_from ?? profile.date_from ?? undefined,
@@ -361,8 +341,7 @@ export async function runAISimilaritySearch(
     };
   } else {
     // Generate embedding from selfie file
-    const { embedding: generatedEmbedding } =
-      await generateImageEmbedding(selfieFile);
+    const { embedding: generatedEmbedding } = await generateImageEmbedding(selfieFile);
     embedding = generatedEmbedding;
   }
 
@@ -374,7 +353,7 @@ export async function runAISimilaritySearch(
 
   // Get updated limit info
   const subscription = await getSubscription(supabase, user.id);
-  const planId: PlanId = subscription?.plan_id ?? "free";
+  const planId: PlanId = subscription?.plan_id ?? 'free';
   const rateLimit = getRateLimitForPlan(planId);
 
   return {
@@ -400,16 +379,14 @@ export async function runAISimilaritySearch(
  * Add matched photos to "Photos of You" (create talent_photo_tags)
  * This allows users to add AI-matched photos to their library
  */
-export async function addMatchedPhotosToLibrary(
-  photoIds: string[],
-): Promise<{ added: number }> {
+export async function addMatchedPhotosToLibrary(photoIds: string[]): Promise<{ added: number }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be signed in to add photos to your library.");
+    throw new Error('You must be signed in to add photos to your library.');
   }
 
   if (photoIds.length === 0) {

@@ -1,15 +1,8 @@
-"use client";
+'use client';
 
-import {
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Settings,
-  User,
-} from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Bell, ChevronsUpDown, CreditCard, LogOut, Settings, User } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,15 +11,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 
-type RoleSlug = "photographer" | "talent";
+type RoleSlug = 'photographer' | 'talent';
 
 export function NavUser({
   user,
@@ -44,19 +37,17 @@ export function NavUser({
   const pathname = usePathname();
 
   const handleLogout = async () => {
-    await fetch("/auth/signout", { method: "POST" });
-    router.push("/");
+    await fetch('/auth/signout', { method: 'POST' });
+    router.push('/');
     router.refresh();
   };
 
   const profileUrl =
-    activeRole === "photographer"
-      ? "/dashboard/photographer/profile"
-      : "/dashboard/talent/profile";
+    activeRole === 'photographer' ? '/dashboard/photographer/profile' : '/dashboard/talent/profile';
   const settingsUrl =
-    activeRole === "photographer"
-      ? "/dashboard/photographer/settings"
-      : "/dashboard/talent/settings";
+    activeRole === 'photographer'
+      ? '/dashboard/photographer/settings'
+      : '/dashboard/talent/settings';
 
   const isProfileActive = pathname.startsWith(profileUrl);
   const isSettingsActive = pathname.startsWith(settingsUrl);
@@ -73,7 +64,7 @@ export function NavUser({
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
                 <AvatarFallback className="rounded-lg">
-                  {user.name?.charAt(0).toUpperCase() ?? "U"}
+                  {user.name?.charAt(0).toUpperCase() ?? 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -85,7 +76,7 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -94,14 +85,12 @@ export function NavUser({
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
                   <AvatarFallback className="rounded-lg">
-                    {user.name?.charAt(0).toUpperCase() ?? "U"}
+                    {user.name?.charAt(0).toUpperCase() ?? 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {user.email}
-                  </span>
+                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -109,14 +98,14 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem
                 onClick={() => router.push(profileUrl)}
-                className={isProfileActive ? "bg-accent" : ""}
+                className={isProfileActive ? 'bg-accent' : ''}
               >
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => router.push(settingsUrl)}
-                className={isSettingsActive ? "bg-accent" : ""}
+                className={isSettingsActive ? 'bg-accent' : ''}
               >
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
@@ -124,11 +113,9 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {activeRole === "photographer" && (
+              {activeRole === 'photographer' && (
                 <DropdownMenuItem
-                  onClick={() =>
-                    router.push("/dashboard/photographer/settings?tab=billing")
-                  }
+                  onClick={() => router.push('/dashboard/photographer/settings?tab=billing')}
                 >
                   <CreditCard className="mr-2 h-4 w-4" />
                   <span>Billing</span>

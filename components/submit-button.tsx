@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useFormStatus } from "react-dom";
-import { Button, type ButtonProps } from "./ui/button";
-import { Spinner } from "./ui/spinner";
+import { useFormStatus } from 'react-dom';
+import { Button, type ButtonProps } from './ui/button';
+import { Spinner } from './ui/spinner';
 
 export function SubmitButton({ children, ...props }: ButtonProps) {
   const { pending, action } = useFormStatus();
