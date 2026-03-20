@@ -3,7 +3,6 @@
 import {
   CalendarDays,
   CalendarPlus,
-  Camera,
   Compass,
   Home,
   Images,
@@ -16,21 +15,10 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { type ComponentProps, type FC, useOptimistic, useTransition } from 'react';
-import { switchRole } from '@/app/actions/roles';
+import type { ComponentProps } from 'react';
 import { NavMains } from './nav-main';
 import { NavSecondary } from './nav-secondary';
-import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar } from './ui/sidebar';
-
-type RoleSlug = 'photographer' | 'talent';
+import { Sidebar, SidebarContent, SidebarHeader } from './ui/sidebar';
 
 const photographerNav = [
   { title: 'Overview', url: '/dashboard/photographer', icon: Home },
@@ -79,118 +67,12 @@ const navSecondary = [
   },
 ];
 
-const RoleSwitcher: FC<{
-  activeRole: RoleSlug;
-}> = ({ activeRole }) => {
-  const router = useRouter();
-  const { state } = useSidebar();
-  const [optimisticRole, addOptimisticRole] = useOptimistic<RoleSlug, RoleSlug>(
-    activeRole,
-    (_, role) => role,
-  );
-  const [isPending, startTransition] = useTransition();
-
-  const onSelect = (role: RoleSlug) => {
-    if (role === optimisticRole) return;
-    startTransition(async () => {
-      addOptimisticRole(role);
-      try {
-        const result = await switchRole(role);
-        addOptimisticRole(result.activeRole);
-        // Redirect to the correct dashboard homepage
-        const dashboardPath =
-          role === 'photographer' ? '/dashboard/photographer' : '/dashboard/talent';
-        router.push(dashboardPath);
-      } catch (error) {
-        console.error(error);
-        addOptimisticRole(activeRole);
-      } finally {
-        router.refresh();
-      }
-    });
-  };
-
-  const currentRole = optimisticRole;
-  const roleStyles: Record<string, { bg: string; color: string }> = {
-    photographer: {
-      bg: 'bg-role-photographer',
-      color: 'text-primary-foreground',
-    },
-    talent: {
-      bg: 'bg-role-talent',
-      color: 'text-primary-foreground',
-    },
-  };
-
-  const { bg, color } = roleStyles[currentRole] ?? roleStyles.talent;
-
-  if (state === 'collapsed') {
-    const Icon = currentRole === 'photographer' ? Camera : User;
-
-    return (
-      <div className="flex justify-center pb-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className={`h-8 w-8 rounded-full p-2 transition-opacity ${color} ${bg} hover:text-white ${isPending ? 'opacity-70' : ''}`}
-              disabled={isPending}
-            >
-              <Icon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-40">
-            <DropdownMenuItem onClick={() => onSelect('photographer')}>
-              Photographer
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onSelect('talent')}>Talent</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    );
-  }
-
-  return (
-    <div className="pb-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className={`w-full justify-start gap-2 transition-opacity ${color} ${bg} border-transparent hover:text-white ${
-              isPending ? 'opacity-70' : ''
-            }`}
-            disabled={isPending}
-          >
-            {currentRole === 'photographer' ? (
-              <>
-                <Camera className="h-4 w-4" />
-                <span>Photographer</span>
-              </>
-            ) : (
-              <>
-                <User className="h-4 w-4" />
-                <span>Talent</span>
-              </>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-40">
-          <DropdownMenuItem onClick={() => onSelect('photographer')}>Photographer</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSelect('talent')}>Talent</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-};
-
 export function AppSidebar({
   activeRole,
-  user,
+  user: _user,
   ...props
 }: ComponentProps<typeof Sidebar> & {
-  activeRole: RoleSlug;
+  activeRole: 'photographer' | 'talent';
   user: {
     name: string;
     email: string;
@@ -212,9 +94,6 @@ export function AppSidebar({
         <NavMains items={navItems} />
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
-      <SidebarFooter>
-        <RoleSwitcher activeRole={activeRole} />
-      </SidebarFooter>
     </Sidebar>
   );
 }

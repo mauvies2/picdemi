@@ -1,19 +1,25 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { CalendarIcon, Search, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 import { createPortal } from 'react-dom';
 import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 interface EventSearchBarProps {
   variant?: 'hero' | 'compact';
   initialWhere?: string;
   initialActivity?: string;
-  onSearch?: (where: string, activity: string) => void;
+  initialDateFrom?: string;
+  initialDateTo?: string;
+  onSearch?: (where: string, activity: string, dateFrom: string, dateTo: string) => void;
   searchHref?: string;
   className?: string;
 }
@@ -150,16 +156,42 @@ function useActivityCombobox(initialActivity: string, sortedActivities: Activity
   };
 }
 
+function parseDateStr(s: string): Date | undefined {
+  if (!s) return undefined;
+  try {
+    return parseISO(s);
+  } catch {
+    return undefined;
+  }
+}
+
+function whenLabel(from: Date | undefined, to: Date | undefined): string | null {
+  if (from && to) return `${format(from, 'MMM d')} – ${format(to, 'MMM d')}`;
+  if (from) return `From ${format(from, 'MMM d')}`;
+  if (to) return `Until ${format(to, 'MMM d')}`;
+  return null;
+}
+
 export function EventSearchBar({
   variant = 'hero',
   initialWhere = '',
   initialActivity = '',
+  initialDateFrom = '',
+  initialDateTo = '',
   onSearch,
   searchHref = '/events',
   className,
 }: EventSearchBarProps) {
   const router = useRouter();
   const [where, setWhere] = useState(initialWhere);
+  const whereRef = useRef<HTMLInputElement>(null);
+  const activityInputRef = useRef<HTMLInputElement>(null);
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const from = parseDateStr(initialDateFrom);
+    const to = parseDateStr(initialDateTo);
+    return from || to ? { from, to } : undefined;
+  });
 
   const sortedActivities = useMemo(
     () => [...activityOptions].sort((a, b) => a.label.localeCompare(b.label)),
@@ -172,36 +204,58 @@ export function EventSearchBar({
     const validatedActivity = activity.validate();
     if (validatedActivity === null) return;
 
+    const df = dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : '';
+    const dt = dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : '';
+
     if (onSearch) {
-      onSearch(where, validatedActivity);
+      onSearch(where, validatedActivity, df, dt);
       return;
     }
     const params = new URLSearchParams();
     if (where.trim()) params.set('where', where.trim());
     if (validatedActivity) params.set('activity', validatedActivity);
+    if (df) params.set('dateFrom', df);
+    if (dt) params.set('dateTo', dt);
     router.push(`${searchHref}?${params.toString()}`);
-  }, [activity, where, onSearch, searchHref, router]);
+  }, [activity, where, dateRange, onSearch, searchHref, router]);
+
+  const label = whenLabel(dateRange?.from, dateRange?.to);
 
   if (variant === 'hero') {
     return (
-      <div className={cn('w-full max-w-xl', className)}>
+      <div className={cn('w-full max-w-2xl', className)}>
         <div className="rounded-2xl pl-3 sm:rounded-full border-2 bg-background shadow-md">
           <div className="flex flex-col sm:flex-row sm:items-stretch">
             {/* Where */}
-            <div className="flex-1 px-4 pt-4 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start">
+            <div className="relative flex-1 px-4 pt-4 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Where
               </p>
-              <input
-                id="event-search-where"
-                name="where"
-                type="text"
-                placeholder="Add location or event name"
-                value={where}
-                onChange={(e) => setWhere(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full h-auto outline-none p-0 mt-0.5 text-base text-muted-foreground font-medium focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/40"
-              />
+              <div className="flex w-full items-center gap-1">
+                <input
+                  ref={whereRef}
+                  id="event-search-where"
+                  name="where"
+                  type="text"
+                  placeholder="Add location or event name"
+                  value={where}
+                  onChange={(e) => setWhere(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  className="min-w-0 flex-1 h-auto outline-none p-0 mt-0.5 text-base text-muted-foreground font-medium focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/40"
+                />
+                {where && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWhere('');
+                      whereRef.current?.focus();
+                    }}
+                    className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="hidden sm:block w-px bg-border self-stretch my-4" />
@@ -215,27 +269,42 @@ export function EventSearchBar({
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Activity
               </p>
-              <input
-                id="event-search-activity"
-                name="activity"
-                type="text"
-                placeholder="Any activity"
-                value={activity.inputValue}
-                onChange={(e) => {
-                  activity.setInputValue(e.target.value);
-                  activity.setOpen(true);
-                }}
-                onFocus={() => activity.setOpen(true)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSearch();
-                  if (e.key === 'Escape') activity.setOpen(false);
-                }}
-                className={cn(
-                  'mt-0.5 text-base text-muted-foreground bg-transparent outline-none w-full placeholder:text-muted-foreground/40 transition-all',
-                  activity.error &&
-                    'animate-[shake_0.35s_ease-in-out] text-destructive placeholder:text-destructive/40',
+              <div className="flex w-full items-center gap-1">
+                <input
+                  ref={activityInputRef}
+                  id="event-search-activity"
+                  name="activity"
+                  type="text"
+                  placeholder="Any activity"
+                  value={activity.inputValue}
+                  onChange={(e) => {
+                    activity.setInputValue(e.target.value);
+                    activity.setOpen(true);
+                  }}
+                  onFocus={() => activity.setOpen(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSearch();
+                    if (e.key === 'Escape') activity.setOpen(false);
+                  }}
+                  className={cn(
+                    'mt-0.5 text-base text-muted-foreground bg-transparent outline-none min-w-0 flex-1 placeholder:text-muted-foreground/40 transition-all',
+                    activity.error &&
+                      'animate-[shake_0.35s_ease-in-out] text-destructive placeholder:text-destructive/40',
+                  )}
+                />
+                {activity.inputValue && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      activity.clear();
+                      activityInputRef.current?.focus();
+                    }}
+                    className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 )}
-              />
+              </div>
               {activity.open && activity.filtered.length > 0 && typeof document !== 'undefined' && (
                 <ActivityDropdown
                   filtered={activity.filtered}
@@ -243,6 +312,55 @@ export function EventSearchBar({
                   onSelect={activity.select}
                 />
               )}
+            </div>
+
+            <div className="hidden sm:block w-px bg-border self-stretch my-4" />
+            <div className="sm:hidden h-px bg-border mx-5 mt-2" />
+
+            {/* When */}
+            <div className="relative flex-1 px-5 pt-3 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
+                When
+              </p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="mt-0.5 flex w-full items-center gap-1 text-left outline-none"
+                  >
+                    <span
+                      className={cn(
+                        'flex-1 truncate text-base font-medium',
+                        label ? 'text-muted-foreground' : 'text-muted-foreground/40',
+                      )}
+                    >
+                      {label ?? 'Any dates'}
+                    </span>
+                    {label ? (
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setDateRange(undefined);
+                        }}
+                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    ) : (
+                      <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start" sideOffset={12}>
+                  <Calendar
+                    mode="range"
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={1}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Search button */}
@@ -289,18 +407,34 @@ export function EventSearchBar({
         className,
       )}
     >
-      <Input
-        id="event-search-where-compact"
-        name="where"
-        placeholder="Where..."
-        value={where}
-        onChange={(e) => setWhere(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        className="h-6 w-24 border-0 p-0 text-sm focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/50"
-      />
+      <div className="flex items-center gap-1">
+        <Input
+          ref={whereRef}
+          id="event-search-where-compact"
+          name="where"
+          placeholder="Where..."
+          value={where}
+          onChange={(e) => setWhere(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          className="h-6 w-24 border-0 p-0 text-sm focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/50"
+        />
+        {where && (
+          <button
+            type="button"
+            onClick={() => {
+              setWhere('');
+              whereRef.current?.focus();
+            }}
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
       <div className="w-px h-4 bg-border shrink-0" />
-      <div ref={activity.containerRef} className="relative">
+      <div ref={activity.containerRef} className="relative flex items-center gap-1">
         <input
+          ref={activityInputRef}
           id="event-search-activity-compact"
           name="activity"
           placeholder="Activity..."
@@ -319,6 +453,18 @@ export function EventSearchBar({
             activity.error && 'text-destructive',
           )}
         />
+        {activity.inputValue && (
+          <button
+            type="button"
+            onClick={() => {
+              activity.clear();
+              activityInputRef.current?.focus();
+            }}
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
         {activity.open && activity.filtered.length > 0 && typeof document !== 'undefined' && (
           <ActivityDropdown
             filtered={activity.filtered}

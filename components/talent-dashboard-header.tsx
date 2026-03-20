@@ -68,7 +68,7 @@ export function TalentDashboardHeader({
           </nav>
 
           {/* Right: Cart + User Avatar + Mobile hamburger */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-3">
             <CartLinkButton />
             <DashboardUserMenu user={user} activeRole={activeRole} />
             <button

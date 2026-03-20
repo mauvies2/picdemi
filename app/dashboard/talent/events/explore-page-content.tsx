@@ -71,8 +71,9 @@ export function ExplorePageContent({
         setIsFilterModalOpen={search.setIsFilterModalOpen}
         handleFilterChange={search.handleFilterChange}
         clearFilters={search.clearFilters}
-        clearDateFilters={search.clearDateFilters}
         setHasSearched={search.setHasSearched}
+        photographerQuery={search.photographerQuery}
+        setPhotographerQuery={search.setPhotographerQuery}
       />
 
       <EventGrid

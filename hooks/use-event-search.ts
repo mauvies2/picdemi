@@ -80,6 +80,7 @@ export function useEventSearch({
   const [sortBy, setSortBy] = useState<SortBy>('date_desc');
   const [dateFrom, setDateFrom] = useState(initialDateFrom ?? '');
   const [dateTo, setDateTo] = useState(initialDateTo ?? '');
+  const [photographerQuery, setPhotographerQuery] = useState('');
   const [events, setEvents] = useState<EventWithStats[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, startTransition] = useTransition();
@@ -107,7 +108,7 @@ export function useEventSearch({
           .join(', ')
       : null;
 
-  const skeletonKeys = useMemo(() => Array.from({ length: 8 }, (_, i) => `skeleton-${i}`), []);
+  const skeletonKeys = useMemo(() => Array.from({ length: 4 }, (_, i) => `skeleton-${i}`), []);
 
   const sortedActivityOptions = useMemo(
     () => [...activityOptions].sort((a, b) => a.label.localeCompare(b.label)),
@@ -197,6 +198,7 @@ export function useEventSearch({
           sortBy,
           limit: LIMIT,
           offset: 0,
+          photographerQuery: photographerQuery.trim() || undefined,
         });
         setEvents(
           result.events.map((e) => ({
@@ -224,6 +226,7 @@ export function useEventSearch({
     dateTo,
     sortBy,
     searchTrigger,
+    photographerQuery,
   ]);
 
   const hasMore = events.length < total;
@@ -233,15 +236,18 @@ export function useEventSearch({
     (selectedCity && selectedCity !== 'all') ||
     (selectedCountry && selectedCountry !== 'all') ||
     !!dateFrom ||
-    !!dateTo;
+    !!dateTo ||
+    !!photographerQuery;
 
   const activeFilterCount =
     (selectedActivity !== 'all' ? 1 : 0) +
     (selectedCity !== 'all' ? 1 : 0) +
     (selectedCountry !== 'all' ? 1 : 0) +
-    (dateFrom || dateTo ? 1 : 0);
+    (dateFrom || dateTo ? 1 : 0) +
+    (photographerQuery ? 1 : 0);
 
-  const dateFilterCount = dateFrom || dateTo ? 1 : 0;
+  // Used as the badge count on the simplified-mode Filters button
+  const dateFilterCount = (dateFrom || dateTo ? 1 : 0) + (photographerQuery ? 1 : 0);
 
   const clearFilters = () => {
     setSelectedActivity('all');
@@ -250,6 +256,7 @@ export function useEventSearch({
     setSearchText('');
     setDateFrom('');
     setDateTo('');
+    setPhotographerQuery('');
     setLocationApplied(false);
     setHasSearched(loadOnMount);
     if (!loadOnMount) setEvents([]);
@@ -282,6 +289,7 @@ export function useEventSearch({
           sortBy,
           limit: LIMIT,
           offset: nextPage * LIMIT,
+          photographerQuery: photographerQuery.trim() || undefined,
         });
         setEvents((prev) => [
           ...prev,
@@ -318,6 +326,8 @@ export function useEventSearch({
     setDateFrom,
     dateTo,
     setDateTo,
+    photographerQuery,
+    setPhotographerQuery,
     events,
     total,
     isLoading,

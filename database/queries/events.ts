@@ -179,8 +179,23 @@ export async function searchPublicEvents(
     sortBy?: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc';
     limit?: number;
     offset?: number;
+    photographerQuery?: string;
   },
 ): Promise<{ events: EventSummary[]; total: number }> {
+  // Photographer filter: resolve matching user IDs before building the main query
+  let photographerUserIds: string[] | null = null;
+  if (filters.photographerQuery?.trim()) {
+    const term = `%${filters.photographerQuery.trim()}%`;
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('id')
+      .or(`username.ilike.${term},display_name.ilike.${term}`);
+    photographerUserIds = (profileData ?? []).map((p: { id: string }) => p.id);
+    if (photographerUserIds.length === 0) {
+      return { events: [], total: 0 };
+    }
+  }
+
   let query = supabase
     .from('events')
     .select(
@@ -189,6 +204,10 @@ export async function searchPublicEvents(
     )
     .eq('is_public', true)
     .is('deleted_at', null);
+
+  if (photographerUserIds) {
+    query = query.in('user_id', photographerUserIds);
+  }
 
   // Text search on name, city, or country
   if (filters.searchText?.trim()) {

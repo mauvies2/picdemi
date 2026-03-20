@@ -19,6 +19,7 @@ export async function searchEventsAction(filters: {
   sortBy?: 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc';
   limit?: number;
   offset?: number;
+  photographerQuery?: string;
 }) {
   const result = await searchPublicEvents(supabaseAdmin, filters);
 
