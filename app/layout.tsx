@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist_Mono, Inter, Inter_Tight } from 'next/font/google';
-import { headers } from 'next/headers';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { ConditionalHeader } from '@/components/conditional-header';
 import { GuestCartProvider } from '@/components/guest-cart-provider';
 import Header from '@/components/header';
 import { Main } from '@/components/main';
@@ -32,22 +32,18 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = 'force-dynamic';
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = await headers();
-  const pathname = headersList.get('x-pathname') || '';
-  const hideHeader = pathname.startsWith('/auth/reset-password');
-
   return (
     <html lang="en" className={`${inter.variable} ${geistMono.variable} ${interTight.variable}`}>
       <body className="antialiased">
         <GuestCartProvider>
-          {!hideHeader && <Header />}
+          <ConditionalHeader>
+            <Header />
+          </ConditionalHeader>
           <Main>{children}</Main>
           <Toaster />
         </GuestCartProvider>

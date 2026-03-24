@@ -119,7 +119,13 @@ export function ProfileContent({ initialData, showSuccessMessage = false }: Prof
       {photos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="rounded-full bg-muted p-6 mb-4">
-            <Image src="/logo.svg" alt="Picdemi" width={48} height={48} className="opacity-50" />
+            <Image
+              src="/favicon/favicon_simple_dark.png"
+              alt="Picdemi"
+              width={48}
+              height={48}
+              className="opacity-50"
+            />
           </div>
           <h3 className="text-lg font-semibold mb-2">No photos yet</h3>
           <p className="text-sm text-muted-foreground mb-4 max-w-md">

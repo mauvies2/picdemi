@@ -25,6 +25,7 @@ export interface Event {
 
 export interface EventSummary {
   id: string;
+  user_id: string;
   name: string;
   date: string;
   city: string;
@@ -180,6 +181,9 @@ export async function searchPublicEvents(
     limit?: number;
     offset?: number;
     photographerQuery?: string;
+    lat?: number;
+    lng?: number;
+    radiusKm?: number;
   },
 ): Promise<{ events: EventSummary[]; total: number }> {
   // Photographer filter: resolve matching user IDs before building the main query
@@ -199,7 +203,7 @@ export async function searchPublicEvents(
   let query = supabase
     .from('events')
     .select(
-      'id, name, date, city, country, state, activity, is_public, share_code, price_per_photo, watermark_enabled',
+      'id, user_id, name, date, city, country, state, activity, is_public, share_code, price_per_photo, watermark_enabled',
       { count: 'exact' },
     )
     .eq('is_public', true)
@@ -209,12 +213,55 @@ export async function searchPublicEvents(
     query = query.in('user_id', photographerUserIds);
   }
 
-  // Text search on name, city, or country
-  if (filters.searchText?.trim()) {
-    const searchText = `%${filters.searchText.trim()}%`;
-    query = query.or(
-      `name.ilike.${searchText},city.ilike.${searchText},country.ilike.${searchText}`,
-    );
+  // Radius bounding-box + text search
+  // When lat/lng/radiusKm are provided, use a bounding-box OR text-fallback approach:
+  //   • Events WITH coordinates: included if inside the bounding box
+  //   • Events WITHOUT coordinates: included if they match the city text (fallback)
+  const hasRadius =
+    filters.lat !== undefined &&
+    filters.lng !== undefined &&
+    filters.radiusKm !== undefined &&
+    filters.radiusKm > 0;
+
+  if (hasRadius && filters.lat !== undefined && filters.lng !== undefined && filters.radiusKm !== undefined) {
+    const deltaLat = filters.radiusKm / 111;
+    const deltaLng = filters.radiusKm / (111 * Math.cos((filters.lat * Math.PI) / 180));
+    const latMin = (filters.lat - deltaLat).toFixed(6);
+    const latMax = (filters.lat + deltaLat).toFixed(6);
+    const lngMin = (filters.lng - deltaLng).toFixed(6);
+    const lngMax = (filters.lng + deltaLng).toFixed(6);
+
+    // For text fallback: extract city part from "City, Country" strings
+    const rawText = filters.searchText?.trim() ?? '';
+    const cityPart = rawText.includes(', ') ? rawText.split(', ')[0] : rawText;
+    const escapedCity = cityPart.replace(/"/g, '\\"');
+
+    if (cityPart) {
+      // OR: within bounding box (events with coords) | city text match (events without coords)
+      query = query.or(
+        `and(lat.gte.${latMin},lat.lte.${latMax},lng.gte.${lngMin},lng.lte.${lngMax}),` +
+        `and(lat.is.null,city.ilike.%${cityPart}%)`,
+      );
+    } else {
+      // No text — apply bounding box only
+      query = query
+        .gte('lat', Number(latMin))
+        .lte('lat', Number(latMax))
+        .gte('lng', Number(lngMin))
+        .lte('lng', Number(lngMax));
+    }
+  } else if (filters.searchText?.trim()) {
+    // Text search across name, city, country.
+    // Split on ", " so that "Barcelona, Spain" searches each token separately
+    // without needing PostgREST quoted-value syntax (which causes parse errors).
+    const terms = filters.searchText.trim().split(/,\s*/).filter(Boolean);
+    const conditions = terms
+      .flatMap((t) => {
+        const pat = `%${t.trim()}%`;
+        return [`name.ilike.${pat}`, `city.ilike.${pat}`, `country.ilike.${pat}`];
+      })
+      .join(',');
+    query = query.or(conditions);
   }
 
   // Activity filter

@@ -20,8 +20,24 @@ export async function searchEventsAction(filters: {
   limit?: number;
   offset?: number;
   photographerQuery?: string;
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
 }) {
-  const result = await searchPublicEvents(supabaseAdmin, filters);
+  const result = await searchPublicEvents(supabaseAdmin, filters).catch(async (err: unknown) => {
+    // Graceful fallback: if the lat/lng columns don't exist yet (migration pending),
+    // retry without the radius params so the search still works.
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('column') && msg.includes('does not exist')) {
+      return searchPublicEvents(supabaseAdmin, {
+        ...filters,
+        lat: undefined,
+        lng: undefined,
+        radiusKm: undefined,
+      });
+    }
+    throw err;
+  });
 
   // Get cover photos for events
   const eventIds = result.events.map((e) => e.id);
@@ -58,12 +74,27 @@ export async function searchEventsAction(filters: {
     }),
   );
 
+  // Fetch photographer profiles
+  const userIds = [...new Set(result.events.map((e) => e.user_id).filter(Boolean))];
+  const { data: profileRows } = await supabaseAdmin
+    .from('profiles')
+    .select('id, username, display_name')
+    .in('id', userIds);
+
+  const profileMap = new Map<string, { username: string | null; display_name: string | null }>();
+  (profileRows ?? []).forEach((p) => profileMap.set(p.id, p));
+
   return {
-    events: result.events.map((event) => ({
-      ...event,
-      photoCount: stats.get(event.id)?.count ?? 0,
-      coverUrl: coverUrls.get(event.id) ?? null,
-    })),
+    events: result.events.map((event) => {
+      const profile = profileMap.get(event.user_id);
+      return {
+        ...event,
+        photoCount: stats.get(event.id)?.count ?? 0,
+        coverUrl: coverUrls.get(event.id) ?? null,
+        photographerUsername: profile?.username ?? null,
+        photographerDisplayName: profile?.display_name ?? null,
+      };
+    }),
     total: result.total,
   };
 }
@@ -71,4 +102,17 @@ export async function searchEventsAction(filters: {
 export async function getFilterOptionsAction() {
   const supabase = await createClient();
   return await getEventFilterOptions(supabase);
+}
+
+export async function searchEventNamesAction(query: string): Promise<string[]> {
+  if (!query.trim()) return [];
+  const { data } = await supabaseAdmin
+    .from('events')
+    .select('name')
+    .eq('is_public', true)
+    .is('deleted_at', null)
+    .ilike('name', `%${query.trim()}%`)
+    .order('name')
+    .limit(6);
+  return [...new Set((data ?? []).map((r: { name: string }) => r.name))];
 }

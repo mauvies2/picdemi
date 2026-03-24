@@ -1,6 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
+import { Camera } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
@@ -15,6 +16,8 @@ type ExploreEventCardProps = {
   photoCount: number;
   coverUrl?: string | null;
   pricePerPhoto: number | null;
+  photographerUsername?: string | null;
+  photographerDisplayName?: string | null;
   linkPrefix?: string;
 };
 
@@ -28,58 +31,68 @@ export function ExploreEventCard({
   photoCount,
   coverUrl,
   pricePerPhoto,
+  photographerUsername,
+  photographerDisplayName,
   linkPrefix = '/dashboard/talent/events',
 }: ExploreEventCardProps) {
   const activityLabel = activityOptions.find((opt) => opt.value === activity)?.label ?? activity;
   const formattedDate = format(new Date(date), 'MMM d, yyyy');
-  const location = `${city}, ${country}`;
-  const priceText = pricePerPhoto !== null ? `$${pricePerPhoto.toFixed(2)}/photo` : 'Free';
+  const location = [city, country].filter(Boolean).join(', ');
+  const photographerHandle =
+    photographerDisplayName || (photographerUsername ? `@${photographerUsername}` : null);
+  const priceText =
+    pricePerPhoto !== null
+      ? `From $${pricePerPhoto % 1 === 0 ? pricePerPhoto : pricePerPhoto.toFixed(2)}`
+      : 'Free';
 
   return (
-    <Link
-      href={`${linkPrefix}/${id}`}
-      className="group block rounded-xl border border-border bg-card transition-all hover:border-primary/50 hover:shadow-md"
-    >
-      <div className="overflow-hidden rounded-t-xl bg-muted">
-        <div className="relative aspect-square w-full">
-          {coverUrl ? (
-            <>
-              <Image
-                src={coverUrl}
-                alt={`${name} cover`}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-3">
-                <div className="text-xs font-medium text-white drop-shadow-sm">
-                  {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-linear-to-br from-muted to-muted/50 text-sm text-muted-foreground">
-              <div className="text-2xl">📸</div>
-              <div>No photos yet</div>
+    <Link href={`${linkPrefix}/${id}`} className="group block">
+      {/* Image */}
+      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-xl bg-muted">
+        {coverUrl ? (
+          <>
+            <Image
+              src={coverUrl}
+              alt={`${name} cover`}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            />
+            {/* Subtle gradient for photo count legibility */}
+            <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
+            {/* Photo count — bottom-left */}
+            <div className="absolute bottom-0 left-0 p-3">
+              <span className="text-xs font-medium text-white drop-shadow-sm">
+                {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+              </span>
             </div>
+          </>
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+            <Camera className="h-8 w-8 opacity-30" />
+            <span className="text-xs">No photos yet</span>
+          </div>
+        )}
+      </div>
+
+      {/* Info below image */}
+      <div className="flex items-start justify-between gap-3 px-1">
+        {/* Left column */}
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold leading-snug text-foreground">{name}</p>
+          <p className="mt-0.5 truncate text-sm text-muted-foreground">{location}</p>
+          <p className="text-sm text-muted-foreground">{formattedDate}</p>
+          {photographerHandle && (
+            <p className="mt-0.5 truncate text-sm text-muted-foreground">{photographerHandle}</p>
           )}
         </div>
-      </div>
-      <div className="space-y-1 p-3">
-        <h3 className="line-clamp-2 text-base font-semibold leading-tight text-foreground">
-          {name}
-        </h3>
-        <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-          <span>{formattedDate}</span>
-          <span>•</span>
-          <span className="line-clamp-1">{location}</span>
-        </div>
-        <div className="flex items-center justify-between gap-2 pt-1">
-          <span className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+
+        {/* Right column */}
+        <div className="shrink-0 text-right">
+          <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
             {activityLabel}
           </span>
-          <span className="text-sm  text-muted-foreground">{priceText}</span>
+          <p className="mt-1.5 text-xs text-foreground">{priceText}</p>
         </div>
       </div>
     </Link>

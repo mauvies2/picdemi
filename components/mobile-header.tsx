@@ -18,7 +18,7 @@ export function MobileHeader() {
     <div className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
       <Link href="/" className="flex items-center gap-1">
         <Image
-          src="/logo.svg"
+          src="/favicon/favicon_simple_dark.png"
           alt="Logo"
           width={24}
           height={24}

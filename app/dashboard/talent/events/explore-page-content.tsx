@@ -1,6 +1,6 @@
 'use client';
 
-import type { FilterOptions } from '@/hooks/use-event-search';
+import type { EventWithStats, FilterOptions } from '@/hooks/use-event-search';
 import { useEventSearch } from '@/hooks/use-event-search';
 import { EventFilterBar } from './components/event-filter-bar';
 import { EventGrid } from './components/event-grid';
@@ -8,10 +8,14 @@ import { EventInfoCards } from './components/event-info-cards';
 
 export function ExplorePageContent({
   initialFilterOptions,
+  initialEvents,
+  initialTotal,
+  initialLat,
+  initialLng,
+  initialRadius,
   eventLinkPrefix,
   showInfoCards = false,
   loadOnMount = false,
-  enableLocation = false,
   initialWhere,
   initialActivity,
   initialDateFrom,
@@ -20,10 +24,14 @@ export function ExplorePageContent({
   clearHref,
 }: {
   initialFilterOptions: FilterOptions;
+  initialEvents?: EventWithStats[];
+  initialTotal?: number;
+  initialLat?: number;
+  initialLng?: number;
+  initialRadius?: number;
   eventLinkPrefix?: string;
   showInfoCards?: boolean;
   loadOnMount?: boolean;
-  enableLocation?: boolean;
   initialWhere?: string;
   initialActivity?: string;
   initialDateFrom?: string;
@@ -33,12 +41,16 @@ export function ExplorePageContent({
 }) {
   const search = useEventSearch({
     initialFilterOptions,
+    initialEvents,
+    initialTotal,
+    initialLat,
+    initialLng,
+    initialRadius,
     initialWhere,
     initialActivity,
     initialDateFrom,
     initialDateTo,
     loadOnMount,
-    enableLocation,
     clearHref,
   });
 
@@ -74,6 +86,8 @@ export function ExplorePageContent({
         setHasSearched={search.setHasSearched}
         photographerQuery={search.photographerQuery}
         setPhotographerQuery={search.setPhotographerQuery}
+        radiusKm={search.radiusKm}
+        setRadiusKm={search.setRadiusKm}
       />
 
       <EventGrid
@@ -83,7 +97,6 @@ export function ExplorePageContent({
         hasSearched={search.hasSearched}
         hasMore={search.hasMore}
         hasFilters={search.hasFilters}
-        enableLocation={enableLocation}
         skeletonKeys={search.skeletonKeys}
         eventLinkPrefix={eventLinkPrefix}
         onLoadMore={search.loadMore}

@@ -12,7 +12,6 @@ type EventGridProps = {
   hasSearched: boolean;
   hasMore: boolean;
   hasFilters: boolean;
-  enableLocation: boolean;
   skeletonKeys: string[];
   eventLinkPrefix?: string;
   onLoadMore: () => void;
@@ -40,16 +39,12 @@ export function EventGrid({
   hasSearched,
   hasMore,
   hasFilters,
-  enableLocation,
   skeletonKeys,
   eventLinkPrefix,
   onLoadMore,
   onClearFilters,
 }: EventGridProps) {
   if (!hasSearched) {
-    if (enableLocation) {
-      return <EventSkeleton skeletonKeys={skeletonKeys} />;
-    }
     return (
       <div className="rounded-xl border border-dashed p-10 text-center">
         <Search className="mx-auto mb-4 h-10 w-10 text-muted-foreground/40" />
@@ -102,6 +97,8 @@ export function EventGrid({
             photoCount={event.photoCount}
             coverUrl={event.coverUrl}
             pricePerPhoto={event.pricePerPhoto}
+            photographerUsername={event.photographerUsername}
+            photographerDisplayName={event.photographerDisplayName}
             linkPrefix={eventLinkPrefix}
           />
         ))}

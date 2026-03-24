@@ -19,18 +19,24 @@ export type EventWithStats = {
   photoCount: number;
   coverUrl: string | null;
   pricePerPhoto: number | null;
+  photographerUsername: string | null;
+  photographerDisplayName: string | null;
 };
 
 export type SortBy = 'date_asc' | 'date_desc' | 'name_asc' | 'name_desc';
 
 type UseEventSearchOptions = {
   initialFilterOptions: FilterOptions;
+  initialEvents?: EventWithStats[];
+  initialTotal?: number;
   initialWhere?: string;
   initialActivity?: string;
   initialDateFrom?: string;
   initialDateTo?: string;
+  initialLat?: number;
+  initialLng?: number;
+  initialRadius?: number;
   loadOnMount?: boolean;
-  enableLocation?: boolean;
   clearHref?: string;
 };
 
@@ -38,12 +44,16 @@ const LIMIT = 20;
 
 export function useEventSearch({
   initialFilterOptions,
+  initialEvents,
+  initialTotal,
   initialWhere,
   initialActivity,
   initialDateFrom,
   initialDateTo,
+  initialLat,
+  initialLng,
+  initialRadius,
   loadOnMount = false,
-  enableLocation = false,
   clearHref,
 }: UseEventSearchOptions) {
   const router = useRouter();
@@ -81,32 +91,27 @@ export function useEventSearch({
   const [dateFrom, setDateFrom] = useState(initialDateFrom ?? '');
   const [dateTo, setDateTo] = useState(initialDateTo ?? '');
   const [photographerQuery, setPhotographerQuery] = useState('');
-  const [events, setEvents] = useState<EventWithStats[]>([]);
-  const [total, setTotal] = useState(0);
+  const [searchLat, setSearchLat] = useState<number | undefined>(initialLat);
+  const [searchLng, setSearchLng] = useState<number | undefined>(initialLng);
+  const [radiusKm, setRadiusKm] = useState<number>(initialRadius ?? (initialLat ? 25 : 0));
+  const [events, setEvents] = useState<EventWithStats[]>(initialEvents ?? []);
+  const [total, setTotal] = useState(initialTotal ?? 0);
   const [isLoading, startTransition] = useTransition();
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  // Don't auto-search when waiting for geolocation — wait until location resolves or fails
-  const [hasSearched, setHasSearched] = useState(loadOnMount && !enableLocation);
+  const [isInitialLoad, setIsInitialLoad] = useState(!initialEvents);
+  // When initialEvents is provided by the server, mark as searched so the grid shows results,
+  // but use a ref to skip the redundant mount fetch.
+  const [hasSearched, setHasSearched] = useState(!!initialEvents || loadOnMount);
+  const skipInitialFetch = useRef(!!initialEvents);
   const [page, setPage] = useState(0);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [searchTrigger, setSearchTrigger] = useState(0);
-  const [locationApplied, setLocationApplied] = useState(false);
-  const locationRequested = useRef(false);
 
   const [filterOptions, setFilterOptions] = useState(initialFilterOptions);
 
   const debouncedSearch = useDebounce(searchText, 300);
 
-  const locationLabel = initialWhere
-    ? initialWhere
-    : locationApplied
-      ? [
-          selectedCity !== 'all' ? selectedCity : null,
-          selectedCountry !== 'all' ? selectedCountry : null,
-        ]
-          .filter(Boolean)
-          .join(', ')
-      : null;
+  const locationLabel =
+    selectedCity !== 'all' ? selectedCity : selectedCountry !== 'all' ? selectedCountry : null;
 
   const skeletonKeys = useMemo(() => Array.from({ length: 4 }, (_, i) => `skeleton-${i}`), []);
 
@@ -115,72 +120,16 @@ export function useEventSearch({
     [],
   );
 
-  // Geolocation
-  useEffect(() => {
-    if (!enableLocation || locationRequested.current) return;
-    if (!navigator.geolocation) return;
-    locationRequested.current = true;
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
-            { headers: { 'Accept-Language': 'en' } },
-          );
-          if (!res.ok) return;
-          const data = await res.json();
-          const rawCity: string =
-            data.address?.city ?? data.address?.town ?? data.address?.village ?? '';
-          const rawCountry: string = data.address?.country ?? '';
-
-          if (!rawCity && !rawCountry) return;
-
-          const resolvedCity = rawCity
-            ? (filterOptions.cities.find((c) => c.toLowerCase() === rawCity.toLowerCase()) ??
-              rawCity)
-            : null;
-          const resolvedCountry = rawCountry
-            ? (filterOptions.countries.find((c) => c.toLowerCase() === rawCountry.toLowerCase()) ??
-              rawCountry)
-            : null;
-
-          setFilterOptions((prev) => ({
-            cities:
-              resolvedCity && !prev.cities.includes(resolvedCity)
-                ? [...prev.cities, resolvedCity].sort()
-                : prev.cities,
-            countries:
-              resolvedCountry && !prev.countries.includes(resolvedCountry)
-                ? [...prev.countries, resolvedCountry].sort()
-                : prev.countries,
-          }));
-
-          if (resolvedCity) setSelectedCity(resolvedCity);
-          if (resolvedCountry) setSelectedCountry(resolvedCountry);
-          setLocationApplied(true);
-          setHasSearched(true);
-
-          const locationName = resolvedCity ?? resolvedCountry ?? '';
-          if (locationName && clearHref) {
-            router.replace(`${clearHref}?where=${encodeURIComponent(locationName)}`);
-          }
-        } catch {
-          // Silently ignore reverse geocoding errors
-        }
-      },
-      () => {
-        // Permission denied or error — fall back to showing all events
-        setHasSearched(true);
-      },
-    );
-  }, [enableLocation, filterOptions.cities, filterOptions.countries, clearHref, router]);
-
   // Search
   // biome-ignore lint/correctness/useExhaustiveDependencies: searchTrigger is an imperative counter, not a reactive value
   useEffect(() => {
     if (!hasSearched) {
+      setIsInitialLoad(false);
+      return;
+    }
+    // Skip the initial fetch when the server already pre-populated events
+    if (skipInitialFetch.current) {
+      skipInitialFetch.current = false;
       setIsInitialLoad(false);
       return;
     }
@@ -199,6 +148,9 @@ export function useEventSearch({
           limit: LIMIT,
           offset: 0,
           photographerQuery: photographerQuery.trim() || undefined,
+          lat: searchLat,
+          lng: searchLng,
+          radiusKm: radiusKm > 0 ? radiusKm : undefined,
         });
         setEvents(
           result.events.map((e) => ({
@@ -227,6 +179,9 @@ export function useEventSearch({
     sortBy,
     searchTrigger,
     photographerQuery,
+    radiusKm,
+    searchLat,
+    searchLng,
   ]);
 
   const hasMore = events.length < total;
@@ -257,7 +212,6 @@ export function useEventSearch({
     setDateFrom('');
     setDateTo('');
     setPhotographerQuery('');
-    setLocationApplied(false);
     setHasSearched(loadOnMount);
     if (!loadOnMount) setEvents([]);
   };
@@ -290,6 +244,9 @@ export function useEventSearch({
           limit: LIMIT,
           offset: nextPage * LIMIT,
           photographerQuery: photographerQuery.trim() || undefined,
+          lat: searchLat,
+          lng: searchLng,
+          radiusKm: radiusKm > 0 ? radiusKm : undefined,
         });
         setEvents((prev) => [
           ...prev,
@@ -328,6 +285,12 @@ export function useEventSearch({
     setDateTo,
     photographerQuery,
     setPhotographerQuery,
+    radiusKm,
+    setRadiusKm,
+    searchLat,
+    setSearchLat,
+    searchLng,
+    setSearchLng,
     events,
     total,
     isLoading,

@@ -63,6 +63,9 @@ type EventFilterBarProps = {
   // Photographer filter
   photographerQuery: string;
   setPhotographerQuery: (v: string) => void;
+  // Radius
+  radiusKm: number;
+  setRadiusKm: (v: number) => void;
   // Actions
   handleFilterChange: (setter: (v: string) => void) => (value: string) => void;
   clearFilters: () => void;
@@ -117,6 +120,8 @@ export function EventFilterBar({
   setHasSearched,
   photographerQuery,
   setPhotographerQuery,
+  radiusKm,
+  setRadiusKm,
 }: EventFilterBarProps) {
   // --- Local (pending) state for the modal ---
   const [localActivity, setLocalActivity] = useState(selectedActivity);
@@ -129,6 +134,7 @@ export function EventFilterBar({
     const to = parseDateStr(dateTo);
     return from || to ? { from, to } : undefined;
   });
+  const [localRadiusKm, setLocalRadiusKm] = useState(radiusKm);
 
   // Sync local state when modal opens so it always reflects current applied state
   // biome-ignore lint/correctness/useExhaustiveDependencies: only sync on open
@@ -139,6 +145,7 @@ export function EventFilterBar({
     setLocalCountry(selectedCountry);
     setLocalSortBy(sortBy);
     setLocalPhotographerQuery(photographerQuery);
+    setLocalRadiusKm(radiusKm);
     const from = parseDateStr(dateFrom);
     const to = parseDateStr(dateTo);
     setLocalDateRange(from || to ? { from, to } : undefined);
@@ -150,6 +157,7 @@ export function EventFilterBar({
     setSelectedCountry(localCountry);
     setSortBy(localSortBy);
     setPhotographerQuery(localPhotographerQuery);
+    setRadiusKm(localRadiusKm);
     setDateFrom(localDateRange?.from ? format(localDateRange.from, 'yyyy-MM-dd') : '');
     setDateTo(localDateRange?.to ? format(localDateRange.to, 'yyyy-MM-dd') : '');
     setHasSearched(true);
@@ -170,6 +178,7 @@ export function EventFilterBar({
     setLocalCountry('all');
     setLocalSortBy('date_desc');
     setLocalPhotographerQuery('');
+    setLocalRadiusKm(0);
     setLocalDateRange(undefined);
   };
 
@@ -248,10 +257,42 @@ export function EventFilterBar({
     </div>
   );
 
+  const RADIUS_OPTIONS = [
+    { label: '5 km', value: 5 },
+    { label: '10 km', value: 10 },
+    { label: '25 km', value: 25 },
+    { label: '50 km', value: 50 },
+    { label: '100 km', value: 100 },
+    { label: 'National', value: 0 },
+  ] as const;
+
+  const radiusField = (current: number, onChange: (v: number) => void) => (
+    <div className="w-full">
+      <Label className="mb-2 block text-sm font-medium">Distance</Label>
+      <div className="flex flex-wrap gap-2">
+        {RADIUS_OPTIONS.map(({ label, value }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => onChange(value)}
+            className={cn(
+              'rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
+              current === value
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-background text-foreground hover:bg-muted',
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   const simplifiedModalContent = (
     <div className="space-y-4 py-4">
+      {radiusField(localRadiusKm, setLocalRadiusKm)}
       {photographerField(localPhotographerQuery, setLocalPhotographerQuery)}
-      {whenField(localDateRange, setLocalDateRange)}
     </div>
   );
 
@@ -365,6 +406,9 @@ export function EventFilterBar({
               <span className="truncate text-sm text-muted-foreground">
                 Showing events near{' '}
                 <span className="font-medium text-foreground">{locationLabel}</span>
+                {radiusKm > 0 && (
+                  <span className="ml-1 text-muted-foreground">· within {radiusKm} km</span>
+                )}
               </span>
             </>
           ) : null}
@@ -379,9 +423,9 @@ export function EventFilterBar({
               >
                 <Filter className="h-4 w-4" />
                 Filters
-                {dateFilterCount > 0 && (
+                {(dateFilterCount > 0 || radiusKm > 0) && (
                   <span className="rounded-full bg-primary px-1.5 py-0.5 text-xs font-medium text-primary-foreground">
-                    {dateFilterCount}
+                    {dateFilterCount + (radiusKm > 0 ? 1 : 0)}
                   </span>
                 )}
               </button>

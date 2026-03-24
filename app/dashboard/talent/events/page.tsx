@@ -26,7 +26,6 @@ export default async function TalentExplorePage({
         key={`${where ?? ''}-${activity ?? ''}`}
         initialFilterOptions={filterOptions}
         loadOnMount={true}
-        enableLocation={!where}
         initialWhere={where}
         initialActivity={activity}
         hideTopFilters={true}

@@ -1,16 +1,18 @@
 'use client';
 
 import { format, parseISO } from 'date-fns';
-import { CalendarIcon, Search, X } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, Clock, Search, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { createPortal } from 'react-dom';
+import { searchEventNamesAction } from '@/app/dashboard/talent/events/actions';
 import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useDebounce } from '@/hooks/use-debounce';
 import { cn } from '@/lib/utils';
 
 interface EventSearchBarProps {
@@ -19,6 +21,10 @@ interface EventSearchBarProps {
   initialActivity?: string;
   initialDateFrom?: string;
   initialDateTo?: string;
+  initialPreset?: string;
+  initialLat?: number;
+  initialLng?: number;
+  initialRadius?: number;
   onSearch?: (where: string, activity: string, dateFrom: string, dateTo: string) => void;
   searchHref?: string;
   className?: string;
@@ -31,6 +37,32 @@ interface ActivityOption {
 
 const DROPDOWN_MAX_H = 240;
 const DROPDOWN_GAP = 8;
+
+// ─── Date preset helpers ──────────────────────────────────────────────────────
+
+function todayRange(): DateRange {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return { from: d, to: d };
+}
+
+function last3DaysRange(): DateRange {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(from.getDate() - 2);
+  from.setHours(0, 0, 0, 0);
+  return { from, to };
+}
+
+function lastWeekRange(): DateRange {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(from.getDate() - 6);
+  from.setHours(0, 0, 0, 0);
+  return { from, to };
+}
+
+// ─── Activity dropdown ────────────────────────────────────────────────────────
 
 function ActivityDropdown({
   filtered,
@@ -94,6 +126,8 @@ function ActivityDropdown({
   );
 }
 
+// ─── Activity combobox hook ───────────────────────────────────────────────────
+
 function useActivityCombobox(initialActivity: string, sortedActivities: ActivityOption[]) {
   const initialLabel = sortedActivities.find((a) => a.value === initialActivity)?.label ?? '';
   const [inputValue, setInputValue] = useState(initialLabel);
@@ -156,6 +190,8 @@ function useActivityCombobox(initialActivity: string, sortedActivities: Activity
   };
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function parseDateStr(s: string): Date | undefined {
   if (!s) return undefined;
   try {
@@ -166,11 +202,84 @@ function parseDateStr(s: string): Date | undefined {
 }
 
 function whenLabel(from: Date | undefined, to: Date | undefined): string | null {
-  if (from && to) return `${format(from, 'MMM d')} – ${format(to, 'MMM d')}`;
-  if (from) return `From ${format(from, 'MMM d')}`;
+  if (from && to) {
+    const sameDay = format(from, 'yyyy-MM-dd') === format(to, 'yyyy-MM-dd');
+    return sameDay ? format(from, 'MMM d') : `${format(from, 'MMM d')} – ${format(to, 'MMM d')}`;
+  }
+  if (from) return format(from, 'MMM d');
   if (to) return `Until ${format(to, 'MMM d')}`;
   return null;
 }
+
+// ─── When popover content ─────────────────────────────────────────────────────
+
+const PRESETS = [
+  { label: 'Today', getRange: todayRange },
+  { label: 'Last 3 days', getRange: last3DaysRange },
+  { label: 'Last week', getRange: lastWeekRange },
+] as const;
+
+function WhenPopoverContent({
+  dateRange,
+  onSelectPreset,
+  onSelectCustom,
+}: {
+  dateRange: DateRange | undefined;
+  onSelectPreset: (label: string, range: DateRange) => void;
+  onSelectCustom: (range: DateRange | undefined) => void;
+}) {
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  if (showCalendar) {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowCalendar(false)}
+          className="flex items-center gap-1 px-3 pt-3 pb-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Quick options
+        </button>
+        <Calendar
+          mode="range"
+          selected={dateRange}
+          onSelect={(range) => {
+            onSelectCustom(range);
+          }}
+          numberOfMonths={1}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-1.5 w-48">
+      {PRESETS.map(({ label, getRange }) => (
+        <button
+          key={label}
+          type="button"
+          onClick={() => onSelectPreset(label, getRange())}
+          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
+        >
+          <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          {label}
+        </button>
+      ))}
+      <div className="my-1.5 h-px bg-border" />
+      <button
+        type="button"
+        onClick={() => setShowCalendar(true)}
+        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
+      >
+        <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        Custom date…
+      </button>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export function EventSearchBar({
   variant = 'hero',
@@ -178,6 +287,10 @@ export function EventSearchBar({
   initialActivity = '',
   initialDateFrom = '',
   initialDateTo = '',
+  initialPreset,
+  initialLat,
+  initialLng,
+  initialRadius,
   onSearch,
   searchHref = '/events',
   className,
@@ -187,11 +300,25 @@ export function EventSearchBar({
   const whereRef = useRef<HTMLInputElement>(null);
   const activityInputRef = useRef<HTMLInputElement>(null);
 
+  // If a known preset is passed, recompute its range so "Today" is always fresh
   const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    if (initialPreset === 'Today') return todayRange();
+    if (initialPreset === 'Last 3 days') return last3DaysRange();
+    if (initialPreset === 'Last week') return lastWeekRange();
     const from = parseDateStr(initialDateFrom);
     const to = parseDateStr(initialDateTo);
-    return from || to ? { from, to } : undefined;
+    if (from || to) return { from, to };
+    return undefined;
   });
+
+  // Track the preset label (null = any dates / custom)
+  const [presetLabel, setPresetLabel] = useState<string | null>(initialPreset ?? null);
+
+  const [searchLat, setSearchLat] = useState<number | undefined>(initialLat);
+  const [searchLng, setSearchLng] = useState<number | undefined>(initialLng);
+  const [radius, setRadius] = useState<number>(initialRadius ?? (initialLat ? 25 : 0));
+
+  const [whenOpen, setWhenOpen] = useState(false);
 
   const sortedActivities = useMemo(
     () => [...activityOptions].sort((a, b) => a.label.localeCompare(b.label)),
@@ -200,7 +327,22 @@ export function EventSearchBar({
 
   const activity = useActivityCombobox(initialActivity, sortedActivities);
 
+  // Event name suggestions
+  const debouncedWhere = useDebounce(where, 250);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const whereContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!debouncedWhere.trim()) {
+      setSuggestions([]);
+      return;
+    }
+    searchEventNamesAction(debouncedWhere).then(setSuggestions).catch(() => setSuggestions([]));
+  }, [debouncedWhere]);
+
   const handleSearch = useCallback(() => {
+    setShowSuggestions(false);
     const validatedActivity = activity.validate();
     if (validatedActivity === null) return;
 
@@ -216,20 +358,57 @@ export function EventSearchBar({
     if (validatedActivity) params.set('activity', validatedActivity);
     if (df) params.set('dateFrom', df);
     if (dt) params.set('dateTo', dt);
+    if (presetLabel) params.set('preset', presetLabel);
+    if (searchLat !== undefined && searchLng !== undefined) {
+      params.set('lat', searchLat.toFixed(6));
+      params.set('lng', searchLng.toFixed(6));
+      params.set('radius', radius.toString());
+    }
     router.push(`${searchHref}?${params.toString()}`);
-  }, [activity, where, dateRange, onSearch, searchHref, router]);
+  }, [
+    activity,
+    where,
+    dateRange,
+    onSearch,
+    searchHref,
+    router,
+    presetLabel,
+    searchLat,
+    searchLng,
+    radius,
+  ]);
 
-  const label = whenLabel(dateRange?.from, dateRange?.to);
+  const displayLabel = presetLabel ?? whenLabel(dateRange?.from, dateRange?.to);
+
+  const clearDateRange = useCallback(() => {
+    setDateRange(undefined);
+    setPresetLabel(null);
+  }, []);
+
+  const handleSelectPreset = useCallback((label: string, range: DateRange) => {
+    setPresetLabel(label);
+    setDateRange(range);
+    setWhenOpen(false);
+  }, []);
+
+  const handleSelectCustom = useCallback((range: DateRange | undefined) => {
+    setDateRange(range);
+    setPresetLabel(null);
+    if (range?.from && range?.to) setWhenOpen(false);
+  }, []);
 
   if (variant === 'hero') {
     return (
-      <div className={cn('w-full max-w-2xl', className)}>
+      <div className={cn('w-full max-w-3xl', className)}>
         <div className="rounded-2xl pl-3 sm:rounded-full border-2 bg-background shadow-md">
           <div className="flex flex-col sm:flex-row sm:items-stretch">
             {/* Where */}
-            <div className="relative flex-1 px-4 pt-4 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start">
+            <div
+              ref={whereContainerRef}
+              className="relative flex-1 min-w-0 px-5 pt-4 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start"
+            >
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Where
+                Name or location
               </p>
               <div className="flex w-full items-center gap-1">
                 <input
@@ -237,25 +416,63 @@ export function EventSearchBar({
                   id="event-search-where"
                   name="where"
                   type="text"
-                  placeholder="Add location or event name"
+                  autoComplete="off"
+                  placeholder="Add name or location"
                   value={where}
-                  onChange={(e) => setWhere(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className="min-w-0 flex-1 h-auto outline-none p-0 mt-0.5 text-base text-muted-foreground font-medium focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/40"
+                  onChange={(e) => {
+                    setWhere(e.target.value);
+                    setSearchLat(undefined);
+                    setSearchLng(undefined);
+                    setRadius(0);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') { setShowSuggestions(false); handleSearch(); }
+                    if (e.key === 'Escape') setShowSuggestions(false);
+                  }}
+                  className="min-w-0 flex-1 h-auto outline-none p-0 mt-0.5 text-base text-muted-foreground font-medium focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/40 [&:-webkit-autofill]:![box-shadow:0_0_0_1000px_white_inset]"
                 />
-                {where && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setWhere('');
-                      whereRef.current?.focus();
-                    }}
-                    className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWhere('');
+                    setSearchLat(undefined);
+                    setSearchLng(undefined);
+                    setRadius(0);
+                    setSuggestions([]);
+                    whereRef.current?.focus();
+                  }}
+                  className={cn(
+                    'mt-0.5 shrink-0 text-muted-foreground hover:text-foreground transition-opacity',
+                    where ? 'opacity-100' : 'opacity-0 pointer-events-none',
+                  )}
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
+              {/* Name suggestions dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border bg-popover shadow-lg overflow-hidden">
+                  {suggestions.map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setWhere(name);
+                        setSuggestions([]);
+                        setShowSuggestions(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors text-left"
+                    >
+                      <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      {name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="hidden sm:block w-px bg-border self-stretch my-4" />
@@ -264,7 +481,7 @@ export function EventSearchBar({
             {/* Activity */}
             <div
               ref={activity.containerRef}
-              className="relative flex-1 px-5 pt-3 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start"
+              className="relative w-[27%] min-w-0 px-5 pt-3 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start"
             >
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Activity
@@ -275,7 +492,7 @@ export function EventSearchBar({
                   id="event-search-activity"
                   name="activity"
                   type="text"
-                  placeholder="Any activity"
+                  placeholder="Add activity"
                   value={activity.inputValue}
                   onChange={(e) => {
                     activity.setInputValue(e.target.value);
@@ -318,33 +535,30 @@ export function EventSearchBar({
             <div className="sm:hidden h-px bg-border mx-5 mt-2" />
 
             {/* When */}
-            <div className="relative flex-1 px-5 pt-3 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start">
+            <div className="relative w-[27%] min-w-0 px-5 pt-3 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
                 When
               </p>
-              <Popover>
+              <Popover open={whenOpen} onOpenChange={(o) => setWhenOpen(o)}>
                 <div className="mt-0.5 flex w-full items-center gap-1">
                   <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex-1 truncate text-left outline-none"
-                    >
+                    <button type="button" className="flex-1 truncate text-left outline-none">
                       <span
                         className={cn(
                           'text-base font-medium',
-                          label ? 'text-muted-foreground' : 'text-muted-foreground/40',
+                          displayLabel ? 'text-muted-foreground' : 'text-muted-foreground/40',
                         )}
                       >
-                        {label ?? 'Any dates'}
+                        {displayLabel ?? 'Add dates'}
                       </span>
                     </button>
                   </PopoverTrigger>
-                  {label ? (
+                  {displayLabel ? (
                     <button
                       type="button"
                       onMouseDown={(e) => {
                         e.preventDefault();
-                        setDateRange(undefined);
+                        clearDateRange();
                       }}
                       className="shrink-0 text-muted-foreground hover:text-foreground"
                     >
@@ -355,11 +569,10 @@ export function EventSearchBar({
                   )}
                 </div>
                 <PopoverContent className="w-auto p-0" align="start" sideOffset={12}>
-                  <Calendar
-                    mode="range"
-                    selected={dateRange}
-                    onSelect={setDateRange}
-                    numberOfMonths={1}
+                  <WhenPopoverContent
+                    dateRange={dateRange}
+                    onSelectPreset={handleSelectPreset}
+                    onSelectCustom={handleSelectCustom}
                   />
                 </PopoverContent>
               </Popover>

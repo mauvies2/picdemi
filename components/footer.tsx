@@ -10,7 +10,13 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="Picdemi" width={24} height={24} className="h-6 w-6" />
+              <Image
+                src="/favicon/favicon_simple_dark.png"
+                alt="Picdemi"
+                width={24}
+                height={24}
+                className="h-6 w-6"
+              />
               <span className="text-xl font-bold tracking-tight">Picdemi</span>
             </Link>
             <p className="text-sm text-muted-foreground">
