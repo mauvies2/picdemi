@@ -376,7 +376,7 @@ export async function runAISimilaritySearch(
 }
 
 /**
- * Add matched photos to "Photos of You" (create talent_photo_tags)
+ * Add matched photos to "My Photos" (create talent_photo_tags)
  * This allows users to add AI-matched photos to their library
  */
 export async function addMatchedPhotosToLibrary(photoIds: string[]): Promise<{ added: number }> {

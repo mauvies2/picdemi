@@ -27,7 +27,7 @@ export default async function TalentPhotosPage() {
 
   return (
     <div>
-      <DashboardHeader title="Photos of you" />
+      <DashboardHeader title="My Photos" />
       <p className="text-sm text-muted-foreground">Photos you have selected or tagged.</p>
       <TalentPhotosGrid
         initialGroups={result.groups}

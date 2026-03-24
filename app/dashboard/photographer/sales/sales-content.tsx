@@ -1,7 +1,8 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { DollarSign, Image, ShoppingCart, TrendingUp } from 'lucide-react';
-import { useEffect, useState, useTransition } from 'react';
+import { useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -10,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Sale, SalesByDate, SalesSummary, TopSellingEvent } from '@/database/queries/sales';
+import type { Sale, SalesByDate, TopSellingEvent } from '@/database/queries/sales';
 import { cn } from '@/lib/utils';
 import { getSalesDataAction } from './actions';
 
@@ -207,35 +208,23 @@ function RecentSales({ sales }: RecentSalesProps) {
 
 export function SalesContent() {
   const [timeRange, setTimeRange] = useState<string>('30');
-  const [salesData, setSalesData] = useState<{
-    summary: SalesSummary;
-    salesOverTime: SalesByDate[];
-    topEvents: TopSellingEvent[];
-    recentSales: Sale[];
-  } | null>(null);
-  const [isLoading, startTransition] = useTransition();
 
-  useEffect(() => {
-    const endDate = new Date();
-    let startDate: Date | undefined;
-
-    if (timeRange === 'all') {
-      startDate = undefined;
-    } else {
-      const days = Number.parseInt(timeRange, 10);
-      startDate = new Date();
-      startDate.setDate(startDate.getDate() - days);
-    }
-
-    startTransition(async () => {
-      try {
-        const data = await getSalesDataAction(startDate?.toISOString(), endDate.toISOString());
-        setSalesData(data);
-      } catch (error) {
-        console.error('Failed to load sales data:', error);
+  const { data: salesData, isFetching } = useQuery({
+    queryKey: ['sales', { timeRange }] as const,
+    queryFn: async () => {
+      const endDate = new Date();
+      let startDate: Date | undefined;
+      if (timeRange !== 'all') {
+        const days = Number.parseInt(timeRange, 10);
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
       }
-    });
-  }, [timeRange]);
+      return getSalesDataAction(startDate?.toISOString(), endDate.toISOString());
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const isLoading = isFetching && !salesData;
 
   return (
     <div className="space-y-4">

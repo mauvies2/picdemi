@@ -194,6 +194,10 @@ export default function PhotoAlbumViewer({
           photosInCart={photosInCart}
           onAddToCart={onAddToCart}
           onRemoveFromCart={onRemoveFromCart}
+          showAddToPhotos={showAddToPhotos}
+          photosInMyPhotos={photosInMyPhotos}
+          onAddToPhotos={onAddToPhotos}
+          onRemoveFromPhotos={onRemoveFromPhotos}
           isMobile={isMobile}
         />
       );
@@ -211,6 +215,10 @@ export default function PhotoAlbumViewer({
       showAddToCart,
       onAddToCart,
       onRemoveFromCart,
+      showAddToPhotos,
+      photosInMyPhotos,
+      onAddToPhotos,
+      onRemoveFromPhotos,
       selectionActive,
       isMobile,
     ],

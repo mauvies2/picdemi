@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Package, Search, ShoppingBag } from 'lucide-react';
+import { Package, Search, ShoppingBag, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -11,15 +11,10 @@ import type { RoleSlug } from '@/lib/roles';
 import { cn } from '@/lib/utils';
 
 const talentNavLinks = [
-  {
-    href: '/dashboard/talent',
-    label: 'Overview',
-    icon: LayoutDashboard,
-    exact: true,
-  },
   { href: '/dashboard/talent/events', label: 'Explore', icon: Search },
-  { href: '/dashboard/talent/photos', label: 'Photos of me', icon: Package },
+  { href: '/dashboard/talent/photos', label: 'My photos', icon: Package },
   { href: '/dashboard/talent/orders', label: 'Orders', icon: ShoppingBag },
+  { href: '/dashboard/talent/profile', label: 'Profile', icon: User },
 ];
 
 export function TalentDashboardHeader({
@@ -56,7 +51,7 @@ export function TalentDashboardHeader({
                 href={link.href}
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
-                  isActive(link.href, link.exact)
+                  isActive(link.href)
                     ? 'bg-accent text-accent-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
                 )}
@@ -111,7 +106,7 @@ export function TalentDashboardHeader({
                 href={link.href}
                 className={cn(
                   'flex items-center gap-2 px-4 py-3 rounded-md text-base font-medium transition-colors',
-                  isActive(link.href, link.exact)
+                  isActive(link.href)
                     ? 'bg-accent text-accent-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
                 )}

@@ -2,6 +2,7 @@
 
 import type { EventWithStats, FilterOptions } from '@/hooks/use-event-search';
 import { useEventSearch } from '@/hooks/use-event-search';
+import { AIMatchingButton } from '../photos/ai-matching/ai-matching-button';
 import { EventFilterBar } from './components/event-filter-bar';
 import { EventGrid } from './components/event-grid';
 import { EventInfoCards } from './components/event-info-cards';
@@ -21,7 +22,7 @@ export function ExplorePageContent({
   initialDateFrom,
   initialDateTo,
   hideTopFilters = false,
-  clearHref,
+  showFindMe = false,
 }: {
   initialFilterOptions: FilterOptions;
   initialEvents?: EventWithStats[];
@@ -37,7 +38,7 @@ export function ExplorePageContent({
   initialDateFrom?: string;
   initialDateTo?: string;
   hideTopFilters?: boolean;
-  clearHref?: string;
+  showFindMe?: boolean;
 }) {
   const search = useEventSearch({
     initialFilterOptions,
@@ -51,7 +52,6 @@ export function ExplorePageContent({
     initialDateFrom,
     initialDateTo,
     loadOnMount,
-    clearHref,
   });
 
   return (
@@ -84,6 +84,7 @@ export function ExplorePageContent({
         handleFilterChange={search.handleFilterChange}
         clearFilters={search.clearFilters}
         setHasSearched={search.setHasSearched}
+        extraButtons={showFindMe ? <AIMatchingButton className="h-9 rounded-full" /> : undefined}
         photographerQuery={search.photographerQuery}
         setPhotographerQuery={search.setPhotographerQuery}
         radiusKm={search.radiusKm}

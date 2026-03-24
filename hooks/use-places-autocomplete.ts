@@ -22,21 +22,61 @@ export type PlaceDetails = {
 // ─── Mock data (used when NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is absent) ──────────
 
 const MOCK_PREDICTIONS: PlacePrediction[] = [
-  { placeId: 'mock-bcn', description: 'Barcelona, Spain', mainText: 'Barcelona', secondaryText: 'Spain' },
+  {
+    placeId: 'mock-bcn',
+    description: 'Barcelona, Spain',
+    mainText: 'Barcelona',
+    secondaryText: 'Spain',
+  },
   { placeId: 'mock-mad', description: 'Madrid, Spain', mainText: 'Madrid', secondaryText: 'Spain' },
-  { placeId: 'mock-tar', description: 'Tarragona, Spain', mainText: 'Tarragona', secondaryText: 'Spain' },
-  { placeId: 'mock-nyc', description: 'New York, NY, USA', mainText: 'New York', secondaryText: 'NY, USA' },
+  {
+    placeId: 'mock-tar',
+    description: 'Tarragona, Spain',
+    mainText: 'Tarragona',
+    secondaryText: 'Spain',
+  },
+  {
+    placeId: 'mock-nyc',
+    description: 'New York, NY, USA',
+    mainText: 'New York',
+    secondaryText: 'NY, USA',
+  },
   { placeId: 'mock-ldn', description: 'London, UK', mainText: 'London', secondaryText: 'UK' },
   { placeId: 'mock-par', description: 'Paris, France', mainText: 'Paris', secondaryText: 'France' },
-  { placeId: 'mock-lis', description: 'Lisbon, Portugal', mainText: 'Lisbon', secondaryText: 'Portugal' },
-  { placeId: 'mock-mia', description: 'Miami, FL, USA', mainText: 'Miami', secondaryText: 'FL, USA' },
+  {
+    placeId: 'mock-lis',
+    description: 'Lisbon, Portugal',
+    mainText: 'Lisbon',
+    secondaryText: 'Portugal',
+  },
+  {
+    placeId: 'mock-mia',
+    description: 'Miami, FL, USA',
+    mainText: 'Miami',
+    secondaryText: 'FL, USA',
+  },
 ];
 
 const MOCK_DETAILS: Record<string, PlaceDetails> = {
-  'mock-bcn': { lat: 41.3851, lng: 2.1734, city: 'Barcelona', formattedAddress: 'Barcelona, Spain' },
+  'mock-bcn': {
+    lat: 41.3851,
+    lng: 2.1734,
+    city: 'Barcelona',
+    formattedAddress: 'Barcelona, Spain',
+  },
   'mock-mad': { lat: 40.4168, lng: -3.7038, city: 'Madrid', formattedAddress: 'Madrid, Spain' },
-  'mock-tar': { lat: 41.1189, lng: 1.2445, city: 'Tarragona', formattedAddress: 'Tarragona, Spain' },
-  'mock-nyc': { lat: 40.7128, lng: -74.006, city: 'New York', formattedAddress: 'New York, NY, USA' },
+  'mock-tar': {
+    lat: 41.1189,
+    lng: 1.2445,
+    city: 'Tarragona',
+    formattedAddress: 'Tarragona, Spain',
+  },
+  'mock-nyc': {
+    lat: 40.7128,
+    lng: -74.006,
+    city: 'New York',
+    formattedAddress: 'New York, NY, USA',
+  },
   'mock-ldn': { lat: 51.5074, lng: -0.1278, city: 'London', formattedAddress: 'London, UK' },
   'mock-par': { lat: 48.8566, lng: 2.3522, city: 'Paris', formattedAddress: 'Paris, France' },
   'mock-lis': { lat: 38.7169, lng: -9.1395, city: 'Lisbon', formattedAddress: 'Lisbon, Portugal' },

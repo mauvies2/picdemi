@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DollarSign, TrendingUp, Wallet, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState, useTransition } from 'react';
@@ -23,8 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { EarningsSummary, PhotographerEarning } from '@/database/queries/earnings';
-import type { PaymentAccount } from '@/database/queries/payment-accounts';
+import type { PhotographerEarning } from '@/database/queries/earnings';
 import type { Payout } from '@/database/queries/payouts';
 import { cn } from '@/lib/utils';
 import { getPayoutProfileStatusAction } from '../profile/payout-profile/actions';
@@ -103,27 +103,22 @@ function PayoutRequestDialog({
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState('');
   const [paymentAccountId, setPaymentAccountId] = useState<string>('');
-  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const { data: paymentAccounts = [] } = useQuery({
+    queryKey: ['payment-accounts'] as const,
+    queryFn: () => getPaymentAccountsAction(),
+    enabled: open,
+    staleTime: 2 * 60 * 1000,
+  });
+
   useEffect(() => {
-    if (open) {
-      getPaymentAccountsAction()
-        .then((accounts) => {
-          setPaymentAccounts(accounts);
-          const defaultAccount = accounts.find((a) => a.is_default);
-          if (defaultAccount) {
-            setPaymentAccountId(defaultAccount.id);
-          } else if (accounts.length > 0) {
-            setPaymentAccountId(accounts[0].id);
-          }
-        })
-        .catch((err) => {
-          console.error('Failed to load payment accounts:', err);
-        });
+    if (paymentAccounts.length > 0 && !paymentAccountId) {
+      const defaultAccount = paymentAccounts.find((a) => a.is_default);
+      setPaymentAccountId(defaultAccount?.id ?? paymentAccounts[0].id);
     }
-  }, [open]);
+  }, [paymentAccounts, paymentAccountId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,7 +157,13 @@ function PayoutRequestDialog({
   const maxAmount = (availableBalance / 100).toFixed(2);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) setPaymentAccountId('');
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="lg" disabled={!isPayoutProfileComplete}>
           Request Payout
@@ -399,49 +400,32 @@ function EarningsTable({ earnings }: EarningsTableProps) {
 }
 
 export function EarningsContent() {
-  const [summary, setSummary] = useState<EarningsSummary | null>(null);
-  const [earnings, setEarnings] = useState<PhotographerEarning[]>([]);
-  const [payouts, setPayouts] = useState<Payout[]>([]);
-  const [isPayoutProfileComplete, setIsPayoutProfileComplete] = useState(true);
-  const [isLoading, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    startTransition(async () => {
-      try {
-        const [summaryData, earningsData, payoutsData, profileStatus] = await Promise.all([
-          getEarningsSummaryAction(),
-          getPhotographerEarningsAction(20),
-          getPayoutsAction(),
-          getPayoutProfileStatusAction(),
-        ]);
-        setSummary(summaryData);
-        setEarnings(earningsData);
-        setPayouts(payoutsData);
-        setIsPayoutProfileComplete(profileStatus.isComplete);
-      } catch (error) {
-        console.error('Failed to load earnings data:', error);
-      }
-    });
-  }, []);
+  const { data, isFetching } = useQuery({
+    queryKey: ['earnings'] as const,
+    queryFn: async () => {
+      const [summaryData, earningsData, payoutsData, profileStatus] = await Promise.all([
+        getEarningsSummaryAction(),
+        getPhotographerEarningsAction(20),
+        getPayoutsAction(),
+        getPayoutProfileStatusAction(),
+      ]);
+      return {
+        summary: summaryData,
+        earnings: earningsData,
+        payouts: payoutsData,
+        isPayoutProfileComplete: profileStatus.isComplete,
+      };
+    },
+    staleTime: 2 * 60 * 1000,
+  });
 
-  const loadData = () => {
-    startTransition(async () => {
-      try {
-        const [summaryData, earningsData, payoutsData, profileStatus] = await Promise.all([
-          getEarningsSummaryAction(),
-          getPhotographerEarningsAction(20),
-          getPayoutsAction(),
-          getPayoutProfileStatusAction(),
-        ]);
-        setSummary(summaryData);
-        setEarnings(earningsData);
-        setPayouts(payoutsData);
-        setIsPayoutProfileComplete(profileStatus.isComplete);
-      } catch (error) {
-        console.error('Failed to load earnings data:', error);
-      }
-    });
-  };
+  const summary = data?.summary ?? null;
+  const earnings = data?.earnings ?? [];
+  const payouts = data?.payouts ?? [];
+  const isPayoutProfileComplete = data?.isPayoutProfileComplete ?? true;
+  const isLoading = isFetching && !data;
 
   return (
     <div className="space-y-6">
@@ -498,7 +482,7 @@ export function EarningsContent() {
               </p>
               <PayoutRequestDialog
                 availableBalance={summary.withdrawableBalanceCents}
-                onSuccess={loadData}
+                onSuccess={() => queryClient.invalidateQueries({ queryKey: ['earnings'] })}
                 isPayoutProfileComplete={isPayoutProfileComplete}
               />
             </div>

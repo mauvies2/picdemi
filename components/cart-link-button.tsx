@@ -1,37 +1,26 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useEffect, useState, useTransition } from 'react';
 import { getCartItemCountAction } from '@/app/dashboard/talent/cart/actions';
 import { useGuestCart } from '@/components/guest-cart-provider';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 function AuthCartLinkButton() {
-  const [cartItemCount, setCartItemCount] = useState<number>(0);
-  const [, startTransition] = useTransition();
-
-  const fetchCartCount = useCallback(() => {
-    startTransition(async () => {
+  const { data: cartItemCount = 0 } = useQuery({
+    queryKey: ['cart-count'] as const,
+    queryFn: async () => {
       try {
-        const count = await getCartItemCountAction();
-        setCartItemCount(count);
+        return await getCartItemCountAction();
       } catch {
-        setCartItemCount(0);
+        return 0;
       }
-    });
-  }, []);
-
-  useEffect(() => {
-    fetchCartCount();
-  }, [fetchCartCount]);
-
-  useEffect(() => {
-    const handleFocus = () => fetchCartCount();
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [fetchCartCount]);
+    },
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
+  });
 
   return <CartIconButton href="/dashboard/talent/cart" count={cartItemCount} />;
 }

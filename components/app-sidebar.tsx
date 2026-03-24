@@ -48,7 +48,7 @@ const photographerNav = [
 
 const talentNav = [
   { title: 'Overview', url: '/dashboard/talent', icon: Home },
-  { title: 'Photos of you', url: '/dashboard/talent/photos', icon: Images },
+  { title: 'My Photos', url: '/dashboard/talent/photos', icon: Images },
   { title: 'Profile', url: '/dashboard/talent/profile', icon: User },
   { title: 'Explore', url: '/dashboard/talent/events', icon: Compass },
   { title: 'Orders', url: '/dashboard/talent/orders', icon: Package },

@@ -9,9 +9,27 @@ import type { EventWithStats } from '@/hooks/use-event-search';
 export default async function PublicEventsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ where?: string; activity?: string; dateFrom?: string; dateTo?: string; preset?: string; lat?: string; lng?: string; radius?: string }>;
+  searchParams: Promise<{
+    where?: string;
+    activity?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    preset?: string;
+    lat?: string;
+    lng?: string;
+    radius?: string;
+  }>;
 }) {
-  const { where, activity, dateFrom, dateTo, preset, lat: latStr, lng: lngStr, radius: radiusStr } = await searchParams;
+  const {
+    where,
+    activity,
+    dateFrom,
+    dateTo,
+    preset,
+    lat: latStr,
+    lng: lngStr,
+    radius: radiusStr,
+  } = await searchParams;
   const parsedLat = latStr ? Number.parseFloat(latStr) : undefined;
   const parsedLng = lngStr ? Number.parseFloat(lngStr) : undefined;
   const parsedRadius = radiusStr ? Number.parseInt(radiusStr, 10) : undefined;
@@ -26,9 +44,7 @@ export default async function PublicEventsPage({
   if (where) {
     try {
       // Replicate the hook's logic: exact city/country match → filter; otherwise → searchText
-      const matchedCity = filterOptions.cities.find(
-        (c) => c.toLowerCase() === where.toLowerCase(),
-      );
+      const matchedCity = filterOptions.cities.find((c) => c.toLowerCase() === where.toLowerCase());
       const matchedCountry = filterOptions.countries.find(
         (c) => c.toLowerCase() === where.toLowerCase(),
       );
@@ -94,7 +110,7 @@ export default async function PublicEventsPage({
           initialDateFrom={dateFrom}
           initialDateTo={dateTo}
           hideTopFilters={true}
-          clearHref="/events"
+          showFindMe={true}
         />
       </div>
       <Footer />

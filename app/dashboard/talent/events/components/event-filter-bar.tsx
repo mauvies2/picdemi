@@ -70,6 +70,8 @@ type EventFilterBarProps = {
   handleFilterChange: (setter: (v: string) => void) => (value: string) => void;
   clearFilters: () => void;
   setHasSearched: (v: boolean) => void;
+  // Extra buttons (e.g. Find Me) rendered before the Filters button
+  extraButtons?: React.ReactNode;
 };
 
 function parseDateStr(s: string): Date | undefined {
@@ -118,6 +120,7 @@ export function EventFilterBar({
   handleFilterChange,
   clearFilters,
   setHasSearched,
+  extraButtons,
   photographerQuery,
   setPhotographerQuery,
   radiusKm,
@@ -415,6 +418,7 @@ export function EventFilterBar({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          {extraButtons}
           <Dialog open={isFilterModalOpen} onOpenChange={setIsFilterModalOpen}>
             <DialogTrigger asChild>
               <button

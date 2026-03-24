@@ -1,8 +1,10 @@
-import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
 import { searchEventsAction } from '@/app/dashboard/talent/events/actions';
 import { useDebounce } from '@/hooks/use-debounce';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type FilterOptions = {
   cities: string[];
@@ -37,10 +39,24 @@ type UseEventSearchOptions = {
   initialLng?: number;
   initialRadius?: number;
   loadOnMount?: boolean;
-  clearHref?: string;
 };
 
+// ─── Query helpers ────────────────────────────────────────────────────────────
+
 const LIMIT = 20;
+
+/** Normalize a server action result into the shape stored in the cache. */
+function normalizeResult(result: Awaited<ReturnType<typeof searchEventsAction>>) {
+  return {
+    events: result.events.map((e) => ({
+      ...e,
+      pricePerPhoto: e.price_per_photo,
+    })) as EventWithStats[],
+    total: result.total,
+  };
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useEventSearch({
   initialFilterOptions,
@@ -54,10 +70,8 @@ export function useEventSearch({
   initialLng,
   initialRadius,
   loadOnMount = false,
-  clearHref,
 }: UseEventSearchOptions) {
-  const router = useRouter();
-
+  // ── Filter state ────────────────────────────────────────────────────────────
   const [searchText, setSearchText] = useState<string>(() => {
     if (!initialWhere) return '';
     const matchedCity = initialFilterOptions.cities.find(
@@ -94,82 +108,137 @@ export function useEventSearch({
   const [searchLat, setSearchLat] = useState<number | undefined>(initialLat);
   const [searchLng, setSearchLng] = useState<number | undefined>(initialLng);
   const [radiusKm, setRadiusKm] = useState<number>(initialRadius ?? (initialLat ? 25 : 0));
-  const [events, setEvents] = useState<EventWithStats[]>(initialEvents ?? []);
-  const [total, setTotal] = useState(initialTotal ?? 0);
-  const [isLoading, startTransition] = useTransition();
-  const [isInitialLoad, setIsInitialLoad] = useState(!initialEvents);
-  // When initialEvents is provided by the server, mark as searched so the grid shows results,
-  // but use a ref to skip the redundant mount fetch.
-  const [hasSearched, setHasSearched] = useState(!!initialEvents || loadOnMount);
-  const skipInitialFetch = useRef(!!initialEvents);
-  const [page, setPage] = useState(0);
+
+  // ── Query-enabled gate ──────────────────────────────────────────────────────
+  // When loadOnMount=false the query stays disabled until the user explicitly
+  // triggers a search (e.g. from the filter bar).
+  const [queryEnabled, setQueryEnabled] = useState(loadOnMount || !!initialEvents);
+
+  // ── Misc UI state ───────────────────────────────────────────────────────────
+  const [filterOptions] = useState(initialFilterOptions);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [searchTrigger, setSearchTrigger] = useState(0);
 
-  const [filterOptions, setFilterOptions] = useState(initialFilterOptions);
-
+  // ── Debounce ─────────────────────────────────────────────────────────────────
   const debouncedSearch = useDebounce(searchText, 300);
 
-  const locationLabel =
-    selectedCity !== 'all' ? selectedCity : selectedCountry !== 'all' ? selectedCountry : null;
-
-  const skeletonKeys = useMemo(() => Array.from({ length: 4 }, (_, i) => `skeleton-${i}`), []);
-
-  const sortedActivityOptions = useMemo(
-    () => [...activityOptions].sort((a, b) => a.label.localeCompare(b.label)),
-    [],
-  );
-
-  // Search
-  // biome-ignore lint/correctness/useExhaustiveDependencies: searchTrigger is an imperative counter, not a reactive value
-  useEffect(() => {
-    if (!hasSearched) {
-      setIsInitialLoad(false);
-      return;
-    }
-    // Skip the initial fetch when the server already pre-populated events
-    if (skipInitialFetch.current) {
-      skipInitialFetch.current = false;
-      setIsInitialLoad(false);
-      return;
-    }
-    setPage(0);
-    startTransition(async () => {
-      try {
-        const result = await searchEventsAction({
-          searchText: debouncedSearch.trim() || undefined,
-          activities:
-            selectedActivity && selectedActivity !== 'all' ? [selectedActivity] : undefined,
-          cities: selectedCity && selectedCity !== 'all' ? [selectedCity] : undefined,
-          countries: selectedCountry && selectedCountry !== 'all' ? [selectedCountry] : undefined,
-          dateFrom: dateFrom || undefined,
-          dateTo: dateTo || undefined,
+  // ── Query key ────────────────────────────────────────────────────────────────
+  // All parameters that affect the result live here. TanStack Query uses this
+  // as the cache key: identical keys → instant cache hit, no network request.
+  const queryKey = useMemo(
+    () =>
+      [
+        'events',
+        {
+          search: debouncedSearch.trim(),
+          activity: selectedActivity,
+          city: selectedCity,
+          country: selectedCountry,
+          dateFrom,
+          dateTo,
           sortBy,
-          limit: LIMIT,
-          offset: 0,
-          photographerQuery: photographerQuery.trim() || undefined,
+          photographer: photographerQuery.trim(),
           lat: searchLat,
           lng: searchLng,
-          radiusKm: radiusKm > 0 ? radiusKm : undefined,
-        });
-        setEvents(
-          result.events.map((e) => ({
-            ...e,
-            pricePerPhoto: e.price_per_photo,
-          })),
-        );
-        setPage(0);
-        setTotal(result.total);
-        setIsInitialLoad(false);
-      } catch (error) {
-        console.error('Error searching events:', error);
-        setEvents([]);
-        setTotal(0);
-        setIsInitialLoad(false);
-      }
-    });
+          radius: radiusKm,
+        },
+      ] as const,
+    [
+      debouncedSearch,
+      selectedActivity,
+      selectedCity,
+      selectedCountry,
+      dateFrom,
+      dateTo,
+      sortBy,
+      photographerQuery,
+      searchLat,
+      searchLng,
+      radiusKm,
+    ],
+  );
+
+  // ── Main query ───────────────────────────────────────────────────────────────
+  const { data, isPending, isFetching, refetch } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const result = await searchEventsAction({
+        searchText: debouncedSearch.trim() || undefined,
+        activities: selectedActivity !== 'all' ? [selectedActivity] : undefined,
+        cities: selectedCity !== 'all' ? [selectedCity] : undefined,
+        countries: selectedCountry !== 'all' ? [selectedCountry] : undefined,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+        sortBy,
+        limit: LIMIT,
+        offset: 0,
+        photographerQuery: photographerQuery.trim() || undefined,
+        lat: searchLat,
+        lng: searchLng,
+        radiusKm: radiusKm > 0 ? radiusKm : undefined,
+      });
+      return normalizeResult(result);
+    },
+    // Server pre-fetched data seeds the cache on first paint (no client fetch on mount).
+    // initialDataUpdatedAt: Date.now() tells TanStack Query the data is fresh right now,
+    // so it won't immediately trigger a background refetch.
+    initialData:
+      initialEvents !== undefined ? { events: initialEvents, total: initialTotal ?? 0 } : undefined,
+    initialDataUpdatedAt: initialEvents !== undefined ? Date.now() : undefined,
+    enabled: queryEnabled,
+  });
+
+  // ── "Load more" (pagination) ─────────────────────────────────────────────────
+  // Extra pages are accumulated locally. They're reset whenever the query key
+  // changes (i.e. the user applies a new filter) so stale pages don't bleed in.
+  const [extraEvents, setExtraEvents] = useState<EventWithStats[]>([]);
+  const [page, setPage] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const prevQueryKeyRef = useRef(queryKey);
+
+  useEffect(() => {
+    if (prevQueryKeyRef.current !== queryKey) {
+      prevQueryKeyRef.current = queryKey;
+      setExtraEvents([]);
+      setPage(0);
+    }
+  });
+
+  const baseEvents = data?.events ?? [];
+  const events = [...baseEvents, ...extraEvents];
+  const total = data?.total ?? 0;
+  const hasMore = events.length < total;
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return;
+    const nextPage = page + 1;
+    setIsLoadingMore(true);
+    try {
+      const result = await searchEventsAction({
+        searchText: debouncedSearch.trim() || undefined,
+        activities: selectedActivity !== 'all' ? [selectedActivity] : undefined,
+        cities: selectedCity !== 'all' ? [selectedCity] : undefined,
+        countries: selectedCountry !== 'all' ? [selectedCountry] : undefined,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+        sortBy,
+        limit: LIMIT,
+        offset: nextPage * LIMIT,
+        photographerQuery: photographerQuery.trim() || undefined,
+        lat: searchLat,
+        lng: searchLng,
+        radiusKm: radiusKm > 0 ? radiusKm : undefined,
+      });
+      setExtraEvents((prev) => [...prev, ...normalizeResult(result).events]);
+      setPage(nextPage);
+    } catch (err) {
+      console.error('Error loading more events:', err);
+    } finally {
+      setIsLoadingMore(false);
+    }
   }, [
-    hasSearched,
+    isLoadingMore,
+    hasMore,
+    page,
     debouncedSearch,
     selectedActivity,
     selectedCity,
@@ -177,14 +246,15 @@ export function useEventSearch({
     dateFrom,
     dateTo,
     sortBy,
-    searchTrigger,
     photographerQuery,
-    radiusKm,
     searchLat,
     searchLng,
+    radiusKm,
   ]);
 
-  const hasMore = events.length < total;
+  // ── Derived state ────────────────────────────────────────────────────────────
+  const locationLabel =
+    selectedCity !== 'all' ? selectedCity : selectedCountry !== 'all' ? selectedCountry : null;
 
   const hasFilters =
     (selectedActivity && selectedActivity !== 'all') ||
@@ -201,10 +271,34 @@ export function useEventSearch({
     (dateFrom || dateTo ? 1 : 0) +
     (photographerQuery ? 1 : 0);
 
-  // Used as the badge count on the simplified-mode Filters button
   const dateFilterCount = (dateFrom || dateTo ? 1 : 0) + (photographerQuery ? 1 : 0);
 
-  const clearFilters = () => {
+  const skeletonKeys = useMemo(() => Array.from({ length: 4 }, (_, i) => `skeleton-${i}`), []);
+
+  const sortedActivityOptions = useMemo(
+    () => [...activityOptions].sort((a, b) => a.label.localeCompare(b.label)),
+    [],
+  );
+
+  // ── Actions ──────────────────────────────────────────────────────────────────
+  const triggerSearch = useCallback(() => {
+    if (!queryEnabled) {
+      setQueryEnabled(true);
+    } else {
+      refetch();
+    }
+  }, [queryEnabled, refetch]);
+
+  /** Called by filter bar dropdowns — enables query and lets the key change drive the fetch. */
+  const handleFilterChange = useCallback(
+    (setter: (v: string) => void) => (value: string) => {
+      setter(value);
+      setQueryEnabled(true);
+    },
+    [],
+  );
+
+  const clearFilters = useCallback(() => {
     setSelectedActivity('all');
     setSelectedCity('all');
     setSelectedCountry('all');
@@ -212,63 +306,28 @@ export function useEventSearch({
     setDateFrom('');
     setDateTo('');
     setPhotographerQuery('');
-    setHasSearched(loadOnMount);
-    if (!loadOnMount) setEvents([]);
-  };
+    if (!loadOnMount) setQueryEnabled(false);
+  }, [loadOnMount]);
 
-  const clearDateFilters = () => {
+  const clearDateFilters = useCallback(() => {
     setDateFrom('');
     setDateTo('');
-  };
+  }, []);
 
-  const handleFilterChange = (setter: (v: string) => void) => (value: string) => {
-    setter(value);
-    setHasSearched(true);
-  };
+  // Legacy compatibility shim — some consumers call setHasSearched(true/false)
+  const setHasSearched = useCallback((value: boolean) => {
+    setQueryEnabled(value);
+  }, []);
 
-  const loadMore = () => {
-    if (isLoading || !hasMore) return;
-    const nextPage = page + 1;
-    setPage(nextPage);
-    startTransition(async () => {
-      try {
-        const result = await searchEventsAction({
-          searchText: debouncedSearch.trim() || undefined,
-          activities:
-            selectedActivity && selectedActivity !== 'all' ? [selectedActivity] : undefined,
-          cities: selectedCity && selectedCity !== 'all' ? [selectedCity] : undefined,
-          countries: selectedCountry && selectedCountry !== 'all' ? [selectedCountry] : undefined,
-          dateFrom: dateFrom || undefined,
-          dateTo: dateTo || undefined,
-          sortBy,
-          limit: LIMIT,
-          offset: nextPage * LIMIT,
-          photographerQuery: photographerQuery.trim() || undefined,
-          lat: searchLat,
-          lng: searchLng,
-          radiusKm: radiusKm > 0 ? radiusKm : undefined,
-        });
-        setEvents((prev) => [
-          ...prev,
-          ...result.events.map((e) => ({
-            ...e,
-            pricePerPhoto: e.price_per_photo,
-          })),
-        ]);
-        setTotal(result.total);
-      } catch (error) {
-        console.error('Error loading more events:', error);
-      }
-    });
-  };
-
-  const triggerSearch = () => {
-    setHasSearched(true);
-    setSearchTrigger((n) => n + 1);
-  };
+  // ── Loading states ───────────────────────────────────────────────────────────
+  // isPending: query is enabled but has no data at all yet (true first-time skeleton)
+  // isFetching: any in-flight request (background refresh, filter change, etc.)
+  // isLoading: only show full-screen skeleton when there's no cached data to show
+  const isLoading = isFetching;
+  const isInitialLoad = isPending && queryEnabled;
 
   return {
-    // State
+    // Filter state
     searchText,
     setSearchText,
     selectedActivity,
@@ -291,11 +350,12 @@ export function useEventSearch({
     setSearchLat,
     searchLng,
     setSearchLng,
+    // Data
     events,
     total,
     isLoading,
     isInitialLoad,
-    hasSearched,
+    hasSearched: queryEnabled,
     setHasSearched,
     filterOptions,
     sortedActivityOptions,
@@ -312,7 +372,7 @@ export function useEventSearch({
     clearFilters,
     clearDateFilters,
     handleFilterChange,
-    loadMore,
+    loadMore: isLoadingMore ? () => {} : loadMore,
     triggerSearch,
   };
 }

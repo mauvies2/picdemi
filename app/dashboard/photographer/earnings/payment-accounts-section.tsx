@@ -1,7 +1,8 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, Plus, Star, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -408,27 +409,15 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
 }
 
 export function PaymentAccountsSection() {
-  const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const loadAccounts = useCallback(() => {
-    startTransition(async () => {
-      try {
-        const data = await getPaymentAccountsAction();
-        setAccounts(data);
-      } catch (error) {
-        console.error('Failed to load payment accounts:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    loadAccounts();
-  }, [loadAccounts]);
+  const { data: accounts = [], isPending: isLoading } = useQuery({
+    queryKey: ['payment-accounts'] as const,
+    queryFn: () => getPaymentAccountsAction(),
+    staleTime: 2 * 60 * 1000,
+  });
 
   const handleDelete = async (accountId: string) => {
     if (!confirm('Are you sure you want to delete this payment account?')) {
@@ -438,7 +427,7 @@ export function PaymentAccountsSection() {
     startTransition(async () => {
       try {
         await deletePaymentAccountAction(accountId);
-        loadAccounts();
+        queryClient.invalidateQueries({ queryKey: ['payment-accounts'] });
       } catch (error) {
         console.error('Failed to delete payment account:', error);
         alert(error instanceof Error ? error.message : 'Failed to delete account');
@@ -450,7 +439,7 @@ export function PaymentAccountsSection() {
     startTransition(async () => {
       try {
         await setDefaultPaymentAccountAction(accountId);
-        loadAccounts();
+        queryClient.invalidateQueries({ queryKey: ['payment-accounts'] });
       } catch (error) {
         console.error('Failed to set default account:', error);
         alert(error instanceof Error ? error.message : 'Failed to set default account');
@@ -483,7 +472,7 @@ export function PaymentAccountsSection() {
             <PaymentAccountForm
               onSuccess={() => {
                 setIsDialogOpen(false);
-                loadAccounts();
+                queryClient.invalidateQueries({ queryKey: ['payment-accounts'] });
               }}
               onCancel={() => setIsDialogOpen(false)}
             />

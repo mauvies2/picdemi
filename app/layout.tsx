@@ -6,6 +6,7 @@ import { ConditionalHeader } from '@/components/conditional-header';
 import { GuestCartProvider } from '@/components/guest-cart-provider';
 import Header from '@/components/header';
 import { Main } from '@/components/main';
+import { QueryProvider } from '@/components/query-provider';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -40,13 +41,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${geistMono.variable} ${interTight.variable}`}>
       <body className="antialiased">
-        <GuestCartProvider>
-          <ConditionalHeader>
-            <Header />
-          </ConditionalHeader>
-          <Main>{children}</Main>
-          <Toaster />
-        </GuestCartProvider>
+        <QueryProvider>
+          <GuestCartProvider>
+            <ConditionalHeader>
+              <Header />
+            </ConditionalHeader>
+            <Main>{children}</Main>
+            <Toaster />
+          </GuestCartProvider>
+        </QueryProvider>
       </body>
     </html>
   );

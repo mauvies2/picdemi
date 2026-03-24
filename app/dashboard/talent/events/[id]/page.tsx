@@ -37,19 +37,30 @@ export default async function ExploreEventDetailPage({
   // Check if user is talent (watermark only shows for talent users)
   let useWatermark = false;
   const photosInCart: string[] = [];
+  const photosInMyPhotos: string[] = [];
   try {
     if (user) {
       const { activeRole } = await getActiveRole();
       // Only show watermark for talent users if watermark is enabled
       useWatermark = activeRole === 'talent' && event.watermark_enabled === true;
 
-      // Check which photos are in cart (only for talent users)
+      // Check which photos are in cart and in "my photos" (only for talent users)
       if (activeRole === 'talent') {
         const photoIds = photos.map((p) => p.id);
         for (const photoId of photoIds) {
           const inCart = await isPhotoInCart(supabase, user.id, photoId);
           if (inCart) {
             photosInCart.push(photoId);
+          }
+        }
+        if (photoIds.length > 0) {
+          const { data: tags } = await supabase
+            .from('talent_photo_tags')
+            .select('photo_id')
+            .eq('talent_user_id', user.id)
+            .in('photo_id', photoIds);
+          for (const tag of tags ?? []) {
+            photosInMyPhotos.push(tag.photo_id);
           }
         }
       }
@@ -118,6 +129,7 @@ export default async function ExploreEventDetailPage({
             items={photoItems}
             showAddToCart={user !== null}
             photosInCart={new Set(photosInCart)}
+            photosInMyPhotos={new Set(photosInMyPhotos)}
           />
         </div>
       )}

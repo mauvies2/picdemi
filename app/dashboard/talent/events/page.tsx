@@ -29,7 +29,7 @@ export default async function TalentExplorePage({
         initialWhere={where}
         initialActivity={activity}
         hideTopFilters={true}
-        clearHref="/dashboard/talent/events"
+        showFindMe={true}
       />
     </div>
   );

@@ -223,7 +223,12 @@ export async function searchPublicEvents(
     filters.radiusKm !== undefined &&
     filters.radiusKm > 0;
 
-  if (hasRadius && filters.lat !== undefined && filters.lng !== undefined && filters.radiusKm !== undefined) {
+  if (
+    hasRadius &&
+    filters.lat !== undefined &&
+    filters.lng !== undefined &&
+    filters.radiusKm !== undefined
+  ) {
     const deltaLat = filters.radiusKm / 111;
     const deltaLng = filters.radiusKm / (111 * Math.cos((filters.lat * Math.PI) / 180));
     const latMin = (filters.lat - deltaLat).toFixed(6);
@@ -234,13 +239,12 @@ export async function searchPublicEvents(
     // For text fallback: extract city part from "City, Country" strings
     const rawText = filters.searchText?.trim() ?? '';
     const cityPart = rawText.includes(', ') ? rawText.split(', ')[0] : rawText;
-    const escapedCity = cityPart.replace(/"/g, '\\"');
 
     if (cityPart) {
       // OR: within bounding box (events with coords) | city text match (events without coords)
       query = query.or(
         `and(lat.gte.${latMin},lat.lte.${latMax},lng.gte.${lngMin},lng.lte.${lngMax}),` +
-        `and(lat.is.null,city.ilike.%${cityPart}%)`,
+          `and(lat.is.null,city.ilike.%${cityPart}%)`,
       );
     } else {
       // No text — apply bounding box only

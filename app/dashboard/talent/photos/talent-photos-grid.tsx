@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Loader2, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
@@ -9,7 +10,6 @@ import { addPhotoToCartAction } from '@/app/dashboard/talent/cart/actions';
 import PhotoAlbumViewer, { type PhotoAlbumItem } from '@/components/photo-album-viewer';
 import { Button } from '@/components/ui/button';
 import { listMyTaggedPhotos, type TaggedPhotoGroup } from './actions';
-import { AIMatchingButton } from './ai-matching/ai-matching-button';
 
 interface TalentPhotosGridProps {
   initialGroups: TaggedPhotoGroup[];
@@ -22,6 +22,7 @@ export function TalentPhotosGrid({
   hasMore: initialHasMore,
   photosInCart = [],
 }: TalentPhotosGridProps) {
+  const queryClient = useQueryClient();
   const [groups, setGroups] = useState(initialGroups);
   const [offset, setOffset] = useState(
     initialGroups.reduce((sum, g) => sum + g.dates.reduce((s, d) => s + d.photos.length, 0), 0),
@@ -52,6 +53,7 @@ export function TalentPhotosGrid({
         for (const photoId of selectedIds) {
           await addPhotoToCartAction(photoId);
         }
+        queryClient.invalidateQueries({ queryKey: ['cart-count'] });
         toast.success(
           `Added ${selectedIds.length} photo${selectedIds.length === 1 ? '' : 's'} to cart`,
         );
@@ -62,7 +64,7 @@ export function TalentPhotosGrid({
         toast.error(message);
       }
     });
-  }, [selectedIds]);
+  }, [selectedIds, queryClient]);
 
   const selectedCountLabel = useMemo(() => {
     if (selectedIds.length === 0) return 'No photos selected';
@@ -204,7 +206,6 @@ export function TalentPhotosGrid({
             Select
           </Button>
         )}
-        <AIMatchingButton />
       </div>
 
       <div className="space-y-6">
