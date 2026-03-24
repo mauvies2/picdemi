@@ -1,18 +1,19 @@
 'use client';
 
 import { format, parseISO } from 'date-fns';
-import { CalendarIcon, ChevronLeft, Clock, Search, X } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, Clock, MapPin, Navigation, Search, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { createPortal } from 'react-dom';
-import { searchEventNamesAction } from '@/app/dashboard/talent/events/actions';
 import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
+import { searchEventNamesAction } from '@/app/dashboard/talent/events/actions';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDebounce } from '@/hooks/use-debounce';
+import { type PlacePrediction, usePlacesAutocomplete } from '@/hooks/use-places-autocomplete';
 import { cn } from '@/lib/utils';
 
 interface EventSearchBarProps {
@@ -279,6 +280,107 @@ function WhenPopoverContent({
   );
 }
 
+// ─── Where suggestions dropdown ───────────────────────────────────────────────
+
+function WhereSuggestionsDropdown({
+  placePredictions,
+  eventNames,
+  hasInput,
+  onSelectPlace,
+  onSelectEventName,
+  onUseCurrentLocation,
+}: {
+  placePredictions: PlacePrediction[];
+  eventNames: string[];
+  hasInput: boolean;
+  onSelectPlace: (p: PlacePrediction) => void;
+  onSelectEventName: (name: string) => void;
+  onUseCurrentLocation: () => void;
+}) {
+  const showPlaces = hasInput && placePredictions.length > 0;
+  const showEvents = hasInput && eventNames.length > 0;
+  const showCurrentLocation =
+    !hasInput && typeof navigator !== 'undefined' && !!navigator.geolocation;
+
+  if (!showPlaces && !showEvents && !showCurrentLocation) return null;
+
+  return (
+    <div className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-2xl border bg-popover shadow-xl">
+      {/* Current location — shown when input is empty */}
+      {showCurrentLocation && (
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            onUseCurrentLocation();
+          }}
+          className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
+        >
+          <Navigation className="h-4 w-4 shrink-0 text-primary" />
+          Use current location
+        </button>
+      )}
+
+      {/* Google Places suggestions */}
+      {showPlaces && (
+        <>
+          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+            Locations
+          </p>
+          {placePredictions.map((p) => (
+            <button
+              key={p.placeId}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onSelectPlace(p);
+              }}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors text-left"
+            >
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <span>
+                <span className="font-medium">{p.mainText}</span>
+                {p.secondaryText && (
+                  <span className="text-muted-foreground">, {p.secondaryText}</span>
+                )}
+              </span>
+            </button>
+          ))}
+        </>
+      )}
+
+      {/* Divider */}
+      {showPlaces && showEvents && <div className="mx-4 my-1 h-px bg-border" />}
+
+      {/* Event name suggestions */}
+      {showEvents && (
+        <>
+          <p className="px-4 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+            Events
+          </p>
+          {eventNames.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onSelectEventName(name);
+              }}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors text-left"
+            >
+              <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              {name}
+            </button>
+          ))}
+        </>
+      )}
+
+      {/* Bottom padding */}
+      {/* <div className="h-1.5" /> */}
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function EventSearchBar({
@@ -327,19 +429,68 @@ export function EventSearchBar({
 
   const activity = useActivityCombobox(initialActivity, sortedActivities);
 
-  // Event name suggestions
+  // Places autocomplete + event name suggestions
+  const { getPredictions, getDetails } = usePlacesAutocomplete();
   const debouncedWhere = useDebounce(where, 250);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [placePredictions, setPlacePredictions] = useState<PlacePrediction[]>([]);
+  const [eventNameSuggestions, setEventNameSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const whereContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!debouncedWhere.trim()) {
-      setSuggestions([]);
+      setPlacePredictions([]);
+      setEventNameSuggestions([]);
       return;
     }
-    searchEventNamesAction(debouncedWhere).then(setSuggestions).catch(() => setSuggestions([]));
-  }, [debouncedWhere]);
+    getPredictions(debouncedWhere)
+      .then(setPlacePredictions)
+      .catch(() => setPlacePredictions([]));
+    searchEventNamesAction(debouncedWhere)
+      .then(setEventNameSuggestions)
+      .catch(() => setEventNameSuggestions([]));
+  }, [debouncedWhere, getPredictions]);
+
+  const handleSelectPlace = useCallback(
+    async (prediction: PlacePrediction) => {
+      setShowSuggestions(false);
+      setWhere(prediction.mainText);
+      const details = await getDetails(prediction.placeId);
+      if (details) {
+        setSearchLat(details.lat);
+        setSearchLng(details.lng);
+        setRadius(25);
+      }
+    },
+    [getDetails],
+  );
+
+  const handleUseCurrentLocation = useCallback(() => {
+    if (!navigator.geolocation) return;
+    setShowSuggestions(false);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setSearchLat(latitude);
+        setSearchLng(longitude);
+        setRadius(25);
+        // Reverse geocode with Nominatim (free, no API key needed)
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+            { headers: { 'Accept-Language': 'en' } },
+          );
+          const data = await res.json();
+          const city: string =
+            data.address?.city ?? data.address?.town ?? data.address?.village ?? 'Nearby';
+          setWhere(city);
+        } catch {
+          setWhere('Nearby');
+        }
+      },
+      () => {}, // permission denied — silently ignore
+    );
+  }, []);
 
   const handleSearch = useCallback(() => {
     setShowSuggestions(false);
@@ -429,7 +580,10 @@ export function EventSearchBar({
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') { setShowSuggestions(false); handleSearch(); }
+                    if (e.key === 'Enter') {
+                      setShowSuggestions(false);
+                      handleSearch();
+                    }
                     if (e.key === 'Escape') setShowSuggestions(false);
                   }}
                   className="min-w-0 flex-1 h-auto outline-none p-0 mt-0.5 text-base text-muted-foreground font-medium focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/40 [&:-webkit-autofill]:![box-shadow:0_0_0_1000px_white_inset]"
@@ -441,7 +595,8 @@ export function EventSearchBar({
                     setSearchLat(undefined);
                     setSearchLng(undefined);
                     setRadius(0);
-                    setSuggestions([]);
+                    setPlacePredictions([]);
+                    setEventNameSuggestions([]);
                     whereRef.current?.focus();
                   }}
                   className={cn(
@@ -452,26 +607,22 @@ export function EventSearchBar({
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              {/* Name suggestions dropdown */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border bg-popover shadow-lg overflow-hidden">
-                  {suggestions.map((name) => (
-                    <button
-                      key={name}
-                      type="button"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        setWhere(name);
-                        setSuggestions([]);
-                        setShowSuggestions(false);
-                      }}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors text-left"
-                    >
-                      <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                      {name}
-                    </button>
-                  ))}
-                </div>
+
+              {/* Combined dropdown */}
+              {showSuggestions && (
+                <WhereSuggestionsDropdown
+                  placePredictions={placePredictions}
+                  eventNames={eventNameSuggestions}
+                  hasInput={!!where.trim()}
+                  onSelectPlace={handleSelectPlace}
+                  onSelectEventName={(name) => {
+                    setWhere(name);
+                    setPlacePredictions([]);
+                    setEventNameSuggestions([]);
+                    setShowSuggestions(false);
+                  }}
+                  onUseCurrentLocation={handleUseCurrentLocation}
+                />
               )}
             </div>
 
