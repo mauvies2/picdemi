@@ -9,7 +9,13 @@ export function CloseButton({ className = '' }: { className?: string }) {
   const handleClick = () => {
     if (pathname?.startsWith('/auth/reset-password')) {
       router.push('/login');
-    } else if (window.history.length > 1) {
+      return;
+    }
+
+    const referrer = document.referrer;
+    const isSameDomain = referrer && new URL(referrer).origin === window.location.origin;
+
+    if (isSameDomain && window.history.length > 1) {
       router.back();
     } else {
       router.push('/');

@@ -323,35 +323,37 @@ export function EventSearchBar({
                 When
               </p>
               <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="mt-0.5 flex w-full items-center gap-1 text-left outline-none"
-                  >
-                    <span
-                      className={cn(
-                        'flex-1 truncate text-base font-medium',
-                        label ? 'text-muted-foreground' : 'text-muted-foreground/40',
-                      )}
+                <div className="mt-0.5 flex w-full items-center gap-1">
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="flex-1 truncate text-left outline-none"
                     >
-                      {label ?? 'Any dates'}
-                    </span>
-                    {label ? (
-                      <button
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          setDateRange(undefined);
-                        }}
-                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                      <span
+                        className={cn(
+                          'text-base font-medium',
+                          label ? 'text-muted-foreground' : 'text-muted-foreground/40',
+                        )}
                       >
-                        <X className="h-4 w-4" />
-                      </button>
-                    ) : (
-                      <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground/40" />
-                    )}
-                  </button>
-                </PopoverTrigger>
+                        {label ?? 'Any dates'}
+                      </span>
+                    </button>
+                  </PopoverTrigger>
+                  {label ? (
+                    <button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setDateRange(undefined);
+                      }}
+                      className="shrink-0 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+                  )}
+                </div>
                 <PopoverContent className="w-auto p-0" align="start" sideOffset={12}>
                   <Calendar
                     mode="range"
