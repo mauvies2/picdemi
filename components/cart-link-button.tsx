@@ -39,7 +39,7 @@ function CartIconButton({ href, count }: { href: string; count: number }) {
         className="relative h-10 w-10 p-0 hover:bg-accent"
         aria-label="Shopping cart"
       >
-        <ShoppingCart className="h-5 w-5" />
+        <ShoppingCart className="h-6 w-6 mt-2" />
         {count > 0 && (
           <span
             className={cn(

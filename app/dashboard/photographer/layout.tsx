@@ -1,7 +1,7 @@
 import { getActiveRole, switchRole } from '@/app/actions/roles';
 import { AppSidebar } from '@/components/app-sidebar';
 import { DashboardTopHeader } from '@/components/dashboard-top-header';
-import { MobileHeader } from '@/components/mobile-header';
+import { PhotographerBottomNav } from '@/components/photographer-bottom-nav';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { getProfileFields } from '@/database/queries';
 import { createClient } from '@/database/server';
@@ -33,10 +33,10 @@ export default async function PhotographerLayout({ children }: { children: React
     <SidebarProvider>
       <AppSidebar activeRole={activeRole} user={sidebarUser} />
       <SidebarInset>
-        <MobileHeader />
         <DashboardTopHeader user={sidebarUser} activeRole={activeRole} />
-        <div className="flex flex-1 flex-col gap-6 p-4">{children}</div>
+        <div className="flex flex-1 flex-col gap-6 p-4 pb-20 md:pb-4">{children}</div>
       </SidebarInset>
+      <PhotographerBottomNav user={sidebarUser} activeRole={activeRole} />
     </SidebarProvider>
   );
 }

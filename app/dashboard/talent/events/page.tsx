@@ -5,31 +5,50 @@ import { ExplorePageContent } from './explore-page-content';
 export default async function TalentExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ where?: string; activity?: string }>;
+  searchParams: Promise<{
+    where?: string;
+    activity?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    preset?: string;
+    lat?: string;
+    lng?: string;
+    radius?: string;
+  }>;
 }) {
-  const { where, activity } = await searchParams;
+  const { where, activity, dateFrom, dateTo, preset, lat, lng, radius } = await searchParams;
   const filterOptions = await getFilterOptionsAction();
+
+  const key = `${where ?? ''}-${activity ?? ''}-${dateFrom ?? ''}-${dateTo ?? ''}`;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-center">
         <EventSearchBar
-          key={`${where ?? ''}-${activity ?? ''}`}
+          key={key}
           variant="hero"
           initialWhere={where ?? ''}
           initialActivity={activity ?? ''}
+          initialDateFrom={dateFrom ?? ''}
+          initialDateTo={dateTo ?? ''}
+          initialPreset={preset}
+          initialLat={lat ? Number(lat) : undefined}
+          initialLng={lng ? Number(lng) : undefined}
+          initialRadius={radius ? Number(radius) : undefined}
           searchHref="/dashboard/talent/events"
         />
       </div>
 
       <ExplorePageContent
-        key={`${where ?? ''}-${activity ?? ''}`}
+        key={key}
         initialFilterOptions={filterOptions}
         loadOnMount={true}
         initialWhere={where}
         initialActivity={activity}
+        initialDateFrom={dateFrom}
+        initialDateTo={dateTo}
         hideTopFilters={true}
-        showFindMe={true}
+        showFindMe={false}
       />
     </div>
   );

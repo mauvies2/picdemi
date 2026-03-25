@@ -1,6 +1,7 @@
 'use client';
 
 import { format, parseISO } from 'date-fns';
+import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarIcon, ChevronLeft, Clock, MapPin, Navigation, Search, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -10,6 +11,7 @@ import { activityOptions } from '@/app/dashboard/photographer/events/new/activit
 import { searchEventNamesAction } from '@/app/dashboard/talent/events/actions';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -224,16 +226,18 @@ function WhenPopoverContent({
   dateRange,
   onSelectPreset,
   onSelectCustom,
+  mobile = false,
 }: {
   dateRange: DateRange | undefined;
   onSelectPreset: (label: string, range: DateRange) => void;
   onSelectCustom: (range: DateRange | undefined) => void;
+  mobile?: boolean;
 }) {
   const [showCalendar, setShowCalendar] = useState(false);
 
   if (showCalendar) {
     return (
-      <div>
+      <div className={mobile ? 'w-full' : undefined}>
         <button
           type="button"
           onClick={() => setShowCalendar(false)}
@@ -249,19 +253,23 @@ function WhenPopoverContent({
             onSelectCustom(range);
           }}
           numberOfMonths={1}
+          {...(mobile && {
+            className: '!p-0',
+            classNames: { root: 'w-full max-w-full' },
+          })}
         />
       </div>
     );
   }
 
   return (
-    <div className="p-1.5 w-48">
+    <div className="w-48 p-3">
       {PRESETS.map(({ label, getRange }) => (
         <button
           key={label}
           type="button"
           onClick={() => onSelectPreset(label, getRange())}
-          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
+          className="flex w-full items-center gap-2.5 rounded-lg py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
         >
           <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           {label}
@@ -271,7 +279,7 @@ function WhenPopoverContent({
       <button
         type="button"
         onClick={() => setShowCalendar(true)}
-        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
+        className="flex w-full items-center gap-2.5 rounded-lg py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
       >
         <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         Custom date…
@@ -381,6 +389,45 @@ function WhereSuggestionsDropdown({
   );
 }
 
+// ─── Mobile calendar semantic table components ────────────────────────────────
+
+function MobileMonthGrid({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
+  return <table className={className} {...props} />;
+}
+function MobileWeeks({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
+  return <tbody className={className} {...props} />;
+}
+function MobileWeekdays({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) {
+  return <tr className={className} {...props} />;
+}
+function MobileWeekday({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
+  return <th scope="col" className={className} {...props} />;
+}
+function MobileWeek({
+  week: _week,
+  className,
+  ...props
+}: { week: unknown } & React.HTMLAttributes<HTMLTableRowElement>) {
+  return <tr className={className} {...(props as React.HTMLAttributes<HTMLTableRowElement>)} />;
+}
+function MobileDay({
+  day: _day,
+  modifiers: _modifiers,
+  className,
+  ...props
+}: { day: unknown; modifiers: unknown } & React.TdHTMLAttributes<HTMLTableCellElement>) {
+  return <td className={className} {...props} />;
+}
+
+const MOBILE_CALENDAR_COMPONENTS = {
+  MonthGrid: MobileMonthGrid,
+  Weeks: MobileWeeks,
+  Weekdays: MobileWeekdays,
+  Weekday: MobileWeekday,
+  Week: MobileWeek,
+  Day: MobileDay,
+};
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function EventSearchBar({
@@ -419,6 +466,8 @@ export function EventSearchBar({
   const [searchLat, setSearchLat] = useState<number | undefined>(initialLat);
   const [searchLng, setSearchLng] = useState<number | undefined>(initialLng);
   const [radius, setRadius] = useState<number>(initialRadius ?? (initialLat ? 25 : 0));
+  const [mobileDialogOpen, setMobileDialogOpen] = useState(false);
+  const [mobileWhenOpen, setMobileWhenOpen] = useState(false);
 
   const [whenOpen, setWhenOpen] = useState(false);
 
@@ -474,7 +523,7 @@ export function EventSearchBar({
         setSearchLat(latitude);
         setSearchLng(longitude);
         setRadius(25);
-        // Reverse geocode with Nominatim (free, no API key needed)
+
         try {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
@@ -492,6 +541,19 @@ export function EventSearchBar({
     );
   }, []);
 
+  const clearAll = useCallback(() => {
+    setWhere('');
+    setPlacePredictions([]);
+    setEventNameSuggestions([]);
+    setShowSuggestions(false);
+    setSearchLat(undefined);
+    setSearchLng(undefined);
+    setRadius(0);
+    activity.clear();
+    setDateRange(undefined);
+    setPresetLabel(null);
+  }, [activity]);
+
   const handleSearch = useCallback(() => {
     setShowSuggestions(false);
     const validatedActivity = activity.validate();
@@ -502,6 +564,7 @@ export function EventSearchBar({
 
     if (onSearch) {
       onSearch(where, validatedActivity, df, dt);
+      setMobileDialogOpen(false);
       return;
     }
     const params = new URLSearchParams();
@@ -515,6 +578,7 @@ export function EventSearchBar({
       params.set('lng', searchLng.toFixed(6));
       params.set('radius', radius.toString());
     }
+    setMobileDialogOpen(false);
     router.push(`${searchHref}?${params.toString()}`);
   }, [
     activity,
@@ -540,18 +604,303 @@ export function EventSearchBar({
     setPresetLabel(label);
     setDateRange(range);
     setWhenOpen(false);
+    setMobileWhenOpen(false);
   }, []);
 
   const handleSelectCustom = useCallback((range: DateRange | undefined) => {
     setDateRange(range);
     setPresetLabel(null);
-    if (range?.from && range?.to) setWhenOpen(false);
+    if (range?.from && range?.to) {
+      setWhenOpen(false);
+      setMobileWhenOpen(false);
+    }
   }, []);
 
   if (variant === 'hero') {
     return (
       <div className={cn('w-full max-w-3xl', className)}>
-        <div className="rounded-2xl pl-3 sm:rounded-full border-2 bg-background shadow-md">
+        <div className="md:hidden w-full flex justify-center">
+          <button
+            type="button"
+            onClick={() => setMobileDialogOpen(true)}
+            className="flex h-14 items-center rounded-full border bg-background px-10 gap-3 shadow-lg"
+          >
+            <Search className="h-5 w-5 text-foreground/80" />
+            <span className="font-medium tracking-wider text-foreground/80">Search your event</span>
+          </button>
+        </div>
+
+        <Dialog
+          open={mobileDialogOpen}
+          onOpenChange={(open) => {
+            setMobileDialogOpen(open);
+            if (!open) setMobileWhenOpen(false);
+          }}
+        >
+          <DialogContent
+            showCloseButton={false}
+            className="inset-0 h-dvh max-w-none translate-x-0 translate-y-0 rounded-none border-0 p-0"
+          >
+            <DialogTitle className="sr-only">Search events</DialogTitle>
+            <AnimatePresence mode="wait">
+              {mobileDialogOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="flex h-full flex-col bg-background"
+                >
+                  <div className="flex items-center justify-end px-4 py-6">
+                    <DialogClose asChild>
+                      <button
+                        type="button"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        aria-label="Close search"
+                      >
+                        <X className="h-7 w-7" />
+                      </button>
+                    </DialogClose>
+                  </div>
+
+                  <div className="flex-1 space-y-3 overflow-x-hidden overflow-y-auto px-4 pb-28 [scrollbar-gutter:stable]">
+                    {/* biome-ignore lint/a11y/noStaticElementInteractions: onMouseDown dismisses the date picker when tapping another field — no semantic role applies */}
+                    <section
+                      ref={whereContainerRef}
+                      className="relative rounded-2xl border bg-background px-4 py-3 shadow-sm"
+                      onMouseDown={() => setMobileWhenOpen(false)}
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Where
+                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <input
+                          ref={whereRef}
+                          id="event-search-where-mobile"
+                          name="where-mobile"
+                          type="text"
+                          autoComplete="off"
+                          placeholder="Add location or event name"
+                          value={where}
+                          onChange={(e) => {
+                            setWhere(e.target.value);
+                            setSearchLat(undefined);
+                            setSearchLng(undefined);
+                            setRadius(0);
+                            setShowSuggestions(true);
+                          }}
+                          onFocus={() => setShowSuggestions(true)}
+                          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              setShowSuggestions(false);
+                              handleSearch();
+                            }
+                            if (e.key === 'Escape') setShowSuggestions(false);
+                          }}
+                          className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50"
+                        />
+                        {where && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setWhere('');
+                              setSearchLat(undefined);
+                              setSearchLng(undefined);
+                              setRadius(0);
+                              setPlacePredictions([]);
+                              setEventNameSuggestions([]);
+                              whereRef.current?.focus();
+                            }}
+                            className="shrink-0 text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      {showSuggestions && (
+                        <WhereSuggestionsDropdown
+                          placePredictions={placePredictions}
+                          eventNames={eventNameSuggestions}
+                          hasInput={!!where.trim()}
+                          onSelectPlace={handleSelectPlace}
+                          onSelectEventName={(name) => {
+                            setWhere(name);
+                            setPlacePredictions([]);
+                            setEventNameSuggestions([]);
+                            setShowSuggestions(false);
+                          }}
+                          onUseCurrentLocation={handleUseCurrentLocation}
+                        />
+                      )}
+                    </section>
+
+                    {/* biome-ignore lint/a11y/noStaticElementInteractions: onMouseDown dismisses the date picker when tapping another field — no semantic role applies */}
+                    <section
+                      ref={activity.containerRef}
+                      className="relative rounded-2xl border bg-background px-4 py-3 shadow-sm"
+                      onMouseDown={() => setMobileWhenOpen(false)}
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Activity
+                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <input
+                          ref={activityInputRef}
+                          id="event-search-activity-mobile"
+                          name="activity-mobile"
+                          type="text"
+                          placeholder="Add activity"
+                          value={activity.inputValue}
+                          onChange={(e) => {
+                            activity.setInputValue(e.target.value);
+                            activity.setOpen(true);
+                          }}
+                          onFocus={() => activity.setOpen(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSearch();
+                            if (e.key === 'Escape') activity.setOpen(false);
+                          }}
+                          className={cn(
+                            'min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground/50',
+                            activity.error &&
+                              'animate-[shake_0.35s_ease-in-out] text-destructive placeholder:text-destructive/40',
+                          )}
+                        />
+                        {activity.inputValue && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              activity.clear();
+                              activityInputRef.current?.focus();
+                            }}
+                            className="shrink-0 text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      {activity.open && activity.filtered.length > 0 && (
+                        <div className="mt-2 max-h-48 overflow-y-auto rounded-xl bg-background py-1">
+                          {activity.filtered.map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                activity.select(opt);
+                              }}
+                              className="w-full py-2.5 text-left text-sm transition-colors hover:bg-muted"
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+
+                    <div className="rounded-2xl border bg-background shadow-sm overflow-hidden">
+                      <button
+                        type="button"
+                        className="w-full px-4 py-3 text-left"
+                        onMouseDown={() => {
+                          setMobileWhenOpen((o) => !o);
+                        }}
+                      >
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          When
+                        </p>
+                        <div className="mt-2 flex w-full items-center gap-2">
+                          <span
+                            className={cn(
+                              'flex-1 text-base font-medium',
+                              displayLabel ? 'text-foreground' : 'text-muted-foreground/50',
+                            )}
+                          >
+                            {displayLabel ?? 'Add dates'}
+                          </span>
+                          {displayLabel ? (
+                            <button
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                clearDateRange();
+                              }}
+                              className="shrink-0 text-muted-foreground hover:text-foreground"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          ) : (
+                            <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                          )}
+                        </div>
+                      </button>
+                      {mobileWhenOpen && (
+                        <div className="border-t">
+                          <div className="flex flex-wrap gap-2 px-3 py-3">
+                            {PRESETS.map(({ label, getRange }) => (
+                              <button
+                                key={label}
+                                type="button"
+                                onClick={() => handleSelectPreset(label, getRange())}
+                                className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-muted"
+                              >
+                                <Clock className="h-3 w-3 shrink-0 text-muted-foreground" />
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                          <Calendar
+                            mode="range"
+                            selected={dateRange}
+                            onSelect={(range) => {
+                              setDateRange(range);
+                              setPresetLabel(null);
+                              if (range?.from && range?.to) setMobileWhenOpen(false);
+                            }}
+                            numberOfMonths={1}
+                            className="w-full p-2! [--cell-size:--spacing(7)]"
+                            classNames={{
+                              root: 'w-full',
+                              months: 'flex flex-col gap-4 relative w-full',
+                              month: 'flex flex-col w-full gap-4',
+                              table: 'w-full',
+                              weekdays: 'flex w-full',
+                              week: 'flex w-full mt-2',
+                            }}
+                            components={MOBILE_CALENDAR_COMPONENTS}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-background px-4 py-3 md:hidden">
+                    <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={clearAll}
+                        className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        Clear all
+                      </button>
+                      <Button
+                        onClick={handleSearch}
+                        className="h-11 rounded-full px-5 text-sm font-semibold"
+                      >
+                        <Search className="mr-2 h-4 w-4" />
+                        Search
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </DialogContent>
+        </Dialog>
+
+        <div className="hidden md:block rounded-2xl pl-3 sm:rounded-full border-2 bg-background shadow-md">
           <div className="flex flex-col sm:flex-row sm:items-stretch">
             {/* Where */}
             <div
@@ -586,7 +935,7 @@ export function EventSearchBar({
                     }
                     if (e.key === 'Escape') setShowSuggestions(false);
                   }}
-                  className="min-w-0 flex-1 h-auto outline-none p-0 mt-0.5 text-base text-muted-foreground font-medium focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/40 [&:-webkit-autofill]:![box-shadow:0_0_0_1000px_white_inset]"
+                  className="min-w-0 flex-1 w-0 h-auto outline-none p-0 mt-0.5 text-sm text-muted-foreground font-medium focus-visible:ring-0 shadow-none bg-transparent placeholder:text-muted-foreground/40 [&:-webkit-autofill]:[box-shadow:0_0_0_1000px_white_inset]!"
                 />
                 <button
                   type="button"
@@ -655,7 +1004,7 @@ export function EventSearchBar({
                     if (e.key === 'Escape') activity.setOpen(false);
                   }}
                   className={cn(
-                    'mt-0.5 text-base text-muted-foreground bg-transparent outline-none min-w-0 flex-1 placeholder:text-muted-foreground/40 transition-all',
+                    'mt-0.5 text-sm text-muted-foreground bg-transparent outline-none min-w-0 flex-1 w-0 placeholder:text-muted-foreground/40 transition-all',
                     activity.error &&
                       'animate-[shake_0.35s_ease-in-out] text-destructive placeholder:text-destructive/40',
                   )}
@@ -673,13 +1022,16 @@ export function EventSearchBar({
                   </button>
                 )}
               </div>
-              {activity.open && activity.filtered.length > 0 && typeof document !== 'undefined' && (
-                <ActivityDropdown
-                  filtered={activity.filtered}
-                  anchorRef={activity.containerRef}
-                  onSelect={activity.select}
-                />
-              )}
+              {activity.open &&
+                activity.filtered.length > 0 &&
+                typeof document !== 'undefined' &&
+                !mobileDialogOpen && (
+                  <ActivityDropdown
+                    filtered={activity.filtered}
+                    anchorRef={activity.containerRef}
+                    onSelect={activity.select}
+                  />
+                )}
             </div>
 
             <div className="hidden sm:block w-px bg-border self-stretch my-4" />
@@ -693,10 +1045,13 @@ export function EventSearchBar({
               <Popover open={whenOpen} onOpenChange={(o) => setWhenOpen(o)}>
                 <div className="mt-0.5 flex w-full items-center gap-1">
                   <PopoverTrigger asChild>
-                    <button type="button" className="flex-1 truncate text-left outline-none">
+                    <button
+                      type="button"
+                      className="flex-1 truncate text-left outline-none min-w-0"
+                    >
                       <span
                         className={cn(
-                          'text-base font-medium',
+                          'block truncate text-sm font-medium',
                           displayLabel ? 'text-muted-foreground' : 'text-muted-foreground/40',
                         )}
                       >

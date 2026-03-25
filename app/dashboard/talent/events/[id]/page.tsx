@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getActiveRole } from '@/app/actions/roles';
+import { AIMatchingButton } from '@/app/dashboard/talent/photos/ai-matching/ai-matching-button';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { createPhotoUrls, getEventPhotosPublic, isPhotoInCart } from '@/database/queries';
 import { createClient } from '@/database/server';
@@ -124,7 +125,10 @@ export default async function ExploreEventDetailPage({
           <p className="text-muted-foreground">No photos available yet.</p>
         </div>
       ) : (
-        <div className="w-full">
+        <div className="w-full space-y-3">
+          <div className="flex justify-end">
+            <AIMatchingButton className="h-9 rounded-full" />
+          </div>
           <EventPhotoViewer
             items={photoItems}
             showAddToCart={user !== null}

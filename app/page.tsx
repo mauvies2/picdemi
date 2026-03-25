@@ -14,10 +14,12 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { EventSearchBar } from '@/components/event-search-bar';
 import { Footer } from '@/components/footer';
 import { PricingPlanButton } from '@/components/pricing-plan-button';
 import { Button } from '@/components/ui/button';
+import { getProfileFields } from '@/database/queries';
 import { createClient } from '@/database/server';
 import { PLANS } from '@/lib/plans';
 
@@ -28,7 +30,15 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthenticated = !!user;
+  if (user) {
+    const profile = await getProfileFields(supabase, user.id, ['active_role']);
+    if (profile?.active_role === 'PHOTOGRAPHER') {
+      redirect('/dashboard/photographer');
+    }
+    redirect('/dashboard/talent');
+  }
+
+  const isAuthenticated = false;
 
   return (
     <div className="flex min-h-screen flex-col">

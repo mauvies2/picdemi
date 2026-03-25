@@ -82,7 +82,9 @@ export async function searchEventsAction(filters: {
     .in('id', userIds);
 
   const profileMap = new Map<string, { username: string | null; display_name: string | null }>();
-  (profileRows ?? []).forEach((p) => profileMap.set(p.id, p));
+  for (const p of profileRows ?? []) {
+    profileMap.set(p.id, p);
+  }
 
   return {
     events: result.events.map((event) => {

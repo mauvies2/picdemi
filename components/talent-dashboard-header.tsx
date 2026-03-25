@@ -4,7 +4,7 @@ import { Package, Search, ShoppingBag, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { BottomNav } from '@/components/bottom-nav';
 import { CartLinkButton } from '@/components/cart-link-button';
 import { DashboardUserMenu } from '@/components/dashboard-user-menu';
 import type { RoleSlug } from '@/lib/roles';
@@ -28,11 +28,9 @@ export function TalentDashboardHeader({
   };
   activeRole: RoleSlug;
 }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
-  const isActive = (href: string, exact?: boolean) =>
-    exact ? pathname === href : pathname.startsWith(href);
+  const isActive = (href: string) => pathname.startsWith(href);
 
   return (
     <>
@@ -43,7 +41,7 @@ export function TalentDashboardHeader({
             <Image src="/logo_dark.svg" alt="Picdemi" width={130} height={50} priority />
           </Link>
 
-          {/* Center: Nav Links (desktop) */}
+          {/* Center: Nav Links (desktop only) */}
           <nav className="hidden md:flex items-center gap-0.5">
             {talentNavLinks.map((link) => (
               <Link
@@ -62,63 +60,15 @@ export function TalentDashboardHeader({
             ))}
           </nav>
 
-          {/* Right: Cart + User Avatar + Mobile hamburger */}
+          {/* Right: Cart + User Avatar */}
           <div className="flex items-center gap-3">
             <CartLinkButton />
             <DashboardUserMenu user={user} activeRole={activeRole} />
-            <button
-              type="button"
-              className="md:hidden ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent"
-              aria-label="Toggle Menu"
-              onClick={() => setMobileOpen((v) => !v)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="h-5 w-5"
-                aria-hidden="true"
-              >
-                {mobileOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile nav overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 top-16 z-40 bg-background md:hidden"
-          role="dialog"
-          aria-modal="true"
-        >
-          <nav className="flex flex-col gap-1 px-4 py-4">
-            {talentNavLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-3 rounded-md text-base font-medium transition-colors',
-                  isActive(link.href)
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
-                )}
-                onClick={() => setMobileOpen(false)}
-              >
-                <link.icon className="h-5 w-5 shrink-0" />
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      )}
+      <BottomNav items={talentNavLinks} />
     </>
   );
 }

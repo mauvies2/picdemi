@@ -29,7 +29,7 @@ export default async function TalentLayout({ children }: { children: React.React
   return (
     <div className="flex min-h-svh flex-col">
       <TalentDashboardHeader user={sidebarUser} activeRole={activeRole} />
-      <div className="mx-auto w-full max-w-screen-2xl flex flex-1 flex-col gap-6 px-4 py-6 md:px-6">
+      <div className="mx-auto w-full max-w-screen-2xl flex flex-1 flex-col gap-6 px-4 py-6 pb-20 md:pb-6 md:px-6">
         {children}
       </div>
     </div>

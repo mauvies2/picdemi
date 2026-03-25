@@ -8,8 +8,22 @@ import { useCallback, useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { addPhotoToCartAction } from '@/app/dashboard/talent/cart/actions';
 import PhotoAlbumViewer, { type PhotoAlbumItem } from '@/components/photo-album-viewer';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { listMyTaggedPhotos, type TaggedPhotoGroup } from './actions';
+import {
+  listMyTaggedPhotos,
+  removePhotosFromMyPhotosAction,
+  type TaggedPhotoGroup,
+} from './actions';
 
 interface TalentPhotosGridProps {
   initialGroups: TaggedPhotoGroup[];
@@ -31,6 +45,7 @@ export function TalentPhotosGrid({
   const [isLoading, startTransition] = useTransition();
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
   const handleToggleSelect = useCallback((photoId: string) => {
     setSelectedIds((current) => {
@@ -65,6 +80,37 @@ export function TalentPhotosGrid({
       }
     });
   }, [selectedIds, queryClient]);
+
+  const handleConfirmRemove = useCallback(() => {
+    const idsToRemove = [...selectedIds];
+    startTransition(async () => {
+      try {
+        await removePhotosFromMyPhotosAction(idsToRemove);
+        // Optimistically remove photos from local state
+        setGroups((prev) =>
+          prev
+            .map((group) => ({
+              ...group,
+              dates: group.dates
+                .map((d) => ({
+                  ...d,
+                  photos: d.photos.filter((p) => !idsToRemove.includes(p.photo_id)),
+                }))
+                .filter((d) => d.photos.length > 0),
+            }))
+            .filter((g) => g.dates.length > 0),
+        );
+        setSelectedIds([]);
+        setIsSelecting(false);
+        toast.success(
+          `Removed ${idsToRemove.length} photo${idsToRemove.length === 1 ? '' : 's'} from My Photos`,
+        );
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to remove photos';
+        toast.error(message);
+      }
+    });
+  }, [selectedIds]);
 
   const selectedCountLabel = useMemo(() => {
     if (selectedIds.length === 0) return 'No photos selected';
@@ -192,6 +238,15 @@ export function TalentPhotosGrid({
             </Button>
             <Button
               type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowRemoveConfirm(true)}
+              disabled={selectedIds.length === 0 || isLoading}
+            >
+              Remove
+            </Button>
+            <Button
+              type="button"
               variant="default"
               size="sm"
               onClick={handleAddSelectedToCart}
@@ -282,6 +337,28 @@ export function TalentPhotosGrid({
           </div>
         )}
       </div>
+
+      <AlertDialog open={showRemoveConfirm} onOpenChange={setShowRemoveConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove from My Photos?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedIds.length === 1
+                ? 'This photo will be removed from your collection. The original file is not deleted.'
+                : `These ${selectedIds.length} photos will be removed from your collection. The original files are not deleted.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRemove}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

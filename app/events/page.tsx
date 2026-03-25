@@ -110,7 +110,7 @@ export default async function PublicEventsPage({
           initialDateFrom={dateFrom}
           initialDateTo={dateTo}
           hideTopFilters={true}
-          showFindMe={true}
+          showFindMe={false}
         />
       </div>
       <Footer />

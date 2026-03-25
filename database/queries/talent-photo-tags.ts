@@ -115,6 +115,25 @@ export async function untagPhotoForTalent(
 }
 
 /**
+ * Untag multiple photos for a talent user in a single query
+ */
+export async function untagPhotosForTalent(
+  supabase: SupabaseServerClient,
+  photoIds: string[],
+  talentUserId: string,
+): Promise<void> {
+  if (photoIds.length === 0) return;
+  const { error } = await supabase
+    .from('talent_photo_tags')
+    .delete()
+    .in('photo_id', photoIds)
+    .eq('talent_user_id', talentUserId);
+  if (error) {
+    throw new Error(`Failed to untag photos for talent: ${getErrorMessage(error)}`);
+  }
+}
+
+/**
  * Check if a photo is tagged for a talent user
  */
 export async function isPhotoTaggedForTalent(

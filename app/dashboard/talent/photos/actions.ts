@@ -5,6 +5,7 @@ import {
   getTaggedPhotosCountForTalent,
   getTaggedPhotosForTalent,
   isPhotoInCart,
+  untagPhotosForTalent,
 } from '@/database/queries';
 import { createClient } from '@/database/server';
 import { getBaseUrl } from '@/lib/get-base-url';
@@ -185,4 +186,18 @@ export async function listMyTaggedPhotos(options?: {
     hasMore: offset + taggedPhotos.length < totalCount,
     photosInCart,
   };
+}
+
+/**
+ * Remove multiple photos from the current user's "My Photos" collection.
+ * Does not delete the underlying photo files.
+ */
+export async function removePhotosFromMyPhotosAction(photoIds: string[]): Promise<void> {
+  if (photoIds.length === 0) return;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error('You must be signed in.');
+  await untagPhotosForTalent(supabase, photoIds, user.id);
 }

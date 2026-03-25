@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getActiveRole } from '@/app/actions/roles';
+import { AIMatchingButton } from '@/app/dashboard/talent/photos/ai-matching/ai-matching-button';
 import { CartLinkButton } from '@/components/cart-link-button';
 import {
   createPhotoUrls,
@@ -67,11 +68,13 @@ export default async function EventPage({ params }: { params: Promise<{ shareCod
   // Always watermark on public/share pages — photos are only unwatermarked after purchase
   const useWatermark = event.watermark_enabled === true;
   const photosInCart: string[] = [];
+  let isTalent = false;
 
   try {
     if (user) {
       const { activeRole } = await getActiveRole();
-      if (activeRole === 'talent') {
+      isTalent = activeRole === 'talent';
+      if (isTalent) {
         for (const photo of photos) {
           const inCart = await isPhotoInCart(
             supabase as unknown as SupabaseServerClient,
@@ -141,6 +144,11 @@ export default async function EventPage({ params }: { params: Promise<{ shareCod
           <CartLinkButton guest={!user} />
         </div>
 
+        {user && photoItems.length > 0 && (
+          <div className="mb-3 flex justify-end">
+            <AIMatchingButton className="h-9 rounded-full" />
+          </div>
+        )}
         <PublicEventPhotoViewer
           photos={photoItems}
           eventId={event.id}
