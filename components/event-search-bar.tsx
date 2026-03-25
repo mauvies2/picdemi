@@ -819,7 +819,7 @@ export function EventSearchBar({
                           >
                             {displayLabel ?? 'Add dates'}
                           </span>
-                          {displayLabel ? (
+                          {displayLabel && (
                             <button
                               type="button"
                               onMouseDown={(e) => {
@@ -831,8 +831,6 @@ export function EventSearchBar({
                             >
                               <X className="h-4 w-4" />
                             </button>
-                          ) : (
-                            <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground/50" />
                           )}
                         </div>
                       </button>
@@ -1059,7 +1057,7 @@ export function EventSearchBar({
                       </span>
                     </button>
                   </PopoverTrigger>
-                  {displayLabel ? (
+                  {displayLabel && (
                     <button
                       type="button"
                       onMouseDown={(e) => {
@@ -1070,8 +1068,6 @@ export function EventSearchBar({
                     >
                       <X className="h-4 w-4" />
                     </button>
-                  ) : (
-                    <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground/40" />
                   )}
                 </div>
                 <PopoverContent className="w-auto p-0" align="start" sideOffset={12}>

@@ -159,8 +159,8 @@ export function GuestCartContent() {
                 )}
               </div>
 
-              <div className="flex flex-1 flex-col gap-3 min-w-0">
-                <div className="space-y-1">
+              <div className="flex flex-1 flex-col gap-2 min-w-0">
+                <div>
                   {item.eventName && (
                     <h4 className="font-semibold text-base text-foreground line-clamp-1">
                       {item.eventName}
@@ -175,7 +175,7 @@ export function GuestCartContent() {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-4">
-                  <span className="text-2xl font-bold text-foreground">
+                  <span className="text-xl font-bold text-foreground">
                     {formatPrice(item.unitPriceCents)}
                   </span>
                   <Button
@@ -199,7 +199,7 @@ export function GuestCartContent() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-muted-foreground">Subtotal</span>
-                <span className="text-2xl font-bold text-foreground">
+                <span className="text-xl font-bold text-foreground">
                   {formatPrice(subtotalCents)}
                 </span>
               </div>

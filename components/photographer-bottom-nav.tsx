@@ -7,7 +7,9 @@ import {
   Camera,
   CreditCard,
   Home,
+  LifeBuoy,
   LogOut,
+  Send,
   Settings,
   User,
   Wallet,
@@ -91,8 +93,6 @@ export function PhotographerBottomNav({
         router.push('/dashboard/talent');
       } catch {
         addOptimisticRole(activeRole);
-      } finally {
-        router.refresh();
       }
     });
   };
@@ -222,6 +222,18 @@ export function PhotographerBottomNav({
             <DropdownMenuItem disabled>
               <Bell className="mr-2 h-4 w-4" />
               <span>Notifications</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/photographer/support">
+                <LifeBuoy className="mr-2 h-4 w-4" />
+                <span>Support</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/photographer/feedback">
+                <Send className="mr-2 h-4 w-4" />
+                <span>Feedback</span>
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
 

@@ -17,6 +17,8 @@ export * from './carts';
 export * from './download-tokens';
 // Re-export earnings queries
 export * from './earnings';
+// Re-export feedback and roadmap vote queries
+export * from './feedback';
 // Re-export event queries
 export * from './events';
 // Re-export guest order queries

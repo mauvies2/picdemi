@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Camera, CreditCard, LogOut, Settings, User } from 'lucide-react';
+import { Bell, Camera, CreditCard, LifeBuoy, LogOut, Send, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useOptimistic, useTransition } from 'react';
@@ -53,8 +53,6 @@ export function DashboardUserMenu({
         router.push(role === 'photographer' ? '/dashboard/photographer' : '/dashboard/talent');
       } catch {
         addOptimisticRole(activeRole);
-      } finally {
-        router.refresh();
       }
     });
   };
@@ -145,6 +143,18 @@ export function DashboardUserMenu({
           <DropdownMenuItem disabled>
             <Bell className="mr-2 h-4 w-4" />
             <span>Notifications</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`/dashboard/${optimisticRole}/support`}>
+              <LifeBuoy className="mr-2 h-4 w-4" />
+              <span>Support</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`/dashboard/${optimisticRole}/feedback`}>
+              <Send className="mr-2 h-4 w-4" />
+              <span>Feedback</span>
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

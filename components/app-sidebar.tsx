@@ -54,18 +54,13 @@ const talentNav = [
   { title: 'Orders', url: '/dashboard/talent/orders', icon: Package },
 ];
 
-const navSecondary = [
-  {
-    title: 'Support',
-    url: '#',
-    icon: LifeBuoy,
-  },
-  {
-    title: 'Feedback',
-    url: '#',
-    icon: Send,
-  },
-];
+function getNavSecondary(role: 'photographer' | 'talent') {
+  const base = role === 'photographer' ? '/dashboard/photographer' : '/dashboard/talent';
+  return [
+    { title: 'Support', url: `${base}/support`, icon: LifeBuoy },
+    { title: 'Feedback', url: `${base}/feedback`, icon: Send },
+  ];
+}
 
 export function AppSidebar({
   activeRole,
@@ -92,7 +87,7 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMains items={navItems} />
-        <NavSecondary items={navSecondary} className="mt-auto" />
+        <NavSecondary items={getNavSecondary(activeRole)} className="mt-auto" />
       </SidebarContent>
     </Sidebar>
   );

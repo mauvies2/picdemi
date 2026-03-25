@@ -1,7 +1,6 @@
 'use client';
 
 import { useForm } from '@tanstack/react-form';
-import { Country, State } from 'country-state-city';
 import { format } from 'date-fns';
 import { ChevronDownIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -51,10 +50,10 @@ const getDefaultValues = (): FormValues => {
       const parsed = JSON.parse(stored);
       return {
         name: parsed.name || '',
-        activity: parsed.activity || '',
+        activity: parsed.activity || 'OTHER',
         date: parsed.date || '',
-        country: parsed.country || '',
-        state: parsed.state || '',
+        country: '',
+        state: '',
         city: parsed.city || '',
         is_public: parsed.is_public ?? true,
         watermark_enabled: parsed.watermark_enabled ?? true,
@@ -118,32 +117,10 @@ export default function NewEventForm() {
     },
   });
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const stored = getDefaultValues();
-    if (stored.name || stored.activity || stored.date) {
-      form.setFieldValue('name', stored.name);
-      form.setFieldValue('activity', stored.activity);
-      form.setFieldValue('date', stored.date);
-      form.setFieldValue('country', stored.country);
-      form.setFieldValue('state', stored.state);
-      form.setFieldValue('city', stored.city || '');
-      form.setFieldValue('is_public', stored.is_public);
-      form.setFieldValue('watermark_enabled', stored.watermark_enabled);
-      form.setFieldValue('price_per_photo', stored.price_per_photo);
-    }
-  }, [form.setFieldValue]);
-
   // Save to localStorage whenever form values change
   useEffect(() => {
     const values = form.state.values;
-    const hasData =
-      values.name ||
-      values.activity ||
-      values.date ||
-      values.country ||
-      values.state ||
-      values.city;
+    const hasData = values.name || values.activity || values.date || values.city;
     if (hasData) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
@@ -213,8 +190,6 @@ export default function NewEventForm() {
     formData.append('name', value.name.trim());
     formData.append('activity', value.activity);
     formData.append('date', value.date);
-    formData.append('country', value.country.trim());
-    formData.append('state', value.state.trim());
     if (value.city?.trim()) {
       formData.append('city', value.city.trim());
     }
@@ -275,19 +250,6 @@ export default function NewEventForm() {
         ? `$${typeof source.price_per_photo === 'string' ? Number.parseFloat(source.price_per_photo).toFixed(2) : source.price_per_photo.toFixed(2)}`
         : 'Free';
 
-    // Get country name
-    const countryName = source.country
-      ? (Country.getAllCountries().find((c) => c.isoCode === source.country)?.name ??
-        source.country)
-      : '';
-
-    // Get state name
-    const stateName =
-      source.country && source.state
-        ? (State.getStatesOfCountry(source.country).find((s) => s.isoCode === source.state)?.name ??
-          source.state)
-        : source.state || '';
-
     return [
       { label: 'Name', value: source.name },
       {
@@ -300,9 +262,7 @@ export default function NewEventForm() {
         label: 'Date',
         value: source.date ? format(new Date(source.date), 'PPP') : '',
       },
-      { label: 'Country', value: countryName },
-      ...(stateName ? [{ label: 'State / Province', value: stateName }] : []),
-      ...(source.city ? [{ label: 'City', value: source.city }] : []),
+      ...(source.city ? [{ label: 'Location', value: source.city }] : []),
       {
         label: 'Visibility',
         value: source.is_public ? 'Public' : 'Private',
@@ -340,9 +300,9 @@ export default function NewEventForm() {
               noValidate
               suppressHydrationWarning
             >
-              <div className="grid gap-4" suppressHydrationWarning>
+              <div className="grid gap-2" suppressHydrationWarning>
                 {/* Row 1: Name + Activity (paired on desktop) */}
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-2 md:gap-4 md:grid-cols-2">
                   <form.Field
                     name="name"
                     validators={{
@@ -359,7 +319,7 @@ export default function NewEventForm() {
                           <Label htmlFor="name">Name or place</Label>
                           <Input
                             id="name"
-                            className="mt-2"
+                            className="mt-2 mb-1"
                             value={field.state.value}
                             onChange={(event) => field.handleChange(event.target.value)}
                             onBlur={field.handleBlur}
@@ -368,9 +328,9 @@ export default function NewEventForm() {
                             autoComplete="off"
                             suppressHydrationWarning
                           />
-                          {isInvalid && error ? (
-                            <p className="text-xs text-destructive">{error}</p>
-                          ) : null}
+                          <p className="min-h-4 text-xs text-destructive">
+                            {isInvalid ? error : ''}
+                          </p>
                         </div>
                       );
                     }}
@@ -414,168 +374,35 @@ export default function NewEventForm() {
                               ))}
                             </SelectContent>
                           </Select>
-                          {isInvalid && error ? (
-                            <p className="text-xs text-destructive">{error}</p>
-                          ) : null}
+                          <p className="min-h-4 text-xs text-destructive">
+                            {isInvalid ? error : ''}
+                          </p>
                         </div>
                       );
                     }}
                   </form.Field>
                 </div>
 
-                {/* Row 2: Location (Country, State, City) */}
-                <form.Field
-                  name="country"
-                  validators={{
-                    onChange: ({ value }) =>
-                      value.trim().length === 0 ? 'Country is required.' : undefined,
-                  }}
-                >
-                  {(countryField) => (
-                    <form.Field
-                      name="state"
-                      validators={{
-                        onChange: ({ value }) =>
-                          value.trim().length === 0 ? 'State/Province is required.' : undefined,
-                      }}
-                    >
-                      {(stateField) => (
-                        <form.Field
-                          name="city"
-                          validators={{
-                            onChange: () => undefined, // City is optional
-                          }}
-                        >
-                          {(cityField) => {
-                            const showFeedback =
-                              submitAttempted ||
-                              countryField.state.meta.isTouched ||
-                              stateField.state.meta.isTouched ||
-                              cityField.state.meta.isTouched;
-                            const countryError = showFeedback
-                              ? countryField.state.meta.errors?.[0]
-                              : null;
-                            const stateError = showFeedback
-                              ? stateField.state.meta.errors?.[0]
-                              : null;
-                            const states = State.getStatesOfCountry(countryField.state.value);
-                            return (
-                              <div className="space-y-4">
-                                {/* Country and State side-by-side */}
-                                <div className="grid gap-4 md:grid-cols-2">
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="country">Country</Label>
-                                    <Select
-                                      value={countryField.state.value}
-                                      onValueChange={(value) => {
-                                        countryField.handleChange(value);
-                                        countryField.handleBlur();
-                                      }}
-                                    >
-                                      <SelectTrigger
-                                        id="country"
-                                        aria-invalid={showFeedback && !!countryError}
-                                        className={cn(
-                                          'w-full',
-                                          showFeedback && countryError && 'border-destructive',
-                                        )}
-                                      >
-                                        <SelectValue placeholder="Select a country" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {Country.getAllCountries()
-                                          .sort((a, b) => a.name.localeCompare(b.name))
-                                          .map((c) => (
-                                            <SelectItem key={c.isoCode} value={c.isoCode}>
-                                              {c.name}
-                                            </SelectItem>
-                                          ))}
-                                      </SelectContent>
-                                    </Select>
-                                    {showFeedback && countryError ? (
-                                      <p className="text-xs text-destructive">{countryError}</p>
-                                    ) : null}
-                                  </div>
-
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="state">State / Province</Label>
-                                    {states.length > 0 ? (
-                                      <Select
-                                        value={stateField.state.value}
-                                        onValueChange={(value) => {
-                                          stateField.handleChange(value);
-                                          stateField.handleBlur();
-                                        }}
-                                      >
-                                        <SelectTrigger
-                                          id="state"
-                                          aria-invalid={showFeedback && !!stateError}
-                                          className={cn(
-                                            'w-full',
-                                            showFeedback && stateError && 'border-destructive',
-                                          )}
-                                        >
-                                          <SelectValue placeholder="Select a state or province" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {states
-                                            .sort((a, b) => a.name.localeCompare(b.name))
-                                            .map((s) => (
-                                              <SelectItem key={s.isoCode} value={s.isoCode}>
-                                                {s.name}
-                                              </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                      </Select>
-                                    ) : (
-                                      <Input
-                                        id="state"
-                                        value={stateField.state.value}
-                                        onChange={(e) => {
-                                          stateField.handleChange(e.target.value);
-                                          stateField.handleBlur();
-                                        }}
-                                        placeholder="Enter state or province name"
-                                        aria-invalid={showFeedback && !!stateError}
-                                        className={cn(
-                                          showFeedback && stateError && 'border-destructive',
-                                        )}
-                                        autoComplete="address-level1"
-                                        suppressHydrationWarning
-                                      />
-                                    )}
-                                    {showFeedback && stateError ? (
-                                      <p className="text-xs text-destructive">{stateError}</p>
-                                    ) : null}
-                                  </div>
-                                </div>
-
-                                {/* City below */}
-                                <div className="grid gap-2">
-                                  <Label htmlFor="city">City (Optional)</Label>
-                                  <Input
-                                    id="city"
-                                    value={cityField.state.value || ''}
-                                    onChange={(e) => {
-                                      cityField.handleChange(e.target.value);
-                                      cityField.handleBlur();
-                                    }}
-                                    placeholder="Enter city name"
-                                    autoComplete="address-level2"
-                                    suppressHydrationWarning
-                                  />
-                                </div>
-                              </div>
-                            );
-                          }}
-                        </form.Field>
-                      )}
-                    </form.Field>
+                {/* Row 2: Location */}
+                <form.Field name="city">
+                  {(field) => (
+                    <div className="grid gap-2">
+                      <Label htmlFor="city">Location</Label>
+                      <Input
+                        id="city"
+                        value={field.state.value || ''}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        placeholder="City, region or venue"
+                        autoComplete="off"
+                        suppressHydrationWarning
+                      />
+                    </div>
                   )}
                 </form.Field>
 
                 {/* Row 3: Date + Price per Photo (paired on desktop) */}
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="mt-1.5 grid gap-4 md:grid-cols-2">
                   <form.Field
                     name="date"
                     validators={{
@@ -593,45 +420,47 @@ export default function NewEventForm() {
                       return (
                         <div className="grid gap-2">
                           <Label htmlFor={dateInputId}>Date</Label>
-                          <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-                            <PopoverTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className={cn(
-                                  'w-full justify-between rounded-md border border-input text-left font-normal',
-                                  !parsedDate && 'text-muted-foreground',
-                                )}
-                                aria-invalid={isInvalid}
-                              >
-                                {parsedDate ? format(parsedDate, 'PPP') : 'Select date'}
-                                <ChevronDownIcon className="size-4 opacity-60" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={parsedDate}
-                                captionLayout="dropdown"
-                                onSelect={(date) => {
-                                  field.handleChange(date ? format(date, 'yyyy-MM-dd') : '');
-                                  field.handleBlur();
-                                  setDatePopoverOpen(false);
-                                }}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <input
-                            id={dateInputId}
-                            type="hidden"
-                            value={field.state.value}
-                            readOnly
-                            suppressHydrationWarning
-                          />
-                          {isInvalid && error ? (
-                            <p className="text-xs text-destructive">{error}</p>
-                          ) : null}
+                          <div>
+                            <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className={cn(
+                                    'w-full justify-between rounded-md border border-input text-left font-normal',
+                                    !parsedDate && 'text-muted-foreground',
+                                  )}
+                                  aria-invalid={isInvalid}
+                                >
+                                  {parsedDate ? format(parsedDate, 'PPP') : 'Select date'}
+                                  <ChevronDownIcon className="size-4 opacity-60" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={parsedDate}
+                                  captionLayout="dropdown"
+                                  onSelect={(date) => {
+                                    field.handleChange(date ? format(date, 'yyyy-MM-dd') : '');
+                                    field.handleBlur();
+                                    setDatePopoverOpen(false);
+                                  }}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <input
+                              id={dateInputId}
+                              type="hidden"
+                              value={field.state.value}
+                              readOnly
+                              suppressHydrationWarning
+                            />
+                            <p className="mt-1 min-h-4 text-xs text-destructive">
+                              {isInvalid ? error : ''}
+                            </p>
+                          </div>
                         </div>
                       );
                     }}
@@ -698,9 +527,9 @@ export default function NewEventForm() {
                               suppressHydrationWarning
                             />
                           </div>
-                          {isInvalid && error ? (
-                            <p className="text-xs text-destructive">{error}</p>
-                          ) : null}
+                          <p className="min-h-4 text-xs text-destructive">
+                            {isInvalid ? error : ''}
+                          </p>
                         </div>
                       );
                     }}

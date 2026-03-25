@@ -1,10 +1,11 @@
 'use client';
 
-import { MoreVertical } from 'lucide-react';
+import { Camera, MoreVertical } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import {
   DropdownMenu,
@@ -17,6 +18,10 @@ type EventCardProps = {
   id: string;
   name: string;
   date: string | null;
+  city: string;
+  country: string;
+  activity: string;
+  pricePerPhoto: number | null;
   photoCount: number;
   salesCount: number;
   isPublic: boolean;
@@ -29,6 +34,10 @@ export function EventCard({
   id,
   name,
   date,
+  city,
+  country,
+  activity,
+  pricePerPhoto,
   photoCount,
   salesCount,
   isPublic,
@@ -41,104 +50,109 @@ export function EventCard({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const formattedDate = date ? new Date(date).toDateString().split(' ').slice(1).join(' ') : '';
+  const activityLabel = activityOptions.find((opt) => opt.value === activity)?.label ?? activity;
+  const location = [city, country].filter(Boolean).join(', ');
+  const priceText =
+    pricePerPhoto !== null
+      ? `From $${pricePerPhoto % 1 === 0 ? pricePerPhoto : pricePerPhoto.toFixed(2)}`
+      : 'Free';
 
   const handleDelete = async () => {
     await onDelete();
     router.refresh();
   };
 
-  const handleDeleteClick = () => {
-    setDeleteDialogOpen(true);
-  };
-
-  const handleEdit = () => {
-    router.push(editHref);
-  };
-
   return (
     <div className="group relative">
-      <Link
-        href={`/dashboard/photographer/events/${id}`}
-        className="block rounded-2xl transition-colors"
-      >
-        <div className="overflow-hidden rounded-lg bg-muted">
-          <div className="relative aspect-square w-full">
-            {coverUrl ? (
+      <Link href={`/dashboard/photographer/events/${id}`} className="block">
+        {/* Thumbnail */}
+        <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-xl bg-muted">
+          {coverUrl ? (
+            <>
               <Image
                 src={coverUrl}
                 alt={`${name} cover`}
                 fill
                 sizes="(max-width: 640px) 100vw, 33vw"
-                className="object-cover"
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
               />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                No photos
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
+              {/* Bottom overlay: photo count left, badge right */}
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-3">
+                <span className="text-xs font-medium text-white drop-shadow-sm">
+                  {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+                </span>
+                <span
+                  className={`text-[9px] font-medium uppercase tracking-wider opacity-75 ${
+                    isPublic ? 'text-emerald-300' : 'text-zinc-300'
+                  }`}
+                >
+                  {isPublic ? 'Public' : 'Private'}
+                </span>
               </div>
-            )}
-          </div>
-        </div>
-        <div className="mt-3 px-1 pb-2 space-y-2">
-          {/* First row: Title and Badge */}
-          <div className="flex items-start gap-2">
-            <h3 className="text-sm font-semibold leading-tight line-clamp-2 flex-1 min-w-0">
-              {name}
-            </h3>
-            <span
-              className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider shrink-0 ${
-                isPublic
-                  ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950/50 dark:text-green-400'
-                  : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400'
-              }`}
-            >
-              {isPublic ? 'Public' : 'Private'}
-            </span>
-          </div>
-
-          {/* Second row: Date and Stats */}
-          <div className="flex items-center justify-between gap-2">
-            {/* Left: Date */}
-            {formattedDate && <div className="text-xs text-muted-foreground">{formattedDate}</div>}
-            {/* Right: Photo count and sales */}
-            <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
-              <span>
-                {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
-              </span>
-              <span className="text-muted-foreground/50">•</span>
-              <span>
-                {salesCount} {salesCount === 1 ? 'sale' : 'sales'}
+            </>
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <Camera className="h-8 w-8 opacity-30" />
+              <span className="text-xs">No photos yet</span>
+              {/* Badge for no-cover state */}
+              <span
+                className={`absolute bottom-2 right-2 text-[9px] font-medium uppercase tracking-wider opacity-60 ${
+                  isPublic ? 'text-emerald-600' : 'text-zinc-500'
+                }`}
+              >
+                {isPublic ? 'Public' : 'Private'}
               </span>
             </div>
+          )}
+        </div>
+
+        {/* Info below image */}
+        <div className="flex items-start justify-between gap-3 px-1">
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-semibold leading-snug text-foreground">{name}</p>
+            {location && (
+              <p className="mt-0.5 truncate text-sm text-muted-foreground">{location}</p>
+            )}
+            <p className="text-sm text-muted-foreground">{formattedDate}</p>
+          </div>
+          <div className="shrink-0 text-right">
+            <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {activityLabel}
+            </span>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {priceText} · {salesCount} {salesCount === 1 ? 'sale' : 'sales'}
+            </p>
           </div>
         </div>
       </Link>
 
+      {/* Dropdown — top-right, visible on hover */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
             type="button"
             disabled={isPending}
             aria-label="Open event actions"
-            className="pointer-events-none absolute right-2 top-2 flex size-8 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-all group-hover:pointer-events-auto group-hover:opacity-100 group-hover:shadow-sm group-hover:ring-1 group-hover:ring-transparent focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            className="pointer-events-none absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-black/40 text-white opacity-0 backdrop-blur-sm transition-all group-hover:pointer-events-auto group-hover:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
           >
-            <span className="absolute inset-0 rounded-full bg-muted/60 opacity-0 transition-opacity group-hover:opacity-100 hover:opacity-100" />
-            <MoreVertical className="relative z-10 size-4" />
+            <MoreVertical className="size-3.5" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuItem
-            onSelect={(event) => {
-              event.preventDefault();
-              handleEdit();
+            onSelect={(e) => {
+              e.preventDefault();
+              router.push(editHref);
             }}
             disabled={isPending}
           >
             Edit event
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={(event) => {
-              event.preventDefault();
-              handleDeleteClick();
+            onSelect={(e) => {
+              e.preventDefault();
+              setDeleteDialogOpen(true);
             }}
             variant="destructive"
             disabled={isPending}
@@ -147,6 +161,7 @@ export function EventCard({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}

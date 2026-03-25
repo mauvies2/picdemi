@@ -167,14 +167,14 @@ export function CartContent({ initialCartData }: CartContentProps) {
                 className="group flex gap-4 rounded-lg border border-border bg-card p-3 transition-all hover:border-primary/50 hover:shadow-md"
               >
                 {/* Photo thumbnail */}
-                <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg bg-muted">
+                <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted">
                   {item.previewUrl ? (
                     <Image
                       src={item.previewUrl}
                       alt={item.eventTitle || 'Photo'}
                       fill
                       className="object-cover transition-transform group-hover:scale-105"
-                      sizes="128px"
+                      sizes="80px"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-muted-foreground">
@@ -184,8 +184,8 @@ export function CartContent({ initialCartData }: CartContentProps) {
                 </div>
 
                 {/* Item details */}
-                <div className="flex flex-1 flex-col gap-3 min-w-0">
-                  <div className="space-y-1">
+                <div className="flex flex-1 flex-col gap-2 min-w-0">
+                  <div>
                     {item.eventTitle && (
                       <h4 className="font-semibold text-base text-foreground line-clamp-1">
                         {item.eventTitle}
@@ -209,7 +209,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
 
                   <div className="mt-auto flex items-center justify-between gap-4">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-foreground">
+                      <span className="text-xl font-bold text-foreground">
                         {formatPrice(item.unitPriceCents)}
                       </span>
                       {item.unitPriceCents === 0 && (
@@ -223,7 +223,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
                       size="sm"
                       onClick={() => handleRemove(item.photoId)}
                       disabled={isPending && removingId === item.photoId}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                      className="text-foreground/90 hover:text-foreground hover:bg-muted shrink-0"
                     >
                       {isPending && removingId === item.photoId ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -248,7 +248,7 @@ export function CartContent({ initialCartData }: CartContentProps) {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Subtotal</span>
-                  <span className="text-2xl font-bold text-foreground">
+                  <span className="text-xl font-bold text-foreground">
                     {formatPrice(cartData.subtotalCents)}
                   </span>
                 </div>

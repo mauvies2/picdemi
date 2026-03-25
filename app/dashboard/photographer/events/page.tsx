@@ -161,6 +161,10 @@ export default async function EventsPage() {
               id={event.id}
               name={event.name}
               date={event.date}
+              city={event.city}
+              country={event.country}
+              activity={event.activity}
+              pricePerPhoto={event.price_per_photo}
               photoCount={count}
               salesCount={salesCounts.get(event.id) ?? 0}
               isPublic={event.is_public}
