@@ -189,7 +189,7 @@ export default async function Login({
           <p className="text-center">
             Don&apos;t have an account?{' '}
             <Link className="text-sky-600 hover:underline" href="/signup">
-              Sign up
+              Sign up{' '}
             </Link>
             here.
           </p>

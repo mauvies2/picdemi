@@ -1,13 +1,12 @@
-import { ArrowRight, Camera, CheckCircle2, Download, Search } from 'lucide-react';
+import { ArrowRight, Camera, Download, Search } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { EventSearchBar } from '@/components/event-search-bar';
 import { Footer } from '@/components/footer';
-import { PricingPlanButton } from '@/components/pricing-plan-button';
+import { PricingSection } from '@/components/pricing-section';
 import { Button } from '@/components/ui/button';
 import { getProfileFields } from '@/database/queries';
 import { createClient } from '@/database/server';
-import { PLANS } from '@/lib/plans';
 
 export default async function Home() {
   const supabase = await createClient();
@@ -157,114 +156,7 @@ export default async function Home() {
       </section>
 
       {/* Pricing */}
-      <section className="bg-linear-to-b from-muted/20 via-background to-background py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Pricing For Photographers
-            </h2>
-            <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-              Start for free and scale as your gallery grows. No hidden fees. Cancel anytime.
-            </p>
-          </div>
-
-          <div className="mx-auto mt-12 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {PLANS.map((plan) => {
-              const isFree = plan.id === 'free';
-              const isPopular = plan.popular;
-
-              return (
-                <div
-                  key={plan.id}
-                  className={[
-                    'relative flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-200',
-                    'hover:-translate-y-[2px] hover:border-primary/40 hover:shadow-md',
-                    isPopular &&
-                      'sm:-mt-2 bg-linear-to-b from-primary/5 to-card ring-1 ring-primary/40 ring-offset-1 ring-offset-background shadow-lg',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  {isPopular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <span className="rounded-full bg-primary px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-sm">
-                        Most popular
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="mb-5">
-                    <h3 className="text-xl font-semibold">{plan.name}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">{plan.description}</p>
-
-                    <div className="mt-3 flex items-baseline gap-2">
-                      {plan.price !== null ? (
-                        <>
-                          <span className="text-3xl font-semibold">${plan.price}</span>
-                          <span className="text-xs text-muted-foreground">/month</span>
-                        </>
-                      ) : (
-                        <span className="text-3xl font-semibold">Free</span>
-                      )}
-                    </div>
-
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      {plan.salesFeePercent}% sales fee • Cancel anytime
-                    </p>
-                  </div>
-
-                  <ul className="mb-6 flex-1 space-y-2 text-sm text-foreground/90">
-                    {plan.features.map((feature) => {
-                      const text = typeof feature === 'string' ? feature : feature.text;
-                      const badge = typeof feature === 'string' ? undefined : feature.badge;
-                      return (
-                        <li key={text} className="flex items-center gap-2 leading-relaxed">
-                          <div className="mt-0.5 shrink-0 rounded-full bg-primary/10 p-1 text-primary">
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                          </div>
-                          <span className="text-[13px]">
-                            {text}
-                            {badge && (
-                              <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                {badge}
-                              </span>
-                            )}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-
-                  <div className="mt-auto">
-                    <PricingPlanButton
-                      planId={plan.id}
-                      isFree={isFree}
-                      isAuthenticated={isAuthenticated}
-                    />
-                  </div>
-
-                  <p className="mt-2 text-center text-[11px] text-muted-foreground">
-                    Best for{' '}
-                    {plan.id === 'free'
-                      ? 'trying out Picdemi'
-                      : plan.id === 'starter'
-                        ? 'growing event photographers'
-                        : 'high-volume pros & studios'}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-
-          <p className="mx-auto mt-8 max-w-2xl text-center text-[11px] text-muted-foreground">
-            Need a custom plan for large studios or organizers?{' '}
-            <Link href="/contact" className="underline underline-offset-4 hover:text-foreground">
-              Contact us
-            </Link>
-            .
-          </p>
-        </div>
-      </section>
+      <PricingSection isAuthenticated={isAuthenticated} />
 
       {/* Final CTA */}
       <section className="bg-linear-to-br from-primary/10 via-primary/5 to-background py-20 sm:py-24">

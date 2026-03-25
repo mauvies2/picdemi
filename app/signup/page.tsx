@@ -156,7 +156,7 @@ export default async function Signup({
           <p className="text-center text-muted-foreground">
             Already have account?{' '}
             <Link className="text-sky-600 hover:underline" href="/login">
-              Log in
+              Log in{' '}
             </Link>
             here.
           </p>
