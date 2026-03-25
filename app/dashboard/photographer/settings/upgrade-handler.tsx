@@ -15,10 +15,10 @@ export function UpgradeHandler() {
   const upgradePlan = searchParams.get('upgrade');
 
   useEffect(() => {
-    if (upgradePlan && (upgradePlan === 'amateur' || upgradePlan === 'pro')) {
+    if (upgradePlan && (upgradePlan === 'starter' || upgradePlan === 'pro')) {
       const handleUpgrade = async () => {
         try {
-          const result = await createBillingCheckoutAction(upgradePlan as 'amateur' | 'pro');
+          const result = await createBillingCheckoutAction(upgradePlan as 'starter' | 'pro');
 
           // Remove query parameter from URL
           router.replace('/dashboard/photographer/settings', { scroll: false });

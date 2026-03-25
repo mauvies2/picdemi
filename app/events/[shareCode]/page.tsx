@@ -144,7 +144,7 @@ export default async function EventPage({ params }: { params: Promise<{ shareCod
           <CartLinkButton guest={!user} />
         </div>
 
-        {user && photoItems.length > 0 && (
+        {photoItems.length > 0 && (
           <div className="mb-3 flex justify-end">
             <AIMatchingButton className="h-9 rounded-full" />
           </div>

@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     }
 
     // If user is logged in and has a plan parameter, redirect to billing checkout
-    if (plan && (plan === 'amateur' || plan === 'pro')) {
+    if (plan && (plan === 'starter' || plan === 'pro')) {
       return NextResponse.redirect(`${origin}/dashboard/photographer/settings?upgrade=${plan}`);
     }
 

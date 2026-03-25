@@ -25,7 +25,7 @@ export const AI_SEARCH_RATE_LIMITS: Record<PlanId, RateLimitConfig> = {
     maxSearchesPerMonth: 3,
     description: '3 searches per month',
   },
-  amateur: {
+  starter: {
     maxSearchesPerMonth: 20,
     description: '20 searches per month',
   },

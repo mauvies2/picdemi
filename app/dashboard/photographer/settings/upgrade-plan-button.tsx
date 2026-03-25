@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { createBillingCheckoutAction } from '../billing/actions';
 
 interface UpgradePlanButtonProps {
-  planId: 'amateur' | 'pro';
+  planId: 'starter' | 'pro';
   variant?: 'default' | 'outline';
   size?: 'sm' | 'lg';
   className?: string;
@@ -59,7 +59,7 @@ export function UpgradePlanButton({
       ) : (
         <>
           <Sparkles className="mr-2 h-4 w-4" />
-          {planId === 'pro' ? 'Upgrade to Pro' : 'Upgrade to Amateur'}
+          {planId === 'pro' ? 'Upgrade to Pro' : 'Upgrade to Starter'}
         </>
       )}
     </Button>

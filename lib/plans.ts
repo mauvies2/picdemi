@@ -2,7 +2,9 @@
  * Photographer subscription plans configuration
  */
 
-export type PlanId = 'free' | 'amateur' | 'pro';
+export type PlanId = 'free' | 'starter' | 'pro';
+
+export type PlanFeature = string | { text: string; badge?: string };
 
 export interface Plan {
   id: PlanId;
@@ -14,7 +16,7 @@ export interface Plan {
   maxEvents: number | null; // null for unlimited
   salesFeePercent: number;
   allowCustomBundles: boolean;
-  features: string[];
+  features: PlanFeature[];
   popular?: boolean;
 }
 
@@ -32,31 +34,30 @@ export const PLANS: Plan[] = [
     features: [
       '1GB storage',
       'Up to 3 events',
-      'Manual talent tagging',
       'Default pricing bundles only',
       'Basic search & analytics',
       '15% sales fee',
     ],
   },
   {
-    id: 'amateur',
-    name: 'Amateur',
-    price: 9.99,
+    id: 'starter',
+    name: 'Starter',
+    price: 14.99,
     priceInterval: 'month',
     description: 'For active creators who publish events regularly',
-    storageGB: 20,
-    maxEvents: 10,
-    salesFeePercent: 10,
+    storageGB: 50,
+    maxEvents: 20,
+    salesFeePercent: 8,
     allowCustomBundles: true,
     features: [
-      '20GB storage',
-      'Up to 10 events',
-      'AI-assisted talent tagging',
+      '50GB storage',
+      'Up to 20 events',
+      { text: 'AI-assisted talent tagging', badge: 'Coming soon' },
       'Advanced analytics',
       'Custom pricing bundles',
       'Priority in search results',
       'Email support',
-      '10% sales fee',
+      '8% sales fee',
     ],
     popular: true,
   },
@@ -66,20 +67,19 @@ export const PLANS: Plan[] = [
     price: 29.99,
     priceInterval: 'month',
     description: 'For professional photographers and studios',
-    storageGB: 100,
+    storageGB: 200,
     maxEvents: null, // Unlimited
-    salesFeePercent: 8,
+    salesFeePercent: 5,
     allowCustomBundles: true,
     features: [
-      '100GB storage included',
+      '200GB storage included',
       'Unlimited events',
-      'Add +100GB for $10/mo',
-      'Full AI auto-tagging',
+      'Add +100GB for $5/mo',
+      { text: 'Full AI auto-tagging', badge: 'Coming soon' },
       'Advanced analytics & insights',
-      //   "Priority indexing & search boost",
-      'API access',
+      'Highest priority in search results',
       'Priority support',
-      '8% sales fee',
+      '5% sales fee',
     ],
   },
 ];

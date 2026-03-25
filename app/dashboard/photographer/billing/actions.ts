@@ -6,7 +6,7 @@ import { env } from '@/env.mjs';
 import { stripe } from '@/lib/stripe/config';
 
 const PLAN_TO_PRICE: Record<string, string> = {
-  amateur: env.STRIPE_PRICE_AMATEUR,
+  starter: env.STRIPE_PRICE_AMATEUR,
   pro: env.STRIPE_PRICE_PRO,
 };
 
@@ -14,7 +14,7 @@ const PLAN_TO_PRICE: Record<string, string> = {
  * Create checkout session for subscription upgrade/change
  */
 export async function createBillingCheckoutAction(
-  planId: 'amateur' | 'pro',
+  planId: 'starter' | 'pro',
 ): Promise<{ url: string } | { updated: boolean }> {
   const supabase = await createClient();
 

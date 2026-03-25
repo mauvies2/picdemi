@@ -11,7 +11,7 @@ export interface Subscription {
   user_id: string;
   stripe_customer_id: string;
   stripe_subscription_id: string | null;
-  plan_id: 'free' | 'amateur' | 'pro';
+  plan_id: 'free' | 'starter' | 'pro';
   status:
     | 'incomplete'
     | 'incomplete_expired'

@@ -1,18 +1,4 @@
-import {
-  ArrowRight,
-  Bell,
-  Camera,
-  CheckCircle2,
-  CreditCard,
-  Image as ImageIcon,
-  MapPin,
-  Search,
-  Shield,
-  Sparkles,
-  TrendingUp,
-  Users,
-  Zap,
-} from 'lucide-react';
+import { ArrowRight, Camera, CheckCircle2, Download, Search } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { EventSearchBar } from '@/components/event-search-bar';
@@ -82,235 +68,90 @@ export default async function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="bg-background py-20 sm:py-24">
+      <section className="bg-background py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Header */}
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">How Picdemi works</h2>
-            <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              From upload to purchase in three simple steps.
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              How it works
             </p>
-          </div>
-
-          <div className="mx-auto mt-14 max-w-6xl">
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Step 1 - Photographer */}
-              <div className="group relative rounded-2xl border bg-card p-7 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Camera className="h-6 w-6 text-primary" />
-                </div>
-                <div className="mt-5">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                    Step 1
-                  </span>
-                  <h3 className="mt-2 text-xl font-semibold">Photographers upload</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                    Import hundreds or thousands of event photos with a simple interface. Picdemi
-                    automatically enriches them with activity, location, and date metadata.
-                  </p>
-                </div>
-              </div>
-
-              {/* Step 2 - AI Detection */}
-              <div className="group relative rounded-2xl border bg-card p-7 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Sparkles className="h-6 w-6 text-primary" />
-                </div>
-                <div className="mt-5">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                    Step 2
-                  </span>
-                  <h3 className="mt-2 text-xl font-semibold">AI finds the right faces</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                    Our AI recognizes faces, outfits, and bib numbers so every participant can
-                    quickly find their own shots — even in a sea of images.
-                  </p>
-                </div>
-              </div>
-
-              {/* Step 3 - Search & Buy */}
-              <div className="group relative rounded-2xl border bg-card p-7 shadow-sm transition-all hover:border-primary/20 hover:shadow-md sm:col-span-2 lg:col-span-1">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Search className="h-6 w-6 text-primary" />
-                </div>
-                <div className="mt-5">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                    Step 3
-                  </span>
-                  <h3 className="mt-2 text-xl font-semibold">Participants search & buy</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                    Athletes and attendees search by filters or upload a selfie for AI matching, add
-                    their favorite images to cart, and purchase securely — often from multiple
-                    photographers at once.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features for Users */}
-      <section className="bg-linear-to-b from-muted/30 to-background py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              For participants & talents
+            <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
+              From the lens to your gallery, in seconds.
             </h2>
-            <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              Never lose your race photos again.
+            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+              We connect photographers who love their craft with athletes who live for their
+              passion.
             </p>
           </div>
 
-          <div className="mx-auto mt-14 max-w-6xl">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Search className="h-5 w-5 text-primary" />
+          {/* Three Pillars */}
+          <div className="mx-auto mt-16 max-w-6xl">
+            <div className="grid gap-8 sm:grid-cols-3">
+              {/* Pillar 1 */}
+              <div className="group flex flex-col gap-5 rounded-2xl border bg-card p-8 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border bg-muted/50 transition-colors group-hover:bg-primary/10">
+                  <Camera className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">Smart search</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Filter by event, location, activity, or date — or upload a selfie to let AI do the
-                  work for you.
-                </p>
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight">
+                    Upload &amp; Professionalize
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Drag, drop, and start selling. Upload thousands of photos in minutes and let our
+                    smart metadata handle the organization for you.
+                  </p>
+                </div>
               </div>
 
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Bell className="h-5 w-5 text-primary" />
+              {/* Pillar 2 */}
+              <div className="group flex flex-col gap-5 rounded-2xl border bg-card p-8 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border bg-muted/50 transition-colors group-hover:bg-primary/10">
+                  <Search className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">Photo alerts</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Get notified when new photos of you are uploaded from events you care about.
-                </p>
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight">Instant Discovery</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Find your moment. Search by event, location, or time. No more scrolling through
+                    endless galleries to find that one perfect shot.
+                  </p>
+                </div>
               </div>
 
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <ImageIcon className="h-5 w-5 text-primary" />
+              {/* Pillar 3 */}
+              <div className="group flex flex-col gap-5 rounded-2xl border bg-card p-8 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border bg-muted/50 transition-colors group-hover:bg-primary/10">
+                  <Download className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">Personal library</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Keep every purchased photo in one place and curate a public profile if you want to
-                  share your highlights.
-                </p>
-              </div>
-
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <CreditCard className="h-5 w-5 text-primary" />
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight">Secure &amp; Instant</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    One-click checkout, high-res downloads. Your memories are ready to share the
+                    moment the race ends, watermark-free and at full quality.
+                  </p>
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">Fair, flexible pricing</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Buy just one image or build a bundle. Mix photos from different photographers in a
-                  single checkout.
-                </p>
-              </div>
-
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Zap className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">Instant downloads</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Get high-resolution, watermark-free files immediately after purchase — ready to
-                  post or print.
-                </p>
-              </div>
-
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">Frictionless access</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Search and buy without an account, or create one to unlock saved searches and
-                  notifications.
-                </p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Features for Photographers */}
-      <section className="bg-background py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              For photographers & studios
-            </h2>
-            <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              Turn your event photography into a scalable revenue stream.
-            </p>
-          </div>
+          {/* Divider */}
+          <div className="mx-auto mt-16 max-w-6xl border-t border-border/40" />
 
-          <div className="mx-auto mt-14 max-w-6xl">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Zap className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">Fast bulk uploads</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Drag, drop, done. Upload entire events in minutes and let Picdemi handle
-                  organization.
-                </p>
-              </div>
-
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">Set your own pricing</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Use default bundles to start, then create custom pricing and packages as you grow.
-                </p>
-              </div>
-
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Shield className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">Protected & secure</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Strong watermarking, Stripe-powered payments, and clear licensing keep your work
-                  safe and your payouts predictable.
-                </p>
-              </div>
-
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">Built-in demand</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Your photos become instantly searchable for participants — no more sending links
-                  one by one.
-                </p>
-              </div>
-
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">Event-first structure</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Organize by event, location, and date automatically — so you stay focused on
-                  shooting, not sorting.
-                </p>
-              </div>
-
-              <div className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">Analytics that matter</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  See which events, activities, and photos convert best so you can double down on
-                  what works.
-                </p>
-              </div>
-            </div>
+          {/* Action Bar */}
+          <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/events"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90"
+            >
+              <Search className="h-4 w-4" />
+              Find my photos
+            </Link>
+            <Link
+              href="/signup"
+              className="inline-flex items-center gap-2 rounded-full border border-input bg-background px-7 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90"
+            >
+              <Camera className="h-4 w-4" />
+              Start selling as a photographer
+            </Link>
           </div>
         </div>
       </section>
@@ -320,11 +161,10 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Pricing for every stage of your creative journey
+              Pricing For Photographers
             </h2>
             <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-              Start free, then upgrade when you&apos;re ready. No long-term contracts, cancel
-              anytime.
+              Start for free and scale as your gallery grows. No hidden fees. Cancel anytime.
             </p>
           </div>
 
@@ -374,14 +214,25 @@ export default async function Home() {
                   </div>
 
                   <ul className="mb-6 flex-1 space-y-2 text-sm text-foreground/90">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 leading-relaxed">
-                        <div className="mt-0.5 rounded-full bg-primary/10 p-1 text-primary">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                        </div>
-                        <span className="text-[13px]">{feature}</span>
-                      </li>
-                    ))}
+                    {plan.features.map((feature) => {
+                      const text = typeof feature === 'string' ? feature : feature.text;
+                      const badge = typeof feature === 'string' ? undefined : feature.badge;
+                      return (
+                        <li key={text} className="flex items-center gap-2 leading-relaxed">
+                          <div className="mt-0.5 shrink-0 rounded-full bg-primary/10 p-1 text-primary">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                          </div>
+                          <span className="text-[13px]">
+                            {text}
+                            {badge && (
+                              <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                {badge}
+                              </span>
+                            )}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
 
                   <div className="mt-auto">
@@ -396,7 +247,7 @@ export default async function Home() {
                     Best for{' '}
                     {plan.id === 'free'
                       ? 'trying out Picdemi'
-                      : plan.id === 'amateur'
+                      : plan.id === 'starter'
                         ? 'growing event photographers'
                         : 'high-volume pros & studios'}
                   </p>

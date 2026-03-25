@@ -25,7 +25,7 @@ export default async function Signup({
   } = await supabase.auth.getUser();
 
   // If user is logged in and has a plan parameter, redirect to settings page
-  if (user && params.plan && (params.plan === 'amateur' || params.plan === 'pro')) {
+  if (user && params.plan && (params.plan === 'starter' || params.plan === 'pro')) {
     return redirect(`/dashboard/photographer/settings?upgrade=${params.plan}`);
   }
 

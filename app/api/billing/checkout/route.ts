@@ -4,13 +4,13 @@ import { env } from '@/env.mjs';
 import { stripe } from '@/lib/stripe/config';
 
 const PLAN_TO_PRICE: Record<string, string> = {
-  amateur: env.STRIPE_PRICE_AMATEUR,
+  starter: env.STRIPE_PRICE_AMATEUR,
   pro: env.STRIPE_PRICE_PRO,
 };
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
-  const planId = body?.planId as 'amateur' | 'pro' | undefined;
+  const planId = body?.planId as 'starter' | 'pro' | undefined;
 
   if (!planId || !PLAN_TO_PRICE[planId]) {
     return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });

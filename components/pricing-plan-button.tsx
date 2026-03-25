@@ -8,7 +8,7 @@ import { createBillingCheckoutAction } from '@/app/dashboard/photographer/billin
 import { Button } from '@/components/ui/button';
 
 interface PricingPlanButtonProps {
-  planId: 'free' | 'amateur' | 'pro';
+  planId: 'free' | 'starter' | 'pro';
   isFree: boolean;
   isAuthenticated?: boolean;
   className?: string;
@@ -48,7 +48,7 @@ export function PricingPlanButton({
           size="lg"
           className="w-full justify-center gap-2 text-sm font-medium tracking-tight bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          {planId === 'amateur' ? 'Get Amateur' : 'Go Pro'}
+          {planId === 'starter' ? 'Get Starter' : 'Go Pro'}
           <ArrowRight className="h-4 w-4" />
         </Button>
       </Link>
@@ -59,7 +59,7 @@ export function PricingPlanButton({
   const handleUpgrade = () => {
     startTransition(async () => {
       try {
-        const result = await createBillingCheckoutAction(planId as 'amateur' | 'pro');
+        const result = await createBillingCheckoutAction(planId as 'starter' | 'pro');
 
         if ('url' in result) {
           // Redirect to Stripe Checkout
@@ -97,7 +97,7 @@ export function PricingPlanButton({
         </>
       ) : (
         <>
-          {planId === 'amateur' ? 'Get Amateur' : 'Go Pro'}
+          {planId === 'starter' ? 'Get Starter' : 'Go Pro'}
           <ArrowRight className="h-4 w-4" />
         </>
       )}
