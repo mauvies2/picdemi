@@ -12,6 +12,8 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { getSubscription } from '@/database/queries';
 import { createClient } from '@/database/server';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { formatPlanPrice, PLANS, type PlanId } from '@/lib/plans';
 import { getDashboardData } from '../actions';
 import { UpgradeHandler } from './upgrade-handler';
@@ -24,7 +26,13 @@ function formatStorage(gb: number): string {
   return `${gb.toFixed(2)} GB`;
 }
 
-export default async function PhotographerSettingsPage() {
+export default async function PhotographerSettingsPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
   const dashboardData = await getDashboardData();
   const { storage } = dashboardData;
 
@@ -49,7 +57,7 @@ export default async function PhotographerSettingsPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-6">
       <UpgradeHandler />
-      <DashboardHeader title="Settings" />
+      <DashboardHeader title={dict.photographerDashboard.settingsTitle} />
 
       <div className="flex flex-1 flex-col gap-6">
         {/* Billing & Plan */}
@@ -57,15 +65,15 @@ export default async function PhotographerSettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <CreditCard className="h-5 w-5" />
-              <CardTitle>Billing & Plan</CardTitle>
+              <CardTitle>{dict.photographerDashboard.billingPlan}</CardTitle>
             </div>
-            <CardDescription>Manage your subscription and billing information</CardDescription>
+            <CardDescription>{dict.photographerDashboard.billingPlanDesc}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Current Plan */}
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div>
-                <p className="font-medium">Current Plan</p>
+                <p className="font-medium">{dict.photographerDashboard.currentPlan}</p>
                 <p className="text-sm text-muted-foreground">
                   {currentPlan.name} Plan
                   {currentPlan.price !== null && ` • ${formatPlanPrice(currentPlan)}`}
@@ -80,7 +88,7 @@ export default async function PhotographerSettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Database className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm font-medium">Storage Usage</p>
+                    <p className="text-sm font-medium">{dict.photographerDashboard.storageUsage}</p>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {formatStorage(storage.usedGB)} / {formatStorage(currentPlan.storageGB)}
@@ -91,11 +99,11 @@ export default async function PhotographerSettingsPage() {
                   className="h-2"
                 />
                 <p className="text-xs text-muted-foreground">
-                  {storage.totalPhotos} photos uploaded
+                  {storage.totalPhotos} {dict.photographerDashboard.photosUploaded}
                 </p>
                 {storage.usedGB >= currentPlan.storageGB && (
                   <p className="mt-2 text-xs font-medium text-destructive">
-                    Storage limit reached — upgrade to add more photos
+                    {dict.photographerDashboard.storageLimitReached}
                   </p>
                 )}
               </div>
@@ -103,7 +111,7 @@ export default async function PhotographerSettingsPage() {
 
             {/* Current Plan Features */}
             <div className="space-y-2">
-              <p className="text-sm font-medium">Plan Features</p>
+              <p className="text-sm font-medium">{dict.photographerDashboard.planFeatures}</p>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 {currentPlan.features.map((feature, i) => {
                   const text = typeof feature === 'string' ? feature : feature.text;
@@ -119,7 +127,7 @@ export default async function PhotographerSettingsPage() {
 
             {/* Available Plans */}
             <div className="space-y-4">
-              <p className="text-sm font-medium">Available Plans</p>
+              <p className="text-sm font-medium">{dict.photographerDashboard.availablePlans}</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 {PLANS.filter((plan) => plan.id !== currentPlanId).map((plan) => (
                   <div
@@ -132,7 +140,7 @@ export default async function PhotographerSettingsPage() {
                           <h4 className="font-semibold">{plan.name}</h4>
                           {plan.popular && (
                             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                              Popular
+                              {dict.photographerDashboard.popular}
                             </span>
                           )}
                         </div>
@@ -150,10 +158,10 @@ export default async function PhotographerSettingsPage() {
           </CardContent>
           <CardFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
             <p className="text-xs text-muted-foreground">
-              Need help? Contact support for billing questions.
+              {dict.photographerDashboard.billingHelpText}
             </p>
             <Button variant="outline" size="sm">
-              View Billing History
+              {dict.photographerDashboard.viewBillingHistory}
             </Button>
           </CardFooter>
         </Card>

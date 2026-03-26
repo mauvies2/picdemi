@@ -1,15 +1,23 @@
 import { getInitialVotesAction } from '@/app/[lang]/actions/feedback';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { FeedbackView } from '@/components/feedback-view';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 
-export default async function TalentFeedbackPage() {
+export default async function TalentFeedbackPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
   const initialVotes = await getInitialVotesAction();
 
   return (
     <div className="flex flex-1 flex-col gap-2">
-      <DashboardHeader title="Share Your Feedback" />
+      <DashboardHeader title={dict.talentDashboard.shareFeedback} />
       <p className="text-sm text-muted-foreground mb-4">
-        Help us build Picdemi together — your voice shapes what we build next.
+        {dict.talentDashboard.feedbackSubtitle}
       </p>
       <FeedbackView role="talent" initialVotes={initialVotes} />
     </div>

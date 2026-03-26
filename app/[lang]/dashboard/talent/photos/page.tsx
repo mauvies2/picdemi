@@ -1,6 +1,8 @@
 import { getActiveRole } from '@/app/[lang]/actions/roles';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { createClient } from '@/database/server';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 import { listMyTaggedPhotos } from './actions';
 import { TalentPhotosGrid } from './talent-photos-grid';
@@ -9,6 +11,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function TalentPhotosPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
   const {
     data: { user },
@@ -28,8 +31,8 @@ export default async function TalentPhotosPage({ params }: { params: Promise<{ l
 
   return (
     <div>
-      <DashboardHeader title="My Photos" />
-      <p className="text-sm text-muted-foreground">Photos you have selected or tagged.</p>
+      <DashboardHeader title={dict.talentDashboard.myPhotos} />
+      <p className="text-sm text-muted-foreground">{dict.talentDashboard.myPhotosSubtitle}</p>
       <TalentPhotosGrid
         initialGroups={result.groups}
         hasMore={result.hasMore}

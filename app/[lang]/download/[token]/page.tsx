@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { getDownloadTokenByToken } from '@/database/queries/download-tokens';
 import { getGuestOrderWithItems } from '@/database/queries/guest-orders';
 import { supabaseAdmin } from '@/database/supabase-admin';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { localizedPath } from '@/lib/i18n/localized-path';
 
 interface PhotoDownloadItem {
   photoId: string;
@@ -14,8 +17,9 @@ interface PhotoDownloadItem {
   eventName: string | null;
 }
 
-export default async function DownloadPage({ params }: { params: Promise<{ token: string }> }) {
-  const { token } = await params;
+export default async function DownloadPage({ params }: { params: Promise<{ token: string; lang: string }> }) {
+  const { token, lang } = await params;
+  const dict = await getDictionary(lang as Locale);
 
   // Look up the token (admin client — no auth required for this endpoint)
   const downloadToken = await getDownloadTokenByToken(supabaseAdmin, token);
@@ -33,17 +37,16 @@ export default async function DownloadPage({ params }: { params: Promise<{ token
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
           <Clock className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h1 className="mt-4 text-xl font-semibold">Download link expired</h1>
+        <h1 className="mt-4 text-xl font-semibold">{dict.download.expiredTitle}</h1>
         <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-          This download link has expired. If you have a Picdemi account, your photos are still
-          available in your library.
+          {dict.download.expiredDesc}
         </p>
         <div className="mt-6 flex gap-3">
-          <Link href="/login">
-            <Button variant="outline">Log in</Button>
+          <Link href={localizedPath(lang, '/login')}>
+            <Button variant="outline">{dict.download.login}</Button>
           </Link>
-          <Link href="/signup">
-            <Button>Create account</Button>
+          <Link href={localizedPath(lang, '/signup')}>
+            <Button>{dict.download.createAccount}</Button>
           </Link>
         </div>
       </div>
@@ -107,16 +110,16 @@ export default async function DownloadPage({ params }: { params: Promise<{ token
           <UserPlus className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <div className="flex-1 text-sm">
             <span className="font-medium">
-              Your photos expire in {daysLeft} {daysLeft === 1 ? 'day' : 'days'}.{' '}
+              {dict.download.expiresSoon} {daysLeft} {daysLeft === 1 ? dict.download.day : dict.download.days}.{' '}
             </span>
             <span className="text-muted-foreground">
-              Create a free account to keep them in your library permanently.
+              {dict.download.keepPermanently}
             </span>
             <div className="mt-2">
-              <Link href={`/signup?token=${token}`}>
+              <Link href={localizedPath(lang, `/signup?token=${token}`)}>
                 <Button size="sm" className="gap-1.5">
                   <UserPlus className="h-3.5 w-3.5" />
-                  Create free account
+                  {dict.download.createFreeAccount}
                 </Button>
               </Link>
             </div>
@@ -126,17 +129,17 @@ export default async function DownloadPage({ params }: { params: Promise<{ token
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Your photos</h1>
+        <h1 className="text-2xl font-semibold">{dict.download.yourPhotos}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {photoItems.length} {photoItems.length === 1 ? 'photo' : 'photos'} ready to download ·
-          Links valid for 1 hour (refresh page if expired)
+          {photoItems.length} {photoItems.length === 1 ? dict.events.photo : dict.events.photos} {dict.download.readyToDownload} ·{' '}
+          {dict.download.linksValid}
         </p>
       </div>
 
       {/* Photo grid */}
       {photoItems.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-          No photos found for this order.
+          {dict.download.noPhotosFound}
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -160,7 +163,7 @@ export default async function DownloadPage({ params }: { params: Promise<{ token
                 <a href={photo.signedUrl} download={`picdemi-photo-${i + 1}.jpg`}>
                   <Button size="sm" className="w-full gap-2" variant="outline">
                     <Download className="h-3.5 w-3.5" />
-                    Download
+                    {dict.download.download}
                   </Button>
                 </a>
               </div>

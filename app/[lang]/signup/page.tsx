@@ -10,7 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/database/server';
 import { env } from '@/env.mjs';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getLangFromHeaders } from '@/lib/i18n/get-lang-from-headers';
+import { localizedPath } from '@/lib/i18n/localized-path';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 
 export default async function Signup({
@@ -21,6 +24,7 @@ export default async function Signup({
   searchParams: Promise<{ message?: string; plan?: string; token?: string }>;
 }) {
   const { lang } = await routeParams;
+  const dict = await getDictionary(lang as Locale);
   const params = await searchParams;
   const supabase = await createClient();
 
@@ -88,9 +92,9 @@ export default async function Signup({
     <div className="relative flex h-full w-full flex-col items-center justify-center p-6 md:p-8">
       <CloseButton className="absolute right-4 top-4 md:right-6 md:top-6" />
       <div className="w-full max-w-md">
-        <h1 className="text-center text-4xl font-bold">Create an account</h1>
+        <h1 className="text-center text-4xl font-bold">{dict.signup.title}</h1>
         <p className="mt-4 text-center text-muted-foreground">
-          Sign up with your Google, Facebook or Apple account
+          {dict.signup.subtitle}
         </p>
 
         <div className="mt-4 flex gap-2">
@@ -117,7 +121,7 @@ export default async function Signup({
           </div>
           <div className="relative flex justify-center">
             <span className="bg-background px-2 text-sm text-muted-foreground">
-              or continue with email
+              {dict.signup.orContinueWithEmail}
             </span>
           </div>
         </div>
@@ -128,7 +132,7 @@ export default async function Signup({
               {params.message}
             </p>
           )}
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{dict.signup.email}</Label>
           <Input
             className="mb-4 rounded-full border bg-inherit px-4 h-10"
             id="email"
@@ -137,7 +141,7 @@ export default async function Signup({
             placeholder="you@example.com"
             required
           />
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{dict.signup.password}</Label>
           <Input
             className="mb-4 rounded-full border bg-inherit px-4 h-10 placeholder:text-muted-foreground/30"
             id="password"
@@ -148,7 +152,7 @@ export default async function Signup({
             minLength={6}
             required
           />
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Label htmlFor="confirmPassword">{dict.signup.confirmPassword}</Label>
           <Input
             className="mb-6 rounded-full border bg-inherit px-4 h-10 placeholder:text-muted-foreground/30"
             id="confirmPassword"
@@ -160,18 +164,17 @@ export default async function Signup({
             required
           />
           <SubmitButton formAction={signUp} className="mb-2 h-10">
-            Create Account
+            {dict.signup.createAccount}
           </SubmitButton>
           <p className="text-center text-muted-foreground">
-            Already have account?{' '}
-            <Link className="text-sky-600 hover:underline" href="/login">
-              Log in{' '}
+            {dict.signup.alreadyHaveAccount}{' '}
+            <Link className="text-sky-600 hover:underline" href={localizedPath(lang, '/login')}>
+              {dict.signup.loginHere}{' '}
             </Link>
-            here.
+            {dict.signup.here}
           </p>
           <p className="mt-4 text-center text-xs">
-            By continuing, you agree to Supabase's Terms of Service and Privacy Policy, and to
-            receive periodic emails with updates.
+            {dict.signup.termsNotice}
           </p>
         </form>
       </div>

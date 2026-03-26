@@ -1,6 +1,8 @@
 import { format } from 'date-fns';
 import { Calendar, DollarSign, HardDrive, Image as ImageIcon, TrendingUp } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard-header';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { cn } from '@/lib/utils';
 import { getDashboardData } from './actions';
 import { PerformanceChart } from './performance-chart';
@@ -22,13 +24,19 @@ function formatStorage(gb: number): string {
   return `${gb.toFixed(2)} GB`;
 }
 
-export default async function PhotographerDashboardPage() {
+export default async function PhotographerDashboardPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
   const data = await getDashboardData();
   const { salesSummary, salesOverTime, topEvent, totalEvents, storage } = data;
 
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-6">
-      <DashboardHeader title="Overview" />
+      <DashboardHeader title={dict.photographerDashboard.overview} />
 
       <div className="flex flex-1 flex-col gap-4">
         {/* Stats Cards */}
@@ -37,13 +45,16 @@ export default async function PhotographerDashboardPage() {
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  Total Sales (30d)
+                  {dict.photographerDashboard.totalSales30d}
                 </p>
                 <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">
                   {formatCurrency(salesSummary.totalRevenueCents)}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {salesSummary.totalSales} {salesSummary.totalSales === 1 ? 'sale' : 'sales'}
+                  {salesSummary.totalSales}{' '}
+                  {salesSummary.totalSales === 1
+                    ? dict.photographerDashboard.sale
+                    : dict.photographerDashboard.sales}
                 </p>
               </div>
               <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
@@ -56,13 +67,13 @@ export default async function PhotographerDashboardPage() {
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  Photos Sold (30d)
+                  {dict.photographerDashboard.photosSold30d}
                 </p>
                 <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">
                   {salesSummary.totalPhotosSold}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {formatCurrency(salesSummary.averageOrderValueCents)} avg
+                  {formatCurrency(salesSummary.averageOrderValueCents)} {dict.photographerDashboard.avg}
                 </p>
               </div>
               <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
@@ -74,10 +85,15 @@ export default async function PhotographerDashboardPage() {
           <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Events</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  {dict.photographerDashboard.totalEvents}
+                </p>
                 <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold">{totalEvents}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {totalEvents === 1 ? 'event' : 'events'} created
+                  {totalEvents === 1
+                    ? dict.photographerDashboard.event
+                    : dict.photographerDashboard.eventsCreated}{' '}
+                  {dict.photographerDashboard.created}
                 </p>
               </div>
               <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">
@@ -90,7 +106,9 @@ export default async function PhotographerDashboardPage() {
           <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between h-full gap-6">
               <div className="flex flex-col flex-1 justify-between h-full">
-                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Storage</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  {dict.photographerDashboard.storage}
+                </p>
                 <div className="space-y-1 w-full">
                   <div className="text-xs text-muted-foreground">
                     {formatStorage(storage.usedGB)} / {formatStorage(storage.limitGB)}
@@ -109,7 +127,7 @@ export default async function PhotographerDashboardPage() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {storage.usedPercent.toFixed(1)}% used
+                    {storage.usedPercent.toFixed(1)}% {dict.photographerDashboard.used}
                   </p>
                 </div>
               </div>
@@ -126,14 +144,16 @@ export default async function PhotographerDashboardPage() {
           <div className="lg:col-span-2 rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold">Performance</h2>
+                <h2 className="text-lg sm:text-xl font-semibold">
+                  {dict.photographerDashboard.performance}
+                </h2>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Sales over the last 30 days
+                  {dict.photographerDashboard.salesLast30Days}
                 </p>
               </div>
               <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                 <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span>30 days</span>
+                <span>{dict.photographerDashboard['30days']}</span>
               </div>
             </div>
             <PerformanceChart data={salesOverTime} />
@@ -144,11 +164,13 @@ export default async function PhotographerDashboardPage() {
             {/* Top Event */}
             {topEvent ? (
               <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
-                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Top Event</h2>
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                  {dict.photographerDashboard.topEvent}
+                </h2>
                 <div className="space-y-3">
                   <div>
                     <p className="font-medium text-base sm:text-lg">
-                      {topEvent.event_name || 'Unnamed Event'}
+                      {topEvent.event_name || dict.photographerDashboard.unnamedEvent}
                     </p>
                     {topEvent.event_date && (
                       <p className="text-xs sm:text-sm text-muted-foreground mt-1">
@@ -158,13 +180,17 @@ export default async function PhotographerDashboardPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-3 border-t">
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Revenue</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {dict.photographerDashboard.revenue}
+                      </p>
                       <p className="text-base sm:text-lg font-semibold mt-1">
                         {formatCurrency(topEvent.revenue_cents)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Photos Sold</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {dict.photographerDashboard.photosSold}
+                      </p>
                       <p className="text-base sm:text-lg font-semibold mt-1">
                         {topEvent.photos_sold}
                       </p>
@@ -177,9 +203,11 @@ export default async function PhotographerDashboardPage() {
               </div>
             ) : (
               <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
-                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Top Event</h2>
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                  {dict.photographerDashboard.topEvent}
+                </h2>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  No sales yet. Create your first event to get started!
+                  {dict.photographerDashboard.noSalesYet}
                 </p>
               </div>
             )}

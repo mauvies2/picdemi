@@ -1,6 +1,8 @@
 import { DashboardHeader } from '@/components/dashboard-header';
 import { createSignedUrl, getPhotosForEvents, getUserEvents } from '@/database/queries';
 import { createClient } from '@/database/server';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { deleteEventAction as deleteEvent } from './actions';
 import { EventCard } from './event-card';
 
@@ -63,7 +65,13 @@ async function getEventSalesCounts(
   return salesCounts;
 }
 
-export default async function EventsPage() {
+export default async function EventsPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
   const {
     data: { user },
@@ -72,8 +80,8 @@ export default async function EventsPage() {
   if (!user) {
     return (
       <div>
-        <DashboardHeader title="Events" />
-        <p className="mt-2 text-muted-foreground">Please sign in to view your events.</p>
+        <DashboardHeader title={dict.photographerDashboard.overview} />
+        <p className="mt-2 text-muted-foreground">{dict.photographerDashboard.pleaseSignIn}</p>
       </div>
     );
   }
@@ -138,11 +146,11 @@ export default async function EventsPage() {
 
   return (
     <div>
-      <DashboardHeader title="Events" />
+      <DashboardHeader title={dict.dashboard.events} />
       <div className="text-sm text-muted-foreground">
         {events.length
           ? `${events.length} event${events.length === 1 ? '' : 's'}`
-          : 'No events yet.'}
+          : dict.photographerDashboard.noEventsYet}
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {events.map((event) => {

@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { getDownloadTokenByGuestOrderId } from '@/database/queries/download-tokens';
 import { getGuestOrderBySessionId } from '@/database/queries/guest-orders';
 import { supabaseAdmin } from '@/database/supabase-admin';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { localizedPath } from '@/lib/i18n/localized-path';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 import { stripe } from '@/lib/stripe/config';
 import { ClearGuestCart } from './clear-guest-cart';
@@ -16,6 +19,7 @@ export default async function GuestCheckoutSuccessPage({
   searchParams: Promise<{ session_id?: string }>;
 }) {
   const { lang } = await routeParams;
+  const dict = await getDictionary(lang as Locale);
   const { session_id } = await searchParams;
 
   if (!session_id) {
@@ -53,32 +57,32 @@ export default async function GuestCheckoutSuccessPage({
           <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
         </div>
 
-        <h1 className="text-2xl font-semibold">Payment successful!</h1>
+        <h1 className="text-2xl font-semibold">{dict.checkout.successTitle}</h1>
         <p className="mt-3 text-muted-foreground">
-          You purchased{' '}
+          {dict.checkout.purchased}{' '}
           <strong>
-            {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+            {photoCount} {photoCount === 1 ? dict.events.photo : dict.events.photos}
           </strong>
           .
           {sessionEmail && (
             <>
               {' '}
-              A download link has been sent to <strong>{sessionEmail}</strong>.
+              {dict.checkout.downloadLinkSent} <strong>{sessionEmail}</strong>.
             </>
           )}
         </p>
 
         {/* Download CTA */}
         {downloadToken ? (
-          <Link href={`/download/${downloadToken.token}`} className="mt-8 block">
+          <Link href={localizedPath(lang, `/download/${downloadToken.token}`)} className="mt-8 block">
             <Button size="lg" className="w-full gap-2">
               <Download className="h-5 w-5" />
-              View &amp; Download Your Photos
+              {dict.checkout.viewDownloadPhotos}
             </Button>
           </Link>
         ) : (
           <p className="mt-8 text-sm text-muted-foreground">
-            Your download link will arrive by email shortly.
+            {dict.checkout.downloadLinkEmail}
           </p>
         )}
 
@@ -89,18 +93,17 @@ export default async function GuestCheckoutSuccessPage({
               <UserPlus className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="font-medium text-sm">Save your photos forever</p>
+              <p className="font-medium text-sm">{dict.checkout.savePhotosTitle}</p>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Create a free account to keep all purchased photos in your personal library — no
-                expiry, easy re-download, and AI-powered search to find yourself in new events.
+                {dict.checkout.savePhotosDesc}
               </p>
               <Link
-                href={downloadToken ? `/signup?token=${downloadToken.token}` : '/signup'}
+                href={downloadToken ? localizedPath(lang, `/signup?token=${downloadToken.token}`) : localizedPath(lang, '/signup')}
                 className="mt-3 inline-block"
               >
                 <Button variant="outline" size="sm" className="gap-1.5">
                   <UserPlus className="h-3.5 w-3.5" />
-                  Create free account
+                  {dict.checkout.createFreeAccount}
                 </Button>
               </Link>
             </div>
@@ -108,8 +111,8 @@ export default async function GuestCheckoutSuccessPage({
         </div>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          <Link href="/events" className="hover:underline">
-            Continue browsing events
+          <Link href={localizedPath(lang, '/events')} className="hover:underline">
+            {dict.checkout.continueBrowsing}
           </Link>
         </p>
       </div>

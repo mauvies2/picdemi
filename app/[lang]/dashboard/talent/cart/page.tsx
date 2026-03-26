@@ -1,6 +1,8 @@
 import { getActiveRole } from '@/app/[lang]/actions/roles';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { createClient } from '@/database/server';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 import { getCurrentCart } from './actions';
 import { CartContent } from './cart-content';
@@ -14,6 +16,7 @@ interface CartPageProps {
 
 export default async function CartPage({ params: routeParams, searchParams }: CartPageProps) {
   const { lang } = await routeParams;
+  const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
   const {
     data: { user },
@@ -42,9 +45,9 @@ export default async function CartPage({ params: routeParams, searchParams }: Ca
   return (
     <div className="space-y-6">
       <div>
-        <DashboardHeader title="Shopping Cart" />
+        <DashboardHeader title={dict.talentDashboard.shoppingCart} />
         <p className="text-sm text-muted-foreground mt-1">
-          Review your selected photos before checkout.
+          {dict.talentDashboard.reviewPhotos}
         </p>
       </div>
       <CartContent initialCartData={cartData} />

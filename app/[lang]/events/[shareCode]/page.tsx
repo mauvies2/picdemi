@@ -11,13 +11,16 @@ import {
 } from '@/database/queries';
 import { createClient } from '@/database/server';
 import { supabaseAdmin } from '@/database/supabase-admin';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getBaseUrl } from '@/lib/get-base-url';
 import { PublicEventPhotoViewer } from './public-event-photo-viewer';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export default async function EventPage({ params }: { params: Promise<{ shareCode: string }> }) {
-  const { shareCode: slug } = await params;
+export default async function EventPage({ params }: { params: Promise<{ shareCode: string; lang: string }> }) {
+  const { shareCode: slug, lang } = await params;
+  const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
 
   // Detect whether the slug is a UUID (public event by ID) or a share code
@@ -137,7 +140,7 @@ export default async function EventPage({ params }: { params: Promise<{ shareCod
               {new Date(event.date).toDateString().split(' ').slice(1).join(' ')} •{' '}
               {event.city[0]?.toUpperCase() + event.city.slice(1)}
               {event.price_per_photo !== null && (
-                <> • ${event.price_per_photo.toFixed(2)} per photo</>
+                <> • ${event.price_per_photo.toFixed(2)} {dict.events.perPhoto}</>
               )}
             </div>
           </div>

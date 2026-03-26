@@ -5,14 +5,17 @@ import { DashboardHeader } from '@/components/dashboard-header';
 import { createPhotoUrls, getEventPhotosPublic, isPhotoInCart } from '@/database/queries';
 import { createClient } from '@/database/server';
 import { getBaseUrl } from '@/lib/get-base-url';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { EventPhotoViewer } from './event-photo-viewer';
 
 export default async function ExploreEventDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ lang: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { lang, id } = await params;
+  const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
 
   // Get event by ID - must be public
@@ -116,13 +119,13 @@ export default async function ExploreEventDetailPage({
         <div className="text-sm text-muted-foreground">
           {new Date(event.date).toDateString().split(' ').slice(1).join(' ')} •{' '}
           {event.city[0]?.toUpperCase() + event.city.slice(1)}
-          {event.price_per_photo !== null && <> • ${event.price_per_photo.toFixed(2)} per photo</>}
+          {event.price_per_photo !== null && <> • ${event.price_per_photo.toFixed(2)} {dict.talentDashboard.perPhoto}</>}
         </div>
       </div>
 
       {photoItems.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No photos available yet.</p>
+          <p className="text-muted-foreground">{dict.talentDashboard.noPhotosAvailable}</p>
         </div>
       ) : (
         <div className="w-full space-y-3">
