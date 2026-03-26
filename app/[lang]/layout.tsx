@@ -4,7 +4,8 @@ import { GuestCartProvider } from '@/components/guest-cart-provider';
 import Header from '@/components/header';
 import { Main } from '@/components/main';
 import { QueryProvider } from '@/components/query-provider';
-import { locales } from '@/lib/i18n/config';
+import { type Locale, locales } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 
 export function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
@@ -17,14 +18,14 @@ export default async function LangLayout({
   children: React.ReactNode;
   params: Promise<{ lang: string }>;
 }) {
-  // Consume params to satisfy Next.js dynamic segment requirements
-  await params;
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
 
   return (
     <QueryProvider>
       <GuestCartProvider>
         <ConditionalHeader>
-          <Header />
+          <Header navDict={{ login: dict.nav.login, getStarted: dict.nav.getStarted }} />
         </ConditionalHeader>
         <Main>{children}</Main>
         <Toaster />

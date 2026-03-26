@@ -1,6 +1,8 @@
 import { completeOnboarding, getDashboardPath } from '@/app/[lang]/actions/roles';
 import OnboardingRoleForm from '@/components/onboarding-role-form';
 import { createClient } from '@/database/server';
+import type { Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getLangFromHeaders } from '@/lib/i18n/get-lang-from-headers';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 import { type RoleSlug, roleSlugToEnum } from '@/lib/roles';
@@ -11,6 +13,7 @@ export default async function OnboardingRolePage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
 
   const {
@@ -64,10 +67,8 @@ export default async function OnboardingRolePage({
   return (
     <div className="mx-auto max-w-3xl py-12">
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold">What best describes you?</h1>
-        <p className="mt-2 text-muted-foreground">
-          Select your role to get started. Whether you capture moments or bring them to life.
-        </p>
+        <h1 className="text-3xl font-bold">{dict.onboarding.roleTitle}</h1>
+        <p className="mt-2 text-muted-foreground">{dict.onboarding.roleSubtitle}</p>
       </div>
       <OnboardingRoleForm saveRole={saveRole} />
     </div>

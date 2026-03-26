@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/database/server';
+import type { Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getLangFromHeaders } from '@/lib/i18n/get-lang-from-headers';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 
@@ -27,6 +29,7 @@ export default async function Login({
   }>;
 }) {
   const { lang } = await routeParams;
+  const dict = await getDictionary(lang as Locale);
   const params = await searchParams;
   const supabase = await createClient();
 
@@ -128,10 +131,8 @@ export default async function Login({
     <div className="relative flex h-full w-full flex-col items-center justify-center p-6 md:p-8">
       <CloseButton className="absolute right-4 top-4" />
       <div className="w-full max-w-md">
-        <h1 className="text-center text-4xl font-bold">Welcome back</h1>
-        <p className="mt-4 text-center text-muted-foreground">
-          Login with your Google, Facebook or Apple account
-        </p>
+        <h1 className="text-center text-4xl font-bold">{dict.auth.welcomeBack}</h1>
+        <p className="mt-4 text-center text-muted-foreground">{dict.auth.loginSubtitle}</p>
         <div className="mt-4 flex gap-2">
           <GoogleSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
           <FacebookSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
@@ -146,7 +147,7 @@ export default async function Login({
           </div>
           <div className="relative flex justify-center">
             <span className="bg-background px-2 text-sm text-muted-foreground">
-              or continue with email
+              {dict.auth.orContinueWith}
             </span>
           </div>
         </div>
@@ -163,7 +164,7 @@ export default async function Login({
               {params.message}
             </p>
           )}
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{dict.auth.email}</Label>
           <Input
             className="mb-4 rounded-full border bg-inherit px-4 h-10"
             id="email"
@@ -174,7 +175,7 @@ export default async function Login({
           />
           <div className="mb-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{dict.auth.password}</Label>
               <ForgotPasswordLink emailId="email" />
             </div>
             <Input

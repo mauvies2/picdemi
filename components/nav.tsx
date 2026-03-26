@@ -9,7 +9,13 @@ import { Button } from '@/components/ui/button';
 import { useLocalizedPath } from '@/hooks/use-localized-path';
 import { UserAvatar } from './user-avatar';
 
-export function Nav({ user }: { user: User | null }) {
+export function Nav({
+  user,
+  navDict,
+}: {
+  user: User | null;
+  navDict: { login: string; getStarted: string };
+}) {
   const pathname = usePathname();
   const lp = useLocalizedPath();
 
@@ -51,12 +57,12 @@ export function Nav({ user }: { user: User | null }) {
                 className="text-sm hover:text-foreground/70 transition-colors"
               >
                 <Button size="md" className="md:hidden">
-                  Log in
+                  {navDict.login}
                 </Button>
-                <span className="hidden md:inline-flex">Log in</span>
+                <span className="hidden md:inline-flex">{navDict.login}</span>
               </Link>
               <Link href={lp('/signup')} tabIndex={-1} className="hidden md:inline-flex">
-                <Button size="md">Get started</Button>
+                <Button size="md">{navDict.getStarted}</Button>
               </Link>
             </>
           )}

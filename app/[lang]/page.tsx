@@ -6,10 +6,14 @@ import { PricingSection } from '@/components/pricing-section';
 import { Button } from '@/components/ui/button';
 import { getProfileFields } from '@/database/queries';
 import { createClient } from '@/database/server';
+import type { Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { localizedPath } from '@/lib/i18n/localized-path';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 
 export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
 
   const {
@@ -43,21 +47,20 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             </div> */}
 
           <h1 className="text-balance text-5xl font-semibold tracking-tight lg:text-7xl">
-            Your best shots
+            {dict.home.heroHeadline1}
             <span className="block bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-              delivered fast.
+              {dict.home.heroHeadline2}
             </span>
           </h1>
 
           <p className="mx-auto max-w-2xl text-lg leading-normal text-muted-foreground sm:text-xl">
-            Bridging the gap between photographers and athletes. Discover your photos in seconds
-            through our advanced gallery search.
+            {dict.home.heroSubtitle}
           </p>
 
           <EventSearchBar variant="hero" className="mx-auto" />
 
           <p className="text-xs text-muted-foreground/80 tracking-wider">
-            No account needed · Buy in minutes · Instant downloads
+            {dict.home.heroDisclaimer}
           </p>
         </div>
 
@@ -73,14 +76,13 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           {/* Header */}
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              How it works
+              {dict.home.howItWorksLabel}
             </p>
             <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-              From the lens to your gallery, in seconds.
+              {dict.home.howItWorksHeadline}
             </h2>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              We connect photographers who love their craft with athletes who live for their
-              passion.
+              {dict.home.howItWorksSubtitle}
             </p>
           </div>
 
@@ -93,12 +95,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                   <Camera className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold tracking-tight">
-                    Upload &amp; Professionalize
-                  </h3>
+                  <h3 className="text-lg font-semibold tracking-tight">{dict.home.pillar1Title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    Drag, drop, and start selling. Upload thousands of photos in minutes and let our
-                    smart metadata handle the organization for you.
+                    {dict.home.pillar1Body}
                   </p>
                 </div>
               </div>
@@ -109,10 +108,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                   <Search className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold tracking-tight">Instant Discovery</h3>
+                  <h3 className="text-lg font-semibold tracking-tight">{dict.home.pillar2Title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    Find your moment. Search by event, location, or time. No more scrolling through
-                    endless galleries to find that one perfect shot.
+                    {dict.home.pillar2Body}
                   </p>
                 </div>
               </div>
@@ -123,10 +121,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                   <Download className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold tracking-tight">Secure &amp; Instant</h3>
+                  <h3 className="text-lg font-semibold tracking-tight">{dict.home.pillar3Title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    One-click checkout, high-res downloads. Your memories are ready to share the
-                    moment the race ends, watermark-free and at full quality.
+                    {dict.home.pillar3Body}
                   </p>
                 </div>
               </div>
@@ -139,18 +136,18 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           {/* Action Bar */}
           <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/events"
+              href={localizedPath(lang, '/events')}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90"
             >
               <Search className="h-4 w-4" />
-              Find my photos
+              {dict.home.findMyPhotos}
             </Link>
             <Link
-              href="/signup"
+              href={localizedPath(lang, '/signup')}
               className="inline-flex items-center gap-2 rounded-full border border-input bg-background px-7 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90"
             >
               <Camera className="h-4 w-4" />
-              Start selling as a photographer
+              {dict.home.startSelling}
             </Link>
           </div>
         </div>
@@ -164,22 +161,21 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Ready to see your events in a new light?
+              {dict.home.ctaHeadline}
             </h2>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              Join photographers and talents who use Picdemi to make sure great moments never get
-              lost in someone&apos;s camera roll.
+              {dict.home.ctaSubtitle}
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link href="/signup">
+              <Link href={localizedPath(lang, '/signup')}>
                 <Button size="lg" className="group px-8 text-base">
-                  Create your free account
+                  {dict.home.ctaCreateAccount}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href={localizedPath(lang, '/login')}>
                 <Button size="lg" variant="outline" className="px-8 text-base">
-                  I already have an account
+                  {dict.home.ctaHaveAccount}
                 </Button>
               </Link>
             </div>
