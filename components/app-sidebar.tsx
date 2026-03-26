@@ -16,6 +16,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ComponentProps } from 'react';
+import { useLocalizedPath } from '@/hooks/use-localized-path';
 import { NavMains } from './nav-main';
 import { NavSecondary } from './nav-secondary';
 import { Sidebar, SidebarContent, SidebarHeader } from './ui/sidebar';
@@ -74,20 +75,25 @@ export function AppSidebar({
     avatar?: string | null;
   };
 }) {
-  const navItems = activeRole === 'photographer' ? photographerNav : talentNav;
+  const lp = useLocalizedPath();
+  const navItems = (activeRole === 'photographer' ? photographerNav : talentNav).map((item) => ({
+    ...item,
+    url: lp(item.url),
+  }));
+  const navSecondary = getNavSecondary(activeRole).map((item) => ({ ...item, url: lp(item.url) }));
 
   return (
     <Sidebar collapsible="icon" className="h-svh" {...props}>
       <SidebarHeader>
         <div className="relative flex items-center px-2">
-          <Link href="/" className="flex items-center gap-1">
+          <Link href={lp('/')} className="flex items-center gap-1">
             <Image src="/logo_dark.svg" alt="Logo" width={170} height={50} priority />
           </Link>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMains items={navItems} />
-        <NavSecondary items={getNavSecondary(activeRole)} className="mt-auto" />
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
     </Sidebar>
   );

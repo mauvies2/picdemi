@@ -1,6 +1,6 @@
 import { ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
-import { getCartItemCountAction } from '@/app/dashboard/talent/cart/actions';
+import { getCartItemCountAction } from '@/app/[lang]/dashboard/talent/cart/actions';
 import { DashboardUserMenu } from '@/components/dashboard-user-menu';
 import { Button } from '@/components/ui/button';
 import type { RoleSlug } from '@/lib/roles';

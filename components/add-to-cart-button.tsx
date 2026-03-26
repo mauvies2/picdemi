@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import {
   addPhotoToCartAction,
   removePhotoFromCartAction,
-} from '@/app/dashboard/talent/cart/actions';
+} from '@/app/[lang]/dashboard/talent/cart/actions';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

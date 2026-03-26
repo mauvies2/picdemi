@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Loader2, Mail } from 'lucide-react';
 import { useEffect, useState, useTransition } from 'react';
-import { resetPasswordAction } from '@/app/login/actions';
+import { resetPasswordAction } from '@/app/[lang]/login/actions';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

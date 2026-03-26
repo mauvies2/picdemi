@@ -1,0 +1,110 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Volver",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "submit": "Enviar",
+    "or": "o"
+  },
+  "nav": {
+    "login": "Iniciar sesión",
+    "getStarted": "Empezar",
+    "explore": "Explorar",
+    "myPhotos": "Mis fotos",
+    "orders": "Pedidos",
+    "profile": "Perfil",
+    "support": "Soporte",
+    "feedback": "Comentarios",
+    "settings": "Configuración",
+    "overview": "Resumen",
+    "events": "Eventos",
+    "createEvent": "Crear evento",
+    "sales": "Ventas",
+    "earnings": "Ganancias"
+  },
+  "home": {
+    "heroHeadline": "Encuéntrate en cada momento",
+    "heroSubtitle": "Conectamos fotógrafos con atletas y asistentes a eventos. Sube fotos de eventos y deja que la IA ayude a los usuarios a encontrarse al instante.",
+    "heroDisclaimer": "Disponible para fotógrafos y deportistas",
+    "howItWorksLabel": "Cómo funciona",
+    "howItWorksHeadline": "Simple para todos",
+    "pillar1Title": "Fotógrafos suben fotos",
+    "pillar1Body": "Crea un evento, sube tus fotos y ponlas a la venta en minutos.",
+    "pillar2Title": "La IA encuentra tu foto",
+    "pillar2Body": "Nuestra tecnología de reconocimiento facial localiza tus fotos automáticamente.",
+    "pillar3Title": "Compra y descarga",
+    "pillar3Body": "Paga solo por las fotos que quieres, en alta resolución y sin marca de agua.",
+    "findMyPhotos": "Encontrar mis fotos",
+    "startSelling": "Empezar a vender",
+    "ctaHeadline": "¿Listo para empezar?",
+    "ctaCreateAccount": "Crear cuenta gratis",
+    "ctaHaveAccount": "¿Ya tienes cuenta?"
+  },
+  "auth": {
+    "welcomeBack": "Bienvenido de nuevo",
+    "loginSubtitle": "Inicia sesión en tu cuenta",
+    "continueWithEmail": "Continuar con email",
+    "email": "Email",
+    "password": "Contraseña",
+    "loginButton": "Iniciar sesión",
+    "noAccount": "¿No tienes cuenta?",
+    "signUpHere": "Regístrate aquí",
+    "signUpTitle": "Crear cuenta",
+    "signUpButton": "Crear cuenta",
+    "forgotPassword": "¿Olvidaste tu contraseña?"
+  },
+  "onboarding": {
+    "roleTitle": "¿Cómo vas a usar Picdemi?",
+    "photographer": "Fotógrafo",
+    "talent": "Deportista",
+    "photographerDesc": "Sube fotos de eventos y véndelas",
+    "talentDesc": "Busca y compra fotos de ti mismo"
+  },
+  "dashboard": {
+    "overview": "Resumen",
+    "createEvent": "Crear evento",
+    "events": "Eventos",
+    "sales": "Ventas",
+    "earnings": "Ganancias",
+    "support": "Soporte",
+    "feedback": "Comentarios",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "explore": "Explorar",
+    "myPhotos": "Mis fotos",
+    "orders": "Pedidos",
+    "activeRole": "Rol activo",
+    "switchTo": "Cambiar a",
+    "logOut": "Cerrar sesión",
+    "billing": "Facturación",
+    "account": "Cuenta"
+  },
+  "events": {
+    "editEvent": "Editar evento",
+    "deleteEvent": "Eliminar evento",
+    "deleteConfirmTitle": "¿Eliminar evento?",
+    "deleteConfirmDesc": "Esta acción no se puede deshacer. Se eliminarán el evento y todas sus fotos.",
+    "photos": "fotos",
+    "photo": "foto",
+    "sales": "ventas",
+    "sale": "venta",
+    "public": "Público",
+    "private": "Privado",
+    "noPhotosYet": "Aún no hay fotos"
+  },
+  "cart": {
+    "title": "Carrito",
+    "empty": "Tu carrito está vacío",
+    "browseEvents": "Explorar eventos",
+    "checkout": "Pagar"
+  },
+  "languageSwitcher": {
+    "es": "Español",
+    "en": "English"
+  }
+}

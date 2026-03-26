@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { switchRole } from '@/app/actions/roles';
+import { switchRole } from '@/app/[lang]/actions/roles';
 import type { RoleSlug } from '@/lib/roles';
 
 export async function POST(request: Request) {

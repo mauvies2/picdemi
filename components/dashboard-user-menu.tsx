@@ -4,7 +4,7 @@ import { Bell, Camera, CreditCard, LifeBuoy, LogOut, Send, Settings, User } from
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useOptimistic, useTransition } from 'react';
-import { switchRole } from '@/app/actions/roles';
+import { switchRole } from '@/app/[lang]/actions/roles';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {

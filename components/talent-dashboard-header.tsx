@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { BottomNav } from '@/components/bottom-nav';
 import { CartLinkButton } from '@/components/cart-link-button';
 import { DashboardUserMenu } from '@/components/dashboard-user-menu';
+import { useLocalizedPath } from '@/hooks/use-localized-path';
 import type { RoleSlug } from '@/lib/roles';
 import { cn } from '@/lib/utils';
 
@@ -29,15 +30,17 @@ export function TalentDashboardHeader({
   activeRole: RoleSlug;
 }) {
   const pathname = usePathname();
+  const lp = useLocalizedPath();
+  const pathWithoutLang = pathname.replace(/^\/(es|en)/, '') || '/';
 
-  const isActive = (href: string) => pathname.startsWith(href);
+  const isActive = (href: string) => pathWithoutLang.startsWith(href);
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/80">
         <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-6">
           {/* Left: Logo */}
-          <Link href="/" className="flex shrink-0 items-center gap-2">
+          <Link href={lp('/')} className="flex shrink-0 items-center gap-2">
             <Image src="/logo_dark.svg" alt="Picdemi" width={130} height={50} priority />
           </Link>
 
@@ -46,7 +49,7 @@ export function TalentDashboardHeader({
             {talentNavLinks.map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                href={lp(link.href)}
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
                   isActive(link.href)
@@ -68,7 +71,7 @@ export function TalentDashboardHeader({
         </div>
       </header>
 
-      <BottomNav items={talentNavLinks} />
+      <BottomNav items={talentNavLinks.map((item) => ({ ...item, href: lp(item.href) }))} />
     </>
   );
 }

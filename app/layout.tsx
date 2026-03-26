@@ -1,12 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist_Mono, Inter, Inter_Tight } from 'next/font/google';
+import { headers } from 'next/headers';
 import './globals.css';
-import { Toaster } from 'sonner';
-import { ConditionalHeader } from '@/components/conditional-header';
-import { GuestCartProvider } from '@/components/guest-cart-provider';
-import Header from '@/components/header';
-import { Main } from '@/components/main';
-import { QueryProvider } from '@/components/query-provider';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -33,24 +28,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const lang = (await headers()).get('x-lang') ?? 'es';
+
   return (
-    <html lang="en" className={`${inter.variable} ${geistMono.variable} ${interTight.variable}`}>
-      <body className="antialiased">
-        <QueryProvider>
-          <GuestCartProvider>
-            <ConditionalHeader>
-              <Header />
-            </ConditionalHeader>
-            <Main>{children}</Main>
-            <Toaster />
-          </GuestCartProvider>
-        </QueryProvider>
-      </body>
+    <html lang={lang} className={`${inter.variable} ${geistMono.variable} ${interTight.variable}`}>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

@@ -1,0 +1,110 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "confirm": "Confirm",
+    "close": "Close",
+    "submit": "Submit",
+    "or": "or"
+  },
+  "nav": {
+    "login": "Log in",
+    "getStarted": "Get started",
+    "explore": "Explore",
+    "myPhotos": "My photos",
+    "orders": "Orders",
+    "profile": "Profile",
+    "support": "Support",
+    "feedback": "Feedback",
+    "settings": "Settings",
+    "overview": "Overview",
+    "events": "Events",
+    "createEvent": "Create event",
+    "sales": "Sales",
+    "earnings": "Earnings"
+  },
+  "home": {
+    "heroHeadline": "Find Yourself in Every Moment",
+    "heroSubtitle": "Connect photographers with athletes and event-goers. Upload event photos and let AI help users find themselves instantly.",
+    "heroDisclaimer": "Available for photographers and athletes",
+    "howItWorksLabel": "How it works",
+    "howItWorksHeadline": "Simple for everyone",
+    "pillar1Title": "Photographers upload photos",
+    "pillar1Body": "Create an event, upload your photos, and start selling in minutes.",
+    "pillar2Title": "AI finds your photo",
+    "pillar2Body": "Our facial recognition technology locates your photos automatically.",
+    "pillar3Title": "Buy and download",
+    "pillar3Body": "Pay only for the photos you want, in high resolution with no watermark.",
+    "findMyPhotos": "Find my photos",
+    "startSelling": "Start selling",
+    "ctaHeadline": "Ready to get started?",
+    "ctaCreateAccount": "Create free account",
+    "ctaHaveAccount": "Already have an account?"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "loginSubtitle": "Sign in to your account",
+    "continueWithEmail": "Continue with email",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Sign in",
+    "noAccount": "Don't have an account?",
+    "signUpHere": "Sign up here",
+    "signUpTitle": "Create account",
+    "signUpButton": "Create account",
+    "forgotPassword": "Forgot your password?"
+  },
+  "onboarding": {
+    "roleTitle": "How will you use Picdemi?",
+    "photographer": "Photographer",
+    "talent": "Athlete",
+    "photographerDesc": "Upload event photos and sell them",
+    "talentDesc": "Find and buy photos of yourself"
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "createEvent": "Create event",
+    "events": "Events",
+    "sales": "Sales",
+    "earnings": "Earnings",
+    "support": "Support",
+    "feedback": "Feedback",
+    "profile": "Profile",
+    "settings": "Settings",
+    "explore": "Explore",
+    "myPhotos": "My photos",
+    "orders": "Orders",
+    "activeRole": "Active role",
+    "switchTo": "Switch to",
+    "logOut": "Log out",
+    "billing": "Billing",
+    "account": "Account"
+  },
+  "events": {
+    "editEvent": "Edit event",
+    "deleteEvent": "Delete event",
+    "deleteConfirmTitle": "Delete event?",
+    "deleteConfirmDesc": "This action cannot be undone. The event and all its photos will be deleted.",
+    "photos": "photos",
+    "photo": "photo",
+    "sales": "sales",
+    "sale": "sale",
+    "public": "Public",
+    "private": "Private",
+    "noPhotosYet": "No photos yet"
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "browseEvents": "Browse events",
+    "checkout": "Checkout"
+  },
+  "languageSwitcher": {
+    "es": "Español",
+    "en": "English"
+  }
+}

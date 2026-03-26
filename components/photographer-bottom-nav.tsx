@@ -18,7 +18,7 @@ import {
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useOptimistic, useTransition } from 'react';
-import { switchRole } from '@/app/actions/roles';
+import { switchRole } from '@/app/[lang]/actions/roles';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -29,6 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useLocalizedPath } from '@/hooks/use-localized-path';
 import type { RoleSlug } from '@/lib/roles';
 import { cn } from '@/lib/utils';
 
@@ -37,21 +38,31 @@ const navLinks = [
     href: '/dashboard/photographer',
     label: 'Overview',
     icon: Home,
-    isActive: (p: string) => p === '/dashboard/photographer',
+    isActive: (p: string) => {
+      const clean = p.replace(/^\/(es|en)/, '');
+      return clean === '/dashboard/photographer';
+    },
   },
   {
     href: '/dashboard/photographer/events',
     label: 'Events',
     icon: CalendarDays,
-    isActive: (p: string) =>
-      p.startsWith('/dashboard/photographer/events') &&
-      !p.startsWith('/dashboard/photographer/events/new'),
+    isActive: (p: string) => {
+      const clean = p.replace(/^\/(es|en)/, '');
+      return (
+        clean.startsWith('/dashboard/photographer/events') &&
+        !clean.startsWith('/dashboard/photographer/events/new')
+      );
+    },
   },
   {
     href: '/dashboard/photographer/events/new',
     label: 'Create',
     icon: CalendarPlus,
-    isActive: (p: string) => p === '/dashboard/photographer/events/new',
+    isActive: (p: string) => {
+      const clean = p.replace(/^\/(es|en)/, '');
+      return clean === '/dashboard/photographer/events/new';
+    },
   },
 ];
 
@@ -71,6 +82,8 @@ export function PhotographerBottomNav({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const lp = useLocalizedPath();
+  const pathWithoutLang = pathname.replace(/^\/(es|en)/, '') || '/';
   const [_optimisticRole, addOptimisticRole] = useOptimistic<RoleSlug, RoleSlug>(
     activeRole,
     (_, role) => role,
@@ -79,7 +92,7 @@ export function PhotographerBottomNav({
 
   const handleLogout = async () => {
     await fetch('/auth/signout', { method: 'POST' });
-    router.push('/');
+    router.push(lp('/'));
     router.refresh();
   };
 
@@ -90,14 +103,14 @@ export function PhotographerBottomNav({
       try {
         const result = await switchRole('talent');
         addOptimisticRole(result.activeRole);
-        router.push('/dashboard/talent');
+        router.push(lp('/dashboard/talent'));
       } catch {
         addOptimisticRole(activeRole);
       }
     });
   };
 
-  const isAccountActive = accountActiveRoutes.some((r) => pathname.startsWith(r));
+  const isAccountActive = accountActiveRoutes.some((r) => pathWithoutLang.startsWith(r));
 
   return (
     <nav
@@ -109,7 +122,7 @@ export function PhotographerBottomNav({
         return (
           <Link
             key={item.href}
-            href={item.href}
+            href={lp(item.href)}
             className={cn(
               'flex flex-1 flex-col items-center justify-center gap-1 py-3 transition-colors duration-150',
               active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/70',
@@ -186,13 +199,13 @@ export function PhotographerBottomNav({
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/photographer/sales">
+              <Link href={lp('/dashboard/photographer/sales')}>
                 <WalletMinimal className="mr-2 h-4 w-4" />
                 <span>Sales</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/photographer/earnings">
+              <Link href={lp('/dashboard/photographer/earnings')}>
                 <Wallet className="mr-2 h-4 w-4" />
                 <span>Earnings</span>
               </Link>
@@ -202,19 +215,19 @@ export function PhotographerBottomNav({
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/photographer/profile">
+              <Link href={lp('/dashboard/photographer/profile')}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/photographer/settings">
+              <Link href={lp('/dashboard/photographer/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/photographer/settings?tab=billing">
+              <Link href={lp('/dashboard/photographer/settings?tab=billing')}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 <span>Billing</span>
               </Link>
@@ -224,13 +237,13 @@ export function PhotographerBottomNav({
               <span>Notifications</span>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/photographer/support">
+              <Link href={lp('/dashboard/photographer/support')}>
                 <LifeBuoy className="mr-2 h-4 w-4" />
                 <span>Support</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/photographer/feedback">
+              <Link href={lp('/dashboard/photographer/feedback')}>
                 <Send className="mr-2 h-4 w-4" />
                 <span>Feedback</span>
               </Link>

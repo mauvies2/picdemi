@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { untagPhotoForTalentAction } from '@/app/dashboard/photographer/events/[id]/actions';
+import { untagPhotoForTalentAction } from '@/app/[lang]/dashboard/photographer/events/[id]/actions';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';

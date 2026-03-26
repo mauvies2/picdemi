@@ -3,7 +3,7 @@
 import { X } from 'lucide-react';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
-import { untagPhotoForTalentAction } from '@/app/dashboard/photographer/events/[id]/actions';
+import { untagPhotoForTalentAction } from '@/app/[lang]/dashboard/photographer/events/[id]/actions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 

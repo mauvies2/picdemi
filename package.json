@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.8",
+    "@cspell/dict-es-es": "^3.0.8",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/google.maps": "^3.58.1",
     "@types/node": "^24.12.0",

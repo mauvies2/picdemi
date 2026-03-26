@@ -1,6 +1,8 @@
 const vscodeConfig = require('./.vscode/settings.json');
 
 module.exports = {
+  language: 'en,es',
+  import: ['@cspell/dict-es-es/cspell-ext.json'],
   ignorePaths: [
     'node_modules',
     'public',
