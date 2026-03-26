@@ -7,6 +7,7 @@ import { GuestCartProvider } from '@/components/guest-cart-provider';
 import Header from '@/components/header';
 import { Main } from '@/components/main';
 import { QueryProvider } from '@/components/query-provider';
+import { getSiteUrl } from '@/lib/get-site-url';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -24,12 +25,31 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  title: 'Picdemi - Find Yourself in Every Moment',
+  // Absolute base for all relative OG/canonical URLs resolved by Next.js
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: 'Picdemi — Find Yourself in Every Photo',
+    template: '%s | Picdemi',
+  },
   description:
-    'Connect photographers with athletes and event-goers. Upload event photos and let AI help users find themselves instantly. Search, purchase, and download high-resolution photos.',
+    'Browse sports event photos from marathons, cycling races, triathlons, and more. Find yourself in high-resolution photos shot by professional event photographers.',
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
+  },
+  openGraph: {
+    siteName: 'Picdemi',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
+  // Prevent indexing of dashboard/auth pages at the root level fallback;
+  // individual pages override this where needed.
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
