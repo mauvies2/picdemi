@@ -16,6 +16,7 @@ export interface Event {
   activity: string;
   is_public: boolean;
   share_code: string | null;
+  slug: string | null;
   price_per_photo: number | null;
   watermark_enabled: boolean;
   created_at?: string;
@@ -34,6 +35,7 @@ export interface EventSummary {
   activity: string;
   is_public: boolean;
   share_code: string | null;
+  slug: string | null;
   price_per_photo: number | null;
   watermark_enabled: boolean;
 }
@@ -48,7 +50,7 @@ export async function getUserEvents(
   const { data, error } = await supabase
     .from('events')
     .select(
-      'id, name, date, city, country, activity, is_public, share_code, price_per_photo, watermark_enabled',
+      'id, name, date, city, country, activity, is_public, share_code, slug, price_per_photo, watermark_enabled',
     )
     .eq('user_id', userId)
     .is('deleted_at', null)
@@ -124,6 +126,7 @@ export async function createEvent(
     activity: string;
     is_public: boolean;
     share_code: string | null;
+    slug?: string | null;
     price_per_photo: number | null;
     watermark_enabled: boolean;
   },
@@ -157,6 +160,28 @@ export async function getEventByShareCode(
     .eq('share_code', shareCode)
     .is('deleted_at', null)
     .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data as Event;
+}
+
+/**
+ * Get a public event by its SEO-friendly slug (public access)
+ */
+export async function getEventBySlug(
+  supabase: SupabaseServerClient,
+  slug: string,
+): Promise<Event | null> {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_public', true)
+    .is('deleted_at', null)
+    .maybeSingle();
 
   if (error || !data) {
     return null;
@@ -203,7 +228,7 @@ export async function searchPublicEvents(
   let query = supabase
     .from('events')
     .select(
-      'id, user_id, name, date, city, country, state, activity, is_public, share_code, price_per_photo, watermark_enabled',
+      'id, user_id, name, date, city, country, state, activity, is_public, share_code, slug, price_per_photo, watermark_enabled',
       { count: 'exact' },
     )
     .eq('is_public', true)
