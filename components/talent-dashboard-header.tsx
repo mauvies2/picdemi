@@ -10,6 +10,7 @@ import { DashboardUserMenu } from '@/components/dashboard-user-menu';
 import { useLocalizedPath } from '@/hooks/use-localized-path';
 import type { RoleSlug } from '@/lib/roles';
 import { cn } from '@/lib/utils';
+import { LanguageSwitcher } from './language-switcher';
 
 const talentNavLinks = [
   { href: '/dashboard/talent/events', label: 'Explore', icon: Search },
@@ -65,6 +66,7 @@ export function TalentDashboardHeader({
 
           {/* Right: Cart + User Avatar */}
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <CartLinkButton />
             <DashboardUserMenu user={user} activeRole={activeRole} />
           </div>
