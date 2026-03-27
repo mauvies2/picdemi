@@ -12,6 +12,7 @@ import {
   uploadFile,
 } from '@/database/queries';
 import { createClient } from '@/database/server';
+import { generateEventSlug } from '@/lib/slugify';
 import { activityValues } from './activity-options';
 
 const eventSchema = z.object({
@@ -124,7 +125,33 @@ export const createEvent = async (formData: FormData): Promise<CreateEventResult
     share_code: shareCode,
     price_per_photo: payload.price_per_photo ?? null,
     watermark_enabled: watermarkEnabled,
+    // Slug is only set on public events (private events use share codes)
+    slug: null,
   });
+
+  // Generate SEO slug for public events after we have the event ID.
+  // We first try the clean base slug; if it's already taken we append
+  // the first 6 chars of the event UUID to guarantee uniqueness.
+  if (payload.is_public) {
+    const year = new Date(payload.date).getFullYear();
+    const baseSlug = generateEventSlug(payload.name, payload.city || '', year);
+
+    const { data: existing } = await supabase
+      .from('events')
+      .select('id')
+      .eq('slug', baseSlug)
+      .maybeSingle();
+
+    const finalSlug = existing
+      ? generateEventSlug(payload.name, payload.city || '', year, event.id.slice(0, 6))
+      : baseSlug;
+
+    await supabase
+      .from('events')
+      .update({ slug: finalSlug })
+      .eq('id', event.id)
+      .eq('user_id', user.id);
+  }
 
   const photoRecords: { original_path: string }[] = [];
 
