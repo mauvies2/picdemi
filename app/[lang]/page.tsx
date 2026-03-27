@@ -11,6 +11,7 @@ import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedPath } from '@/lib/i18n/localized-path';
 import { localizedRedirect } from '@/lib/i18n/redirect';
+import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 
 async function getCachedDictionary(lang: string) {
   'use cache';
@@ -65,7 +66,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             {dict.home.heroSubtitle}
           </p>
 
-          <EventSearchBar variant="hero" className="mx-auto" dict={dict} />
+          <TranslationsProvider translations={dict.eventSearchBar}>
+            <EventSearchBar variant="hero" className="mx-auto" />
+          </TranslationsProvider>
 
           <p className="text-xs text-muted-foreground/80 tracking-wider">
             {dict.home.heroDisclaimer}

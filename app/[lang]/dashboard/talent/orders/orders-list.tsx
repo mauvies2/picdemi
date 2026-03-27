@@ -15,6 +15,8 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
 import type { OrderWithItemCount } from './actions';
 
 function formatCurrency(cents: number, currency = 'usd'): string {
@@ -25,13 +27,13 @@ function formatCurrency(cents: number, currency = 'usd'): string {
   }).format(amount);
 }
 
-function getStatusBadge(status: string, t: OrdersListT) {
+function getStatusBadge(status: string, t: (key: keyof OrdersListT) => string) {
   switch (status) {
     case 'completed':
       return (
         <Badge variant="default" className="bg-green-500 hover:bg-green-600">
           <CheckCircle2 className="mr-1 h-3 w-3" />
-          {t.completed}
+          {t('completed')}
         </Badge>
       );
     case 'pending':
@@ -39,7 +41,7 @@ function getStatusBadge(status: string, t: OrdersListT) {
       return (
         <Badge variant="secondary">
           <Clock className="mr-1 h-3 w-3" />
-          {status === 'pending' ? t.pending : t.processing}
+          {status === 'pending' ? t('pending') : t('processing')}
         </Badge>
       );
     case 'failed':
@@ -47,13 +49,13 @@ function getStatusBadge(status: string, t: OrdersListT) {
       return (
         <Badge variant="destructive">
           <XCircle className="mr-1 h-3 w-3" />
-          {status === 'failed' ? t.failed : t.canceled}
+          {status === 'failed' ? t('failed') : t('canceled')}
         </Badge>
       );
     case 'refunded':
       return (
         <Badge variant="outline" className="border-orange-500 text-orange-600">
-          {t.refunded}
+          {t('refunded')}
         </Badge>
       );
     default:
@@ -61,51 +63,14 @@ function getStatusBadge(status: string, t: OrdersListT) {
   }
 }
 
-type OrdersListT = {
-  orderHistory: string;
-  viewAndManage: string;
-  noOrdersYet: string;
-  noStatusOrders: string;
-  noOrdersDesc: string;
-  noStatusOrdersDesc: string;
-  browseEvents: string;
-  completed: string;
-  pending: string;
-  processing: string;
-  failed: string;
-  canceled: string;
-  refunded: string;
-  photo: string;
-  photos: string;
-  receipt: string;
-};
-
-const DEFAULT_T: OrdersListT = {
-  orderHistory: 'Order History',
-  viewAndManage: 'View and manage your purchase history',
-  noOrdersYet: 'No orders yet',
-  noStatusOrders: 'No {status} orders',
-  noOrdersDesc:
-    'When you purchase photos from events, they will appear here. Start exploring events to find photos of yourself!',
-  noStatusOrdersDesc: "You don't have any {status} orders at this time.",
-  browseEvents: 'Browse Events',
-  completed: 'Completed',
-  pending: 'Pending',
-  processing: 'Processing',
-  failed: 'Failed',
-  canceled: 'Canceled',
-  refunded: 'Refunded',
-  photo: 'photo',
-  photos: 'photos',
-  receipt: 'Receipt',
-};
+type OrdersListT = Dictionary['ordersList'];
 
 interface OrdersListProps {
   orders: OrderWithItemCount[];
-  t?: OrdersListT;
 }
 
-export function OrdersList({ orders, t = DEFAULT_T }: OrdersListProps) {
+export function OrdersList({ orders }: OrdersListProps) {
+  const { t } = useTranslations<OrdersListT>();
   const [statusFilter, _setStatusFilter] = useState<string>('all');
 
   const filteredOrders =
@@ -115,8 +80,8 @@ export function OrdersList({ orders, t = DEFAULT_T }: OrdersListProps) {
     <Card>
       <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle>{t.orderHistory}</CardTitle>
-          <CardDescription>{t.viewAndManage}</CardDescription>
+          <CardTitle>{t('orderHistory')}</CardTitle>
+          <CardDescription>{t('viewAndManage')}</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
@@ -125,17 +90,17 @@ export function OrdersList({ orders, t = DEFAULT_T }: OrdersListProps) {
             <ShoppingCart className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="mb-2 text-lg font-semibold">
               {statusFilter === 'all'
-                ? t.noOrdersYet
-                : t.noStatusOrders.replace('{status}', statusFilter)}
+                ? t('noOrdersYet')
+                : t('noStatusOrders').replace('{status}', statusFilter)}
             </h3>
             <p className="mb-4 text-sm text-muted-foreground max-w-sm">
               {statusFilter === 'all'
-                ? t.noOrdersDesc
-                : t.noStatusOrdersDesc.replace('{status}', statusFilter)}
+                ? t('noOrdersDesc')
+                : t('noStatusOrdersDesc').replace('{status}', statusFilter)}
             </p>
             {statusFilter === 'all' && (
               <Link href="/dashboard/talent/events">
-                <Button>{t.browseEvents}</Button>
+                <Button>{t('browseEvents')}</Button>
               </Link>
             )}
           </div>
@@ -166,7 +131,7 @@ export function OrdersList({ orders, t = DEFAULT_T }: OrdersListProps) {
                     )}
                     <div className="flex items-center gap-1">
                       <Package className="h-3 w-3" />
-                      {order.item_count} {order.item_count === 1 ? t.photo : t.photos}
+                      {order.item_count} {order.item_count === 1 ? t('photo') : t('photos')}
                     </div>
                   </div>
                 </div>
@@ -186,7 +151,7 @@ export function OrdersList({ orders, t = DEFAULT_T }: OrdersListProps) {
                         }}
                       >
                         <Download className="mr-1 h-3 w-3" />
-                        {t.receipt}
+                        {t('receipt')}
                       </Button>
                     )}
                   </div>

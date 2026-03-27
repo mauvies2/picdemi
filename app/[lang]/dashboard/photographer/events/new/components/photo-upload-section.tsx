@@ -29,7 +29,7 @@ export function PhotoUploadSection({
       </div>
 
       {previews.length > 0 && (
-        <div className="space-y-2 pb-24 lg:col-span-2">
+        <div className="order-3 space-y-2 pb-20 lg:col-span-2">
           <h3 className="text-lg font-semibold">Event Photos</h3>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
             {previews.map((preview) => (

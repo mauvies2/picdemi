@@ -8,6 +8,7 @@ import { Footer } from '@/components/footer';
 import type { EventWithStats } from '@/hooks/use-event-search';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 
 export default async function PublicEventsPage({
   params,
@@ -85,42 +86,44 @@ export default async function PublicEventsPage({
       {/* Top bar */}
       <div className="mx-auto max-w-7xl w-full px-4 pt-6 pb-2">
         <div className="flex justify-center">
-          <EventSearchBar
-            key={searchKey}
-            variant="hero"
-            initialWhere={where ?? ''}
-            initialActivity={activity ?? ''}
-            initialDateFrom={dateFrom ?? ''}
-            initialDateTo={dateTo ?? ''}
-            initialPreset={preset}
-            initialLat={parsedLat}
-            initialLng={parsedLng}
-            initialRadius={parsedRadius}
-            dict={dict}
-          />
+          <TranslationsProvider translations={dict.eventSearchBar}>
+            <EventSearchBar
+              key={searchKey}
+              variant="hero"
+              initialWhere={where ?? ''}
+              initialActivity={activity ?? ''}
+              initialDateFrom={dateFrom ?? ''}
+              initialDateTo={dateTo ?? ''}
+              initialPreset={preset}
+              initialLat={parsedLat}
+              initialLng={parsedLng}
+              initialRadius={parsedRadius}
+            />
+          </TranslationsProvider>
         </div>
       </div>
 
       {/* Content */}
       <div className="mx-auto max-w-7xl w-full flex-1 px-4 py-6">
-        <ExplorePageContent
-          key={searchKey}
-          initialFilterOptions={filterOptions}
-          initialEvents={initialEvents}
-          initialTotal={initialTotal}
-          initialLat={parsedLat}
-          initialLng={parsedLng}
-          initialRadius={parsedRadius}
-          eventLinkPrefix="/events"
-          loadOnMount={true}
-          initialWhere={where}
-          initialActivity={activity}
-          initialDateFrom={dateFrom}
-          initialDateTo={dateTo}
-          hideTopFilters={true}
-          showFindMe={false}
-          dict={dict}
-        />
+        <TranslationsProvider translations={{ ...dict.eventFilterBar, ...dict.eventCard }}>
+          <ExplorePageContent
+            key={searchKey}
+            initialFilterOptions={filterOptions}
+            initialEvents={initialEvents}
+            initialTotal={initialTotal}
+            initialLat={parsedLat}
+            initialLng={parsedLng}
+            initialRadius={parsedRadius}
+            eventLinkPrefix="/events"
+            loadOnMount={true}
+            initialWhere={where}
+            initialActivity={activity}
+            initialDateFrom={dateFrom}
+            initialDateTo={dateTo}
+            hideTopFilters={true}
+            showFindMe={false}
+          />
+        </TranslationsProvider>
       </div>
       <Footer dict={dict} lang={lang} />
     </div>

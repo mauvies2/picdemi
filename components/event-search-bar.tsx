@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useDebounce } from '@/hooks/use-debounce';
 import { type PlacePrediction, usePlacesAutocomplete } from '@/hooks/use-places-autocomplete';
 import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
 import { cn } from '@/lib/utils';
 
 interface EventSearchBarProps {
@@ -32,7 +33,6 @@ interface EventSearchBarProps {
   onSearch?: (where: string, activity: string, dateFrom: string, dateTo: string) => void;
   searchHref?: string;
   className?: string;
-  dict: Dictionary;
 }
 
 interface ActivityOption {
@@ -455,9 +455,9 @@ export function EventSearchBar({
   onSearch,
   searchHref = '/events',
   className,
-  dict,
 }: EventSearchBarProps) {
   const router = useRouter();
+  const { t } = useTranslations<Dictionary['eventSearchBar']>();
   const [where, setWhere] = useState(initialWhere);
   const whereRef = useRef<HTMLInputElement>(null);
   const activityInputRef = useRef<HTMLInputElement>(null);
@@ -640,9 +640,7 @@ export function EventSearchBar({
             className="flex h-14 items-center rounded-full border bg-background px-10 gap-3 shadow-lg"
           >
             <Search className="h-5 w-5 text-foreground/80" />
-            <span className="font-medium tracking-wider text-foreground/80">
-              {dict.eventSearchBar.mobileText}
-            </span>
+            <span className="font-medium tracking-wider text-foreground/80">{t('mobileText')}</span>
           </button>
         </div>
 
@@ -687,7 +685,7 @@ export function EventSearchBar({
                       onMouseDown={() => setMobileWhenOpen(false)}
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        {dict.eventSearchBar.whereLabel}
+                        {t('whereLabel')}
                       </p>
                       <div className="mt-2 flex items-center gap-2">
                         <input
@@ -696,7 +694,7 @@ export function EventSearchBar({
                           name="where-mobile"
                           type="text"
                           autoComplete="off"
-                          placeholder={dict.eventSearchBar.wherePlaceholder}
+                          placeholder={t('wherePlaceholder')}
                           value={where}
                           onChange={(e) => {
                             setWhere(e.target.value);
@@ -747,7 +745,11 @@ export function EventSearchBar({
                             setShowSuggestions(false);
                           }}
                           onUseCurrentLocation={handleUseCurrentLocation}
-                          t={dict.eventSearchBar}
+                          t={{
+                            useCurrentLocation: t('useCurrentLocation'),
+                            locationsLabel: t('locationsLabel'),
+                            eventsLabel: t('eventsLabel'),
+                          }}
                         />
                       )}
                     </section>
@@ -759,7 +761,7 @@ export function EventSearchBar({
                       onMouseDown={() => setMobileWhenOpen(false)}
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        {dict.eventSearchBar.activityLabel}
+                        {t('activityLabel')}
                       </p>
                       <div className="mt-2 flex items-center gap-2">
                         <input
@@ -767,7 +769,7 @@ export function EventSearchBar({
                           id="event-search-activity-mobile"
                           name="activity-mobile"
                           type="text"
-                          placeholder={dict.eventSearchBar.activityPlaceholder}
+                          placeholder={t('activityPlaceholder')}
                           value={activity.inputValue}
                           onChange={(e) => {
                             activity.setInputValue(e.target.value);
@@ -825,7 +827,7 @@ export function EventSearchBar({
                         }}
                       >
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          {dict.eventSearchBar.whenLabel}
+                          {t('whenLabel')}
                         </p>
                         <div className="mt-2 flex w-full items-center gap-2">
                           <span
@@ -834,7 +836,7 @@ export function EventSearchBar({
                               displayLabel ? 'text-foreground' : 'text-muted-foreground/50',
                             )}
                           >
-                            {displayLabel ?? dict.eventSearchBar.addDates}
+                            {displayLabel ?? t('addDates')}
                           </span>
                           {displayLabel && (
                             <button
@@ -855,13 +857,13 @@ export function EventSearchBar({
                         <div className="border-t">
                           <div className="flex flex-wrap gap-2 px-3 py-3">
                             {[
-                              { label: dict.eventSearchBar.presetToday, getRange: todayRange },
+                              { label: t('presetToday'), getRange: todayRange },
                               {
-                                label: dict.eventSearchBar.presetLast3Days,
+                                label: t('presetLast3Days'),
                                 getRange: last3DaysRange,
                               },
                               {
-                                label: dict.eventSearchBar.presetLastWeek,
+                                label: t('presetLastWeek'),
                                 getRange: lastWeekRange,
                               },
                             ].map(({ label, getRange }) => (
@@ -908,14 +910,14 @@ export function EventSearchBar({
                         onClick={clearAll}
                         className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                       >
-                        {dict.eventSearchBar.clearAll}
+                        {t('clearAll')}
                       </button>
                       <Button
                         onClick={handleSearch}
                         className="h-11 rounded-full px-5 text-sm font-semibold"
                       >
                         <Search className="mr-2 h-4 w-4" />
-                        {dict.eventSearchBar.searchButton}
+                        {t('searchButton')}
                       </Button>
                     </div>
                   </div>
@@ -933,7 +935,7 @@ export function EventSearchBar({
               className="relative flex-1 min-w-0 px-5 pt-4 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start"
             >
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
-                {dict.eventSearchBar.nameOrLocation}
+                {t('nameOrLocation')}
               </p>
               <div className="flex w-full items-center gap-1">
                 <input
@@ -942,7 +944,7 @@ export function EventSearchBar({
                   name="where"
                   type="text"
                   autoComplete="off"
-                  placeholder={dict.eventSearchBar.nameOrLocationPlaceholder}
+                  placeholder={t('nameOrLocationPlaceholder')}
                   value={where}
                   onChange={(e) => {
                     setWhere(e.target.value);
@@ -996,7 +998,11 @@ export function EventSearchBar({
                     setShowSuggestions(false);
                   }}
                   onUseCurrentLocation={handleUseCurrentLocation}
-                  t={dict.eventSearchBar}
+                  t={{
+                    useCurrentLocation: t('useCurrentLocation'),
+                    locationsLabel: t('locationsLabel'),
+                    eventsLabel: t('eventsLabel'),
+                  }}
                 />
               )}
             </div>
@@ -1010,7 +1016,7 @@ export function EventSearchBar({
               className="relative w-[27%] min-w-0 px-5 pt-3 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start"
             >
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
-                {dict.eventSearchBar.activityLabel}
+                {t('activityLabel')}
               </p>
               <div className="flex w-full items-center gap-1">
                 <input
@@ -1018,7 +1024,7 @@ export function EventSearchBar({
                   id="event-search-activity"
                   name="activity"
                   type="text"
-                  placeholder={dict.eventSearchBar.activityPlaceholder}
+                  placeholder={t('activityPlaceholder')}
                   value={activity.inputValue}
                   onChange={(e) => {
                     activity.setInputValue(e.target.value);
@@ -1066,7 +1072,7 @@ export function EventSearchBar({
             {/* When */}
             <div className="relative w-[27%] min-w-0 px-5 pt-3 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
-                {dict.eventSearchBar.whenLabel}
+                {t('whenLabel')}
               </p>
               <Popover open={whenOpen} onOpenChange={(o) => setWhenOpen(o)}>
                 <div className="mt-0.5 flex w-full items-center gap-1">
@@ -1081,7 +1087,7 @@ export function EventSearchBar({
                           displayLabel ? 'text-muted-foreground' : 'text-muted-foreground/40',
                         )}
                       >
-                        {displayLabel ?? dict.eventSearchBar.addDates}
+                        {displayLabel ?? t('addDates')}
                       </span>
                     </button>
                   </PopoverTrigger>
@@ -1103,7 +1109,13 @@ export function EventSearchBar({
                     dateRange={dateRange}
                     onSelectPreset={handleSelectPreset}
                     onSelectCustom={handleSelectCustom}
-                    t={dict.eventSearchBar}
+                    t={{
+                      quickOptions: t('quickOptions'),
+                      customDate: t('customDate'),
+                      presetToday: t('presetToday'),
+                      presetLast3Days: t('presetLast3Days'),
+                      presetLastWeek: t('presetLastWeek'),
+                    }}
                   />
                 </PopoverContent>
               </Popover>
@@ -1118,9 +1130,7 @@ export function EventSearchBar({
                 className="flex w-full sm:w-10 h-10 shrink-0 items-center justify-center gap-2 rounded-xl sm:rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80"
               >
                 <Search className="h-5 w-5" />
-                <span className="sm:hidden text-sm font-semibold">
-                  {dict.eventSearchBar.searchButton}
-                </span>
+                <span className="sm:hidden text-sm font-semibold">{t('searchButton')}</span>
               </button>
             </div>
           </div>
@@ -1160,7 +1170,7 @@ export function EventSearchBar({
           ref={whereRef}
           id="event-search-where-compact"
           name="where"
-          placeholder={dict.eventSearchBar.whereCompactPlaceholder}
+          placeholder={t('whereCompactPlaceholder')}
           value={where}
           onChange={(e) => setWhere(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -1185,7 +1195,7 @@ export function EventSearchBar({
           ref={activityInputRef}
           id="event-search-activity-compact"
           name="activity"
-          placeholder={dict.eventSearchBar.activityCompactPlaceholder}
+          placeholder={t('activityCompactPlaceholder')}
           value={activity.inputValue}
           onChange={(e) => {
             activity.setInputValue(e.target.value);

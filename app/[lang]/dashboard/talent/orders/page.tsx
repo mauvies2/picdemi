@@ -3,6 +3,7 @@ import { DashboardHeader } from '@/components/dashboard-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 import { getTalentOrderStats, getTalentOrders } from './actions';
 import { OrdersList } from './orders-list';
 
@@ -66,7 +67,9 @@ export default async function TalentOrdersPage({ params }: { params: Promise<{ l
       </div>
 
       {/* Orders List */}
-      <OrdersList orders={orders} t={dict.ordersList} />
+      <TranslationsProvider translations={dict.ordersList}>
+        <OrdersList orders={orders} />
+      </TranslationsProvider>
     </div>
   );
 }

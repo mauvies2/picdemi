@@ -4,6 +4,7 @@ import { createClient } from '@/database/server';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedRedirect } from '@/lib/i18n/redirect';
+import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 import { listMyTaggedPhotos } from './actions';
 import { TalentPhotosGrid } from './talent-photos-grid';
 
@@ -33,12 +34,13 @@ export default async function TalentPhotosPage({ params }: { params: Promise<{ l
     <div>
       <DashboardHeader title={dict.talentDashboard.myPhotos} />
       <p className="text-sm text-muted-foreground">{dict.talentDashboard.myPhotosSubtitle}</p>
-      <TalentPhotosGrid
-        initialGroups={result.groups}
-        hasMore={result.hasMore}
-        photosInCart={result.photosInCart}
-        t={{ ...dict.talentPhotos, cancel: dict.common.cancel }}
-      />
+      <TranslationsProvider translations={{ ...dict.talentPhotos, cancel: dict.common.cancel }}>
+        <TalentPhotosGrid
+          initialGroups={result.groups}
+          hasMore={result.hasMore}
+          photosInCart={result.photosInCart}
+        />
+      </TranslationsProvider>
     </div>
   );
 }
