@@ -100,6 +100,7 @@ export function TimeSyncModal({ eventId, open, onOpenChange, onSynced }: TimeSyn
 
     const formData = new FormData();
     formData.append('photo', file);
+    formData.append('fileLastModified', String(file.lastModified));
 
     try {
       const result = await completeSyncAction(eventId, formData);

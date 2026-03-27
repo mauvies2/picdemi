@@ -27,7 +27,7 @@ export async function createTimeSyncToken(
     .insert({
       event_id: eventId,
       server_time: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     })
     .select('id, server_time')
     .single();

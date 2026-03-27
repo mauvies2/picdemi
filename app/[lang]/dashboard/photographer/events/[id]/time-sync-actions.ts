@@ -90,7 +90,7 @@ export async function completeSyncAction(
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // ── 2. Extract camera timestamp from EXIF ───────────────────────────────
+    // ── 2. Extract camera timestamp (EXIF → fileLastModified fallback) ───────
     let cameraTimeMs: number | null = null;
     try {
       const { exif: exifBuffer } = await sharp(buffer).metadata();
@@ -105,7 +105,17 @@ export async function completeSyncAction(
         }
       }
     } catch {
-      // EXIF parsing failed — continue, will fail below
+      // EXIF parsing failed — fall through to fileLastModified
+    }
+
+    // Fallback: use file.lastModified sent from the client (reliable for phone photos —
+    // the OS sets this to the capture time when the photo is saved)
+    if (!cameraTimeMs) {
+      const lastModifiedStr = formData.get('fileLastModified');
+      if (lastModifiedStr) {
+        const ms = Number(lastModifiedStr);
+        if (!Number.isNaN(ms) && ms > 0) cameraTimeMs = ms;
+      }
     }
 
     if (!cameraTimeMs) {
