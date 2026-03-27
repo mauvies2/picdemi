@@ -57,6 +57,7 @@ export default async function TalentExplorePage({
         initialDateTo={dateTo}
         hideTopFilters={true}
         showFindMe={false}
+        dict={dict}
       />
     </div>
   );
