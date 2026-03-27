@@ -73,9 +73,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        {/* <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
           <div className="h-6 w-px bg-muted-foreground/30" />
-        </div>
+        </div> */}
       </section>
 
       {/* How It Works */}

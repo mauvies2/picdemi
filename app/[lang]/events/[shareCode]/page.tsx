@@ -6,11 +6,14 @@ import { getActiveRole } from '@/app/[lang]/actions/roles';
 import { activityOptions } from '@/app/[lang]/dashboard/photographer/events/new/activity-options';
 import { AIMatchingButton } from '@/app/[lang]/dashboard/talent/photos/ai-matching/ai-matching-button';
 import { CartLinkButton } from '@/components/cart-link-button';
+import { TimeFilterBar } from '@/components/time-filter-bar';
 import {
   createPhotoUrls,
   getEventByShareCode,
   getEventBySlug,
+  getEventPhotosFiltered,
   getEventPhotosPublic,
+  getPhotoTimeRange,
   isPhotoInCart,
   type SupabaseServerClient,
 } from '@/database/queries';
@@ -39,6 +42,7 @@ type EventRow = {
   slug: string | null;
   price_per_photo: number | null;
   watermark_enabled: boolean;
+  time_sync_enabled: boolean;
   user_id: string;
 };
 
@@ -185,16 +189,39 @@ export async function generateMetadata({
 
 export default async function EventPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ shareCode: string; lang: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { shareCode: param, lang } = await params;
+  const sp = await searchParams;
+  const startTime = typeof sp.startTime === 'string' ? sp.startTime : undefined;
+  const endTime = typeof sp.endTime === 'string' ? sp.endTime : undefined;
+
   const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
 
   const cached = await getCachedEventData(param);
   if (!cached) notFound();
-  const { event, photos } = cached;
+  const { event } = cached;
+
+  // Fetch photos — filtered when time params are provided for time-sync events
+  let photos = cached.photos;
+  if (event.time_sync_enabled && (startTime || endTime)) {
+    photos = await getEventPhotosFiltered(
+      supabaseAdmin as unknown as SupabaseServerClient,
+      event.id,
+      startTime,
+      endTime,
+    );
+  }
+
+  // Fetch time range for the slider (only needed when time sync is enabled)
+  let timeRange: { min: string | null; max: string | null } | null = null;
+  if (event.time_sync_enabled) {
+    timeRange = await getPhotoTimeRange(supabaseAdmin as unknown as SupabaseServerClient, event.id);
+  }
 
   // Permanent redirect: UUID visitors with a slug get sent to the canonical slug URL.
   if (UUID_REGEX.test(param) && event.slug) {
@@ -353,8 +380,17 @@ export default async function EventPage({
         </div>
 
         {photoItems.length > 0 && (
-          <div className="mb-3 flex justify-end">
-            <AIMatchingButton className="h-9 rounded-full" />
+          <div className="mb-3 flex items-center justify-between gap-3">
+            {timeRange?.min && timeRange?.max ? (
+              <Suspense
+                fallback={<div className="h-14 flex-1 animate-pulse rounded-lg bg-muted" />}
+              >
+                <TimeFilterBar minTime={timeRange.min} maxTime={timeRange.max} />
+              </Suspense>
+            ) : (
+              <div />
+            )}
+            <AIMatchingButton className="h-9 rounded-full shrink-0" />
           </div>
         )}
         <Suspense

@@ -11,6 +11,7 @@ export interface Photo {
   event_id: string | null;
   original_url: string | null;
   taken_at: string | null;
+  corrected_taken_at?: string | null;
   city?: string | null;
   country?: string | null;
   state?: string | null;
@@ -27,6 +28,7 @@ export interface PhotoDetail {
   id: string;
   original_url: string | null;
   taken_at: string | null;
+  corrected_taken_at?: string | null;
   city: string | null;
   country: string | null;
   state: string | null;
@@ -156,7 +158,8 @@ export async function createPhoto(
   photoData: {
     event_id: string;
     original_url: string;
-    taken_at: string;
+    taken_at: string | null;
+    corrected_taken_at?: string | null;
     city: string;
     country: string;
     state: string | null;
@@ -169,6 +172,83 @@ export async function createPhoto(
 
   if (error) {
     throw new Error(`Failed to create photo: ${getErrorMessage(error)}`);
+  }
+}
+
+/**
+ * Get the min/max corrected_taken_at for an event's photos.
+ * Used to determine the range for the time filter slider.
+ */
+export async function getPhotoTimeRange(
+  supabase: SupabaseServerClient,
+  eventId: string,
+): Promise<{ min: string | null; max: string | null }> {
+  const { data, error } = await supabase
+    .from('photos')
+    .select('corrected_taken_at')
+    .eq('event_id', eventId)
+    .not('corrected_taken_at', 'is', null)
+    .order('corrected_taken_at', { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to get photo time range: ${getErrorMessage(error)}`);
+  }
+
+  const times = (data ?? [])
+    .map((p) => p.corrected_taken_at as string | null)
+    .filter((t): t is string => t !== null);
+
+  return {
+    min: times[0] ?? null,
+    max: times[times.length - 1] ?? null,
+  };
+}
+
+/**
+ * Get photos for an event with optional time range filtering on corrected_taken_at.
+ */
+export async function getEventPhotosFiltered(
+  supabase: SupabaseServerClient,
+  eventId: string,
+  startTime?: string,
+  endTime?: string,
+): Promise<PhotoDetail[]> {
+  let query = supabase
+    .from('photos')
+    .select('id, original_url, taken_at, corrected_taken_at, city, country')
+    .eq('event_id', eventId);
+
+  if (startTime) {
+    query = query.gte('corrected_taken_at', startTime);
+  }
+  if (endTime) {
+    query = query.lte('corrected_taken_at', endTime);
+  }
+
+  query = query.order('corrected_taken_at', { ascending: true, nullsFirst: false });
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(`Failed to get filtered event photos: ${getErrorMessage(error)}`);
+  }
+
+  return (data ?? []) as PhotoDetail[];
+}
+
+/**
+ * Batch update corrected_taken_at for photos after a time sync completes.
+ */
+export async function batchUpdateCorrectedTakenAt(
+  supabase: SupabaseServerClient,
+  updates: { id: string; corrected_taken_at: string }[],
+): Promise<void> {
+  if (updates.length === 0) return;
+
+  const { error } = await supabase.from('photos').upsert(updates, { onConflict: 'id' });
+
+  if (error) {
+    throw new Error(`Failed to batch update corrected_taken_at: ${getErrorMessage(error)}`);
   }
 }
 

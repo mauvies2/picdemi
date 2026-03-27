@@ -28,7 +28,7 @@ const eventSchema = z.object({
   date: z.string().min(1, 'Date is required.'),
   country: z.string().trim().optional().default(''),
   state: z.string().trim().optional().default(''),
-  city: z.string().trim().optional(),
+  city: z.string().trim().min(1, 'Location is required.'),
   is_public: z
     .string()
     .default('true')
@@ -45,6 +45,14 @@ const eventSchema = z.object({
       const num = Number.parseFloat(val);
       return Number.isNaN(num) || num < 0 ? null : num;
     }),
+  time_sync_enabled: z
+    .string()
+    .default('false')
+    .transform((val) => val === 'true'),
+  sync_now: z
+    .string()
+    .default('false')
+    .transform((val) => val === 'true'),
 });
 
 type EventPayload = z.infer<typeof eventSchema>;
@@ -52,6 +60,7 @@ type EventPayload = z.infer<typeof eventSchema>;
 type CreateEventResult = {
   eventId: string;
   shareCode: string | null;
+  openSync?: boolean;
 };
 
 export const createEvent = async (formData: FormData): Promise<CreateEventResult> => {
@@ -74,6 +83,8 @@ export const createEvent = async (formData: FormData): Promise<CreateEventResult
     is_public: formData.get('is_public'),
     watermark_enabled: formData.get('watermark_enabled'),
     price_per_photo: formData.get('price_per_photo'),
+    time_sync_enabled: formData.get('time_sync_enabled'),
+    sync_now: formData.get('sync_now'),
   };
 
   const parsed = eventSchema.safeParse({
@@ -86,6 +97,8 @@ export const createEvent = async (formData: FormData): Promise<CreateEventResult
     is_public: rawPayload.is_public?.toString() ?? 'true',
     watermark_enabled: rawPayload.watermark_enabled?.toString() ?? 'true',
     price_per_photo: rawPayload.price_per_photo?.toString(),
+    time_sync_enabled: rawPayload.time_sync_enabled?.toString() ?? 'false',
+    sync_now: rawPayload.sync_now?.toString() ?? 'false',
   });
 
   if (!parsed.success) {
@@ -127,6 +140,7 @@ export const createEvent = async (formData: FormData): Promise<CreateEventResult
     watermark_enabled: watermarkEnabled,
     // Slug is only set on public events (private events use share codes)
     slug: null,
+    time_sync_enabled: payload.time_sync_enabled,
   });
 
   // Generate SEO slug for public events after we have the event ID.
@@ -155,6 +169,9 @@ export const createEvent = async (formData: FormData): Promise<CreateEventResult
 
   const photoRecords: { original_path: string }[] = [];
 
+  // Lazily import exifr to avoid bundling it unless needed at runtime
+  const exifr = (await import('exifr')).default;
+
   try {
     for (const file of uploadedFiles) {
       const fileId = crypto.randomUUID();
@@ -164,6 +181,20 @@ export const createEvent = async (formData: FormData): Promise<CreateEventResult
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
+      // Extract real EXIF timestamp; fall back to event date if unavailable
+      let takenAt: string | null = null;
+      try {
+        const exif = await exifr.parse(buffer, ['DateTimeOriginal']);
+        if (exif?.DateTimeOriginal) {
+          takenAt = new Date(exif.DateTimeOriginal).toISOString();
+        }
+      } catch {
+        // EXIF unavailable — takenAt stays null
+      }
+      if (!takenAt) {
+        takenAt = new Date(payload.date).toISOString();
+      }
+
       await uploadFile(supabase, 'photos', path, buffer, {
         contentType: file.type || undefined,
         upsert: false,
@@ -172,7 +203,8 @@ export const createEvent = async (formData: FormData): Promise<CreateEventResult
       await createPhoto(supabase, user.id, {
         event_id: event.id,
         original_url: path,
-        taken_at: new Date(payload.date).toISOString(),
+        taken_at: takenAt,
+        corrected_taken_at: takenAt, // no offset yet; updated when sync completes
         city: payload.city || '',
         country: payload.country,
         state: payload.state || null,
@@ -210,5 +242,9 @@ export const createEvent = async (formData: FormData): Promise<CreateEventResult
   updateTag(`photographer-events-${user.id}`);
   updateTag(`dashboard-photographer-${user.id}`);
 
-  return { eventId: event.id, shareCode };
+  return {
+    eventId: event.id,
+    shareCode,
+    openSync: payload.time_sync_enabled && payload.sync_now,
+  };
 };

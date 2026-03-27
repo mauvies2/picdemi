@@ -2,8 +2,8 @@
 
 import { useForm } from '@tanstack/react-form';
 import { format } from 'date-fns';
-import { ChevronDownIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ChevronDownIcon, Clock } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useId, useMemo, useState, useTransition } from 'react';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,8 @@ const getDefaultValues = (): FormValues => {
       is_public: true,
       watermark_enabled: true,
       price_per_photo: null,
+      time_sync_enabled: false,
+      sync_now: false,
     };
   }
 
@@ -59,6 +61,8 @@ const getDefaultValues = (): FormValues => {
         is_public: parsed.is_public ?? true,
         watermark_enabled: parsed.watermark_enabled ?? true,
         price_per_photo: parsed.price_per_photo ?? null,
+        time_sync_enabled: false,
+        sync_now: false,
       };
     }
   } catch {
@@ -75,12 +79,35 @@ const getDefaultValues = (): FormValues => {
     is_public: true,
     watermark_enabled: true,
     price_per_photo: null,
+    time_sync_enabled: false,
+    sync_now: false,
   };
 };
 
 const defaultValues = getDefaultValues();
 
+const SYNC_T = {
+  en: {
+    label: 'Enable Time Filter for Attendees',
+    desc: "Let attendees filter photos by time of day using your camera's clock",
+    syncNow: 'Sync now',
+    syncNowDesc: 'Open sync wizard after creating the event',
+    syncLater: 'Sync later',
+    syncLaterDesc: 'Set up from the event page when ready',
+  },
+  es: {
+    label: 'Activar filtro de hora para talentos',
+    desc: 'Permite que los talentos filtren fotos por hora del día usando el reloj de tu cámara',
+    syncNow: 'Sincronizar ahora',
+    syncNowDesc: 'Abrir asistente de sincronización al crear el evento',
+    syncLater: 'Sincronizar después',
+    syncLaterDesc: 'Configurar desde la página del evento cuando estés listo',
+  },
+} as const;
+
 export default function NewEventForm() {
+  const { lang } = useParams<{ lang?: string }>();
+  const syncT = SYNC_T[lang === 'en' ? 'en' : 'es'];
   const router = useRouter();
   const lp = useLocalizedPath();
   const [files, setFiles] = useState<File[]>([]);
@@ -206,6 +233,8 @@ export default function NewEventForm() {
         formData.append('price_per_photo', price.toString());
       }
     }
+    formData.append('time_sync_enabled', value.time_sync_enabled ? 'true' : 'false');
+    formData.append('sync_now', value.sync_now ? 'true' : 'false');
     for (const file of files) {
       formData.append('photos', file);
     }
@@ -231,10 +260,12 @@ export default function NewEventForm() {
           setCreatedEventId(result.eventId);
           // Redirect after a short delay to show the share code
           setTimeout(() => {
-            router.push(lp(`/dashboard/photographer/events/${result.eventId}`));
+            const suffix = result.openSync ? '?openSync=true' : '';
+            router.push(lp(`/dashboard/photographer/events/${result.eventId}${suffix}`));
           }, 5000);
         } else {
-          router.push(lp(`/dashboard/photographer/events/${result.eventId}`));
+          const suffix = result.openSync ? '?openSync=true' : '';
+          router.push(lp(`/dashboard/photographer/events/${result.eventId}${suffix}`));
         }
       } catch (error) {
         console.error(error);
@@ -386,21 +417,34 @@ export default function NewEventForm() {
                 </div>
 
                 {/* Row 2: Location */}
-                <form.Field name="city">
-                  {(field) => (
-                    <div className="grid gap-2">
-                      <Label htmlFor="city">Location</Label>
-                      <Input
-                        id="city"
-                        value={field.state.value || ''}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder="City, region or venue"
-                        autoComplete="off"
-                        suppressHydrationWarning
-                      />
-                    </div>
-                  )}
+                <form.Field
+                  name="city"
+                  validators={{
+                    onChange: ({ value }) =>
+                      value.trim().length === 0 ? 'Location is required.' : undefined,
+                  }}
+                >
+                  {(field) => {
+                    const showFeedback = submitAttempted || field.state.meta.isTouched;
+                    const error = showFeedback ? field.state.meta.errors?.[0] : null;
+                    const isInvalid = showFeedback && !field.state.meta.isValid;
+                    return (
+                      <div className="grid gap-2">
+                        <Label htmlFor="city">Location</Label>
+                        <Input
+                          id="city"
+                          value={field.state.value || ''}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          placeholder="City, region or venue"
+                          aria-invalid={isInvalid}
+                          autoComplete="off"
+                          suppressHydrationWarning
+                        />
+                        <p className="min-h-4 text-xs text-destructive">{isInvalid ? error : ''}</p>
+                      </div>
+                    );
+                  }}
                 </form.Field>
 
                 {/* Row 3: Date + Price per Photo (paired on desktop) */}
@@ -551,7 +595,7 @@ export default function NewEventForm() {
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-xs text-muted-foreground">
                             {field.state.value ? 'Public' : 'Private'}
                           </span>
                           <Switch
@@ -587,7 +631,7 @@ export default function NewEventForm() {
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-xs text-muted-foreground">
                             {field.state.value ? 'Enabled' : 'Disabled'}
                           </span>
                           <Switch
@@ -602,6 +646,73 @@ export default function NewEventForm() {
                       </div>
                     );
                   }}
+                </form.Field>
+
+                <form.Field name="time_sync_enabled">
+                  {(field) => (
+                    <div className="rounded-lg border border-input p-3 space-y-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="grid gap-1">
+                          <Label htmlFor="time_sync_enabled" className="flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5" />
+                            {syncT.label}
+                          </Label>
+                          <p className="text-xs text-muted-foreground">{syncT.desc}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {field.state.value ? 'Enabled' : 'Disabled'}
+                          </span>
+                          <Switch
+                            id="time_sync_enabled"
+                            checked={field.state.value}
+                            onCheckedChange={(checked) => {
+                              field.handleChange(checked);
+                              field.handleBlur();
+                              if (!checked) {
+                                form.setFieldValue('sync_now', false);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {field.state.value && (
+                        <form.Field name="sync_now">
+                          {(syncField) => (
+                            <div className="flex gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => syncField.handleChange(true)}
+                                className={cn(
+                                  'flex-1 rounded-md border px-3 py-2 text-sm text-left transition-colors',
+                                  syncField.state.value
+                                    ? 'border-primary bg-primary/5 text-primary'
+                                    : 'border-input text-muted-foreground hover:border-foreground/40',
+                                )}
+                              >
+                                <span className="font-medium block">{syncT.syncNow}</span>
+                                <span className="text-xs opacity-70">{syncT.syncNowDesc}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => syncField.handleChange(false)}
+                                className={cn(
+                                  'flex-1 rounded-md border px-3 py-2 text-sm text-left transition-colors',
+                                  !syncField.state.value
+                                    ? 'border-primary bg-primary/5 text-primary'
+                                    : 'border-input text-muted-foreground hover:border-foreground/40',
+                                )}
+                              >
+                                <span className="font-medium block">{syncT.syncLater}</span>
+                                <span className="text-xs opacity-70">{syncT.syncLaterDesc}</span>
+                              </button>
+                            </div>
+                          )}
+                        </form.Field>
+                      )}
+                    </div>
+                  )}
                 </form.Field>
               </div>
             </form>

@@ -1,8 +1,16 @@
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import { getActiveRole } from '@/app/[lang]/actions/roles';
 import { AIMatchingButton } from '@/app/[lang]/dashboard/talent/photos/ai-matching/ai-matching-button';
 import { DashboardHeader } from '@/components/dashboard-header';
-import { createPhotoUrls, getEventPhotosPublic, isPhotoInCart } from '@/database/queries';
+import { TimeFilterBar } from '@/components/time-filter-bar';
+import {
+  createPhotoUrls,
+  getEventPhotosFiltered,
+  getEventPhotosPublic,
+  getPhotoTimeRange,
+  isPhotoInCart,
+} from '@/database/queries';
 import { createClient } from '@/database/server';
 import { getBaseUrl } from '@/lib/get-base-url';
 import type { Locale } from '@/lib/i18n/config';
@@ -11,10 +19,16 @@ import { EventPhotoViewer } from './event-photo-viewer';
 
 export default async function ExploreEventDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ lang: string; id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { lang, id } = await params;
+  const sp = await searchParams;
+  const startTime = typeof sp.startTime === 'string' ? sp.startTime : undefined;
+  const endTime = typeof sp.endTime === 'string' ? sp.endTime : undefined;
+
   const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
 
@@ -30,8 +44,17 @@ export default async function ExploreEventDetailPage({
     notFound();
   }
 
-  // Get photos for the event
-  const photos = await getEventPhotosPublic(supabase, event.id);
+  // Get photos — filtered by time range if params provided and time sync enabled
+  let photos = await getEventPhotosPublic(supabase, event.id);
+  if (event.time_sync_enabled && (startTime || endTime)) {
+    photos = await getEventPhotosFiltered(supabase, event.id, startTime, endTime);
+  }
+
+  // Fetch time range for the slider
+  let timeRange: { min: string | null; max: string | null } | null = null;
+  if (event.time_sync_enabled) {
+    timeRange = await getPhotoTimeRange(supabase, event.id);
+  }
 
   // Get user info for watermark and cart check
   const {
@@ -134,8 +157,17 @@ export default async function ExploreEventDetailPage({
         </div>
       ) : (
         <div className="w-full space-y-3">
-          <div className="flex justify-end">
-            <AIMatchingButton className="h-9 rounded-full" />
+          <div className="flex items-center justify-between gap-3">
+            {timeRange?.min && timeRange?.max ? (
+              <Suspense
+                fallback={<div className="h-14 flex-1 animate-pulse rounded-lg bg-muted" />}
+              >
+                <TimeFilterBar minTime={timeRange.min} maxTime={timeRange.max} />
+              </Suspense>
+            ) : (
+              <div />
+            )}
+            <AIMatchingButton className="h-9 rounded-full shrink-0" />
           </div>
           <EventPhotoViewer
             items={photoItems}

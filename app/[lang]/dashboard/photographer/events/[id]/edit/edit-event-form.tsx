@@ -2,9 +2,10 @@
 
 import { useForm } from '@tanstack/react-form';
 import { format } from 'date-fns';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { z } from 'zod';
+import { TimeSyncModal } from '@/components/time-sync-modal';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Dropzone } from '@/components/uploader/Dropzone';
@@ -26,12 +27,33 @@ interface EditEventFormProps {
   initialPhotos: PhotoWithUrl[];
 }
 
+const SYNC_T = {
+  en: {
+    title: 'Camera Time Sync',
+    syncedOffset: (n: number) => `Synced — offset: ${n}s`,
+    pendingDesc: 'Sync pending — attendees cannot filter by time yet',
+    resync: 'Re-sync',
+    syncNow: 'Sync now',
+  },
+  es: {
+    title: 'Sincronización de hora',
+    syncedOffset: (n: number) => `Sincronizado — diferencia: ${n}s`,
+    pendingDesc: 'Sincronización pendiente — los talentos no pueden filtrar por hora aún',
+    resync: 'Resincronizar',
+    syncNow: 'Sincronizar ahora',
+  },
+} as const;
+
 export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
+  const { lang } = useParams<{ lang?: string }>();
+  const syncT = SYNC_T[lang === 'en' ? 'en' : 'es'];
   const router = useRouter();
   const lp = useLocalizedPath();
   const [isPending, startTransition] = useTransition();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
+  const [synced, setSynced] = useState(event.time_offset !== null);
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [photos, setPhotos] = useState<PhotoWithUrl[]>(initialPhotos);
   const [newFiles, setNewFiles] = useState<File[]>([]);
@@ -55,6 +77,7 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
     is_public: event.is_public,
     watermark_enabled: event.watermark_enabled,
     price_per_photo: event.price_per_photo,
+    time_sync_enabled: event.time_sync_enabled,
   };
 
   const handleDeletePhoto = (photoId: string) => {
@@ -114,13 +137,12 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
         formData.append('name', parsed.name.trim());
         formData.append('activity', parsed.activity);
         formData.append('date', parsed.date);
-        formData.append('country', parsed.country.trim());
-        formData.append('state', parsed.state.trim());
-        if (parsed.city?.trim()) {
-          formData.append('city', parsed.city.trim());
-        }
+        formData.append('country', (parsed.country ?? '').trim());
+        formData.append('state', (parsed.state ?? '').trim());
+        formData.append('city', parsed.city.trim());
         formData.append('is_public', parsed.is_public ? 'true' : 'false');
         formData.append('watermark_enabled', parsed.watermark_enabled ? 'true' : 'false');
+        formData.append('time_sync_enabled', parsed.time_sync_enabled ? 'true' : 'false');
         if (parsed.price_per_photo !== undefined && parsed.price_per_photo !== null) {
           const price =
             typeof parsed.price_per_photo === 'string'
@@ -232,6 +254,42 @@ export function EditEventForm({ event, initialPhotos }: EditEventFormProps) {
           </Button>
         </div>
       </form>
+
+      {(event.time_sync_enabled || form.state.values.time_sync_enabled) && (
+        <>
+          <div className="mt-6 rounded-lg border border-input p-4 space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium">{syncT.title}</h3>
+                <p className="text-xs text-muted-foreground">
+                  {synced
+                    ? syncT.syncedOffset(
+                        event.time_offset !== null
+                          ? Math.round(Math.abs(event.time_offset) / 1000)
+                          : 0,
+                      )
+                    : syncT.pendingDesc}
+                </p>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setSyncModalOpen(true)}
+              >
+                {synced ? syncT.resync : syncT.syncNow}
+              </Button>
+            </div>
+          </div>
+
+          <TimeSyncModal
+            eventId={event.id}
+            open={syncModalOpen}
+            onOpenChange={setSyncModalOpen}
+            onSynced={() => setSynced(true)}
+          />
+        </>
+      )}
     </div>
   );
 }

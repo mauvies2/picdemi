@@ -19,6 +19,8 @@ export interface Event {
   slug: string | null;
   price_per_photo: number | null;
   watermark_enabled: boolean;
+  time_sync_enabled: boolean;
+  time_offset: number | null;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
@@ -129,6 +131,7 @@ export async function createEvent(
     slug?: string | null;
     price_per_photo: number | null;
     watermark_enabled: boolean;
+    time_sync_enabled?: boolean;
   },
 ): Promise<{ id: string }> {
   const { data, error } = await supabase
@@ -400,6 +403,8 @@ export async function updateEvent(
     share_code?: string | null;
     price_per_photo?: number | null;
     watermark_enabled?: boolean;
+    time_sync_enabled?: boolean;
+    time_offset?: number | null;
   },
 ): Promise<void> {
   // Verify event belongs to user and is not deleted

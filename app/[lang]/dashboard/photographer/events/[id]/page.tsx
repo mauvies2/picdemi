@@ -7,13 +7,18 @@ import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 import { getPhotoTags } from './actions';
 import { EventPhotoAlbum } from './event-photo-album';
+import { TimeSyncSection } from './time-sync-banner';
 
 export default async function EventDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ lang: string; id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { lang, id } = await params;
+  const sp = await searchParams;
+  const openSync = sp.openSync === 'true';
   const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
 
@@ -63,6 +68,12 @@ export default async function EventDetailPage({
           <EventShareCode shareCode={event.share_code} eventName={event.name} />
         </div>
       )}
+      <TimeSyncSection
+        eventId={id}
+        timeSyncEnabled={event.time_sync_enabled}
+        timeOffset={event.time_offset}
+        autoOpen={openSync}
+      />
       <div className="mt-4">
         <EventPhotoAlbum
           eventId={id}

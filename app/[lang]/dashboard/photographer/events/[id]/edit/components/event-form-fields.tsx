@@ -1,9 +1,9 @@
 'use client';
 
 import type { ReactFormExtendedApi } from '@tanstack/react-form';
-import { Country, State } from 'country-state-city';
 import { format } from 'date-fns';
-import { ChevronDownIcon } from 'lucide-react';
+import { ChevronDownIcon, Clock } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useId } from 'react';
 import {
   activityOptions,
@@ -36,12 +36,25 @@ type EventFormFieldsProps = {
   setDatePopoverOpen: (open: boolean) => void;
 };
 
+const SYNC_T = {
+  en: {
+    label: 'Enable Time Filter for Attendees',
+    desc: "Let attendees filter photos by time of day using your camera's clock",
+  },
+  es: {
+    label: 'Activar filtro de hora para talentos',
+    desc: 'Permite que los talentos filtren fotos por hora del día usando el reloj de tu cámara',
+  },
+} as const;
+
 export function EventFormFields({
   form,
   submitAttempted,
   datePopoverOpen,
   setDatePopoverOpen,
 }: EventFormFieldsProps) {
+  const { lang } = useParams<{ lang?: string }>();
+  const syncT = SYNC_T[lang === 'en' ? 'en' : 'es'];
   const dateInputId = useId();
 
   return (
@@ -125,146 +138,35 @@ export function EventFormFields({
         </form.Field>
       </div>
 
-      {/* Row 2: Location (Country, State, City) */}
+      {/* Row 2: Location */}
       <form.Field
-        name="country"
+        name="city"
         validators={{
-          onChange: ({ value }) => (value.trim().length === 0 ? 'Country is required.' : undefined),
+          onChange: ({ value }) =>
+            value.trim().length === 0 ? 'Location is required.' : undefined,
         }}
       >
-        {(countryField) => (
-          <form.Field
-            name="state"
-            validators={{
-              onChange: ({ value }) =>
-                value.trim().length === 0 ? 'State/Province is required.' : undefined,
-            }}
-          >
-            {(stateField) => (
-              <form.Field
-                name="city"
-                validators={{
-                  onChange: () => undefined,
-                }}
-              >
-                {(cityField) => {
-                  const showFeedback =
-                    submitAttempted ||
-                    countryField.state.meta.isTouched ||
-                    stateField.state.meta.isTouched ||
-                    cityField.state.meta.isTouched;
-                  const countryError = showFeedback ? countryField.state.meta.errors?.[0] : null;
-                  const stateError = showFeedback ? stateField.state.meta.errors?.[0] : null;
-                  const states = State.getStatesOfCountry(countryField.state.value);
-                  return (
-                    <div className="space-y-4">
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="grid gap-2">
-                          <Label htmlFor="country">Country</Label>
-                          <Select
-                            value={countryField.state.value}
-                            onValueChange={(value: string) => {
-                              countryField.handleChange(value);
-                              countryField.handleBlur();
-                            }}
-                          >
-                            <SelectTrigger
-                              id="country"
-                              aria-invalid={showFeedback && !!countryError}
-                              className={cn(
-                                'w-full',
-                                showFeedback && countryError && 'border-destructive',
-                              )}
-                            >
-                              <SelectValue placeholder="Select a country" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Country.getAllCountries()
-                                .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((c) => (
-                                  <SelectItem key={c.isoCode} value={c.isoCode}>
-                                    {c.name}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-                          {showFeedback && countryError ? (
-                            <p className="text-xs text-destructive">{countryError}</p>
-                          ) : null}
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="state">State / Province</Label>
-                          {states.length > 0 ? (
-                            <Select
-                              value={stateField.state.value}
-                              onValueChange={(value: string) => {
-                                stateField.handleChange(value);
-                                stateField.handleBlur();
-                              }}
-                            >
-                              <SelectTrigger
-                                id="state"
-                                aria-invalid={showFeedback && !!stateError}
-                                className={cn(
-                                  'w-full',
-                                  showFeedback && stateError && 'border-destructive',
-                                )}
-                              >
-                                <SelectValue placeholder="Select a state or province" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {states
-                                  .sort((a, b) => a.name.localeCompare(b.name))
-                                  .map((s) => (
-                                    <SelectItem key={s.isoCode} value={s.isoCode}>
-                                      {s.name}
-                                    </SelectItem>
-                                  ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input
-                              id="state"
-                              value={stateField.state.value}
-                              onChange={(e) => {
-                                stateField.handleChange(e.target.value);
-                                stateField.handleBlur();
-                              }}
-                              placeholder="Enter state or province name"
-                              aria-invalid={showFeedback && !!stateError}
-                              className={cn(showFeedback && stateError && 'border-destructive')}
-                              autoComplete="address-level1"
-                              suppressHydrationWarning
-                            />
-                          )}
-                          {showFeedback && stateError ? (
-                            <p className="text-xs text-destructive">{stateError}</p>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <div className="grid gap-2">
-                        <Label htmlFor="city">City (Optional)</Label>
-                        <Input
-                          id="city"
-                          value={cityField.state.value || ''}
-                          onChange={(e) => {
-                            cityField.handleChange(e.target.value);
-                            cityField.handleBlur();
-                          }}
-                          placeholder="Enter city name"
-                          autoComplete="address-level2"
-                          suppressHydrationWarning
-                        />
-                      </div>
-                    </div>
-                  );
-                }}
-              </form.Field>
-            )}
-          </form.Field>
-        )}
+        {(field) => {
+          const showFeedback = submitAttempted || field.state.meta.isTouched;
+          const error = showFeedback ? field.state.meta.errors?.[0] : null;
+          const isInvalid = showFeedback && !field.state.meta.isValid;
+          return (
+            <div className="grid gap-2">
+              <Label htmlFor="city">Location</Label>
+              <Input
+                id="city"
+                value={field.state.value || ''}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                placeholder="City, region or venue"
+                aria-invalid={isInvalid}
+                autoComplete="off"
+                suppressHydrationWarning
+              />
+              {isInvalid && error ? <p className="mt-1 text-xs text-destructive">{error}</p> : null}
+            </div>
+          );
+        }}
       </form.Field>
 
       {/* Row 3: Date + Price per Photo */}
@@ -406,7 +308,7 @@ export function EventFormFields({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {field.state.value ? 'Public' : 'Private'}
               </span>
               <Switch
@@ -434,11 +336,39 @@ export function EventFormFields({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {field.state.value ? 'Enabled' : 'Disabled'}
               </span>
               <Switch
                 id="watermark_enabled"
+                checked={field.state.value}
+                onCheckedChange={(checked) => {
+                  field.handleChange(checked);
+                  field.handleBlur();
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </form.Field>
+
+      {/* Time Sync Toggle */}
+      <form.Field name="time_sync_enabled">
+        {(field) => (
+          <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-3">
+            <div className="grid gap-1">
+              <Label htmlFor="time_sync_enabled" className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                {syncT.label}
+              </Label>
+              <p className="text-xs text-muted-foreground">{syncT.desc}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {field.state.value ? 'Enabled' : 'Disabled'}
+              </span>
+              <Switch
+                id="time_sync_enabled"
                 checked={field.state.value}
                 onCheckedChange={(checked) => {
                   field.handleChange(checked);

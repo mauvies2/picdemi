@@ -16,7 +16,7 @@ export const eventSchema = z.object({
   date: z.string().min(1, 'Date is required.'),
   country: z.string().trim().optional().default(''),
   state: z.string().trim().optional().default(''),
-  city: z.string().trim().optional(),
+  city: z.string().trim().min(1, 'Location is required.'),
   is_public: z.boolean().default(true),
   watermark_enabled: z.boolean().default(true),
   price_per_photo: z
@@ -29,6 +29,9 @@ export const eventSchema = z.object({
       const num = Number.parseFloat(strVal);
       return Number.isNaN(num) || num < 0 ? null : num;
     }),
+  // Time sync fields
+  time_sync_enabled: z.boolean().default(false),
+  sync_now: z.boolean().default(false), // UI-only — triggers redirect after creation
 });
 
 export type FormValues = z.infer<typeof eventSchema>;

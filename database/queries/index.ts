@@ -43,6 +43,8 @@ export * from './subscriptions';
 export * from './talent-library';
 // Re-export talent photo tag queries
 export * from './talent-photo-tags';
+// Re-export time sync token queries
+export * from './time-sync';
 // Re-export types
 export type { SupabaseServerClient } from './types';
 export { getErrorMessage } from './types';

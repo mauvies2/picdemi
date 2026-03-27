@@ -119,13 +119,13 @@ export function DashboardUserMenu({
 
         {/* Active role indicator */}
         <div className="px-2 py-1.5">
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
             {optimisticRole === 'photographer' ? (
               <Camera className="h-3 w-3" />
             ) : (
               <User className="h-3 w-3" />
             )}
-            {navLabels.activeRole ?? 'Active role'}:
+            {navLabels.activeRole ?? 'Role'}:
             <span className="font-medium text-foreground">{currentRoleLabel}</span>
           </span>
         </div>

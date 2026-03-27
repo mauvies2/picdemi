@@ -12,11 +12,12 @@ export const eventSchema = z.object({
       'Activity is required.',
     ),
   date: z.string().min(1, 'Date is required.'),
-  country: z.string().trim().min(1, 'Country is required.'),
-  state: z.string().trim().min(1, 'State/Province is required.'),
-  city: z.string().trim().optional(),
+  country: z.string().trim().optional().default(''),
+  state: z.string().trim().optional().default(''),
+  city: z.string().trim().min(1, 'Location is required.'),
   is_public: z.boolean().default(true),
   watermark_enabled: z.boolean().default(true),
+  time_sync_enabled: z.boolean().default(false),
   price_per_photo: z
     .union([z.string(), z.number(), z.null(), z.undefined()])
     .optional()

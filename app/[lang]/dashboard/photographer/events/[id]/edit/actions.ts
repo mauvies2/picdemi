@@ -26,9 +26,9 @@ const eventSchema = z.object({
       'Activity is required.',
     ),
   date: z.string().min(1, 'Date is required.'),
-  country: z.string().trim().min(1, 'Country is required.'),
-  state: z.string().trim().min(1, 'State/Province is required.'),
-  city: z.string().trim().optional(),
+  country: z.string().trim().optional().default(''),
+  state: z.string().trim().optional().default(''),
+  city: z.string().trim().min(1, 'Location is required.'),
   is_public: z
     .string()
     .default('true')
@@ -36,6 +36,10 @@ const eventSchema = z.object({
   watermark_enabled: z
     .string()
     .default('true')
+    .transform((val) => val === 'true'),
+  time_sync_enabled: z
+    .string()
+    .default('false')
     .transform((val) => val === 'true'),
   price_per_photo: z
     .string()
@@ -73,6 +77,7 @@ export async function updateEventAction(
     city: formData.get('city'),
     is_public: formData.get('is_public'),
     watermark_enabled: formData.get('watermark_enabled'),
+    time_sync_enabled: formData.get('time_sync_enabled'),
     price_per_photo: formData.get('price_per_photo'),
   };
 
@@ -85,6 +90,7 @@ export async function updateEventAction(
     city: rawPayload.city?.toString(),
     is_public: rawPayload.is_public?.toString() ?? 'true',
     watermark_enabled: rawPayload.watermark_enabled?.toString() ?? 'true',
+    time_sync_enabled: rawPayload.time_sync_enabled?.toString() ?? 'false',
     price_per_photo: rawPayload.price_per_photo?.toString(),
   });
 
@@ -129,6 +135,7 @@ export async function updateEventAction(
     share_code: shareCode,
     price_per_photo: payload.price_per_photo ?? null,
     watermark_enabled: watermarkEnabled,
+    time_sync_enabled: payload.time_sync_enabled,
   });
 
   // Delete photos if any
@@ -153,6 +160,8 @@ export async function updateEventAction(
     if (uploadedFiles.length > 0) {
       const photoRecords: { original_path: string }[] = [];
 
+      const exifr = (await import('exifr')).default;
+
       try {
         for (const file of uploadedFiles) {
           const fileId = crypto.randomUUID();
@@ -162,6 +171,24 @@ export async function updateEventAction(
           const arrayBuffer = await file.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
 
+          // Extract real EXIF timestamp; fall back to event date if unavailable
+          let takenAt: string | null = null;
+          try {
+            const exif = await exifr.parse(buffer, ['DateTimeOriginal']);
+            if (exif?.DateTimeOriginal) {
+              takenAt = new Date(exif.DateTimeOriginal).toISOString();
+            }
+          } catch {
+            // EXIF unavailable
+          }
+          if (!takenAt) takenAt = new Date(payload.date).toISOString();
+
+          // Apply time offset if sync has been completed
+          const correctedTakenAt =
+            currentEvent.time_offset !== null && currentEvent.time_offset !== undefined
+              ? new Date(new Date(takenAt).getTime() + currentEvent.time_offset).toISOString()
+              : takenAt;
+
           await uploadFile(supabase, 'photos', path, buffer, {
             contentType: file.type || undefined,
             upsert: false,
@@ -170,7 +197,8 @@ export async function updateEventAction(
           await createPhoto(supabase, user.id, {
             event_id: currentEvent.id,
             original_url: path,
-            taken_at: new Date(payload.date).toISOString(),
+            taken_at: takenAt,
+            corrected_taken_at: correctedTakenAt,
             city: payload.city || '',
             country: payload.country,
             state: payload.state,
@@ -286,6 +314,7 @@ export async function addPhotosAction(eventId: string, formData: FormData): Prom
   }
 
   const photoRecords: { original_path: string }[] = [];
+  const exifr = (await import('exifr')).default;
 
   try {
     for (const file of uploadedFiles) {
@@ -296,6 +325,24 @@ export async function addPhotosAction(eventId: string, formData: FormData): Prom
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
+      // Extract real EXIF timestamp; fall back to event date if unavailable
+      let takenAt: string | null = null;
+      try {
+        const exif = await exifr.parse(buffer, ['DateTimeOriginal']);
+        if (exif?.DateTimeOriginal) {
+          takenAt = new Date(exif.DateTimeOriginal).toISOString();
+        }
+      } catch {
+        // EXIF unavailable
+      }
+      if (!takenAt) takenAt = new Date(event.date).toISOString();
+
+      // Apply time offset if sync has been completed
+      const correctedTakenAt =
+        event.time_offset !== null && event.time_offset !== undefined
+          ? new Date(new Date(takenAt).getTime() + event.time_offset).toISOString()
+          : takenAt;
+
       await uploadFile(supabase, 'photos', path, buffer, {
         contentType: file.type || undefined,
         upsert: false,
@@ -304,7 +351,8 @@ export async function addPhotosAction(eventId: string, formData: FormData): Prom
       await createPhoto(supabase, user.id, {
         event_id: event.id,
         original_url: path,
-        taken_at: new Date(event.date).toISOString(),
+        taken_at: takenAt,
+        corrected_taken_at: correctedTakenAt,
         city: event.city,
         country: event.country,
         state: event.state || '',
