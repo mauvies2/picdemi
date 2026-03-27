@@ -16,55 +16,29 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ComponentProps } from 'react';
+import { useLocalizedPath } from '@/hooks/use-localized-path';
 import { NavMains } from './nav-main';
 import { NavSecondary } from './nav-secondary';
 import { Sidebar, SidebarContent, SidebarHeader } from './ui/sidebar';
 
-const photographerNav = [
-  { title: 'Overview', url: '/dashboard/photographer', icon: Home },
-  {
-    title: 'Create Event',
-    url: '/dashboard/photographer/events/new',
-    icon: CalendarPlus,
-  },
-  {
-    title: 'Events',
-    url: '/dashboard/photographer/events',
-    icon: CalendarDays,
-  },
-  { title: 'Sales', url: '/dashboard/photographer/sales', icon: WalletMinimal },
-  { title: 'Earnings', url: '/dashboard/photographer/earnings', icon: Wallet },
-  // {
-  //   title: "Analytics",
-  //   url: "/dashboard/photographer/analytics",
-  //   icon: BarChart3,
-  // },
-  // {
-  //   title: "Messages",
-  //   url: "/dashboard/photographer/messages",
-  //   icon: MessageSquare,
-  // },
-];
-
-const talentNav = [
-  { title: 'Overview', url: '/dashboard/talent', icon: Home },
-  { title: 'My Photos', url: '/dashboard/talent/photos', icon: Images },
-  { title: 'Profile', url: '/dashboard/talent/profile', icon: User },
-  { title: 'Explore', url: '/dashboard/talent/events', icon: Compass },
-  { title: 'Orders', url: '/dashboard/talent/orders', icon: Package },
-];
-
-function getNavSecondary(role: 'photographer' | 'talent') {
-  const base = role === 'photographer' ? '/dashboard/photographer' : '/dashboard/talent';
-  return [
-    { title: 'Support', url: `${base}/support`, icon: LifeBuoy },
-    { title: 'Feedback', url: `${base}/feedback`, icon: Send },
-  ];
+interface NavLabels {
+  overview: string;
+  createEvent: string;
+  events: string;
+  sales: string;
+  earnings: string;
+  myPhotos: string;
+  profile: string;
+  explore: string;
+  orders: string;
+  support: string;
+  feedback: string;
 }
 
 export function AppSidebar({
   activeRole,
   user: _user,
+  navLabels,
   ...props
 }: ComponentProps<typeof Sidebar> & {
   activeRole: 'photographer' | 'talent';
@@ -73,21 +47,50 @@ export function AppSidebar({
     email: string;
     avatar?: string | null;
   };
+  navLabels: NavLabels;
 }) {
-  const navItems = activeRole === 'photographer' ? photographerNav : talentNav;
+  const lp = useLocalizedPath();
+
+  const photographerNav = [
+    { title: navLabels.overview, url: '/dashboard/photographer', icon: Home },
+    { title: navLabels.createEvent, url: '/dashboard/photographer/events/new', icon: CalendarPlus },
+    { title: navLabels.events, url: '/dashboard/photographer/events', icon: CalendarDays },
+    { title: navLabels.sales, url: '/dashboard/photographer/sales', icon: WalletMinimal },
+    { title: navLabels.earnings, url: '/dashboard/photographer/earnings', icon: Wallet },
+  ];
+
+  const talentNav = [
+    { title: navLabels.overview, url: '/dashboard/talent', icon: Home },
+    { title: navLabels.myPhotos, url: '/dashboard/talent/photos', icon: Images },
+    { title: navLabels.profile, url: '/dashboard/talent/profile', icon: User },
+    { title: navLabels.explore, url: '/dashboard/talent/events', icon: Compass },
+    { title: navLabels.orders, url: '/dashboard/talent/orders', icon: Package },
+  ];
+
+  const base = activeRole === 'photographer' ? '/dashboard/photographer' : '/dashboard/talent';
+  const navSecondaryItems = [
+    { title: navLabels.support, url: `${base}/support`, icon: LifeBuoy },
+    { title: navLabels.feedback, url: `${base}/feedback`, icon: Send },
+  ];
+
+  const navItems = (activeRole === 'photographer' ? photographerNav : talentNav).map((item) => ({
+    ...item,
+    url: lp(item.url),
+  }));
+  const navSecondary = navSecondaryItems.map((item) => ({ ...item, url: lp(item.url) }));
 
   return (
     <Sidebar collapsible="icon" className="h-svh" {...props}>
       <SidebarHeader>
         <div className="relative flex items-center px-2">
-          <Link href="/" className="flex items-center gap-1">
+          <Link href={lp('/')} className="flex items-center gap-1">
             <Image src="/logo_dark.svg" alt="Logo" width={170} height={50} priority />
           </Link>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMains items={navItems} />
-        <NavSecondary items={getNavSecondary(activeRole)} className="mt-auto" />
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
     </Sidebar>
   );

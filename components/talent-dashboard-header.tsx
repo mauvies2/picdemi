@@ -7,19 +7,15 @@ import { usePathname } from 'next/navigation';
 import { BottomNav } from '@/components/bottom-nav';
 import { CartLinkButton } from '@/components/cart-link-button';
 import { DashboardUserMenu } from '@/components/dashboard-user-menu';
+import { useLocalizedPath } from '@/hooks/use-localized-path';
 import type { RoleSlug } from '@/lib/roles';
 import { cn } from '@/lib/utils';
-
-const talentNavLinks = [
-  { href: '/dashboard/talent/events', label: 'Explore', icon: Search },
-  { href: '/dashboard/talent/photos', label: 'My photos', icon: Package },
-  { href: '/dashboard/talent/orders', label: 'Orders', icon: ShoppingBag },
-  { href: '/dashboard/talent/profile', label: 'Profile', icon: User },
-];
+import { LanguageSwitcher } from './language-switcher';
 
 export function TalentDashboardHeader({
   user,
   activeRole,
+  navLabels,
 }: {
   user: {
     name: string;
@@ -27,17 +23,41 @@ export function TalentDashboardHeader({
     avatar?: string | null;
   };
   activeRole: RoleSlug;
+  navLabels: {
+    explore: string;
+    myPhotos: string;
+    orders: string;
+    profile: string;
+    settings: string;
+    billing: string;
+    support: string;
+    feedback: string;
+    activeRole: string;
+    switchTo: string;
+    logOut: string;
+    rolePhotographer: string;
+    roleTalent: string;
+  };
 }) {
   const pathname = usePathname();
+  const lp = useLocalizedPath();
+  const pathWithoutLang = pathname.replace(/^\/(es|en)/, '') || '/';
 
-  const isActive = (href: string) => pathname.startsWith(href);
+  const talentNavLinks = [
+    { href: '/dashboard/talent/events', label: navLabels.explore, icon: Search },
+    { href: '/dashboard/talent/photos', label: navLabels.myPhotos, icon: Package },
+    { href: '/dashboard/talent/orders', label: navLabels.orders, icon: ShoppingBag },
+    { href: '/dashboard/talent/profile', label: navLabels.profile, icon: User },
+  ];
+
+  const isActive = (href: string) => pathWithoutLang.startsWith(href);
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/80">
         <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-6">
           {/* Left: Logo */}
-          <Link href="/" className="flex shrink-0 items-center gap-2">
+          <Link href={lp('/')} className="flex shrink-0 items-center gap-2">
             <Image src="/logo_dark.svg" alt="Picdemi" width={130} height={50} priority />
           </Link>
 
@@ -46,7 +66,7 @@ export function TalentDashboardHeader({
             {talentNavLinks.map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                href={lp(link.href)}
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
                   isActive(link.href)
@@ -62,13 +82,29 @@ export function TalentDashboardHeader({
 
           {/* Right: Cart + User Avatar */}
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <CartLinkButton />
-            <DashboardUserMenu user={user} activeRole={activeRole} />
+            <DashboardUserMenu
+              user={user}
+              activeRole={activeRole}
+              navLabels={{
+                activeRole: navLabels.activeRole,
+                profile: navLabels.profile,
+                settings: navLabels.settings,
+                billing: navLabels.billing,
+                support: navLabels.support,
+                feedback: navLabels.feedback,
+                switchTo: navLabels.switchTo,
+                logOut: navLabels.logOut,
+                rolePhotographer: navLabels.rolePhotographer,
+                roleTalent: navLabels.roleTalent,
+              }}
+            />
           </div>
         </div>
       </header>
 
-      <BottomNav items={talentNavLinks} />
+      <BottomNav items={talentNavLinks.map((item) => ({ ...item, href: lp(item.href) }))} />
     </>
   );
 }

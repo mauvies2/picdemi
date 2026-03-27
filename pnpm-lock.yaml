@@ -123,6 +123,9 @@ importers:
       '@biomejs/biome':
         specifier: 2.3.8
         version: 2.3.8
+      '@cspell/dict-es-es':
+        specifier: ^3.0.8
+        version: 3.0.8
       '@tailwindcss/postcss':
         specifier: ^4.2.1
         version: 4.2.1
@@ -317,6 +320,9 @@ packages:
 
   '@cspell/dict-en_us@4.4.31':
     resolution: {integrity: sha512-MdV6mbrSkyIqn9+6F5poCyHIPqWB3H/wlDL9LXfjgAxNFBdYRE767xJtIYunzUqhUiJHSJgZajEFdTtMDw441Q==}
+
+  '@cspell/dict-es-es@3.0.8':
+    resolution: {integrity: sha512-tj4zYKYWtAFc+JWtJo0DxLAve7I0UJM5+6we3hvLyzQlhGCBF41cTihPa/cbLHUkTD6PkrVGf1hgOKuSR9hkMQ==}
 
   '@cspell/dict-filetypes@3.0.17':
     resolution: {integrity: sha512-6f1gZf9o60fGQXGi/fZaryISUNDRmmJwGyr4QU1UvgUgOdpDHLVJtv/0wSL9q5F0wAkYhbXo/fNG8CcUTaf7Ww==}
@@ -2342,6 +2348,8 @@ snapshots:
   '@cspell/dict-en-gb-mit@3.1.20': {}
 
   '@cspell/dict-en_us@4.4.31': {}
+
+  '@cspell/dict-es-es@3.0.8': {}
 
   '@cspell/dict-filetypes@3.0.17': {}
 

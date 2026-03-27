@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation';
 export function Main({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuth =
-    pathname?.startsWith('/signup') ||
-    pathname?.startsWith('/login') ||
-    pathname?.startsWith('/auth/reset-password');
-  const isDashboard = pathname?.startsWith('/dashboard');
+    pathname?.includes('/signup') ||
+    pathname?.includes('/login') ||
+    pathname?.includes('/auth/reset-password');
+  const isDashboard = pathname?.includes('/dashboard');
 
   return (
     <main className={isAuth || isDashboard ? 'w-screen h-screen' : 'px-4 max-w-[1600px]'}>

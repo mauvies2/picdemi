@@ -23,11 +23,13 @@ export function BottomNav({ items }: { items: BottomNavItem[] }) {
       className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden border-t bg-background/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]"
     >
       {items.map((item) => {
+        const pathForCheck = pathname.replace(/^\/(es|en)/, '') || '/';
+        const hrefForCheck = item.href.replace(/^\/(es|en)/, '') || '/';
         const active = item.isActive
-          ? item.isActive(pathname)
+          ? item.isActive(pathForCheck)
           : item.exact
-            ? pathname === item.href
-            : pathname.startsWith(item.href);
+            ? pathForCheck === hrefForCheck
+            : pathForCheck.startsWith(hrefForCheck);
         return (
           <Link
             key={item.href}

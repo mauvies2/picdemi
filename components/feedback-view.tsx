@@ -19,7 +19,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { submitFeedbackAction, toggleVoteAction } from '@/app/actions/feedback';
+import { submitFeedbackAction, toggleVoteAction } from '@/app/[lang]/actions/feedback';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

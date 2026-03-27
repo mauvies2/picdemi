@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
-import { searchEventsAction } from '@/app/dashboard/talent/events/actions';
+import { activityOptions } from '@/app/[lang]/dashboard/photographer/events/new/activity-options';
+import { searchEventsAction } from '@/app/[lang]/dashboard/talent/events/actions';
 import { useDebounce } from '@/hooks/use-debounce';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

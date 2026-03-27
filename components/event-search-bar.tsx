@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { createPortal } from 'react-dom';
-import { activityOptions } from '@/app/dashboard/photographer/events/new/activity-options';
-import { searchEventNamesAction } from '@/app/dashboard/talent/events/actions';
+import { activityOptions } from '@/app/[lang]/dashboard/photographer/events/new/activity-options';
+import { searchEventNamesAction } from '@/app/[lang]/dashboard/talent/events/actions';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDebounce } from '@/hooks/use-debounce';
 import { type PlacePrediction, usePlacesAutocomplete } from '@/hooks/use-places-autocomplete';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
 import { cn } from '@/lib/utils';
 
 interface EventSearchBarProps {
@@ -31,6 +32,7 @@ interface EventSearchBarProps {
   onSearch?: (where: string, activity: string, dateFrom: string, dateTo: string) => void;
   searchHref?: string;
   className?: string;
+  dict: Dictionary;
 }
 
 interface ActivityOption {
@@ -216,22 +218,18 @@ function whenLabel(from: Date | undefined, to: Date | undefined): string | null 
 
 // ─── When popover content ─────────────────────────────────────────────────────
 
-const PRESETS = [
-  { label: 'Today', getRange: todayRange },
-  { label: 'Last 3 days', getRange: last3DaysRange },
-  { label: 'Last week', getRange: lastWeekRange },
-] as const;
-
 function WhenPopoverContent({
   dateRange,
   onSelectPreset,
   onSelectCustom,
   mobile = false,
+  t,
 }: {
   dateRange: DateRange | undefined;
   onSelectPreset: (label: string, range: DateRange) => void;
   onSelectCustom: (range: DateRange | undefined) => void;
   mobile?: boolean;
+  t: { quickOptions: string; customDate: string; presetToday: string; presetLast3Days: string; presetLastWeek: string };
 }) {
   const [showCalendar, setShowCalendar] = useState(false);
 
@@ -244,7 +242,7 @@ function WhenPopoverContent({
           className="flex items-center gap-1 px-3 pt-3 pb-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
-          Quick options
+          {t.quickOptions}
         </button>
         <Calendar
           mode="range"
@@ -262,9 +260,15 @@ function WhenPopoverContent({
     );
   }
 
+  const presets = [
+    { label: t.presetToday, getRange: todayRange },
+    { label: t.presetLast3Days, getRange: last3DaysRange },
+    { label: t.presetLastWeek, getRange: lastWeekRange },
+  ];
+
   return (
     <div className="w-48 p-3">
-      {PRESETS.map(({ label, getRange }) => (
+      {presets.map(({ label, getRange }) => (
         <button
           key={label}
           type="button"
@@ -282,7 +286,7 @@ function WhenPopoverContent({
         className="flex w-full items-center gap-2.5 rounded-lg py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
       >
         <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        Custom date…
+        {t.customDate}
       </button>
     </div>
   );
@@ -297,6 +301,7 @@ function WhereSuggestionsDropdown({
   onSelectPlace,
   onSelectEventName,
   onUseCurrentLocation,
+  t,
 }: {
   placePredictions: PlacePrediction[];
   eventNames: string[];
@@ -304,6 +309,7 @@ function WhereSuggestionsDropdown({
   onSelectPlace: (p: PlacePrediction) => void;
   onSelectEventName: (name: string) => void;
   onUseCurrentLocation: () => void;
+  t: { useCurrentLocation: string; locationsLabel: string; eventsLabel: string };
 }) {
   const showPlaces = hasInput && placePredictions.length > 0;
   const showEvents = hasInput && eventNames.length > 0;
@@ -325,7 +331,7 @@ function WhereSuggestionsDropdown({
           className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors text-left"
         >
           <Navigation className="h-4 w-4 shrink-0 text-primary" />
-          Use current location
+          {t.useCurrentLocation}
         </button>
       )}
 
@@ -333,7 +339,7 @@ function WhereSuggestionsDropdown({
       {showPlaces && (
         <>
           <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-            Locations
+            {t.locationsLabel}
           </p>
           {placePredictions.map((p) => (
             <button
@@ -364,7 +370,7 @@ function WhereSuggestionsDropdown({
       {showEvents && (
         <>
           <p className="px-4 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-            Events
+            {t.eventsLabel}
           </p>
           {eventNames.map((name) => (
             <button
@@ -443,6 +449,7 @@ export function EventSearchBar({
   onSearch,
   searchHref = '/events',
   className,
+  dict,
 }: EventSearchBarProps) {
   const router = useRouter();
   const [where, setWhere] = useState(initialWhere);
@@ -610,6 +617,7 @@ export function EventSearchBar({
   const handleSelectCustom = useCallback((range: DateRange | undefined) => {
     setDateRange(range);
     setPresetLabel(null);
+
     if (range?.from && range?.to) {
       setWhenOpen(false);
       setMobileWhenOpen(false);
@@ -626,7 +634,9 @@ export function EventSearchBar({
             className="flex h-14 items-center rounded-full border bg-background px-10 gap-3 shadow-lg"
           >
             <Search className="h-5 w-5 text-foreground/80" />
-            <span className="font-medium tracking-wider text-foreground/80">Search your event</span>
+            <span className="font-medium tracking-wider text-foreground/80">
+              {dict.eventSearchBar.mobileText}
+            </span>
           </button>
         </div>
 
@@ -671,7 +681,7 @@ export function EventSearchBar({
                       onMouseDown={() => setMobileWhenOpen(false)}
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Where
+                        {dict.eventSearchBar.whereLabel}
                       </p>
                       <div className="mt-2 flex items-center gap-2">
                         <input
@@ -680,7 +690,7 @@ export function EventSearchBar({
                           name="where-mobile"
                           type="text"
                           autoComplete="off"
-                          placeholder="Add location or event name"
+                          placeholder={dict.eventSearchBar.wherePlaceholder}
                           value={where}
                           onChange={(e) => {
                             setWhere(e.target.value);
@@ -731,6 +741,7 @@ export function EventSearchBar({
                             setShowSuggestions(false);
                           }}
                           onUseCurrentLocation={handleUseCurrentLocation}
+                          t={dict.eventSearchBar}
                         />
                       )}
                     </section>
@@ -742,7 +753,7 @@ export function EventSearchBar({
                       onMouseDown={() => setMobileWhenOpen(false)}
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Activity
+                        {dict.eventSearchBar.activityLabel}
                       </p>
                       <div className="mt-2 flex items-center gap-2">
                         <input
@@ -750,7 +761,7 @@ export function EventSearchBar({
                           id="event-search-activity-mobile"
                           name="activity-mobile"
                           type="text"
-                          placeholder="Add activity"
+                          placeholder={dict.eventSearchBar.activityPlaceholder}
                           value={activity.inputValue}
                           onChange={(e) => {
                             activity.setInputValue(e.target.value);
@@ -808,7 +819,7 @@ export function EventSearchBar({
                         }}
                       >
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          When
+                          {dict.eventSearchBar.whenLabel}
                         </p>
                         <div className="mt-2 flex w-full items-center gap-2">
                           <span
@@ -817,7 +828,7 @@ export function EventSearchBar({
                               displayLabel ? 'text-foreground' : 'text-muted-foreground/50',
                             )}
                           >
-                            {displayLabel ?? 'Add dates'}
+                            {displayLabel ?? dict.eventSearchBar.addDates}
                           </span>
                           {displayLabel && (
                             <button
@@ -837,7 +848,11 @@ export function EventSearchBar({
                       {mobileWhenOpen && (
                         <div className="border-t">
                           <div className="flex flex-wrap gap-2 px-3 py-3">
-                            {PRESETS.map(({ label, getRange }) => (
+                            {[
+                              { label: dict.eventSearchBar.presetToday, getRange: todayRange },
+                              { label: dict.eventSearchBar.presetLast3Days, getRange: last3DaysRange },
+                              { label: dict.eventSearchBar.presetLastWeek, getRange: lastWeekRange },
+                            ].map(({ label, getRange }) => (
                               <button
                                 key={label}
                                 type="button"
@@ -881,14 +896,14 @@ export function EventSearchBar({
                         onClick={clearAll}
                         className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                       >
-                        Clear all
+                        {dict.eventSearchBar.clearAll}
                       </button>
                       <Button
                         onClick={handleSearch}
                         className="h-11 rounded-full px-5 text-sm font-semibold"
                       >
                         <Search className="mr-2 h-4 w-4" />
-                        Search
+                        {dict.eventSearchBar.searchButton}
                       </Button>
                     </div>
                   </div>
@@ -906,7 +921,7 @@ export function EventSearchBar({
               className="relative flex-1 min-w-0 px-5 pt-4 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start"
             >
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Name or location
+                {dict.eventSearchBar.nameOrLocation}
               </p>
               <div className="flex w-full items-center gap-1">
                 <input
@@ -915,7 +930,7 @@ export function EventSearchBar({
                   name="where"
                   type="text"
                   autoComplete="off"
-                  placeholder="Add name or location"
+                  placeholder={dict.eventSearchBar.nameOrLocationPlaceholder}
                   value={where}
                   onChange={(e) => {
                     setWhere(e.target.value);
@@ -969,6 +984,7 @@ export function EventSearchBar({
                     setShowSuggestions(false);
                   }}
                   onUseCurrentLocation={handleUseCurrentLocation}
+                  t={dict.eventSearchBar}
                 />
               )}
             </div>
@@ -982,7 +998,7 @@ export function EventSearchBar({
               className="relative w-[27%] min-w-0 px-5 pt-3 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start"
             >
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Activity
+                {dict.eventSearchBar.activityLabel}
               </p>
               <div className="flex w-full items-center gap-1">
                 <input
@@ -990,7 +1006,7 @@ export function EventSearchBar({
                   id="event-search-activity"
                   name="activity"
                   type="text"
-                  placeholder="Add activity"
+                  placeholder={dict.eventSearchBar.activityPlaceholder}
                   value={activity.inputValue}
                   onChange={(e) => {
                     activity.setInputValue(e.target.value);
@@ -1038,7 +1054,7 @@ export function EventSearchBar({
             {/* When */}
             <div className="relative w-[27%] min-w-0 px-5 pt-3 pb-2 sm:py-0 sm:min-h-[60px] sm:flex sm:flex-col sm:justify-center sm:items-start">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
-                When
+                {dict.eventSearchBar.whenLabel}
               </p>
               <Popover open={whenOpen} onOpenChange={(o) => setWhenOpen(o)}>
                 <div className="mt-0.5 flex w-full items-center gap-1">
@@ -1053,7 +1069,7 @@ export function EventSearchBar({
                           displayLabel ? 'text-muted-foreground' : 'text-muted-foreground/40',
                         )}
                       >
-                        {displayLabel ?? 'Add dates'}
+                        {displayLabel ?? dict.eventSearchBar.addDates}
                       </span>
                     </button>
                   </PopoverTrigger>
@@ -1075,6 +1091,7 @@ export function EventSearchBar({
                     dateRange={dateRange}
                     onSelectPreset={handleSelectPreset}
                     onSelectCustom={handleSelectCustom}
+                    t={dict.eventSearchBar}
                   />
                 </PopoverContent>
               </Popover>
@@ -1089,7 +1106,7 @@ export function EventSearchBar({
                 className="flex w-full sm:w-10 h-10 shrink-0 items-center justify-center gap-2 rounded-xl sm:rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80"
               >
                 <Search className="h-5 w-5" />
-                <span className="sm:hidden text-sm font-semibold">Search</span>
+                <span className="sm:hidden text-sm font-semibold">{dict.eventSearchBar.searchButton}</span>
               </button>
             </div>
           </div>
@@ -1129,7 +1146,7 @@ export function EventSearchBar({
           ref={whereRef}
           id="event-search-where-compact"
           name="where"
-          placeholder="Where..."
+          placeholder={dict.eventSearchBar.whereCompactPlaceholder}
           value={where}
           onChange={(e) => setWhere(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -1154,7 +1171,7 @@ export function EventSearchBar({
           ref={activityInputRef}
           id="event-search-activity-compact"
           name="activity"
-          placeholder="Activity..."
+          placeholder={dict.eventSearchBar.activityCompactPlaceholder}
           value={activity.inputValue}
           onChange={(e) => {
             activity.setInputValue(e.target.value);

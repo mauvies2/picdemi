@@ -1,0 +1,189 @@
+import { ArrowRight, Camera, Download, Search } from 'lucide-react';
+import Link from 'next/link';
+import { EventSearchBar } from '@/components/event-search-bar';
+import { Footer } from '@/components/footer';
+import { PricingSection } from '@/components/pricing-section';
+import { Button } from '@/components/ui/button';
+import { getProfileFields } from '@/database/queries';
+import { createClient } from '@/database/server';
+import type { Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { localizedPath } from '@/lib/i18n/localized-path';
+import { localizedRedirect } from '@/lib/i18n/redirect';
+
+export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const profile = await getProfileFields(supabase, user.id, ['active_role']);
+    if (profile?.active_role === 'PHOTOGRAPHER') {
+      localizedRedirect(lang, '/dashboard/photographer');
+    }
+    localizedRedirect(lang, '/dashboard/talent');
+  }
+
+  const isAuthenticated = false;
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      {/* Hero Section */}
+      <section className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center overflow-hidden bg-linear-to-br from-background via-background to-primary/5">
+        {/* Decorative background */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute left-1/4 top-1/4 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute right-1/4 bottom-1/4 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
+        </div>
+
+        <div className="relative z-10 max-w-4xl text-center space-y-6 px-4 sm:px-6 lg:px-8">
+          {/* <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/60 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-sm">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span>AI-powered photo discovery for talents & creators</span>
+            </div> */}
+
+          <h1 className="text-balance text-5xl font-semibold tracking-tight lg:text-7xl">
+            {dict.home.heroHeadline1}
+            <span className="block bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+              {dict.home.heroHeadline2}
+            </span>
+          </h1>
+
+          <p className="mx-auto max-w-2xl text-lg leading-normal text-muted-foreground sm:text-xl">
+            {dict.home.heroSubtitle}
+          </p>
+
+          <EventSearchBar variant="hero" className="mx-auto" dict={dict} />
+
+          <p className="text-xs text-muted-foreground/80 tracking-wider">
+            {dict.home.heroDisclaimer}
+          </p>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="h-6 w-px bg-muted-foreground/30" />
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="bg-background py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              {dict.home.howItWorksLabel}
+            </p>
+            <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
+              {dict.home.howItWorksHeadline}
+            </h2>
+            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+              {dict.home.howItWorksSubtitle}
+            </p>
+          </div>
+
+          {/* Three Pillars */}
+          <div className="mx-auto mt-16 max-w-6xl">
+            <div className="grid gap-8 sm:grid-cols-3">
+              {/* Pillar 1 */}
+              <div className="group flex flex-col gap-5 rounded-2xl border bg-card p-8 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border bg-muted/50 transition-colors group-hover:bg-primary/10">
+                  <Camera className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight">{dict.home.pillar1Title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {dict.home.pillar1Body}
+                  </p>
+                </div>
+              </div>
+
+              {/* Pillar 2 */}
+              <div className="group flex flex-col gap-5 rounded-2xl border bg-card p-8 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border bg-muted/50 transition-colors group-hover:bg-primary/10">
+                  <Search className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight">{dict.home.pillar2Title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {dict.home.pillar2Body}
+                  </p>
+                </div>
+              </div>
+
+              {/* Pillar 3 */}
+              <div className="group flex flex-col gap-5 rounded-2xl border bg-card p-8 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border bg-muted/50 transition-colors group-hover:bg-primary/10">
+                  <Download className="h-5 w-5 text-foreground/70 group-hover:text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight">{dict.home.pillar3Title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {dict.home.pillar3Body}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="mx-auto mt-16 max-w-6xl border-t border-border/40" />
+
+          {/* Action Bar */}
+          <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href={localizedPath(lang, '/events')}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90"
+            >
+              <Search className="h-4 w-4" />
+              {dict.home.findMyPhotos}
+            </Link>
+            <Link
+              href={localizedPath(lang, '/signup')}
+              className="inline-flex items-center gap-2 rounded-full border border-input bg-background px-7 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90"
+            >
+              <Camera className="h-4 w-4" />
+              {dict.home.startSelling}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <PricingSection isAuthenticated={isAuthenticated} />
+
+      {/* Final CTA */}
+      <section className="bg-linear-to-br from-primary/10 via-primary/5 to-background py-20 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              {dict.home.ctaHeadline}
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+              {dict.home.ctaSubtitle}
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link href={localizedPath(lang, '/signup')}>
+                <Button size="lg" className="group px-8 text-base">
+                  {dict.home.ctaCreateAccount}
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+              <Link href={localizedPath(lang, '/login')}>
+                <Button size="lg" variant="outline" className="px-8 text-base">
+                  {dict.home.ctaHaveAccount}
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer dict={dict} lang={lang} />
+    </div>
+  );
+}

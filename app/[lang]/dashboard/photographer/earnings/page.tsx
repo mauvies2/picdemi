@@ -1,0 +1,23 @@
+import { DashboardHeader } from '@/components/dashboard-header';
+import { type Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { EarningsContent } from './earnings-content';
+
+export default async function EarningsPage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
+
+  return (
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6">
+      <div>
+        <DashboardHeader title={dict.photographerDashboard.earningsTitle} />
+        <p className="text-sm text-muted-foreground">{dict.photographerDashboard.earningsSubtitle}</p>
+      </div>
+      <EarningsContent />
+    </div>
+  );
+}

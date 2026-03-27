@@ -1,0 +1,64 @@
+import { EventSearchBar } from '@/components/event-search-bar';
+import type { Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { getFilterOptionsAction } from './actions';
+import { ExplorePageContent } from './explore-page-content';
+
+export default async function TalentExplorePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ lang: string }>;
+  searchParams: Promise<{
+    where?: string;
+    activity?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    preset?: string;
+    lat?: string;
+    lng?: string;
+    radius?: string;
+  }>;
+}) {
+  const { lang } = await params;
+  const { where, activity, dateFrom, dateTo, preset, lat, lng, radius } = await searchParams;
+
+  const dict = await getDictionary(lang as Locale);
+  const filterOptions = await getFilterOptionsAction();
+
+  const key = `${where ?? ''}-${activity ?? ''}-${dateFrom ?? ''}-${dateTo ?? ''}`;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-center">
+        <EventSearchBar
+          key={key}
+          variant="hero"
+          initialWhere={where ?? ''}
+          initialActivity={activity ?? ''}
+          initialDateFrom={dateFrom ?? ''}
+          initialDateTo={dateTo ?? ''}
+          initialPreset={preset}
+          initialLat={lat ? Number(lat) : undefined}
+          initialLng={lng ? Number(lng) : undefined}
+          initialRadius={radius ? Number(radius) : undefined}
+          searchHref="/dashboard/talent/events"
+          dict={dict}
+        />
+      </div>
+
+      <ExplorePageContent
+        key={key}
+        initialFilterOptions={filterOptions}
+        loadOnMount={true}
+        initialWhere={where}
+        initialActivity={activity}
+        initialDateFrom={dateFrom}
+        initialDateTo={dateTo}
+        hideTopFilters={true}
+        showFindMe={false}
+        dict={dict}
+      />
+    </div>
+  );
+}

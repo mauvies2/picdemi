@@ -4,7 +4,7 @@ import { ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { createBillingCheckoutAction } from '@/app/dashboard/photographer/billing/actions';
+import { createBillingCheckoutAction } from '@/app/[lang]/dashboard/photographer/billing/actions';
 import { Button } from '@/components/ui/button';
 
 interface PricingPlanButtonProps {

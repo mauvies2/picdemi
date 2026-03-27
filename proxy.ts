@@ -2,11 +2,31 @@ import { createServerClient } from '@supabase/ssr';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { env } from '@/env.mjs';
+import { defaultLocale } from '@/lib/i18n/config';
+
+const LOCALES = ['es', 'en'] as const;
 
 export async function proxy(request: NextRequest) {
-  // Add the pathname to the request headers so server components can access it
+  const { pathname, search } = request.nextUrl;
+
+  // ── Locale detection & redirect ─────────────────────────────────────────
+  const firstSegment = pathname.split('/')[1];
+  const hasLocale = (LOCALES as readonly string[]).includes(firstSegment);
+
+  if (!hasLocale) {
+    const acceptLang = request.headers.get('accept-language') ?? '';
+    const preferred = acceptLang.toLowerCase().startsWith('es') ? 'es' : defaultLocale;
+    const base = pathname === '/' ? '' : pathname;
+    const target = new URL(`/${preferred}${base}${search}`, request.url);
+    return NextResponse.redirect(target);
+  }
+
+  const lang = firstSegment; // 'es' | 'en'
+
+  // ── Headers ──────────────────────────────────────────────────────────────
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-pathname', request.nextUrl.pathname);
+  requestHeaders.set('x-pathname', pathname);
+  requestHeaders.set('x-lang', lang);
 
   const response = NextResponse.next({
     request: {
@@ -14,7 +34,7 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  // Create a Supabase client configured to use cookies
+  // ── Supabase session refresh ─────────────────────────────────────────────
   const supabase = createServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -62,10 +82,12 @@ export const config = {
     /*
      * Match all request paths except for the ones starting with:
      * - api (API routes)
+     * - auth (OAuth callbacks)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - any path with a file extension (static assets)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|auth|_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
 };
