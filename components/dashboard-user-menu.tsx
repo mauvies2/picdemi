@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Camera, CreditCard, LifeBuoy, LogOut, Send, Settings, User } from 'lucide-react';
+import { Camera, CreditCard, LifeBuoy, LogOut, Send, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useOptimistic, useTransition } from 'react';
@@ -21,6 +21,7 @@ import type { RoleSlug } from '@/lib/roles';
 export function DashboardUserMenu({
   user,
   activeRole,
+  navLabels = {},
 }: {
   user: {
     name: string;
@@ -28,6 +29,18 @@ export function DashboardUserMenu({
     avatar?: string | null;
   };
   activeRole: RoleSlug;
+  navLabels?: {
+    activeRole?: string;
+    profile?: string;
+    settings?: string;
+    billing?: string;
+    support?: string;
+    feedback?: string;
+    switchTo?: string;
+    logOut?: string;
+    rolePhotographer?: string;
+    roleTalent?: string;
+  };
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -70,8 +83,10 @@ export function DashboardUserMenu({
   const isSettingsActive = pathname.startsWith(settingsUrl);
 
   const otherRole: RoleSlug = optimisticRole === 'photographer' ? 'talent' : 'photographer';
-  const otherRoleLabel = otherRole === 'photographer' ? 'Photographer' : 'Talent';
-  const currentRoleLabel = optimisticRole === 'photographer' ? 'Photographer' : 'Talent';
+  const photographerLabel = navLabels.rolePhotographer ?? 'Photographer';
+  const talentLabel = navLabels.roleTalent ?? 'Talent';
+  const otherRoleLabel = otherRole === 'photographer' ? photographerLabel : talentLabel;
+  const currentRoleLabel = optimisticRole === 'photographer' ? photographerLabel : talentLabel;
 
   return (
     <DropdownMenu>
@@ -110,7 +125,7 @@ export function DashboardUserMenu({
             ) : (
               <User className="h-3 w-3" />
             )}
-            Active role:
+            {navLabels.activeRole ?? 'Active role'}:
             <span className="font-medium text-foreground">{currentRoleLabel}</span>
           </span>
         </div>
@@ -120,13 +135,13 @@ export function DashboardUserMenu({
           <DropdownMenuItem asChild className={isProfileActive ? 'bg-accent' : ''}>
             <Link href={profileUrl}>
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span>{navLabels.profile ?? 'Profile'}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className={isSettingsActive ? 'bg-accent' : ''}>
             <Link href={settingsUrl}>
               <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+              <span>{navLabels.settings ?? 'Settings'}</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -136,24 +151,20 @@ export function DashboardUserMenu({
             <DropdownMenuItem asChild>
               <Link href="/dashboard/photographer/settings?tab=billing">
                 <CreditCard className="mr-2 h-4 w-4" />
-                <span>Billing</span>
+                <span>{navLabels.billing ?? 'Billing'}</span>
               </Link>
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem disabled>
-            <Bell className="mr-2 h-4 w-4" />
-            <span>Notifications</span>
-          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href={`/dashboard/${optimisticRole}/support`}>
               <LifeBuoy className="mr-2 h-4 w-4" />
-              <span>Support</span>
+              <span>{navLabels.support ?? 'Support'}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href={`/dashboard/${optimisticRole}/feedback`}>
               <Send className="mr-2 h-4 w-4" />
-              <span>Feedback</span>
+              <span>{navLabels.feedback ?? 'Feedback'}</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -161,13 +172,13 @@ export function DashboardUserMenu({
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => handleSwitchRole(otherRole)} disabled={isPending}>
             <Camera className="mr-2 h-4 w-4" />
-            <span>Switch to {otherRoleLabel}</span>
+            <span>{navLabels.switchTo ?? 'Switch to'} {otherRoleLabel}</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{navLabels.logOut ?? 'Log out'}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

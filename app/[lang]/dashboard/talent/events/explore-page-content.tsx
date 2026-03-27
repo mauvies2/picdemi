@@ -2,6 +2,7 @@
 
 import type { EventWithStats, FilterOptions } from '@/hooks/use-event-search';
 import { useEventSearch } from '@/hooks/use-event-search';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
 import { AIMatchingButton } from '../photos/ai-matching/ai-matching-button';
 import { EventFilterBar } from './components/event-filter-bar';
 import { EventGrid } from './components/event-grid';
@@ -23,6 +24,7 @@ export function ExplorePageContent({
   initialDateTo,
   hideTopFilters = false,
   showFindMe = false,
+  dict,
 }: {
   initialFilterOptions: FilterOptions;
   initialEvents?: EventWithStats[];
@@ -39,6 +41,7 @@ export function ExplorePageContent({
   initialDateTo?: string;
   hideTopFilters?: boolean;
   showFindMe?: boolean;
+  dict?: Dictionary;
 }) {
   const search = useEventSearch({
     initialFilterOptions,

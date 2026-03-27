@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Bell,
   CalendarDays,
   CalendarPlus,
   Camera,
@@ -33,39 +32,6 @@ import { useLocalizedPath } from '@/hooks/use-localized-path';
 import type { RoleSlug } from '@/lib/roles';
 import { cn } from '@/lib/utils';
 
-const navLinks = [
-  {
-    href: '/dashboard/photographer',
-    label: 'Overview',
-    icon: Home,
-    isActive: (p: string) => {
-      const clean = p.replace(/^\/(es|en)/, '');
-      return clean === '/dashboard/photographer';
-    },
-  },
-  {
-    href: '/dashboard/photographer/events',
-    label: 'Events',
-    icon: CalendarDays,
-    isActive: (p: string) => {
-      const clean = p.replace(/^\/(es|en)/, '');
-      return (
-        clean.startsWith('/dashboard/photographer/events') &&
-        !clean.startsWith('/dashboard/photographer/events/new')
-      );
-    },
-  },
-  {
-    href: '/dashboard/photographer/events/new',
-    label: 'Create',
-    icon: CalendarPlus,
-    isActive: (p: string) => {
-      const clean = p.replace(/^\/(es|en)/, '');
-      return clean === '/dashboard/photographer/events/new';
-    },
-  },
-];
-
 const accountActiveRoutes = [
   '/dashboard/photographer/sales',
   '/dashboard/photographer/earnings',
@@ -76,14 +42,63 @@ const accountActiveRoutes = [
 export function PhotographerBottomNav({
   user,
   activeRole,
+  navLabels,
 }: {
   user: { name: string; email: string; avatar?: string | null };
   activeRole: RoleSlug;
+  navLabels: {
+    overview: string;
+    events: string;
+    createEvent: string;
+    account: string;
+    sales: string;
+    earnings: string;
+    profile: string;
+    settings: string;
+    billing: string;
+    support: string;
+    feedback: string;
+    switchToTalent: string;
+    logOut: string;
+  };
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const lp = useLocalizedPath();
   const pathWithoutLang = pathname.replace(/^\/(es|en)/, '') || '/';
+
+  const navLinks = [
+    {
+      href: '/dashboard/photographer',
+      label: navLabels.overview,
+      icon: Home,
+      isActive: (p: string) => {
+        const clean = p.replace(/^\/(es|en)/, '');
+        return clean === '/dashboard/photographer';
+      },
+    },
+    {
+      href: '/dashboard/photographer/events',
+      label: navLabels.events,
+      icon: CalendarDays,
+      isActive: (p: string) => {
+        const clean = p.replace(/^\/(es|en)/, '');
+        return (
+          clean.startsWith('/dashboard/photographer/events') &&
+          !clean.startsWith('/dashboard/photographer/events/new')
+        );
+      },
+    },
+    {
+      href: '/dashboard/photographer/events/new',
+      label: navLabels.createEvent,
+      icon: CalendarPlus,
+      isActive: (p: string) => {
+        const clean = p.replace(/^\/(es|en)/, '');
+        return clean === '/dashboard/photographer/events/new';
+      },
+    },
+  ];
   const [_optimisticRole, addOptimisticRole] = useOptimistic<RoleSlug, RoleSlug>(
     activeRole,
     (_, role) => role,
@@ -170,7 +185,7 @@ export function PhotographerBottomNav({
               isAccountActive && 'font-semibold',
             )}
           >
-            Account
+            {navLabels.account}
           </span>
         </DropdownMenuTrigger>
 
@@ -191,8 +206,6 @@ export function PhotographerBottomNav({
           <div className="px-2 py-1.5">
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Camera className="h-3 w-3" />
-              Active role:
-              <span className="font-medium text-foreground">Photographer</span>
             </span>
           </div>
 
@@ -201,13 +214,13 @@ export function PhotographerBottomNav({
             <DropdownMenuItem asChild>
               <Link href={lp('/dashboard/photographer/sales')}>
                 <WalletMinimal className="mr-2 h-4 w-4" />
-                <span>Sales</span>
+                <span>{navLabels.sales}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={lp('/dashboard/photographer/earnings')}>
                 <Wallet className="mr-2 h-4 w-4" />
-                <span>Earnings</span>
+                <span>{navLabels.earnings}</span>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -217,35 +230,31 @@ export function PhotographerBottomNav({
             <DropdownMenuItem asChild>
               <Link href={lp('/dashboard/photographer/profile')}>
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>{navLabels.profile}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={lp('/dashboard/photographer/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>{navLabels.settings}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={lp('/dashboard/photographer/settings?tab=billing')}>
                 <CreditCard className="mr-2 h-4 w-4" />
-                <span>Billing</span>
+                <span>{navLabels.billing}</span>
               </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              <Bell className="mr-2 h-4 w-4" />
-              <span>Notifications</span>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={lp('/dashboard/photographer/support')}>
                 <LifeBuoy className="mr-2 h-4 w-4" />
-                <span>Support</span>
+                <span>{navLabels.support}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={lp('/dashboard/photographer/feedback')}>
                 <Send className="mr-2 h-4 w-4" />
-                <span>Feedback</span>
+                <span>{navLabels.feedback}</span>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -254,14 +263,14 @@ export function PhotographerBottomNav({
           <DropdownMenuGroup>
             <DropdownMenuItem onClick={handleSwitchRole} disabled={isPending}>
               <Camera className="mr-2 h-4 w-4" />
-              <span>Switch to Talent</span>
+              <span>{navLabels.switchToTalent}</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
 
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
+            <span>{navLabels.logOut}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

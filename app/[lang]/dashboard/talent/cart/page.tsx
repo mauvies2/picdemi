@@ -1,7 +1,7 @@
 import { getActiveRole } from '@/app/[lang]/actions/roles';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { createClient } from '@/database/server';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 import { getCurrentCart } from './actions';
@@ -46,9 +46,7 @@ export default async function CartPage({ params: routeParams, searchParams }: Ca
     <div className="space-y-6">
       <div>
         <DashboardHeader title={dict.talentDashboard.shoppingCart} />
-        <p className="text-sm text-muted-foreground mt-1">
-          {dict.talentDashboard.reviewPhotos}
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">{dict.talentDashboard.reviewPhotos}</p>
       </div>
       <CartContent initialCartData={cartData} />
     </div>

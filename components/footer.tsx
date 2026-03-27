@@ -1,15 +1,18 @@
 import { Facebook, Instagram, Mail, Twitter } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { localizedPath } from '@/lib/i18n/localized-path';
 
-export function Footer() {
+export function Footer({ dict, lang }: { dict: Dictionary; lang: string }) {
+  const t = dict.footer;
   return (
     <footer className="border-t bg-background">
       <div className="mx-auto max-w-7xl py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href={localizedPath(lang, '/')} className="flex items-center gap-2">
               <Image
                 src="/favicon/favicon_simple_dark.png"
                 alt="Picdemi"
@@ -19,9 +22,7 @@ export function Footer() {
               />
               <span className="text-xl font-bold tracking-tight">Picdemi</span>
             </Link>
-            <p className="text-sm text-muted-foreground">
-              Find yourself in every moment. Connect photographers with athletes and event-goers.
-            </p>
+            <p className="text-sm text-muted-foreground">{t.tagline}</p>
             <div className="flex items-center gap-4">
               <a
                 // biome-ignore lint/a11y/useValidAnchor: explanation
@@ -52,22 +53,22 @@ export function Footer() {
 
           {/* Product */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Product</h3>
+            <h3 className="text-sm font-semibold">{t.productTitle}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  href="/signup"
+                  href={localizedPath(lang, '/signup')}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Get Started
+                  {t.getStarted}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/login"
+                  href={localizedPath(lang, '/login')}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Sign In
+                  {t.signIn}
                 </Link>
               </li>
               <li>
@@ -76,7 +77,7 @@ export function Footer() {
                   href="#"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Pricing
+                  {t.pricing}
                 </a>
               </li>
               <li>
@@ -85,7 +86,7 @@ export function Footer() {
                   href="#"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Features
+                  {t.features}
                 </a>
               </li>
             </ul>
@@ -93,7 +94,7 @@ export function Footer() {
 
           {/* For Photographers */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">For Photographers</h3>
+            <h3 className="text-sm font-semibold">{t.photographersTitle}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a
@@ -101,7 +102,7 @@ export function Footer() {
                   href="#"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Upload Photos
+                  {t.uploadPhotos}
                 </a>
               </li>
               <li>
@@ -110,25 +111,16 @@ export function Footer() {
                   href="#"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Set Pricing
+                  {t.setPricing}
                 </a>
               </li>
-              {/* <li>
-                <a
-                  // biome-ignore lint/a11y/useValidAnchor: explanation
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Analytics
-                </a>
-              </li> */}
               <li>
                 <a
                   // biome-ignore lint/a11y/useValidAnchor: explanation
                   href="#"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Resources
+                  {t.resources}
                 </a>
               </li>
             </ul>
@@ -136,7 +128,7 @@ export function Footer() {
 
           {/* Support */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Support</h3>
+            <h3 className="text-sm font-semibold">{t.supportTitle}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a
@@ -144,7 +136,7 @@ export function Footer() {
                   href="#"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Help Center
+                  {t.helpCenter}
                 </a>
               </li>
               <li>
@@ -153,7 +145,7 @@ export function Footer() {
                   href="#"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Contact Us
+                  {t.contactUs}
                 </a>
               </li>
               <li>
@@ -162,7 +154,7 @@ export function Footer() {
                   href="#"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Privacy Policy
+                  {t.privacyPolicy}
                 </a>
               </li>
               <li>
@@ -171,7 +163,7 @@ export function Footer() {
                   href="#"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Terms of Service
+                  {t.termsOfService}
                 </a>
               </li>
             </ul>
@@ -181,7 +173,7 @@ export function Footer() {
         <div className="mt-12 border-t pt-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Picdemi. All rights reserved.
+              © {new Date().getFullYear()} Picdemi. {t.allRightsReserved}
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Mail className="h-4 w-4" />

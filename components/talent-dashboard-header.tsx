@@ -12,16 +12,10 @@ import type { RoleSlug } from '@/lib/roles';
 import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from './language-switcher';
 
-const talentNavLinks = [
-  { href: '/dashboard/talent/events', label: 'Explore', icon: Search },
-  { href: '/dashboard/talent/photos', label: 'My photos', icon: Package },
-  { href: '/dashboard/talent/orders', label: 'Orders', icon: ShoppingBag },
-  { href: '/dashboard/talent/profile', label: 'Profile', icon: User },
-];
-
 export function TalentDashboardHeader({
   user,
   activeRole,
+  navLabels,
 }: {
   user: {
     name: string;
@@ -29,10 +23,32 @@ export function TalentDashboardHeader({
     avatar?: string | null;
   };
   activeRole: RoleSlug;
+  navLabels: {
+    explore: string;
+    myPhotos: string;
+    orders: string;
+    profile: string;
+    settings: string;
+    billing: string;
+    support: string;
+    feedback: string;
+    activeRole: string;
+    switchTo: string;
+    logOut: string;
+    rolePhotographer: string;
+    roleTalent: string;
+  };
 }) {
   const pathname = usePathname();
   const lp = useLocalizedPath();
   const pathWithoutLang = pathname.replace(/^\/(es|en)/, '') || '/';
+
+  const talentNavLinks = [
+    { href: '/dashboard/talent/events', label: navLabels.explore, icon: Search },
+    { href: '/dashboard/talent/photos', label: navLabels.myPhotos, icon: Package },
+    { href: '/dashboard/talent/orders', label: navLabels.orders, icon: ShoppingBag },
+    { href: '/dashboard/talent/profile', label: navLabels.profile, icon: User },
+  ];
 
   const isActive = (href: string) => pathWithoutLang.startsWith(href);
 
@@ -68,7 +84,22 @@ export function TalentDashboardHeader({
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
             <CartLinkButton />
-            <DashboardUserMenu user={user} activeRole={activeRole} />
+            <DashboardUserMenu
+              user={user}
+              activeRole={activeRole}
+              navLabels={{
+                activeRole: navLabels.activeRole,
+                profile: navLabels.profile,
+                settings: navLabels.settings,
+                billing: navLabels.billing,
+                support: navLabels.support,
+                feedback: navLabels.feedback,
+                switchTo: navLabels.switchTo,
+                logOut: navLabels.logOut,
+                rolePhotographer: navLabels.rolePhotographer,
+                roleTalent: navLabels.roleTalent,
+              }}
+            />
           </div>
         </div>
       </header>

@@ -29,9 +29,40 @@ import { cn } from '@/lib/utils';
 
 type ActivityOption = { value: string; label: string };
 
+type EventFilterBarT = {
+  filters: string;
+  filterTitle: string;
+  sortBy: string;
+  newestFirst: string;
+  oldestFirst: string;
+  nameAZ: string;
+  nameZA: string;
+  clearAll: string;
+  applyFilters: string;
+  showingEventsNear: string;
+  withinKm: string;
+  searchButton: string;
+};
+
+const DEFAULT_FILTER_T: EventFilterBarT = {
+  filters: 'Filters',
+  filterTitle: 'Filters',
+  sortBy: 'Sort by',
+  newestFirst: 'Newest first',
+  oldestFirst: 'Oldest first',
+  nameAZ: 'Name (A-Z)',
+  nameZA: 'Name (Z-A)',
+  clearAll: 'Clear all',
+  applyFilters: 'Apply filters',
+  showingEventsNear: 'Showing events near',
+  withinKm: 'within {n} km',
+  searchButton: 'Search',
+};
+
 type EventFilterBarProps = {
   // Mode
   hideTopFilters: boolean;
+  t?: EventFilterBarT;
   // Text search (full mode only)
   searchText: string;
   setSearchText: (v: string) => void;
@@ -125,6 +156,7 @@ export function EventFilterBar({
   setPhotographerQuery,
   radiusKm,
   setRadiusKm,
+  t = DEFAULT_FILTER_T,
 }: EventFilterBarProps) {
   // --- Local (pending) state for the modal ---
   const [localActivity, setLocalActivity] = useState(selectedActivity);
@@ -362,17 +394,17 @@ export function EventFilterBar({
 
       <div className="w-full">
         <Label htmlFor="sort-filter-modal" className="mb-2 block text-sm font-medium">
-          Sort by
+          {t.sortBy}
         </Label>
         <Select value={localSortBy} onValueChange={(v) => setLocalSortBy(v as SortBy)}>
           <SelectTrigger id="sort-filter-modal" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="date_desc">Newest first</SelectItem>
-            <SelectItem value="date_asc">Oldest first</SelectItem>
-            <SelectItem value="name_asc">Name (A-Z)</SelectItem>
-            <SelectItem value="name_desc">Name (Z-A)</SelectItem>
+            <SelectItem value="date_desc">{t.newestFirst}</SelectItem>
+            <SelectItem value="date_asc">{t.oldestFirst}</SelectItem>
+            <SelectItem value="name_asc">{t.nameAZ}</SelectItem>
+            <SelectItem value="name_desc">{t.nameZA}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -390,11 +422,11 @@ export function EventFilterBar({
           onClick={resetLocalFilters}
           className="w-full sm:w-auto"
         >
-          Clear all
+          {t.clearAll}
         </Button>
       )}
       <Button type="button" onClick={applyModalFilters} className="w-full sm:w-auto">
-        Apply filters
+        {t.applyFilters}
       </Button>
     </DialogFooter>
   );
@@ -407,10 +439,10 @@ export function EventFilterBar({
             <>
               <MapPin className="h-4 w-4 shrink-0 text-primary" />
               <span className="truncate text-sm text-muted-foreground">
-                Showing events near{' '}
+                {t.showingEventsNear}{' '}
                 <span className="font-medium text-foreground">{locationLabel}</span>
                 {radiusKm > 0 && (
-                  <span className="ml-1 text-muted-foreground">· within {radiusKm} km</span>
+                  <span className="ml-1 text-muted-foreground">· {t.withinKm.replace('{n}', String(radiusKm))}</span>
                 )}
               </span>
             </>
@@ -426,7 +458,7 @@ export function EventFilterBar({
                 className="flex h-9 items-center gap-2 rounded-full border px-3 text-sm font-medium transition-colors hover:bg-muted"
               >
                 <Filter className="h-4 w-4" />
-                Filters
+                {t.filters}
                 {(dateFilterCount > 0 || radiusKm > 0) && (
                   <span className="rounded-full bg-primary px-1.5 py-0.5 text-xs font-medium text-primary-foreground">
                     {dateFilterCount + (radiusKm > 0 ? 1 : 0)}
@@ -436,7 +468,7 @@ export function EventFilterBar({
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Filters</DialogTitle>
+                <DialogTitle>{t.filterTitle}</DialogTitle>
               </DialogHeader>
               {simplifiedModalContent}
               {modalFooter}
@@ -454,10 +486,10 @@ export function EventFilterBar({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="date_desc">Newest first</SelectItem>
-              <SelectItem value="date_asc">Oldest first</SelectItem>
-              <SelectItem value="name_asc">Name (A-Z)</SelectItem>
-              <SelectItem value="name_desc">Name (Z-A)</SelectItem>
+              <SelectItem value="date_desc">{t.newestFirst}</SelectItem>
+              <SelectItem value="date_asc">{t.oldestFirst}</SelectItem>
+              <SelectItem value="name_asc">{t.nameAZ}</SelectItem>
+              <SelectItem value="name_desc">{t.nameZA}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -500,7 +532,7 @@ export function EventFilterBar({
           className="shrink-0"
         >
           <Search className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Search</span>
+          <span className="hidden sm:inline">{t.searchButton}</span>
         </Button>
       </div>
 
@@ -509,7 +541,7 @@ export function EventFilterBar({
         <DialogTrigger asChild>
           <Button type="button" variant="outline" className="h-10 gap-2 sm:hidden">
             <Filter className="h-4 w-4" />
-            Filters
+            {t.filters}
             {activeFilterCount > 0 && (
               <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs font-medium text-primary-foreground">
                 {activeFilterCount}
@@ -519,7 +551,7 @@ export function EventFilterBar({
         </DialogTrigger>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Filters</DialogTitle>
+            <DialogTitle>{t.filterTitle}</DialogTitle>
           </DialogHeader>
           {fullModalContent}
           {modalFooter}
@@ -587,7 +619,7 @@ export function EventFilterBar({
 
         <div>
           <Label htmlFor="sort-filter" className="mb-2 block text-sm font-medium">
-            Sort by
+            {t.sortBy}
           </Label>
           <Select
             value={sortBy}
@@ -600,10 +632,10 @@ export function EventFilterBar({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="date_desc">Newest first</SelectItem>
-              <SelectItem value="date_asc">Oldest first</SelectItem>
-              <SelectItem value="name_asc">Name (A-Z)</SelectItem>
-              <SelectItem value="name_desc">Name (Z-A)</SelectItem>
+              <SelectItem value="date_desc">{t.newestFirst}</SelectItem>
+              <SelectItem value="date_asc">{t.oldestFirst}</SelectItem>
+              <SelectItem value="name_asc">{t.nameAZ}</SelectItem>
+              <SelectItem value="name_desc">{t.nameZA}</SelectItem>
             </SelectContent>
           </Select>
         </div>

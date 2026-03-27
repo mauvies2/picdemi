@@ -19,6 +19,7 @@ type ExploreEventCardProps = {
   photographerUsername?: string | null;
   photographerDisplayName?: string | null;
   linkPrefix?: string;
+  t?: { photos: string; photo: string; from: string; free: string; noPhotosYet: string };
 };
 
 export function ExploreEventCard({
@@ -34,6 +35,7 @@ export function ExploreEventCard({
   photographerUsername,
   photographerDisplayName,
   linkPrefix = '/dashboard/talent/events',
+  t = { photos: 'photos', photo: 'photo', from: 'From', free: 'Free', noPhotosYet: 'No photos yet' },
 }: ExploreEventCardProps) {
   const activityLabel = activityOptions.find((opt) => opt.value === activity)?.label ?? activity;
   const formattedDate = format(new Date(date), 'MMM d, yyyy');
@@ -42,8 +44,8 @@ export function ExploreEventCard({
     photographerDisplayName || (photographerUsername ? `@${photographerUsername}` : null);
   const priceText =
     pricePerPhoto !== null
-      ? `From $${pricePerPhoto % 1 === 0 ? pricePerPhoto : pricePerPhoto.toFixed(2)}`
-      : 'Free';
+      ? `${t.from} $${pricePerPhoto % 1 === 0 ? pricePerPhoto : pricePerPhoto.toFixed(2)}`
+      : t.free;
 
   return (
     <Link href={`${linkPrefix}/${id}`} className="group block">
@@ -63,14 +65,14 @@ export function ExploreEventCard({
             {/* Photo count — bottom-left */}
             <div className="absolute bottom-0 left-0 p-3">
               <span className="text-xs font-medium text-white drop-shadow-sm">
-                {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+                {photoCount} {photoCount === 1 ? t.photo : t.photos}
               </span>
             </div>
           </>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
             <Camera className="h-8 w-8 opacity-30" />
-            <span className="text-xs">No photos yet</span>
+            <span className="text-xs">{t.noPhotosYet}</span>
           </div>
         )}
       </div>

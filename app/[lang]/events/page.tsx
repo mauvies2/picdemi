@@ -5,10 +5,14 @@ import { Footer } from '@/components/footer';
 import { getEventFilterOptions, type SupabaseServerClient } from '@/database/queries';
 import { supabaseAdmin } from '@/database/supabase-admin';
 import type { EventWithStats } from '@/hooks/use-event-search';
+import type { Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 
 export default async function PublicEventsPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<{
     where?: string;
     activity?: string;
@@ -20,6 +24,8 @@ export default async function PublicEventsPage({
     radius?: string;
   }>;
 }) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
   const {
     where,
     activity,
@@ -89,6 +95,7 @@ export default async function PublicEventsPage({
             initialLat={parsedLat}
             initialLng={parsedLng}
             initialRadius={parsedRadius}
+            dict={dict}
           />
         </div>
       </div>
@@ -113,7 +120,7 @@ export default async function PublicEventsPage({
           showFindMe={false}
         />
       </div>
-      <Footer />
+      <Footer dict={dict} lang={lang} />
     </div>
   );
 }

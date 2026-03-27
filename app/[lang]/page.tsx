@@ -57,7 +57,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
             {dict.home.heroSubtitle}
           </p>
 
-          <EventSearchBar variant="hero" className="mx-auto" />
+          <EventSearchBar variant="hero" className="mx-auto" dict={dict} />
 
           <p className="text-xs text-muted-foreground/80 tracking-wider">
             {dict.home.heroDisclaimer}
@@ -183,7 +183,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
         </div>
       </section>
 
-      <Footer />
+      <Footer dict={dict} lang={lang} />
     </div>
   );
 }

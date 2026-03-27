@@ -1,10 +1,14 @@
 import { EventSearchBar } from '@/components/event-search-bar';
+import type { Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getFilterOptionsAction } from './actions';
 import { ExplorePageContent } from './explore-page-content';
 
 export default async function TalentExplorePage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ lang: string }>;
   searchParams: Promise<{
     where?: string;
     activity?: string;
@@ -16,7 +20,10 @@ export default async function TalentExplorePage({
     radius?: string;
   }>;
 }) {
+  const { lang } = await params;
   const { where, activity, dateFrom, dateTo, preset, lat, lng, radius } = await searchParams;
+
+  const dict = await getDictionary(lang as Locale);
   const filterOptions = await getFilterOptionsAction();
 
   const key = `${where ?? ''}-${activity ?? ''}-${dateFrom ?? ''}-${dateTo ?? ''}`;
@@ -36,6 +43,7 @@ export default async function TalentExplorePage({
           initialLng={lng ? Number(lng) : undefined}
           initialRadius={radius ? Number(radius) : undefined}
           searchHref="/dashboard/talent/events"
+          dict={dict}
         />
       </div>
 

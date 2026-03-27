@@ -5,6 +5,19 @@ import { Button } from '@/components/ui/button';
 import type { EventWithStats } from '@/hooks/use-event-search';
 import { ExploreEventCard } from '../explore-event-card';
 
+type EventGridT = {
+  searchPrompt: string;
+  noEventsFound: string;
+  noEventsFoundDesc: string;
+  clearFilters: string;
+  loadMore: string;
+  photo: string;
+  photos: string;
+  from: string;
+  free: string;
+  noPhotosYet: string;
+};
+
 type EventGridProps = {
   events: EventWithStats[];
   isLoading: boolean;
@@ -16,6 +29,7 @@ type EventGridProps = {
   eventLinkPrefix?: string;
   onLoadMore: () => void;
   onClearFilters: () => void;
+  t?: EventGridT;
 };
 
 function EventSkeleton({ skeletonKeys }: { skeletonKeys: string[] }) {
@@ -32,6 +46,19 @@ function EventSkeleton({ skeletonKeys }: { skeletonKeys: string[] }) {
   );
 }
 
+const DEFAULT_T: EventGridT = {
+  searchPrompt: 'Enter an event name above and click Search to find your photos.',
+  noEventsFound: 'No events found',
+  noEventsFoundDesc: 'Try adjusting your filters or search terms to find more events.',
+  clearFilters: 'Clear filters',
+  loadMore: 'Load more',
+  photo: 'photo',
+  photos: 'photos',
+  from: 'From',
+  free: 'Free',
+  noPhotosYet: 'No photos yet',
+};
+
 export function EventGrid({
   events,
   isLoading,
@@ -43,14 +70,13 @@ export function EventGrid({
   eventLinkPrefix,
   onLoadMore,
   onClearFilters,
+  t = DEFAULT_T,
 }: EventGridProps) {
   if (!hasSearched) {
     return (
       <div className="rounded-xl border border-dashed p-10 text-center">
         <Search className="mx-auto mb-4 h-10 w-10 text-muted-foreground/40" />
-        <p className="text-sm text-muted-foreground">
-          Enter an event name above and click <strong>Search</strong> to find your photos.
-        </p>
+        <p className="text-sm text-muted-foreground">{t.searchPrompt}</p>
       </div>
     );
   }
@@ -63,10 +89,8 @@ export function EventGrid({
     return (
       <div className="rounded-xl border border-dashed p-10 text-center">
         <Filter className="mx-auto mb-4 h-10 w-10 text-muted-foreground" />
-        <h3 className="mb-2 text-lg font-semibold">No events found</h3>
-        <p className="text-sm text-muted-foreground">
-          Try adjusting your filters or search terms to find more events.
-        </p>
+        <h3 className="mb-2 text-lg font-semibold">{t.noEventsFound}</h3>
+        <p className="text-sm text-muted-foreground">{t.noEventsFoundDesc}</p>
         {hasFilters && (
           <Button
             type="button"
@@ -75,7 +99,7 @@ export function EventGrid({
             onClick={onClearFilters}
             className="mt-4"
           >
-            Clear filters
+            {t.clearFilters}
           </Button>
         )}
       </div>
@@ -100,6 +124,7 @@ export function EventGrid({
             photographerUsername={event.photographerUsername}
             photographerDisplayName={event.photographerDisplayName}
             linkPrefix={eventLinkPrefix}
+            t={{ photo: t.photo, photos: t.photos, from: t.from, free: t.free, noPhotosYet: t.noPhotosYet }}
           />
         ))}
       </div>
@@ -110,10 +135,10 @@ export function EventGrid({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
+                {t.loadMore}
               </>
             ) : (
-              'Load more'
+              t.loadMore
             )}
           </Button>
         </div>
