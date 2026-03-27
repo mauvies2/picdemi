@@ -106,18 +106,22 @@ export function ExplorePageContent({
         eventLinkPrefix={eventLinkPrefix}
         onLoadMore={search.loadMore}
         onClearFilters={search.clearFilters}
-        t={dict ? {
-          searchPrompt: dict.eventFilterBar.searchPrompt,
-          noEventsFound: dict.eventFilterBar.noEventsFound,
-          noEventsFoundDesc: dict.eventFilterBar.noEventsFoundDesc,
-          clearFilters: dict.eventFilterBar.clearFilters,
-          loadMore: dict.eventFilterBar.loadMore,
-          photo: dict.eventCard.photo,
-          photos: dict.eventCard.photos,
-          from: dict.eventCard.from,
-          free: dict.eventCard.free,
-          noPhotosYet: dict.eventCard.noPhotosYet,
-        } : undefined}
+        t={
+          dict
+            ? {
+                searchPrompt: dict.eventFilterBar.searchPrompt,
+                noEventsFound: dict.eventFilterBar.noEventsFound,
+                noEventsFoundDesc: dict.eventFilterBar.noEventsFoundDesc,
+                clearFilters: dict.eventFilterBar.clearFilters,
+                loadMore: dict.eventFilterBar.loadMore,
+                photo: dict.eventCard.photo,
+                photos: dict.eventCard.photos,
+                from: dict.eventCard.from,
+                free: dict.eventCard.free,
+                noPhotosYet: dict.eventCard.noPhotosYet,
+              }
+            : undefined
+        }
       />
 
       {showInfoCards && <EventInfoCards />}

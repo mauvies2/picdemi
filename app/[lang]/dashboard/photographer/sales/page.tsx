@@ -1,13 +1,9 @@
 import { DashboardHeader } from '@/components/dashboard-header';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { SalesContent } from './sales-content';
 
-export default async function SalesPage({
-  params,
-}: {
-  params: Promise<{ lang: string }>;
-}) {
+export default async function SalesPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
   const dict = await getDictionary(lang as Locale);
 

@@ -35,7 +35,13 @@ export function ExploreEventCard({
   photographerUsername,
   photographerDisplayName,
   linkPrefix = '/dashboard/talent/events',
-  t = { photos: 'photos', photo: 'photo', from: 'From', free: 'Free', noPhotosYet: 'No photos yet' },
+  t = {
+    photos: 'photos',
+    photo: 'photo',
+    from: 'From',
+    free: 'Free',
+    noPhotosYet: 'No photos yet',
+  },
 }: ExploreEventCardProps) {
   const activityLabel = activityOptions.find((opt) => opt.value === activity)?.label ?? activity;
   const formattedDate = format(new Date(date), 'MMM d, yyyy');

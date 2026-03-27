@@ -124,7 +124,13 @@ export function EventGrid({
             photographerUsername={event.photographerUsername}
             photographerDisplayName={event.photographerDisplayName}
             linkPrefix={eventLinkPrefix}
-            t={{ photo: t.photo, photos: t.photos, from: t.from, free: t.free, noPhotosYet: t.noPhotosYet }}
+            t={{
+              photo: t.photo,
+              photos: t.photos,
+              from: t.from,
+              free: t.free,
+              noPhotosYet: t.noPhotosYet,
+            }}
           />
         ))}
       </div>

@@ -94,10 +94,10 @@ export function DashboardUserMenu({
         <Button
           variant="ghost"
           size="sm"
-          className="relative h-9 w-9 rounded-lg hover:bg-accent p-0"
+          className="relative h-10 w-10 mx-1 rounded-lg hover:bg-accent p-0"
           aria-label="User menu"
         >
-          <Avatar className="h-9 w-9">
+          <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
             <AvatarFallback>{user.name?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
           </Avatar>
@@ -172,7 +172,9 @@ export function DashboardUserMenu({
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => handleSwitchRole(otherRole)} disabled={isPending}>
             <Camera className="mr-2 h-4 w-4" />
-            <span>{navLabels.switchTo ?? 'Switch to'} {otherRoleLabel}</span>
+            <span>
+              {navLabels.switchTo ?? 'Switch to'} {otherRoleLabel}
+            </span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

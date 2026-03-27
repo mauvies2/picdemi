@@ -1,7 +1,7 @@
 'use server';
 
 import { Buffer } from 'node:buffer';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 import { z } from 'zod';
 import { activityValues } from '@/app/[lang]/dashboard/photographer/events/new/activity-options';
 import {
@@ -199,6 +199,13 @@ export async function updateEventAction(
   revalidatePath(`/en/dashboard/photographer/events/${eventId}`);
   revalidatePath(`/es/dashboard/photographer/events/${eventId}/edit`);
   revalidatePath(`/en/dashboard/photographer/events/${eventId}/edit`);
+  revalidateTag('events-public', 'max');
+  revalidateTag('filter-options', 'max');
+  revalidateTag(`event-${eventId}`, 'max');
+  revalidateTag(`photographer-events-${user.id}`, 'max');
+  revalidateTag(`dashboard-photographer-${user.id}`, 'max');
+  updateTag(`event-${eventId}`);
+  updateTag(`photographer-events-${user.id}`);
 
   return { success: true };
 }
@@ -241,6 +248,12 @@ export async function deletePhotoAction(photoId: string, eventId: string): Promi
   revalidatePath(`/en/dashboard/photographer/events/${eventId}`);
   revalidatePath(`/es/dashboard/photographer/events/${eventId}/edit`);
   revalidatePath(`/en/dashboard/photographer/events/${eventId}/edit`);
+  revalidateTag('events-public', 'max');
+  revalidateTag(`event-${eventId}`, 'max');
+  revalidateTag(`photographer-events-${user.id}`, 'max');
+  revalidateTag(`dashboard-photographer-${user.id}`, 'max');
+  updateTag(`event-${eventId}`);
+  updateTag(`photographer-events-${user.id}`);
 }
 
 /**
@@ -325,4 +338,10 @@ export async function addPhotosAction(eventId: string, formData: FormData): Prom
   revalidatePath(`/en/dashboard/photographer/events/${eventId}`);
   revalidatePath(`/es/dashboard/photographer/events/${eventId}/edit`);
   revalidatePath(`/en/dashboard/photographer/events/${eventId}/edit`);
+  revalidateTag('events-public', 'max');
+  revalidateTag(`event-${eventId}`, 'max');
+  revalidateTag(`photographer-events-${user.id}`, 'max');
+  revalidateTag(`dashboard-photographer-${user.id}`, 'max');
+  updateTag(`event-${eventId}`);
+  updateTag(`photographer-events-${user.id}`);
 }

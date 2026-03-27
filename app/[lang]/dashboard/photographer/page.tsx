@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { Calendar, DollarSign, HardDrive, Image as ImageIcon, TrendingUp } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard-header';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { cn } from '@/lib/utils';
 import { getDashboardData } from './actions';
@@ -73,7 +73,8 @@ export default async function PhotographerDashboardPage({
                   {salesSummary.totalPhotosSold}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {formatCurrency(salesSummary.averageOrderValueCents)} {dict.photographerDashboard.avg}
+                  {formatCurrency(salesSummary.averageOrderValueCents)}{' '}
+                  {dict.photographerDashboard.avg}
                 </p>
               </div>
               <div className="ml-2 shrink-0 rounded-full bg-primary/10 p-2 sm:p-3">

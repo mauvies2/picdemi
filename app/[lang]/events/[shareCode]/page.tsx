@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
-import { cache } from 'react';
+import { Suspense } from 'react';
 import { getActiveRole } from '@/app/[lang]/actions/roles';
 import { activityOptions } from '@/app/[lang]/dashboard/photographer/events/new/activity-options';
 import { AIMatchingButton } from '@/app/[lang]/dashboard/talent/photos/ai-matching/ai-matching-button';
@@ -18,6 +19,7 @@ import { supabaseAdmin } from '@/database/supabase-admin';
 import { getBaseUrl } from '@/lib/get-base-url';
 import { getSiteUrl } from '@/lib/get-site-url';
 import type { Locale } from '@/lib/i18n/config';
+import { locales } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 import { PublicEventPhotoViewer } from './public-event-photo-viewer';
@@ -42,7 +44,17 @@ type EventRow = {
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const fetchEvent = cache(async (param: string): Promise<EventRow | null> => {
+async function getCachedEventData(param: string): Promise<{
+  event: EventRow;
+  photos: Awaited<ReturnType<typeof getEventPhotosPublic>>;
+} | null> {
+  'use cache';
+  cacheTag(`event-${param}`, 'events-public');
+  // 55 min TTL — safely under the 60-min signed URL expiry
+  cacheLife({ revalidate: 55 * 60, expire: 55 * 60 });
+
+  let event: EventRow | null = null;
+
   // 1. UUID → direct public event lookup by primary key
   if (UUID_REGEX.test(param)) {
     const { data, error } = await supabaseAdmin
@@ -53,20 +65,47 @@ const fetchEvent = cache(async (param: string): Promise<EventRow | null> => {
       .is('deleted_at', null)
       .single();
     if (error || !data) return null;
-    return data as EventRow;
+    event = data as EventRow;
+  } else {
+    // 2. Try SEO slug (public events only)
+    const bySlug = await getEventBySlug(supabaseAdmin as unknown as SupabaseServerClient, param);
+    if (bySlug) {
+      event = bySlug as EventRow;
+    } else {
+      // 3. Fall back to share code (handles private events)
+      const byShareCode = await getEventByShareCode(
+        supabaseAdmin as unknown as SupabaseServerClient,
+        param,
+      );
+      event = byShareCode as EventRow | null;
+    }
   }
 
-  // 2. Try SEO slug (public events only)
-  const bySlug = await getEventBySlug(supabaseAdmin as unknown as SupabaseServerClient, param);
-  if (bySlug) return bySlug as EventRow;
+  if (!event) return null;
 
-  // 3. Fall back to share code (handles private events)
-  const byShareCode = await getEventByShareCode(
+  const photos = await getEventPhotosPublic(
     supabaseAdmin as unknown as SupabaseServerClient,
-    param,
+    event.id,
   );
-  return byShareCode as EventRow | null;
-});
+
+  return { event, photos };
+}
+
+// ─── Static Params (pre-render top 50 public events) ─────────────────────────
+
+export async function generateStaticParams() {
+  const { data } = await supabaseAdmin
+    .from('events')
+    .select('id')
+    .eq('is_public', true)
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false })
+    .limit(50);
+
+  return locales.flatMap((lang) =>
+    (data ?? []).map((e: { id: string }) => ({ lang, shareCode: e.id })),
+  );
+}
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
@@ -76,9 +115,10 @@ export async function generateMetadata({
   params: Promise<{ shareCode: string; lang: string }>;
 }): Promise<Metadata> {
   const { shareCode: param, lang } = await params;
-  const event = await fetchEvent(param);
+  const cached = await getCachedEventData(param);
 
-  if (!event) return { title: 'Event Not Found' };
+  if (!cached) return { title: 'Event Not Found' };
+  const { event } = cached;
 
   const siteUrl = getSiteUrl();
   const canonicalPath = event.slug ?? event.id;
@@ -152,18 +192,14 @@ export default async function EventPage({
   const dict = await getDictionary(lang as Locale);
   const supabase = await createClient();
 
-  const event = await fetchEvent(param);
-  if (!event) notFound();
+  const cached = await getCachedEventData(param);
+  if (!cached) notFound();
+  const { event, photos } = cached;
 
   // Permanent redirect: UUID visitors with a slug get sent to the canonical slug URL.
   if (UUID_REGEX.test(param) && event.slug) {
     localizedRedirect(lang, `/events/${event.slug}`);
   }
-
-  const photos = await getEventPhotosPublic(
-    supabaseAdmin as unknown as SupabaseServerClient,
-    event.id,
-  );
 
   const {
     data: { user },
@@ -306,7 +342,10 @@ export default async function EventPage({
               {new Date(event.date).toDateString().split(' ').slice(1).join(' ')} •{' '}
               {event.city[0]?.toUpperCase() + event.city.slice(1)}
               {event.price_per_photo !== null && (
-                <> • ${event.price_per_photo.toFixed(2)} {dict.events.perPhoto}</>
+                <>
+                  {' '}
+                  • ${event.price_per_photo.toFixed(2)} {dict.events.perPhoto}
+                </>
               )}
             </div>
           </div>
@@ -318,16 +357,27 @@ export default async function EventPage({
             <AIMatchingButton className="h-9 rounded-full" />
           </div>
         )}
-        <PublicEventPhotoViewer
-          photos={photoItems}
-          eventId={event.id}
-          eventName={event.name}
-          eventDate={event.date}
-          pricePerPhoto={event.price_per_photo}
-          photographerId={event.user_id}
-          isAuthenticated={!!user}
-          initialPhotosInCart={photosInCart}
-        />
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {Array.from({ length: 12 }).map((_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton items
+                <div key={i} className="aspect-square animate-pulse rounded-lg bg-muted" />
+              ))}
+            </div>
+          }
+        >
+          <PublicEventPhotoViewer
+            photos={photoItems}
+            eventId={event.id}
+            eventName={event.name}
+            eventDate={event.date}
+            pricePerPhoto={event.price_per_photo}
+            photographerId={event.user_id}
+            isAuthenticated={!!user}
+            initialPhotosInCart={photosInCart}
+          />
+        </Suspense>
       </div>
     </div>
   );

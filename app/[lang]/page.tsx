@@ -1,4 +1,5 @@
 import { ArrowRight, Camera, Download, Search } from 'lucide-react';
+import { cacheLife, cacheTag } from 'next/cache';
 import Link from 'next/link';
 import { EventSearchBar } from '@/components/event-search-bar';
 import { Footer } from '@/components/footer';
@@ -11,9 +12,16 @@ import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedPath } from '@/lib/i18n/localized-path';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 
+async function getCachedDictionary(lang: string) {
+  'use cache';
+  cacheTag(`dict-${lang}`);
+  cacheLife('max');
+  return getDictionary(lang as Locale);
+}
+
 export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
-  const dict = await getDictionary(lang as Locale);
+  const dict = await getCachedDictionary(lang);
   const supabase = await createClient();
 
   const {

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { getDownloadTokenByToken } from '@/database/queries/download-tokens';
 import { getGuestOrderWithItems } from '@/database/queries/guest-orders';
 import { supabaseAdmin } from '@/database/supabase-admin';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedPath } from '@/lib/i18n/localized-path';
 
@@ -17,7 +17,11 @@ interface PhotoDownloadItem {
   eventName: string | null;
 }
 
-export default async function DownloadPage({ params }: { params: Promise<{ token: string; lang: string }> }) {
+export default async function DownloadPage({
+  params,
+}: {
+  params: Promise<{ token: string; lang: string }>;
+}) {
   const { token, lang } = await params;
   const dict = await getDictionary(lang as Locale);
 
@@ -38,9 +42,7 @@ export default async function DownloadPage({ params }: { params: Promise<{ token
           <Clock className="h-8 w-8 text-muted-foreground" />
         </div>
         <h1 className="mt-4 text-xl font-semibold">{dict.download.expiredTitle}</h1>
-        <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-          {dict.download.expiredDesc}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground max-w-sm">{dict.download.expiredDesc}</p>
         <div className="mt-6 flex gap-3">
           <Link href={localizedPath(lang, '/login')}>
             <Button variant="outline">{dict.download.login}</Button>
@@ -110,11 +112,10 @@ export default async function DownloadPage({ params }: { params: Promise<{ token
           <UserPlus className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <div className="flex-1 text-sm">
             <span className="font-medium">
-              {dict.download.expiresSoon} {daysLeft} {daysLeft === 1 ? dict.download.day : dict.download.days}.{' '}
+              {dict.download.expiresSoon} {daysLeft}{' '}
+              {daysLeft === 1 ? dict.download.day : dict.download.days}.{' '}
             </span>
-            <span className="text-muted-foreground">
-              {dict.download.keepPermanently}
-            </span>
+            <span className="text-muted-foreground">{dict.download.keepPermanently}</span>
             <div className="mt-2">
               <Link href={localizedPath(lang, `/signup?token=${token}`)}>
                 <Button size="sm" className="gap-1.5">
@@ -131,8 +132,8 @@ export default async function DownloadPage({ params }: { params: Promise<{ token
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">{dict.download.yourPhotos}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {photoItems.length} {photoItems.length === 1 ? dict.events.photo : dict.events.photos} {dict.download.readyToDownload} ·{' '}
-          {dict.download.linksValid}
+          {photoItems.length} {photoItems.length === 1 ? dict.events.photo : dict.events.photos}{' '}
+          {dict.download.readyToDownload} · {dict.download.linksValid}
         </p>
       </div>
 

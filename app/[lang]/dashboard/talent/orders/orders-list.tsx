@@ -85,7 +85,8 @@ const DEFAULT_T: OrdersListT = {
   viewAndManage: 'View and manage your purchase history',
   noOrdersYet: 'No orders yet',
   noStatusOrders: 'No {status} orders',
-  noOrdersDesc: 'When you purchase photos from events, they will appear here. Start exploring events to find photos of yourself!',
+  noOrdersDesc:
+    'When you purchase photos from events, they will appear here. Start exploring events to find photos of yourself!',
   noStatusOrdersDesc: "You don't have any {status} orders at this time.",
   browseEvents: 'Browse Events',
   completed: 'Completed',
@@ -123,7 +124,9 @@ export function OrdersList({ orders, t = DEFAULT_T }: OrdersListProps) {
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <ShoppingCart className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="mb-2 text-lg font-semibold">
-              {statusFilter === 'all' ? t.noOrdersYet : t.noStatusOrders.replace('{status}', statusFilter)}
+              {statusFilter === 'all'
+                ? t.noOrdersYet
+                : t.noStatusOrders.replace('{status}', statusFilter)}
             </h3>
             <p className="mb-4 text-sm text-muted-foreground max-w-sm">
               {statusFilter === 'all'

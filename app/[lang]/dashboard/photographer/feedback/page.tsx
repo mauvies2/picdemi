@@ -1,7 +1,7 @@
 import { getInitialVotesAction } from '@/app/[lang]/actions/feedback';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { FeedbackView } from '@/components/feedback-view';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 
 export default async function PhotographerFeedbackPage({

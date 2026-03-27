@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '500mb',
     },
     proxyClientMaxBodySize: '500mb',
+    useCache: true,
   },
   images: {
     remotePatterns: (() => {

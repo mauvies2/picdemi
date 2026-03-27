@@ -1,18 +1,15 @@
 'use server';
 
+import { cacheLife, cacheTag } from 'next/cache';
 import { getUserEvents } from '@/database/queries/events';
 import { getSalesOverTime, getSalesSummary, getTopSellingEvents } from '@/database/queries/sales';
 import { createClient } from '@/database/server';
+import { supabaseAdmin } from '@/database/supabase-admin';
 
-export async function getDashboardData() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error('User not authenticated');
-  }
+async function getCachedDashboardData(userId: string) {
+  'use cache';
+  cacheTag(`dashboard-photographer-${userId}`, `photographer-events-${userId}`);
+  cacheLife('minutes');
 
   // Calculate date range for last 30 days
   const endDate = new Date();
@@ -23,23 +20,22 @@ export async function getDashboardData() {
 
   // Fetch all data in parallel
   const [salesSummary, salesOverTime, topEvents, allEvents] = await Promise.all([
-    getSalesSummary(supabase, user.id, startDateStr, endDateStr),
-    getSalesOverTime(supabase, user.id, startDateStr, endDateStr, 'day'),
-    getTopSellingEvents(supabase, user.id, 1, startDateStr, endDateStr),
-    getUserEvents(supabase, user.id),
+    getSalesSummary(supabaseAdmin, userId, startDateStr, endDateStr),
+    getSalesOverTime(supabaseAdmin, userId, startDateStr, endDateStr, 'day'),
+    getTopSellingEvents(supabaseAdmin, userId, 1, startDateStr, endDateStr),
+    getUserEvents(supabaseAdmin, userId),
   ]);
 
   // Calculate total photos count (estimate storage)
-  const { count: totalPhotosCount } = await supabase
+  const { count: totalPhotosCount } = await supabaseAdmin
     .from('photos')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
 
   // Estimate storage: assume average 5MB per photo
   const estimatedStorageMB = (totalPhotosCount ?? 0) * 5;
   const estimatedStorageGB = estimatedStorageMB / 1024;
 
-  // For now, assume a free plan (can be fetched from user subscription later)
   const { getPlanById } = await import('@/lib/plans');
   const currentPlan = getPlanById('free');
   const storageLimitGB = currentPlan?.storageGB ?? 1;
@@ -58,4 +54,17 @@ export async function getDashboardData() {
       totalPhotos: totalPhotosCount ?? 0,
     },
   };
+}
+
+export async function getDashboardData() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  return getCachedDashboardData(user.id);
 }

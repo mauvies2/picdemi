@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { Calendar, Mail, User as UserIcon } from 'lucide-react';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { ProfileForm } from '@/components/profile-form';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { ROLES } from '@/lib/roles';
 import { getProfileData } from './actions';
@@ -77,21 +77,27 @@ export default async function PhotographerProfilePage({
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-muted-foreground">{dict.photographerDashboard.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {dict.photographerDashboard.email}
+                    </p>
                     <p className="truncate font-medium">{email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-muted-foreground">{dict.photographerDashboard.memberSince}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {dict.photographerDashboard.memberSince}
+                    </p>
                     <p className="font-medium">{format(new Date(createdAt), 'MMMM d, yyyy')}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <UserIcon className="h-5 w-5 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-muted-foreground">{dict.photographerDashboard.role}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {dict.photographerDashboard.role}
+                    </p>
                     <p className="font-medium capitalize">
                       {profile.active_role === ROLES.TALENT
                         ? dict.photographerDashboard.roleTalent

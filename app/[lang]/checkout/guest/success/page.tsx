@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { getDownloadTokenByGuestOrderId } from '@/database/queries/download-tokens';
 import { getGuestOrderBySessionId } from '@/database/queries/guest-orders';
 import { supabaseAdmin } from '@/database/supabase-admin';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedPath } from '@/lib/i18n/localized-path';
 import { localizedRedirect } from '@/lib/i18n/redirect';
@@ -74,16 +74,17 @@ export default async function GuestCheckoutSuccessPage({
 
         {/* Download CTA */}
         {downloadToken ? (
-          <Link href={localizedPath(lang, `/download/${downloadToken.token}`)} className="mt-8 block">
+          <Link
+            href={localizedPath(lang, `/download/${downloadToken.token}`)}
+            className="mt-8 block"
+          >
             <Button size="lg" className="w-full gap-2">
               <Download className="h-5 w-5" />
               {dict.checkout.viewDownloadPhotos}
             </Button>
           </Link>
         ) : (
-          <p className="mt-8 text-sm text-muted-foreground">
-            {dict.checkout.downloadLinkEmail}
-          </p>
+          <p className="mt-8 text-sm text-muted-foreground">{dict.checkout.downloadLinkEmail}</p>
         )}
 
         {/* Account signup nudge */}
@@ -98,7 +99,11 @@ export default async function GuestCheckoutSuccessPage({
                 {dict.checkout.savePhotosDesc}
               </p>
               <Link
-                href={downloadToken ? localizedPath(lang, `/signup?token=${downloadToken.token}`) : localizedPath(lang, '/signup')}
+                href={
+                  downloadToken
+                    ? localizedPath(lang, `/signup?token=${downloadToken.token}`)
+                    : localizedPath(lang, '/signup')
+                }
                 className="mt-3 inline-block"
               >
                 <Button variant="outline" size="sm" className="gap-1.5">

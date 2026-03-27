@@ -442,7 +442,9 @@ export function EventFilterBar({
                 {t.showingEventsNear}{' '}
                 <span className="font-medium text-foreground">{locationLabel}</span>
                 {radiusKm > 0 && (
-                  <span className="ml-1 text-muted-foreground">· {t.withinKm.replace('{n}', String(radiusKm))}</span>
+                  <span className="ml-1 text-muted-foreground">
+                    · {t.withinKm.replace('{n}', String(radiusKm))}
+                  </span>
                 )}
               </span>
             </>

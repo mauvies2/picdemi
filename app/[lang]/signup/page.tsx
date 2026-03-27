@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/database/server';
 import { env } from '@/env.mjs';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getLangFromHeaders } from '@/lib/i18n/get-lang-from-headers';
 import { localizedPath } from '@/lib/i18n/localized-path';
@@ -93,9 +93,7 @@ export default async function Signup({
       <CloseButton className="absolute right-4 top-4 md:right-6 md:top-6" />
       <div className="w-full max-w-md">
         <h1 className="text-center text-4xl font-bold">{dict.signup.title}</h1>
-        <p className="mt-4 text-center text-muted-foreground">
-          {dict.signup.subtitle}
-        </p>
+        <p className="mt-4 text-center text-muted-foreground">{dict.signup.subtitle}</p>
 
         <div className="mt-4 flex gap-2">
           <GoogleSignInButton
@@ -173,9 +171,7 @@ export default async function Signup({
             </Link>
             {dict.signup.here}
           </p>
-          <p className="mt-4 text-center text-xs">
-            {dict.signup.termsNotice}
-          </p>
+          <p className="mt-4 text-center text-xs">{dict.signup.termsNotice}</p>
         </form>
       </div>
     </div>

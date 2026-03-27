@@ -1,9 +1,10 @@
-import { searchEventsAction } from '@/app/[lang]/dashboard/talent/events/actions';
+import {
+  getFilterOptionsAction,
+  searchEventsAction,
+} from '@/app/[lang]/dashboard/talent/events/actions';
 import { ExplorePageContent } from '@/app/[lang]/dashboard/talent/events/explore-page-content';
 import { EventSearchBar } from '@/components/event-search-bar';
 import { Footer } from '@/components/footer';
-import { getEventFilterOptions, type SupabaseServerClient } from '@/database/queries';
-import { supabaseAdmin } from '@/database/supabase-admin';
 import type { EventWithStats } from '@/hooks/use-event-search';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
@@ -39,7 +40,7 @@ export default async function PublicEventsPage({
   const parsedLat = latStr ? Number.parseFloat(latStr) : undefined;
   const parsedLng = lngStr ? Number.parseFloat(lngStr) : undefined;
   const parsedRadius = radiusStr ? Number.parseInt(radiusStr, 10) : undefined;
-  const filterOptions = await getEventFilterOptions(supabaseAdmin as SupabaseServerClient);
+  const filterOptions = await getFilterOptionsAction();
 
   // Pre-fetch events server-side so the client skips the duplicate POST on mount.
   // Only when location is known (i.e. `where` is in the URL); otherwise the client

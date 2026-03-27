@@ -41,7 +41,8 @@ const DEFAULT_T: ProfileFormT = {
   username: 'Username',
   usernameDesc: 'Your unique username. This is how others will identify you.',
   displayName: 'Display Name',
-  displayNameDesc: 'Your public display name. This is optional and can be different from your username.',
+  displayNameDesc:
+    'Your public display name. This is optional and can be different from your username.',
   bio: 'Bio',
   bioPlaceholder: 'Tell us about yourself...',
   saveChanges: 'Save Changes',
@@ -188,9 +189,7 @@ export function ProfileForm({
                 className={cn(submitAttempted && displayNameError && 'border-destructive')}
                 disabled={isFormPending}
               />
-              <p className="text-xs text-muted-foreground">
-                {t.displayNameDesc}
-              </p>
+              <p className="text-xs text-muted-foreground">{t.displayNameDesc}</p>
               {displayNameError ? (
                 <p className="text-xs text-destructive">{displayNameError}</p>
               ) : null}

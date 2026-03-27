@@ -1,12 +1,12 @@
 'use server';
 
+import { cacheLife, cacheTag } from 'next/cache';
 import {
   createSignedUrl,
   getEventFilterOptions,
   getPhotosForEvents,
   searchPublicEvents,
 } from '@/database/queries';
-import { createClient } from '@/database/server';
 import { supabaseAdmin } from '@/database/supabase-admin';
 
 export async function searchEventsAction(filters: {
@@ -102,8 +102,10 @@ export async function searchEventsAction(filters: {
 }
 
 export async function getFilterOptionsAction() {
-  const supabase = await createClient();
-  return await getEventFilterOptions(supabase);
+  'use cache';
+  cacheTag('filter-options', 'events-public');
+  cacheLife('hours');
+  return getEventFilterOptions(supabaseAdmin);
 }
 
 export async function searchEventNamesAction(query: string): Promise<string[]> {

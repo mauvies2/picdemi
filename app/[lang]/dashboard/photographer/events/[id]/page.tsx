@@ -2,7 +2,7 @@ import { DashboardHeader } from '@/components/dashboard-header';
 import { EventShareCode } from '@/components/event-share-code';
 import { createSignedUrls, getEvent, getEventPhotos } from '@/database/queries';
 import { createClient } from '@/database/server';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 import { getPhotoTags } from './actions';
@@ -51,7 +51,12 @@ export default async function EventDetailPage({
       <div className="text-sm text-muted-foreground">
         {new Date(event.date).toDateString().split(' ').slice(1).join(' ')} •{' '}
         {event.city[0]?.toUpperCase() + event.city.slice(1)}
-        {event.price_per_photo !== null && <> • ${event.price_per_photo.toFixed(2)} {dict.photographerDashboard.perPhoto}</>}
+        {event.price_per_photo !== null && (
+          <>
+            {' '}
+            • ${event.price_per_photo.toFixed(2)} {dict.photographerDashboard.perPhoto}
+          </>
+        )}
       </div>
       {!event.is_public && event.share_code && (
         <div className="mt-4">

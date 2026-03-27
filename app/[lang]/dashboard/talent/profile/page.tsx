@@ -1,5 +1,5 @@
 import { DashboardHeader } from '@/components/dashboard-header';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getProfileData } from './actions';
 import { ProfileContent } from './profile-content';

@@ -1,7 +1,7 @@
 import { getActiveRole } from '@/app/[lang]/actions/roles';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { createClient } from '@/database/server';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 import { listMyTaggedPhotos } from './actions';

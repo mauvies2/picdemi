@@ -35,11 +35,11 @@ function CartIconButton({ href, count }: { href: string; count: number }) {
     <Link href={href}>
       <Button
         variant="ghost"
-        size="sm"
+        size="icon"
         className="relative h-10 w-10 p-0 hover:bg-accent"
         aria-label="Shopping cart"
       >
-        <ShoppingCart className="h-6 w-6 mt-2" />
+        <ShoppingCart className="h-6 w-6 mt-1" />
         {count > 0 && (
           <span
             className={cn(

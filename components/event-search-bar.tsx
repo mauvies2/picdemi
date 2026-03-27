@@ -229,7 +229,13 @@ function WhenPopoverContent({
   onSelectPreset: (label: string, range: DateRange) => void;
   onSelectCustom: (range: DateRange | undefined) => void;
   mobile?: boolean;
-  t: { quickOptions: string; customDate: string; presetToday: string; presetLast3Days: string; presetLastWeek: string };
+  t: {
+    quickOptions: string;
+    customDate: string;
+    presetToday: string;
+    presetLast3Days: string;
+    presetLastWeek: string;
+  };
 }) {
   const [showCalendar, setShowCalendar] = useState(false);
 
@@ -850,8 +856,14 @@ export function EventSearchBar({
                           <div className="flex flex-wrap gap-2 px-3 py-3">
                             {[
                               { label: dict.eventSearchBar.presetToday, getRange: todayRange },
-                              { label: dict.eventSearchBar.presetLast3Days, getRange: last3DaysRange },
-                              { label: dict.eventSearchBar.presetLastWeek, getRange: lastWeekRange },
+                              {
+                                label: dict.eventSearchBar.presetLast3Days,
+                                getRange: last3DaysRange,
+                              },
+                              {
+                                label: dict.eventSearchBar.presetLastWeek,
+                                getRange: lastWeekRange,
+                              },
                             ].map(({ label, getRange }) => (
                               <button
                                 key={label}
@@ -1106,7 +1118,9 @@ export function EventSearchBar({
                 className="flex w-full sm:w-10 h-10 shrink-0 items-center justify-center gap-2 rounded-xl sm:rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90 active:opacity-80"
               >
                 <Search className="h-5 w-5" />
-                <span className="sm:hidden text-sm font-semibold">{dict.eventSearchBar.searchButton}</span>
+                <span className="sm:hidden text-sm font-semibold">
+                  {dict.eventSearchBar.searchButton}
+                </span>
               </button>
             </div>
           </div>

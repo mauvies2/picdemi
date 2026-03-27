@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 import {
   deletePhoto as dbDeletePhoto,
   deleteEvent,
@@ -48,6 +48,13 @@ export const deleteEventAction = async (eventId: string) => {
   revalidatePath('/en/dashboard/photographer/events');
   revalidatePath(`/es/dashboard/photographer/events/${eventId}`);
   revalidatePath(`/en/dashboard/photographer/events/${eventId}`);
+  revalidateTag('events-public', 'max');
+  revalidateTag('filter-options', 'max');
+  revalidateTag(`event-${eventId}`, 'max');
+  revalidateTag(`photographer-events-${user.id}`, 'max');
+  revalidateTag(`dashboard-photographer-${user.id}`, 'max');
+  updateTag(`photographer-events-${user.id}`);
+  updateTag(`dashboard-photographer-${user.id}`);
 };
 
 export const deletePhoto = async (photoId: string, eventId: string) => {
@@ -85,4 +92,8 @@ export const deletePhoto = async (photoId: string, eventId: string) => {
   revalidatePath('/en/dashboard/photographer/events');
   revalidatePath(`/es/dashboard/photographer/events/${eventId}`);
   revalidatePath(`/en/dashboard/photographer/events/${eventId}`);
+  revalidateTag('events-public', 'max');
+  revalidateTag(`event-${eventId}`, 'max');
+  revalidateTag(`photographer-events-${user.id}`, 'max');
+  updateTag(`photographer-events-${user.id}`);
 };

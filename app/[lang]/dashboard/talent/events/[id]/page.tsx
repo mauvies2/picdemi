@@ -5,7 +5,7 @@ import { DashboardHeader } from '@/components/dashboard-header';
 import { createPhotoUrls, getEventPhotosPublic, isPhotoInCart } from '@/database/queries';
 import { createClient } from '@/database/server';
 import { getBaseUrl } from '@/lib/get-base-url';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { EventPhotoViewer } from './event-photo-viewer';
 
@@ -119,7 +119,12 @@ export default async function ExploreEventDetailPage({
         <div className="text-sm text-muted-foreground">
           {new Date(event.date).toDateString().split(' ').slice(1).join(' ')} •{' '}
           {event.city[0]?.toUpperCase() + event.city.slice(1)}
-          {event.price_per_photo !== null && <> • ${event.price_per_photo.toFixed(2)} {dict.talentDashboard.perPhoto}</>}
+          {event.price_per_photo !== null && (
+            <>
+              {' '}
+              • ${event.price_per_photo.toFixed(2)} {dict.talentDashboard.perPhoto}
+            </>
+          )}
         </div>
       </div>
 

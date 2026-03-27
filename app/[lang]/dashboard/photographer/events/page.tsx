@@ -1,107 +1,43 @@
+import { cacheLife, cacheTag } from 'next/cache';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { createSignedUrl, getPhotosForEvents, getUserEvents } from '@/database/queries';
 import { createClient } from '@/database/server';
-import { type Locale } from '@/lib/i18n/config';
+import { supabaseAdmin } from '@/database/supabase-admin';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { deleteEventAction as deleteEvent } from './actions';
 import { EventCard } from './event-card';
 
-async function getEventSalesCounts(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  eventIds: string[],
-  photographerId: string,
-): Promise<Map<string, number>> {
-  if (eventIds.length === 0) {
-    return new Map();
-  }
+type PhotoStat = {
+  count: number;
+  coverPath: string | null;
+  firstTakenAt: string | null;
+  lastTakenAt: string | null;
+};
 
-  const { data, error } = await supabase
-    .from('order_items')
-    .select(
-      `
-      photo_id,
-      orders!inner(
-        id,
-        status
-      ),
-      photos!inner(
-        event_id
-      )
-    `,
-    )
-    .eq('photographer_id', photographerId)
-    .eq('orders.status', 'completed')
-    .in('photos.event_id', eventIds);
+async function getCachedEventsData(userId: string) {
+  'use cache';
+  cacheTag(`photographer-events-${userId}`);
+  cacheLife('minutes');
 
-  if (error) {
-    console.error('Error fetching event sales:', error);
-    return new Map();
-  }
-
-  const uniqueOrdersPerEvent = new Map<string, Set<string>>();
-
-  const items = (data ?? []) as Array<{
-    photos: Array<{ event_id: string | null }> | { event_id: string | null };
-    orders: Array<{ id: string }> | { id: string };
-  }>;
-
-  items.forEach((item) => {
-    const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
-    const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
-    if (!photo?.event_id || !order?.id) return;
-
-    const eventId = photo.event_id;
-    const orderSet = uniqueOrdersPerEvent.get(eventId) ?? new Set<string>();
-    orderSet.add(order.id);
-    uniqueOrdersPerEvent.set(eventId, orderSet);
-  });
-
-  // Convert sets to counts
-  const salesCounts = new Map<string, number>();
-  uniqueOrdersPerEvent.forEach((orderSet, eventId) => {
-    salesCounts.set(eventId, orderSet.size);
-  });
-
-  return salesCounts;
-}
-
-export default async function EventsPage({
-  params,
-}: {
-  params: Promise<{ lang: string }>;
-}) {
-  const { lang } = await params;
-  const dict = await getDictionary(lang as Locale);
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return (
-      <div>
-        <DashboardHeader title={dict.photographerDashboard.overview} />
-        <p className="mt-2 text-muted-foreground">{dict.photographerDashboard.pleaseSignIn}</p>
-      </div>
-    );
-  }
-
-  const events = await getUserEvents(supabase, user.id);
+  const events = await getUserEvents(supabaseAdmin, userId);
   const eventIds = events.map((e) => e.id).filter(Boolean);
-  const [photoRows, salesCounts] = await Promise.all([
-    getPhotosForEvents(supabase, eventIds),
-    getEventSalesCounts(supabase, eventIds, user.id),
+
+  if (eventIds.length === 0) {
+    return { events, stats: new Map<string, PhotoStat>(), salesCounts: new Map<string, number>() };
+  }
+
+  const [photoRows, salesData] = await Promise.all([
+    getPhotosForEvents(supabaseAdmin, eventIds),
+    supabaseAdmin
+      .from('order_items')
+      .select('photo_id, orders!inner(id, status), photos!inner(event_id)')
+      .eq('photographer_id', userId)
+      .eq('orders.status', 'completed')
+      .in('photos.event_id', eventIds),
   ]);
 
-  const stats = new Map<
-    string,
-    {
-      count: number;
-      coverPath: string | null;
-      firstTakenAt: string | null;
-      lastTakenAt: string | null;
-    }
-  >();
+  const stats = new Map<string, PhotoStat>();
 
   (photoRows ?? []).forEach((row) => {
     if (!row.event_id) return;
@@ -123,18 +59,55 @@ export default async function EventsPage({
   });
 
   // Ensure events with zero photos still have stats entry
-  (events ?? []).forEach((event) => {
+  events.forEach((event) => {
     if (!stats.has(event.id)) {
-      stats.set(event.id, {
-        count: 0,
-        coverPath: null,
-        firstTakenAt: null,
-        lastTakenAt: null,
-      });
+      stats.set(event.id, { count: 0, coverPath: null, firstTakenAt: null, lastTakenAt: null });
     }
   });
 
-  // Sign covers per-event (more robust with special characters/ordering)
+  // Build sales counts from raw data
+  const uniqueOrdersPerEvent = new Map<string, Set<string>>();
+  const items = (salesData.data ?? []) as Array<{
+    photos: Array<{ event_id: string | null }> | { event_id: string | null };
+    orders: Array<{ id: string }> | { id: string };
+  }>;
+  items.forEach((item) => {
+    const photo = Array.isArray(item.photos) ? item.photos[0] : item.photos;
+    const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
+    if (!photo?.event_id || !order?.id) return;
+    const orderSet = uniqueOrdersPerEvent.get(photo.event_id) ?? new Set<string>();
+    orderSet.add(order.id);
+    uniqueOrdersPerEvent.set(photo.event_id, orderSet);
+  });
+
+  const salesCounts = new Map<string, number>();
+  uniqueOrdersPerEvent.forEach((orderSet, eventId) => {
+    salesCounts.set(eventId, orderSet.size);
+  });
+
+  return { events, stats, salesCounts };
+}
+
+export default async function EventsPage({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return (
+      <div>
+        <DashboardHeader title={dict.photographerDashboard.overview} />
+        <p className="mt-2 text-muted-foreground">{dict.photographerDashboard.pleaseSignIn}</p>
+      </div>
+    );
+  }
+
+  const { events, stats, salesCounts } = await getCachedEventsData(user.id);
+
+  // Sign covers outside the cache boundary (signed URLs expire in 1 hour)
   const coverUrls = new Map<string, string>();
   await Promise.all(
     Array.from(stats.entries()).map(async ([eventId, info]) => {

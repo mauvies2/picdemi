@@ -56,8 +56,10 @@ const DEFAULT_T: TalentPhotosT = {
   unknownDate: 'Unknown date',
   uncategorized: 'Uncategorized',
   removeFromMyPhotosTitle: 'Remove from My Photos?',
-  removeConfirmSingle: 'This photo will be removed from your collection. The original file is not deleted.',
-  removeConfirmMultiple: 'These {n} photos will be removed from your collection. The original files are not deleted.',
+  removeConfirmSingle:
+    'This photo will be removed from your collection. The original file is not deleted.',
+  removeConfirmMultiple:
+    'These {n} photos will be removed from your collection. The original files are not deleted.',
   loadMore: 'Load more',
   loading: 'Loading...',
   cancel: 'Cancel',

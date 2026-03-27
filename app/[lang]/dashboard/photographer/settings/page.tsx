@@ -12,7 +12,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { getSubscription } from '@/database/queries';
 import { createClient } from '@/database/server';
-import { type Locale } from '@/lib/i18n/config';
+import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { formatPlanPrice, PLANS, type PlanId } from '@/lib/plans';
 import { getDashboardData } from '../actions';

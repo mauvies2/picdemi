@@ -81,7 +81,7 @@ export function TalentDashboardHeader({
           </nav>
 
           {/* Right: Cart + User Avatar */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <CartLinkButton />
             <DashboardUserMenu

@@ -1,7 +1,7 @@
 'use server';
 
 import { Buffer } from 'node:buffer';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 import { z } from 'zod';
 import {
   createPhoto,
@@ -203,6 +203,12 @@ export const createEvent = async (formData: FormData): Promise<CreateEventResult
   revalidatePath('/en/dashboard/photographer/events');
   revalidatePath(`/es/dashboard/photographer/events/${event.id}`);
   revalidatePath(`/en/dashboard/photographer/events/${event.id}`);
+  revalidateTag('events-public', 'max');
+  revalidateTag('filter-options', 'max');
+  revalidateTag(`photographer-events-${user.id}`, 'max');
+  revalidateTag(`dashboard-photographer-${user.id}`, 'max');
+  updateTag(`photographer-events-${user.id}`);
+  updateTag(`dashboard-photographer-${user.id}`);
 
   return { eventId: event.id, shareCode };
 };
