@@ -48,6 +48,7 @@ export default async function TalentSettingsPage({
                 bio: profile.bio,
               }}
               onSubmit={updateProfileAction}
+              t={dict.profileForm}
             />
           </div>
 

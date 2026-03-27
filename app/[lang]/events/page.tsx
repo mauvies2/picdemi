@@ -118,6 +118,7 @@ export default async function PublicEventsPage({
           initialDateTo={dateTo}
           hideTopFilters={true}
           showFindMe={false}
+          dict={dict}
         />
       </div>
       <Footer dict={dict} lang={lang} />

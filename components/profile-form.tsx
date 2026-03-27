@@ -26,6 +26,28 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+type ProfileFormT = {
+  username: string;
+  usernameDesc: string;
+  displayName: string;
+  displayNameDesc: string;
+  bio: string;
+  bioPlaceholder: string;
+  saveChanges: string;
+  saving: string;
+};
+
+const DEFAULT_T: ProfileFormT = {
+  username: 'Username',
+  usernameDesc: 'Your unique username. This is how others will identify you.',
+  displayName: 'Display Name',
+  displayNameDesc: 'Your public display name. This is optional and can be different from your username.',
+  bio: 'Bio',
+  bioPlaceholder: 'Tell us about yourself...',
+  saveChanges: 'Save Changes',
+  saving: 'Saving...',
+};
+
 interface ProfileFormProps {
   initialValues: {
     username: string;
@@ -34,12 +56,14 @@ interface ProfileFormProps {
   };
   onSubmit: (values: ProfileFormValues) => Promise<void>;
   isPending?: boolean;
+  t?: ProfileFormT;
 }
 
 export function ProfileForm({
   initialValues,
   onSubmit,
   isPending: externalIsPending,
+  t = DEFAULT_T,
 }: ProfileFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -110,7 +134,7 @@ export function ProfileForm({
           return (
             <div className="grid gap-2">
               <Label htmlFor={field.name}>
-                Username <span className="text-destructive">*</span>
+                {t.username} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id={field.name}
@@ -127,8 +151,7 @@ export function ProfileForm({
                 disabled={isFormPending}
               />
               <p className="text-xs text-muted-foreground">
-                Your unique username. This is how others will identify you (e.g., @
-                {field.state.value || 'username'}).
+                {t.usernameDesc} (e.g., @{field.state.value || 'username'}).
               </p>
               {usernameError ? <p className="text-xs text-destructive">{usernameError}</p> : null}
             </div>
@@ -153,7 +176,7 @@ export function ProfileForm({
               : null;
           return (
             <div className="grid gap-2">
-              <Label htmlFor={field.name}>Display Name</Label>
+              <Label htmlFor={field.name}>{t.displayName}</Label>
               <Input
                 id={field.name}
                 name={field.name}
@@ -166,7 +189,7 @@ export function ProfileForm({
                 disabled={isFormPending}
               />
               <p className="text-xs text-muted-foreground">
-                Your public display name. This is optional and can be different from your username.
+                {t.displayNameDesc}
               </p>
               {displayNameError ? (
                 <p className="text-xs text-destructive">{displayNameError}</p>
@@ -193,14 +216,14 @@ export function ProfileForm({
               : null;
           return (
             <div className="grid gap-2">
-              <Label htmlFor={field.name}>Bio</Label>
+              <Label htmlFor={field.name}>{t.bio}</Label>
               <Textarea
                 id={field.name}
                 name={field.name}
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="Tell us about yourself..."
+                placeholder={t.bioPlaceholder}
                 rows={4}
                 aria-invalid={submitAttempted && !!bioError}
                 className={cn(submitAttempted && bioError && 'border-destructive')}
@@ -225,7 +248,7 @@ export function ProfileForm({
       {/* Submit Button */}
       <div className="flex justify-end">
         <Button type="submit" disabled={isFormPending}>
-          {isFormPending ? 'Saving...' : 'Save Changes'}
+          {isFormPending ? t.saving : t.saveChanges}
         </Button>
       </div>
     </form>

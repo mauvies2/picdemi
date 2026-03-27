@@ -12,6 +12,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { untagPhotoForTalentAction } from '@/app/[lang]/dashboard/photographer/events/[id]/actions';
@@ -19,6 +20,41 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { PhotoLightboxItem } from './photo-lightbox';
+
+const TOOLBAR_TRANSLATIONS: Record<
+  string,
+  {
+    share: string;
+    download: string;
+    removeFromPhotos: string;
+    addToPhotos: string;
+    removeFromCart: string;
+    addToCart: string;
+    remove: string;
+    tagRemoved: string;
+  }
+> = {
+  en: {
+    share: 'Share',
+    download: 'Download',
+    removeFromPhotos: 'Remove from photos',
+    addToPhotos: 'Add to photos',
+    removeFromCart: 'Remove from cart',
+    addToCart: 'Add to cart',
+    remove: 'Remove',
+    tagRemoved: 'Tag removed',
+  },
+  es: {
+    share: 'Compartir',
+    download: 'Descargar',
+    removeFromPhotos: 'Eliminar de fotos',
+    addToPhotos: 'Añadir a fotos',
+    removeFromCart: 'Eliminar del carrito',
+    addToCart: 'Añadir al carrito',
+    remove: 'Eliminar',
+    tagRemoved: 'Etiqueta eliminada',
+  },
+};
 
 type LightboxToolbarProps = {
   currentPhoto: PhotoLightboxItem;
@@ -65,6 +101,10 @@ export function LightboxToolbar({
   onUntag,
   onFullscreen,
 }: LightboxToolbarProps) {
+  const params = useParams();
+  const lang = (params?.lang as string) ?? 'es';
+  const t = TOOLBAR_TRANSLATIONS[lang] ?? TOOLBAR_TRANSLATIONS.es;
+
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [isUntagging, startUntagging] = useTransition();
 
@@ -74,7 +114,7 @@ export function LightboxToolbar({
     startUntagging(async () => {
       try {
         await untagPhotoForTalentAction(currentPhoto.id, talentUserId);
-        toast.success('Tag removed');
+        toast.success(t.tagRemoved);
         onUntag?.();
       } catch (error) {
         console.error('Error untagging photo:', error);
@@ -135,7 +175,7 @@ export function LightboxToolbar({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Share</p>
+            <p>{t.share}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -157,7 +197,7 @@ export function LightboxToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Download</p>
+              <p>{t.download}</p>
             </TooltipContent>
           </Tooltip>
         )}
@@ -184,7 +224,7 @@ export function LightboxToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{isInMyPhotos ? 'Remove from photos' : 'Add to photos'}</p>
+              <p>{isInMyPhotos ? t.removeFromPhotos : t.addToPhotos}</p>
             </TooltipContent>
           </Tooltip>
         )}
@@ -211,7 +251,7 @@ export function LightboxToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{isInCart ? 'Remove from cart' : 'Add to cart'}</p>
+              <p>{isInCart ? t.removeFromCart : t.addToCart}</p>
             </TooltipContent>
           </Tooltip>
         )}
@@ -234,7 +274,7 @@ export function LightboxToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Remove</p>
+              <p>{t.remove}</p>
             </TooltipContent>
           </Tooltip>
         )}

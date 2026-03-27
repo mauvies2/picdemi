@@ -64,7 +64,7 @@ export default async function TalentOrdersPage({
       </div>
 
       {/* Orders List */}
-      <OrdersList orders={orders} />
+      <OrdersList orders={orders} t={dict.ordersList} />
     </div>
   );
 }

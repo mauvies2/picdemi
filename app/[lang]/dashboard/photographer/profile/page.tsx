@@ -61,6 +61,7 @@ export default async function PhotographerProfilePage({
                   bio: profile.bio,
                 }}
                 onSubmit={updateProfileAction}
+                t={dict.profileForm}
               />
             </div>
           </div>

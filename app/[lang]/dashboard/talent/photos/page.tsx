@@ -37,6 +37,7 @@ export default async function TalentPhotosPage({ params }: { params: Promise<{ l
         initialGroups={result.groups}
         hasMore={result.hasMore}
         photosInCart={result.photosInCart}
+        t={{ ...dict.talentPhotos, cancel: dict.common.cancel }}
       />
     </div>
   );

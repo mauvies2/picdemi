@@ -321,7 +321,8 @@
     "removeConfirmSingle": "Esta foto se eliminará de tu colección. El archivo original no se elimina.",
     "removeConfirmMultiple": "Estas {n} fotos se eliminarán de tu colección. Los archivos originales no se eliminan.",
     "loadMore": "Cargar más",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "cancel": "Cancelar"
   },
   "lightboxToolbar": {
     "share": "Compartir",

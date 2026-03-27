@@ -25,16 +25,56 @@ import {
   type TaggedPhotoGroup,
 } from './actions';
 
+type TalentPhotosT = {
+  noPhotosTagged: string;
+  select: string;
+  clear: string;
+  remove: string;
+  addToCart: string;
+  noPhotosSelected: string;
+  photoSelected: string;
+  photosSelected: string;
+  unknownDate: string;
+  uncategorized: string;
+  removeFromMyPhotosTitle: string;
+  removeConfirmSingle: string;
+  removeConfirmMultiple: string;
+  loadMore: string;
+  loading: string;
+  cancel: string;
+};
+
+const DEFAULT_T: TalentPhotosT = {
+  noPhotosTagged: 'No photos tagged yet. Photographers will tag you in photos from events.',
+  select: 'Select',
+  clear: 'Clear',
+  remove: 'Remove',
+  addToCart: 'Add to cart',
+  noPhotosSelected: 'No photos selected',
+  photoSelected: '1 photo selected',
+  photosSelected: '{n} photos selected',
+  unknownDate: 'Unknown date',
+  uncategorized: 'Uncategorized',
+  removeFromMyPhotosTitle: 'Remove from My Photos?',
+  removeConfirmSingle: 'This photo will be removed from your collection. The original file is not deleted.',
+  removeConfirmMultiple: 'These {n} photos will be removed from your collection. The original files are not deleted.',
+  loadMore: 'Load more',
+  loading: 'Loading...',
+  cancel: 'Cancel',
+};
+
 interface TalentPhotosGridProps {
   initialGroups: TaggedPhotoGroup[];
   hasMore: boolean;
   photosInCart?: string[];
+  t?: TalentPhotosT;
 }
 
 export function TalentPhotosGrid({
   initialGroups,
   hasMore: initialHasMore,
   photosInCart = [],
+  t = DEFAULT_T,
 }: TalentPhotosGridProps) {
   const queryClient = useQueryClient();
   const [groups, setGroups] = useState(initialGroups);
@@ -113,10 +153,10 @@ export function TalentPhotosGrid({
   }, [selectedIds]);
 
   const selectedCountLabel = useMemo(() => {
-    if (selectedIds.length === 0) return 'No photos selected';
-    if (selectedIds.length === 1) return '1 photo selected';
-    return `${selectedIds.length} photos selected`;
-  }, [selectedIds.length]);
+    if (selectedIds.length === 0) return t.noPhotosSelected;
+    if (selectedIds.length === 1) return t.photoSelected;
+    return t.photosSelected.replace('{n}', String(selectedIds.length));
+  }, [selectedIds.length, t]);
 
   // Restructure: Group by date first, then by event
   const dateGroups = useMemo(() => {
@@ -220,9 +260,7 @@ export function TalentPhotosGrid({
   if (groups.length === 0) {
     return (
       <div className="rounded-xl border border-dashed p-12 text-center">
-        <p className="text-muted-foreground">
-          No photos tagged yet. Photographers will tag you in photos from events.
-        </p>
+        <p className="text-muted-foreground">{t.noPhotosTagged}</p>
       </div>
     );
   }
@@ -234,7 +272,7 @@ export function TalentPhotosGrid({
           <>
             <div className="text-sm font-medium text-muted-foreground">{selectedCountLabel}</div>
             <Button type="button" variant="outline" size="sm" onClick={clearSelection}>
-              Clear
+              {t.clear}
             </Button>
             <Button
               type="button"
@@ -243,7 +281,7 @@ export function TalentPhotosGrid({
               onClick={() => setShowRemoveConfirm(true)}
               disabled={selectedIds.length === 0 || isLoading}
             >
-              Remove
+              {t.remove}
             </Button>
             <Button
               type="button"
@@ -253,12 +291,12 @@ export function TalentPhotosGrid({
               disabled={selectedIds.length === 0 || isLoading}
             >
               <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to cart
+              {t.addToCart}
             </Button>
           </>
         ) : (
           <Button type="button" variant="outline" size="sm" onClick={() => setIsSelecting(true)}>
-            Select
+            {t.select}
           </Button>
         )}
       </div>
@@ -271,7 +309,7 @@ export function TalentPhotosGrid({
             <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-2 pt-4 border-b border-border/50">
               <h2 className="text-xl font-semibold text-foreground">
                 {dateKey === 'unknown'
-                  ? 'Unknown date'
+                  ? t.unknownDate
                   : format(new Date(dateKey), 'EEEE, MMMM d, yyyy')}
               </h2>
             </div>
@@ -286,11 +324,11 @@ export function TalentPhotosGrid({
                       href={`/dashboard/talent/events/${event.event_id}`}
                       className="text-sm font-semibold text-foreground hover:underline"
                     >
-                      {event.event_name ?? 'Uncategorized'}
+                      {event.event_name ?? t.uncategorized}
                     </Link>
                   ) : (
                     <span className="text-sm font-semibold text-foreground">
-                      {event.event_name ?? 'Uncategorized'}
+                      {event.event_name ?? t.uncategorized}
                     </span>
                   )}
                   {event.event_city && event.event_country && (
@@ -328,10 +366,10 @@ export function TalentPhotosGrid({
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
+                  {t.loading}
                 </>
               ) : (
-                'Load more'
+                t.loadMore
               )}
             </Button>
           </div>
@@ -341,20 +379,20 @@ export function TalentPhotosGrid({
       <AlertDialog open={showRemoveConfirm} onOpenChange={setShowRemoveConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove from My Photos?</AlertDialogTitle>
+            <AlertDialogTitle>{t.removeFromMyPhotosTitle}</AlertDialogTitle>
             <AlertDialogDescription>
               {selectedIds.length === 1
-                ? 'This photo will be removed from your collection. The original file is not deleted.'
-                : `These ${selectedIds.length} photos will be removed from your collection. The original files are not deleted.`}
+                ? t.removeConfirmSingle
+                : t.removeConfirmMultiple.replace('{n}', String(selectedIds.length))}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmRemove}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Remove
+              {t.remove}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
