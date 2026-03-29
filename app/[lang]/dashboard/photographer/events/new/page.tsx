@@ -1,5 +1,15 @@
+import type { Locale } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 import NewEventWizard from './wizard';
 
-export default async function NewEventPage() {
-  return <NewEventWizard />;
+export default async function NewEventPage({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang as Locale);
+
+  return (
+    <TranslationsProvider translations={dict.newEvent}>
+      <NewEventWizard />
+    </TranslationsProvider>
+  );
 }

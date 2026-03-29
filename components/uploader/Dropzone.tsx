@@ -1,6 +1,8 @@
 import { useCallback, useId, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
 import { cn } from '@/lib/utils';
 
 type DropzoneProps = {
@@ -14,6 +16,7 @@ function Dropzone({ onSelect, accept, multiple = true, className }: DropzoneProp
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isDragged, setIsDragged] = useState(false);
   const inputId = useId();
+  const { t } = useTranslations<Dictionary['newEvent']>();
 
   const handleFiles = useCallback(
     (fileList: FileList | null) => {
@@ -68,9 +71,9 @@ function Dropzone({ onSelect, accept, multiple = true, className }: DropzoneProp
           onClick={() => inputRef.current?.click()}
           className="focus-visible:outline focus-visible:outline-offset-2"
         >
-          Upload
+          {t('upload')}
         </Button>
-        <p className="text-sm text-muted-foreground">Or drag files here</p>
+        <p className="text-sm text-muted-foreground">{t('dragFiles')}</p>
       </div>
     </label>
   );

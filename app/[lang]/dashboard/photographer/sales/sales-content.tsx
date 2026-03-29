@@ -12,25 +12,29 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Sale, SalesByDate, TopSellingEvent } from '@/database/queries/sales';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
 import { cn } from '@/lib/utils';
 import { getSalesDataAction } from './actions';
+
+type PhotographerDashboardT = Dictionary['photographerDashboard'];
 
 function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-function formatDate(dateString: string): string {
+function formatDate(dateString: string, locale: string): string {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   });
 }
 
-function formatDateTime(dateString: string): string {
+function formatDateTime(dateString: string, locale: string): string {
   const date = new Date(dateString);
-  return date.toLocaleString('en-US', {
+  return date.toLocaleString(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -64,13 +68,16 @@ function SummaryCard({ title, value, icon, trend, className }: SummaryCardProps)
 
 interface SalesChartProps {
   data: SalesByDate[];
+  lang: string;
 }
 
-function SalesChart({ data }: SalesChartProps) {
+function SalesChart({ data, lang }: SalesChartProps) {
+  const { t } = useTranslations<PhotographerDashboardT>();
+
   if (data.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center rounded-lg border border-border bg-card p-6">
-        <p className="text-sm text-muted-foreground">No sales data available</p>
+        <p className="text-sm text-muted-foreground">{t('noSalesDataAvailable')}</p>
       </div>
     );
   }
@@ -81,7 +88,7 @@ function SalesChart({ data }: SalesChartProps) {
 
   return (
     <div className="rounded-lg border border-border bg-card p-6">
-      <h3 className="mb-4 text-lg font-semibold">Sales Over Time</h3>
+      <h3 className="mb-4 text-lg font-semibold">{t('salesOverTime')}</h3>
       <div className="flex h-64 items-end justify-between gap-1 overflow-x-auto pb-2">
         {displayData.map((item) => {
           const height = (item.revenue_cents / maxRevenue) * 100;
@@ -90,10 +97,10 @@ function SalesChart({ data }: SalesChartProps) {
               <div
                 className="w-full rounded-t bg-primary transition-all hover:bg-primary/80"
                 style={{ height: `${Math.max(height, 2)}%` }}
-                title={`${formatDate(item.date)}: ${formatPrice(item.revenue_cents)} (${item.sales_count} sale${item.sales_count !== 1 ? 's' : ''})`}
+                title={`${formatDate(item.date, lang)}: ${formatPrice(item.revenue_cents)} (${item.sales_count} ${item.sales_count !== 1 ? t('sales') : t('sale')})`}
               />
               <span className="text-xs text-muted-foreground">
-                {new Date(item.date).toLocaleDateString('en-US', {
+                {new Date(item.date).toLocaleDateString(lang, {
                   month: 'short',
                   day: 'numeric',
                 })}
@@ -103,7 +110,7 @@ function SalesChart({ data }: SalesChartProps) {
         })}
       </div>
       {data.length > 30 && (
-        <p className="mt-2 text-xs text-muted-foreground">Showing last 30 days of data</p>
+        <p className="mt-2 text-xs text-muted-foreground">{t('showingLast30DaysNote')}</p>
       )}
     </div>
   );
@@ -114,18 +121,20 @@ interface TopEventsProps {
 }
 
 function TopEvents({ events }: TopEventsProps) {
+  const { t } = useTranslations<PhotographerDashboardT>();
+
   if (events.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-6">
-        <h3 className="mb-4 text-lg font-semibold">Top Selling Events</h3>
-        <p className="text-sm text-muted-foreground">No sales yet</p>
+        <h3 className="mb-4 text-lg font-semibold">{t('topSellingEvents')}</h3>
+        <p className="text-sm text-muted-foreground">{t('noSalesYetShort')}</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-lg border border-border bg-card p-6">
-      <h3 className="mb-4 text-lg font-semibold">Top Selling Events</h3>
+      <h3 className="mb-4 text-lg font-semibold">{t('topSellingEvents')}</h3>
       <div className="space-y-3">
         {events.map((event, index) => (
           <div
@@ -136,10 +145,11 @@ function TopEvents({ events }: TopEventsProps) {
               #{index + 1}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium">{event.event_name || 'Untitled Event'}</p>
+              <p className="text-sm font-medium">{event.event_name || t('untitledEvent')}</p>
               <p className="text-xs text-muted-foreground">
-                {event.photos_sold} photo{event.photos_sold !== 1 ? 's' : ''} • {event.sales_count}{' '}
-                sale{event.sales_count !== 1 ? 's' : ''} • {formatPrice(event.revenue_cents)}
+                {event.photos_sold} {event.photos_sold !== 1 ? t('photos') : t('photo')} •{' '}
+                {event.sales_count} {event.sales_count !== 1 ? t('sales') : t('sale')} •{' '}
+                {formatPrice(event.revenue_cents)}
               </p>
             </div>
           </div>
@@ -151,47 +161,50 @@ function TopEvents({ events }: TopEventsProps) {
 
 interface RecentSalesProps {
   sales: Sale[];
+  lang: string;
 }
 
-function RecentSales({ sales }: RecentSalesProps) {
+function RecentSales({ sales, lang }: RecentSalesProps) {
+  const { t } = useTranslations<PhotographerDashboardT>();
+
   if (sales.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-6">
-        <h3 className="mb-4 text-lg font-semibold">Recent Sales</h3>
-        <p className="text-sm text-muted-foreground">No sales yet</p>
+        <h3 className="mb-4 text-lg font-semibold">{t('recentSales')}</h3>
+        <p className="text-sm text-muted-foreground">{t('noSalesYetShort')}</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-lg border border-border bg-card p-6">
-      <h3 className="mb-4 text-lg font-semibold">Recent Sales</h3>
+      <h3 className="mb-4 text-lg font-semibold">{t('recentSales')}</h3>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
               <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
-                Date
+                {t('date')}
               </th>
               <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
-                Event
+                {t('event')}
               </th>
               <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
-                Buyer
+                {t('buyer')}
               </th>
               <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">
-                Amount
+                {t('amount')}
               </th>
             </tr>
           </thead>
           <tbody>
             {sales.map((sale) => (
               <tr key={sale.id} className="border-b border-border">
-                <td className="px-4 py-3 text-sm">{formatDateTime(sale.created_at)}</td>
-                <td className="px-4 py-3 text-sm">{sale.event_name || 'Untitled Event'}</td>
+                <td className="px-4 py-3 text-sm">{formatDateTime(sale.created_at, lang)}</td>
+                <td className="px-4 py-3 text-sm">{sale.event_name || t('untitledEvent')}</td>
                 <td className="px-4 py-3 text-sm text-muted-foreground">
                   {sale.buyer_email || (
-                    <span className="italic">Customer {sale.buyer_id.slice(0, 8)}</span>
+                    <span className="italic">{t('customer')} {sale.buyer_id.slice(0, 8)}</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right text-sm font-medium">
@@ -206,7 +219,8 @@ function RecentSales({ sales }: RecentSalesProps) {
   );
 }
 
-export function SalesContent() {
+export function SalesContent({ lang }: { lang: string }) {
+  const { t } = useTranslations<PhotographerDashboardT>();
   const [timeRange, setTimeRange] = useState<string>('30');
 
   const { data: salesData, isFetching } = useQuery({
@@ -230,17 +244,17 @@ export function SalesContent() {
     <div className="space-y-4">
       {/* Header with time range filter */}
       <div className="flex items-end justify-between">
-        <h2 className="text-xl font-semibold">Overview</h2>
+        <h2 className="text-xl font-semibold">{t('overview')}</h2>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select time range" />
+            <SelectValue placeholder={t('selectTimeRange')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="7">Last 7 days</SelectItem>
-            <SelectItem value="30">Last 30 days</SelectItem>
-            <SelectItem value="90">Last 90 days</SelectItem>
-            <SelectItem value="365">Last year</SelectItem>
-            <SelectItem value="all">All time</SelectItem>
+            <SelectItem value="7">{t('last7Days')}</SelectItem>
+            <SelectItem value="30">{t('last30Days')}</SelectItem>
+            <SelectItem value="90">{t('last90Days')}</SelectItem>
+            <SelectItem value="365">{t('lastYear')}</SelectItem>
+            <SelectItem value="all">{t('allTime')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -263,22 +277,22 @@ export function SalesContent() {
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard
-              title="Total Revenue"
+              title={t('totalRevenue')}
               value={formatPrice(salesData.summary.totalRevenueCents)}
               icon={<DollarSign className="size-6 text-primary" />}
             />
             <SummaryCard
-              title="Total Sales"
+              title={t('totalSales')}
               value={salesData.summary.totalSales.toString()}
               icon={<ShoppingCart className="size-6 text-primary" />}
             />
             <SummaryCard
-              title="Average Order Value"
+              title={t('averageOrderValue')}
               value={formatPrice(salesData.summary.averageOrderValueCents)}
               icon={<TrendingUp className="size-6 text-primary" />}
             />
             <SummaryCard
-              title="Photos Sold"
+              title={t('photosSold')}
               value={salesData.summary.totalPhotosSold.toString()}
               icon={<Image className="size-6 text-primary" />}
             />
@@ -288,8 +302,8 @@ export function SalesContent() {
           {salesData.summary.totalSales > 0 ? (
             <>
               <div className="grid gap-4 lg:grid-cols-2">
-                <SalesChart data={salesData.salesOverTime} />
-                <RecentSales sales={salesData.recentSales} />
+                <SalesChart data={salesData.salesOverTime} lang={lang} />
+                <RecentSales sales={salesData.recentSales} lang={lang} />
               </div>
 
               {/* Top Selling Events */}
@@ -298,10 +312,8 @@ export function SalesContent() {
           ) : (
             <div className="rounded-lg border border-dashed border-border bg-card p-12 text-center">
               <ShoppingCart className="mx-auto mb-4 size-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold">No sales yet</h3>
-              <p className="text-sm text-muted-foreground">
-                Start selling photos to see your sales data here.
-              </p>
+              <h3 className="mb-2 text-lg font-semibold">{t('noSalesYetShort')}</h3>
+              <p className="text-sm text-muted-foreground">{t('startSellingPhotosDesc')}</p>
             </div>
           )}
         </>

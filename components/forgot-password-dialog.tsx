@@ -13,6 +13,10 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
+
+type AuthT = Dictionary['auth'];
 
 interface ForgotPasswordDialogProps {
   open: boolean;
@@ -25,6 +29,7 @@ export function ForgotPasswordDialog({
   onOpenChange,
   initialEmail = '',
 }: ForgotPasswordDialogProps) {
+  const { t } = useTranslations<AuthT>();
   const [email, setEmail] = useState(initialEmail);
   const [isPending, startTransition] = useTransition();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -42,12 +47,12 @@ export function ForgotPasswordDialog({
     setError(null);
 
     if (!email) {
-      setError('Please enter your email address');
+      setError(t('errorEnterEmail'));
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address');
+      setError(t('errorValidEmail'));
       return;
     }
 
@@ -59,7 +64,7 @@ export function ForgotPasswordDialog({
         setIsSuccess(true);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+        setError(err instanceof Error ? err.message : t('somethingWentWrong'));
       }
     });
   };
@@ -83,14 +88,14 @@ export function ForgotPasswordDialog({
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/20">
                 <Mail className="h-6 w-6 text-sky-600 dark:text-sky-400" />
               </div>
-              <DialogTitle className="text-center text-2xl">Reset your password</DialogTitle>
+              <DialogTitle className="text-center text-2xl">{t('resetPasswordTitle')}</DialogTitle>
               <DialogDescription className="text-center">
-                Enter your email address and we&apos;ll send you a link to reset your password.
+                {t('resetPasswordDesc')}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="reset-email">Email address</Label>
+                <Label htmlFor="reset-email">{t('emailAddress')}</Label>
                 <Input
                   id="reset-email"
                   type="email"
@@ -112,10 +117,10 @@ export function ForgotPasswordDialog({
                   {isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
+                      {t('sending')}
                     </>
                   ) : (
-                    'Send reset link'
+                    t('sendResetLink')
                   )}
                 </Button>
                 <Button
@@ -125,7 +130,7 @@ export function ForgotPasswordDialog({
                   disabled={isPending}
                   className="h-10"
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
               </div>
             </form>
@@ -136,21 +141,18 @@ export function ForgotPasswordDialog({
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
                 <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <DialogTitle className="text-center text-2xl">Check your email</DialogTitle>
+              <DialogTitle className="text-center text-2xl">{t('checkYourEmail')}</DialogTitle>
               <DialogDescription className="text-center">
-                We&apos;ve sent a password reset link to{' '}
+                {t('resetLinkSentTo')}{' '}
                 <span className="font-medium text-foreground">{email}</span>
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="rounded-lg border bg-muted/50 p-4">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Didn&apos;t receive the email?</strong> Check your spam folder or try
-                  again in a few minutes.
-                </p>
+                <p className="text-sm text-muted-foreground">{t('didntReceiveEmail')}</p>
               </div>
               <Button onClick={handleClose} className="h-11 w-full" variant="outline">
-                Back to login
+                {t('backToLogin')}
               </Button>
             </div>
           </>

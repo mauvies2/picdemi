@@ -20,6 +20,8 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useLocalizedPath } from '@/hooks/use-localized-path';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
 import { cn } from '@/lib/utils';
 import { createEvent } from './actions';
 import { activityOptions, activityValues } from './activity-options';
@@ -27,6 +29,8 @@ import { ConfirmEventDialog } from './components/confirm-event-dialog';
 import { PhotoUploadSection } from './components/photo-upload-section';
 import { ShareCodeDialog } from './components/share-code-dialog';
 import { eventSchema, type FormValues } from './wizard.schema';
+
+type NewEventT = Dictionary['newEvent'];
 
 const STORAGE_KEY = 'picdemi_new_event_form';
 
@@ -81,6 +85,7 @@ const getDefaultValues = (): FormValues => {
 const defaultValues = getDefaultValues();
 
 export default function NewEventForm() {
+  const { t } = useTranslations<NewEventT>();
   const router = useRouter();
   const lp = useLocalizedPath();
   const [files, setFiles] = useState<File[]>([]);
@@ -105,7 +110,7 @@ export default function NewEventForm() {
       try {
         const parsed = eventSchema.parse(value);
         if (files.length === 0) {
-          setPhotosError('Add at least one photo to continue.');
+          setPhotosError(t('photosRequired'));
           return;
         }
         setPhotosError(null);
@@ -172,7 +177,7 @@ export default function NewEventForm() {
     setFiles((prev) => {
       const next = prev.filter((file) => file !== targetFile);
       if (submitAttempted && next.length === 0) {
-        setPhotosError('Add at least one photo to continue.');
+        setPhotosError(t('photosRequired'));
       } else if (next.length > 0) {
         setPhotosError(null);
       }
@@ -184,7 +189,7 @@ export default function NewEventForm() {
     const value = pendingValues;
     if (!value || isPending) return;
     if (files.length === 0) {
-      setPhotosError('Add at least one photo to continue.');
+      setPhotosError(t('photosRequired'));
       setIsModalOpen(false);
       return;
     }
@@ -238,9 +243,7 @@ export default function NewEventForm() {
         }
       } catch (error) {
         console.error(error);
-        setSubmitError(
-          error instanceof Error ? error.message : 'Something went wrong. Please try again.',
-        );
+        setSubmitError(error instanceof Error ? error.message : t('submitError'));
       }
     });
   };
@@ -250,42 +253,41 @@ export default function NewEventForm() {
     const price =
       source.price_per_photo !== null && source.price_per_photo !== undefined
         ? `$${typeof source.price_per_photo === 'string' ? Number.parseFloat(source.price_per_photo).toFixed(2) : source.price_per_photo.toFixed(2)}`
-        : 'Free';
+        : t('summaryFree');
 
     return [
-      { label: 'Name', value: source.name },
+      { label: t('summaryName'), value: source.name },
       {
-        label: 'Activity',
+        label: t('summaryActivity'),
         value:
           activityOptions.find((option) => option.value === source.activity)?.label ??
           source.activity,
       },
       {
-        label: 'Date',
+        label: t('summaryDate'),
         value: source.date ? format(new Date(source.date), 'PPP') : '',
       },
-      ...(source.city ? [{ label: 'Location', value: source.city }] : []),
+      ...(source.city ? [{ label: t('summaryLocation'), value: source.city }] : []),
       {
-        label: 'Visibility',
-        value: source.is_public ? 'Public' : 'Private',
+        label: t('summaryVisibility'),
+        value: source.is_public ? t('summaryPublic') : t('summaryPrivate'),
       },
       {
-        label: 'Watermark',
-        value: source.is_public && source.watermark_enabled ? 'Enabled' : 'Disabled',
+        label: t('summaryWatermark'),
+        value:
+          source.is_public && source.watermark_enabled ? t('summaryEnabled') : t('summaryDisabled'),
       },
-      { label: 'Price per Photo', value: price },
-      { label: 'Photos', value: `${files.length} selected` },
+      { label: t('summaryPrice'), value: price },
+      { label: 'Photos', value: t('summaryPhotosCount').replace('{n}', String(files.length)) },
     ];
-  }, [pendingValues, form.state.values, files.length]);
+  }, [pendingValues, form.state.values, files.length, t]);
 
   return (
     <div>
       <div className="mx-auto w-full max-w-full space-y-6">
         <header>
-          <DashboardHeader title="Create Event" />
-          <p className="mt-1 text-sm text-muted-foreground">
-            Fill the details and add your photos.
-          </p>
+          <DashboardHeader title={t('title')} />
+          <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
         </header>
 
         {/* Unified layout: Desktop split, Mobile stacked */}
@@ -309,7 +311,7 @@ export default function NewEventForm() {
                     name="name"
                     validators={{
                       onChange: ({ value }) =>
-                        value.trim().length === 0 ? 'Name is required.' : undefined,
+                        value.trim().length === 0 ? t('nameRequired') : undefined,
                     }}
                   >
                     {(field) => {
@@ -318,14 +320,14 @@ export default function NewEventForm() {
                       const isInvalid = showFeedback && !field.state.meta.isValid;
                       return (
                         <div>
-                          <Label htmlFor="name">Name or place</Label>
+                          <Label htmlFor="name">{t('nameLabel')}</Label>
                           <Input
                             id="name"
                             className="mt-2 mb-1"
                             value={field.state.value}
                             onChange={(event) => field.handleChange(event.target.value)}
                             onBlur={field.handleBlur}
-                            placeholder="Event name or place"
+                            placeholder={t('namePlaceholder')}
                             aria-invalid={isInvalid}
                             autoComplete="off"
                             suppressHydrationWarning
@@ -344,7 +346,7 @@ export default function NewEventForm() {
                       onChange: ({ value }) =>
                         value && activityValues.includes(value as (typeof activityValues)[number])
                           ? undefined
-                          : 'Activity is required.',
+                          : t('activityRequired'),
                     }}
                   >
                     {(field) => {
@@ -353,7 +355,7 @@ export default function NewEventForm() {
                       const isInvalid = showFeedback && !field.state.meta.isValid;
                       return (
                         <div className="grid gap-2">
-                          <Label htmlFor="activity">Activity</Label>
+                          <Label htmlFor="activity">{t('activityLabel')}</Label>
                           <Select
                             value={field.state.value}
                             onValueChange={(value) => {
@@ -366,7 +368,7 @@ export default function NewEventForm() {
                               className="w-full rounded-md"
                               aria-invalid={isInvalid}
                             >
-                              <SelectValue placeholder="Select an activity" />
+                              <SelectValue placeholder={t('activityPlaceholder')} />
                             </SelectTrigger>
                             <SelectContent className="w-[--radix-select-trigger-width]">
                               {activityOptions.map((option) => (
@@ -389,13 +391,13 @@ export default function NewEventForm() {
                 <form.Field name="city">
                   {(field) => (
                     <div className="grid gap-2">
-                      <Label htmlFor="city">Location</Label>
+                      <Label htmlFor="city">{t('locationLabel')}</Label>
                       <Input
                         id="city"
                         value={field.state.value || ''}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="City, region or venue"
+                        placeholder={t('locationPlaceholder')}
                         autoComplete="off"
                         suppressHydrationWarning
                       />
@@ -409,7 +411,7 @@ export default function NewEventForm() {
                     name="date"
                     validators={{
                       onChange: ({ value }) =>
-                        value && value.length > 0 ? undefined : 'Date is required.',
+                        value && value.length > 0 ? undefined : t('dateRequired'),
                     }}
                   >
                     {(field) => {
@@ -421,7 +423,7 @@ export default function NewEventForm() {
                         : undefined;
                       return (
                         <div className="grid gap-2">
-                          <Label htmlFor={dateInputId}>Date</Label>
+                          <Label htmlFor={dateInputId}>{t('dateLabel')}</Label>
                           <div>
                             <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                               <PopoverTrigger asChild>
@@ -434,7 +436,9 @@ export default function NewEventForm() {
                                   )}
                                   aria-invalid={isInvalid}
                                 >
-                                  {parsedDate ? format(parsedDate, 'PPP') : 'Select date'}
+                                  {parsedDate
+                                    ? format(parsedDate, 'PPP')
+                                    : t('dateSelectPlaceholder')}
                                   <ChevronDownIcon className="size-4 opacity-60" />
                                 </Button>
                               </PopoverTrigger>
@@ -477,10 +481,10 @@ export default function NewEventForm() {
                         }
                         const num = typeof value === 'string' ? Number.parseFloat(value) : value;
                         if (Number.isNaN(num)) {
-                          return 'Price must be a valid number.';
+                          return t('priceInvalidNumber');
                         }
                         if (num < 0) {
-                          return 'Price cannot be negative.';
+                          return t('priceNegative');
                         }
                         return undefined;
                       },
@@ -492,7 +496,7 @@ export default function NewEventForm() {
                       const isInvalid = showFeedback && !field.state.meta.isValid;
                       return (
                         <div className="grid gap-2">
-                          <Label htmlFor="price_per_photo">Price per Photo (Optional)</Label>
+                          <Label htmlFor="price_per_photo">{t('priceLabel')}</Label>
                           <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                               $
@@ -543,16 +547,16 @@ export default function NewEventForm() {
                     return (
                       <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-3">
                         <div className="grid gap-1">
-                          <Label htmlFor="is_public">Event Visibility</Label>
+                          <Label htmlFor="is_public">{t('visibilityLabel')}</Label>
                           <p className="text-xs text-muted-foreground">
                             {field.state.value
-                              ? 'Anyone can access this event'
-                              : 'Only people with the share code can access'}
+                              ? t('visibilityPublicDesc')
+                              : t('visibilityPrivateDesc')}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">
-                            {field.state.value ? 'Public' : 'Private'}
+                          <span className="text-xs text-muted-foreground">
+                            {field.state.value ? t('visibilityPublic') : t('visibilityPrivate')}
                           </span>
                           <Switch
                             id="is_public"
@@ -581,14 +585,12 @@ export default function NewEventForm() {
                     return (
                       <div className="flex items-center justify-between gap-4 rounded-lg border border-input p-3">
                         <div className="grid gap-1">
-                          <Label htmlFor="watermark_enabled">Watermark on Photos</Label>
-                          <p className="text-xs text-muted-foreground">
-                            Add watermark for talent users (photographers see originals)
-                          </p>
+                          <Label htmlFor="watermark_enabled">{t('watermarkLabel')}</Label>
+                          <p className="text-xs text-muted-foreground">{t('watermarkDesc')}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">
-                            {field.state.value ? 'Enabled' : 'Disabled'}
+                          <span className="text-xs text-muted-foreground">
+                            {field.state.value ? t('watermarkEnabled') : t('watermarkDisabled')}
                           </span>
                           <Switch
                             id="watermark_enabled"
@@ -628,7 +630,7 @@ export default function NewEventForm() {
                 onClick={() => router.back()}
                 disabled={isPending}
               >
-                Cancel
+                {t('cancelButton')}
               </Button>
               <Button
                 type="button"
@@ -642,10 +644,10 @@ export default function NewEventForm() {
                 {isPending ? (
                   <>
                     <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    Creating Event...
+                    {t('creatingButton')}
                   </>
                 ) : (
-                  'Create Event'
+                  t('createButton')
                 )}
               </Button>
             </div>

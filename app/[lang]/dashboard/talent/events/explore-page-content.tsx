@@ -2,7 +2,6 @@
 
 import type { EventWithStats, FilterOptions } from '@/hooks/use-event-search';
 import { useEventSearch } from '@/hooks/use-event-search';
-import type { Dictionary } from '@/lib/i18n/get-dictionary';
 import { AIMatchingButton } from '../photos/ai-matching/ai-matching-button';
 import { EventFilterBar } from './components/event-filter-bar';
 import { EventGrid } from './components/event-grid';
@@ -24,7 +23,6 @@ export function ExplorePageContent({
   initialDateTo,
   hideTopFilters = false,
   showFindMe = false,
-  dict,
 }: {
   initialFilterOptions: FilterOptions;
   initialEvents?: EventWithStats[];
@@ -41,7 +39,6 @@ export function ExplorePageContent({
   initialDateTo?: string;
   hideTopFilters?: boolean;
   showFindMe?: boolean;
-  dict?: Dictionary;
 }) {
   const search = useEventSearch({
     initialFilterOptions,
@@ -92,7 +89,6 @@ export function ExplorePageContent({
         setPhotographerQuery={search.setPhotographerQuery}
         radiusKm={search.radiusKm}
         setRadiusKm={search.setRadiusKm}
-        t={dict?.eventFilterBar}
       />
 
       <EventGrid
@@ -106,22 +102,6 @@ export function ExplorePageContent({
         eventLinkPrefix={eventLinkPrefix}
         onLoadMore={search.loadMore}
         onClearFilters={search.clearFilters}
-        t={
-          dict
-            ? {
-                searchPrompt: dict.eventFilterBar.searchPrompt,
-                noEventsFound: dict.eventFilterBar.noEventsFound,
-                noEventsFoundDesc: dict.eventFilterBar.noEventsFoundDesc,
-                clearFilters: dict.eventFilterBar.clearFilters,
-                loadMore: dict.eventFilterBar.loadMore,
-                photo: dict.eventCard.photo,
-                photos: dict.eventCard.photos,
-                from: dict.eventCard.from,
-                free: dict.eventCard.free,
-                noPhotosYet: dict.eventCard.noPhotosYet,
-              }
-            : undefined
-        }
       />
 
       {showInfoCards && <EventInfoCards />}

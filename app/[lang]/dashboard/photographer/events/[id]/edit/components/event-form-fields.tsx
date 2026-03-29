@@ -406,7 +406,7 @@ export function EventFormFields({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {field.state.value ? 'Public' : 'Private'}
               </span>
               <Switch
@@ -434,7 +434,7 @@ export function EventFormFields({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {field.state.value ? 'Enabled' : 'Disabled'}
               </span>
               <Switch

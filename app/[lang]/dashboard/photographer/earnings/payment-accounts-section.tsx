@@ -25,6 +25,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import type { PaymentAccount, PaymentAccountType } from '@/database/queries/payment-accounts';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
 import {
   type BankAccountFields,
   COMMON_COUNTRIES,
@@ -38,25 +40,28 @@ import {
   setDefaultPaymentAccountAction,
 } from './payment-accounts-actions';
 
-function getPaymentTypeLabel(type: PaymentAccountType): string {
+type EarningsT = Dictionary['earnings'];
+type TFn = (key: keyof EarningsT) => string;
+
+function getPaymentTypeLabel(type: PaymentAccountType, t: TFn): string {
   switch (type) {
     case 'bank_account':
-      return 'Bank Account';
+      return t('bankAccount');
     case 'paypal':
-      return 'PayPal';
+      return t('paypal');
     case 'wise':
-      return 'Wise';
+      return t('wise');
     case 'other':
-      return 'Other';
+      return t('other');
     default:
       return type;
   }
 }
 
-function formatAccountDetails(account: PaymentAccount): string {
+function formatAccountDetails(account: PaymentAccount, t: TFn): string {
   if (account.type === 'paypal' || account.type === 'wise') {
     const email = account.account_details?.email as string | undefined;
-    return email || 'Not provided';
+    return email || t('notProvided');
   }
   if (account.type === 'bank_account') {
     const bankName = account.account_details?.bank_name as string | undefined;
@@ -66,9 +71,9 @@ function formatAccountDetails(account: PaymentAccount): string {
     if (bankName && last4) {
       return `${bankName} ••••${last4}${countryName ? ` (${countryName})` : ''}`;
     }
-    return `Bank account${countryName ? ` (${countryName})` : ''}`;
+    return `${t('bankAccountFallback')}${countryName ? ` (${countryName})` : ''}`;
   }
-  return 'Account details';
+  return t('accountDetailsFallback');
 }
 
 interface PaymentAccountFormProps {
@@ -78,6 +83,7 @@ interface PaymentAccountFormProps {
 }
 
 function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccountFormProps) {
+  const { t } = useTranslations<EarningsT>();
   const [type, setType] = useState<PaymentAccountType>(initialData?.type ?? 'bank_account');
   const [displayName, setDisplayName] = useState(initialData?.display_name ?? '');
   const [accountHolderName, setAccountHolderName] = useState(
@@ -125,7 +131,7 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
     setError(null);
 
     if (!displayName.trim()) {
-      setError('Display name is required');
+      setError(t('errorDisplayNameRequired'));
       return;
     }
 
@@ -133,29 +139,29 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
 
     if (type === 'paypal' || type === 'wise') {
       if (!email.trim()) {
-        setError('Email is required');
+        setError(t('errorEmailRequired'));
         return;
       }
       accountDetails = { email: email.trim() };
     } else if (type === 'bank_account') {
       if (!countryCode) {
-        setError('Country is required for bank accounts');
+        setError(t('errorCountryRequired'));
         return;
       }
       if (!bankName.trim()) {
-        setError('Bank name is required');
+        setError(t('errorBankNameRequired'));
         return;
       }
       if (!field1.trim()) {
-        setError(`${bankFields.label1} is required`);
+        setError(`${bankFields.label1} ${t('errorFieldRequired')}`);
         return;
       }
       if (bankFields.label2 && !field2.trim()) {
-        setError(`${bankFields.label2} is required`);
+        setError(`${bankFields.label2} ${t('errorFieldRequired')}`);
         return;
       }
       if (bankFields.label3 && !field3.trim()) {
-        setError(`${bankFields.label3} is required`);
+        setError(`${bankFields.label3} ${t('errorFieldRequired')}`);
         return;
       }
 
@@ -200,7 +206,7 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
         });
         onSuccess();
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create payment account');
+        setError(err instanceof Error ? err.message : t('errorFailedCreateAccount'));
       }
     });
   };
@@ -209,52 +215,52 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
     <form onSubmit={handleSubmit}>
       <div className="space-y-4 py-4">
         <div className="space-y-2">
-          <Label htmlFor="type">Payment Method</Label>
+          <Label htmlFor="type">{t('paymentMethod')}</Label>
           <Select value={type} onValueChange={(value) => setType(value as PaymentAccountType)}>
             <SelectTrigger id="type">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="bank_account">Bank Account</SelectItem>
-              <SelectItem value="paypal">PayPal</SelectItem>
-              <SelectItem value="wise">Wise</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
+              <SelectItem value="bank_account">{t('bankAccount')}</SelectItem>
+              <SelectItem value="paypal">{t('paypal')}</SelectItem>
+              <SelectItem value="wise">{t('wise')}</SelectItem>
+              <SelectItem value="other">{t('other')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="displayName">Display Name *</Label>
+          <Label htmlFor="displayName">{t('displayNameLabel')} *</Label>
           <Input
             id="displayName"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="e.g., My Business Bank Account"
+            placeholder={t('displayNamePlaceholder')}
             disabled={isPending}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="accountHolderName">Account Holder Name</Label>
+          <Label htmlFor="accountHolderName">{t('accountHolderNameLabel')}</Label>
           <Input
             id="accountHolderName"
             value={accountHolderName}
             onChange={(e) => setAccountHolderName(e.target.value)}
-            placeholder="Full name on account"
+            placeholder={t('accountHolderNamePlaceholder')}
             disabled={isPending}
           />
         </div>
 
         {(type === 'paypal' || type === 'wise') && (
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">{t('emailLabel')} *</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              placeholder={t('emailPlaceholder')}
               disabled={isPending}
               required
             />
@@ -264,7 +270,7 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
         {type === 'bank_account' && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="countryCode">Country *</Label>
+              <Label htmlFor="countryCode">{t('countryLabel')} *</Label>
               <Select
                 value={countryCode}
                 onValueChange={(value) => {
@@ -277,7 +283,7 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
               >
                 <SelectTrigger id="countryCode">
                   <SelectValue
-                    placeholder={isLoadingCountry ? 'Loading your country...' : 'Select country'}
+                    placeholder={isLoadingCountry ? t('loadingCountry') : t('selectCountry')}
                   />
                 </SelectTrigger>
                 <SelectContent>
@@ -290,19 +296,19 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
               </Select>
               {countryCode && !initialData && (
                 <p className="text-xs text-muted-foreground">
-                  Using country from your profile. You can change it if needed.
+                  {t('usingCountryFromProfile')}
                 </p>
               )}
             </div>
             {countryCode && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="bankName">Bank Name *</Label>
+                  <Label htmlFor="bankName">{t('bankNameLabel')} *</Label>
                   <Input
                     id="bankName"
                     value={bankName}
                     onChange={(e) => setBankName(e.target.value)}
-                    placeholder="Bank name"
+                    placeholder={t('bankNamePlaceholder')}
                     disabled={isPending}
                     required
                   />
@@ -369,12 +375,12 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
 
         {type === 'other' && (
           <div className="space-y-2">
-            <Label htmlFor="otherDetails">Account Details</Label>
+            <Label htmlFor="otherDetails">{t('accountDetailsLabel')}</Label>
             <Textarea
               id="otherDetails"
               value={otherDetails}
               onChange={(e) => setOtherDetails(e.target.value)}
-              placeholder="Provide account details"
+              placeholder={t('accountDetailsPlaceholder')}
               disabled={isPending}
             />
           </div>
@@ -390,7 +396,7 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
             className="h-4 w-4 rounded border-gray-300"
           />
           <Label htmlFor="isDefault" className="text-sm font-normal">
-            Set as default payment account
+            {t('setAsDefaultCheckbox')}
           </Label>
         </div>
 
@@ -398,10 +404,10 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
       </div>
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
-          Cancel
+          {t('cancel')}
         </Button>
         <Button type="submit" disabled={isPending}>
-          {isPending ? 'Saving...' : 'Save Account'}
+          {isPending ? t('saving') : t('saveAccount')}
         </Button>
       </DialogFooter>
     </form>
@@ -409,6 +415,7 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
 }
 
 export function PaymentAccountsSection() {
+  const { t } = useTranslations<EarningsT>();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -420,7 +427,7 @@ export function PaymentAccountsSection() {
   });
 
   const handleDelete = async (accountId: string) => {
-    if (!confirm('Are you sure you want to delete this payment account?')) {
+    if (!confirm(t('deleteAccountConfirm'))) {
       return;
     }
 
@@ -430,7 +437,7 @@ export function PaymentAccountsSection() {
         queryClient.invalidateQueries({ queryKey: ['payment-accounts'] });
       } catch (error) {
         console.error('Failed to delete payment account:', error);
-        alert(error instanceof Error ? error.message : 'Failed to delete account');
+        alert(error instanceof Error ? error.message : t('failedDeleteAccount'));
       }
     });
   };
@@ -442,7 +449,7 @@ export function PaymentAccountsSection() {
         queryClient.invalidateQueries({ queryKey: ['payment-accounts'] });
       } catch (error) {
         console.error('Failed to set default account:', error);
-        alert(error instanceof Error ? error.message : 'Failed to set default account');
+        alert(error instanceof Error ? error.message : t('failedSetDefault'));
       }
     });
   };
@@ -451,22 +458,21 @@ export function PaymentAccountsSection() {
     <div className="rounded-xl border bg-card p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Payment Accounts</h3>
-          <p className="text-sm text-muted-foreground">Manage where you receive payouts</p>
+          <h3 className="text-lg font-semibold">{t('paymentAccountsTitle')}</h3>
+          <p className="text-sm text-muted-foreground">{t('paymentAccountsDesc')}</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="mr-2 h-4 w-4" />
-              Add Account
+              {t('addAccount')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Add Payment Account</DialogTitle>
+              <DialogTitle>{t('addPaymentAccountTitle')}</DialogTitle>
               <DialogDescription>
-                Add a payment method to receive payouts. Your account details are encrypted and
-                secure.
+                {t('addPaymentAccountDesc')}
               </DialogDescription>
             </DialogHeader>
             <PaymentAccountForm
@@ -489,7 +495,7 @@ export function PaymentAccountsSection() {
         <div className="rounded-lg border border-dashed p-8 text-center">
           <CreditCard className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
-            No payment accounts yet. Add one to receive payouts.
+            {t('noPaymentAccountsYet')}
           </p>
         </div>
       ) : (
@@ -504,17 +510,17 @@ export function PaymentAccountsSection() {
                   <p className="font-semibold">{account.display_name}</p>
                   {account.is_default && (
                     <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                      Default
+                      {t('defaultBadge')}
                     </span>
                   )}
                   {!account.is_verified && (
                     <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                      Unverified
+                      {t('unverifiedBadge')}
                     </span>
                   )}
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {getPaymentTypeLabel(account.type)} • {formatAccountDetails(account)}
+                  {getPaymentTypeLabel(account.type, t)} • {formatAccountDetails(account, t)}
                 </p>
                 {account.account_holder_name && (
                   <p className="text-xs text-muted-foreground">{account.account_holder_name}</p>
@@ -527,7 +533,7 @@ export function PaymentAccountsSection() {
                     size="sm"
                     onClick={() => handleSetDefault(account.id)}
                     disabled={isPending}
-                    title="Set as default"
+                    title={t('setAsDefault')}
                   >
                     <Star className="h-4 w-4" />
                   </Button>
@@ -537,7 +543,7 @@ export function PaymentAccountsSection() {
                   size="sm"
                   onClick={() => handleDelete(account.id)}
                   disabled={isPending}
-                  title="Delete"
+                  title={t('deleteAccount')}
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>

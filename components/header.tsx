@@ -1,15 +1,11 @@
 import { Nav } from '@/components/nav';
 import { createClient } from '@/database/server';
 
-export default async function Header({
-  navDict,
-}: {
-  navDict: { login: string; getStarted: string };
-}) {
+export default async function Header() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return <Nav user={user} navDict={navDict} />;
+  return <Nav user={user} />;
 }

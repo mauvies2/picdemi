@@ -4,6 +4,7 @@ import { DashboardHeader } from '@/components/dashboard-header';
 import { ProfileForm } from '@/components/profile-form';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 import { ROLES } from '@/lib/roles';
 import { getProfileData } from './actions';
 import { PayoutProfileSection } from './payout-profile-section';
@@ -54,15 +55,16 @@ export default async function PhotographerProfilePage({
             </div>
 
             <div className="flex-1">
-              <ProfileForm
-                initialValues={{
-                  username: profile.username,
-                  display_name: profile.display_name,
-                  bio: profile.bio,
-                }}
-                onSubmit={updateProfileAction}
-                t={dict.profileForm}
-              />
+              <TranslationsProvider translations={dict.profileForm}>
+                <ProfileForm
+                  initialValues={{
+                    username: profile.username,
+                    display_name: profile.display_name,
+                    bio: profile.bio,
+                  }}
+                  onSubmit={updateProfileAction}
+                />
+              </TranslationsProvider>
             </div>
           </div>
 

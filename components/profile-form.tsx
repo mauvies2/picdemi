@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
 import { cn } from '@/lib/utils';
 
 const profileSchema = z.object({
@@ -26,28 +28,7 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
-type ProfileFormT = {
-  username: string;
-  usernameDesc: string;
-  displayName: string;
-  displayNameDesc: string;
-  bio: string;
-  bioPlaceholder: string;
-  saveChanges: string;
-  saving: string;
-};
-
-const DEFAULT_T: ProfileFormT = {
-  username: 'Username',
-  usernameDesc: 'Your unique username. This is how others will identify you.',
-  displayName: 'Display Name',
-  displayNameDesc:
-    'Your public display name. This is optional and can be different from your username.',
-  bio: 'Bio',
-  bioPlaceholder: 'Tell us about yourself...',
-  saveChanges: 'Save Changes',
-  saving: 'Saving...',
-};
+type ProfileFormT = Dictionary['profileForm'];
 
 interface ProfileFormProps {
   initialValues: {
@@ -57,16 +38,15 @@ interface ProfileFormProps {
   };
   onSubmit: (values: ProfileFormValues) => Promise<void>;
   isPending?: boolean;
-  t?: ProfileFormT;
 }
 
 export function ProfileForm({
   initialValues,
   onSubmit,
   isPending: externalIsPending,
-  t = DEFAULT_T,
 }: ProfileFormProps) {
   const router = useRouter();
+  const { t } = useTranslations<ProfileFormT>();
   const [isPending, startTransition] = useTransition();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -135,7 +115,7 @@ export function ProfileForm({
           return (
             <div className="grid gap-2">
               <Label htmlFor={field.name}>
-                {t.username} <span className="text-destructive">*</span>
+                {t('username')} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id={field.name}
@@ -152,7 +132,7 @@ export function ProfileForm({
                 disabled={isFormPending}
               />
               <p className="text-xs text-muted-foreground">
-                {t.usernameDesc} (e.g., @{field.state.value || 'username'}).
+                {t('usernameDesc')} (e.g., @{field.state.value || 'username'}).
               </p>
               {usernameError ? <p className="text-xs text-destructive">{usernameError}</p> : null}
             </div>
@@ -177,7 +157,7 @@ export function ProfileForm({
               : null;
           return (
             <div className="grid gap-2">
-              <Label htmlFor={field.name}>{t.displayName}</Label>
+              <Label htmlFor={field.name}>{t('displayName')}</Label>
               <Input
                 id={field.name}
                 name={field.name}
@@ -189,7 +169,7 @@ export function ProfileForm({
                 className={cn(submitAttempted && displayNameError && 'border-destructive')}
                 disabled={isFormPending}
               />
-              <p className="text-xs text-muted-foreground">{t.displayNameDesc}</p>
+              <p className="text-xs text-muted-foreground">{t('displayNameDesc')}</p>
               {displayNameError ? (
                 <p className="text-xs text-destructive">{displayNameError}</p>
               ) : null}
@@ -215,14 +195,14 @@ export function ProfileForm({
               : null;
           return (
             <div className="grid gap-2">
-              <Label htmlFor={field.name}>{t.bio}</Label>
+              <Label htmlFor={field.name}>{t('bio')}</Label>
               <Textarea
                 id={field.name}
                 name={field.name}
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder={t.bioPlaceholder}
+                placeholder={t('bioPlaceholder')}
                 rows={4}
                 aria-invalid={submitAttempted && !!bioError}
                 className={cn(submitAttempted && bioError && 'border-destructive')}
@@ -247,7 +227,7 @@ export function ProfileForm({
       {/* Submit Button */}
       <div className="flex justify-end">
         <Button type="submit" disabled={isFormPending}>
-          {isFormPending ? t.saving : t.saveChanges}
+          {isFormPending ? t('saving') : t('saveChanges')}
         </Button>
       </div>
     </form>

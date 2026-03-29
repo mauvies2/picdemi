@@ -13,6 +13,7 @@ import { createClient } from '@/database/server';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getLangFromHeaders } from '@/lib/i18n/get-lang-from-headers';
+import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 import { localizedRedirect } from '@/lib/i18n/redirect';
 
 export default async function Login({
@@ -128,79 +129,80 @@ export default async function Login({
   };
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center p-6 md:p-8">
-      <CloseButton className="absolute right-4 top-4" />
-      <div className="w-full max-w-md">
-        <h1 className="text-center text-4xl font-bold">{dict.auth.welcomeBack}</h1>
-        <p className="mt-4 text-center text-muted-foreground">{dict.auth.loginSubtitle}</p>
-        <div className="mt-4 flex gap-2">
-          <GoogleSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
-          <FacebookSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
-          <Button type="button" variant="outline" className="flex-1 h-12 border-2 rounded-lg">
-            <Image src="/apple.svg" alt="Apple" width={22} height={22} />
-          </Button>
-        </div>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+    <TranslationsProvider translations={dict.auth}>
+      <div className="relative flex h-full w-full flex-col items-center justify-center p-6 md:p-8">
+        <CloseButton className="absolute right-4 top-4" />
+        <div className="w-full max-w-md">
+          <h1 className="text-center text-4xl font-bold">{dict.auth.welcomeBack}</h1>
+          <p className="mt-4 text-center text-muted-foreground">{dict.auth.loginSubtitle}</p>
+          <div className="mt-4 flex gap-2">
+            <GoogleSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
+            <FacebookSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
+            <Button type="button" variant="outline" className="flex-1 h-12 border-2 rounded-lg">
+              <Image src="/apple.svg" alt="Apple" width={22} height={22} />
+            </Button>
           </div>
-          <div className="relative flex justify-center">
-            <span className="bg-background px-2 text-sm text-muted-foreground">
-              {dict.auth.orContinueWith}
-            </span>
-          </div>
-        </div>
 
-        <form className="animate-in flex w-full flex-col justify-center gap-2">
-          {params?.message && (
-            <p
-              className={`mt-4 border p-4 text-center ${
-                params.reset === 'success'
-                  ? 'border-green-500 bg-green-100 text-green-800'
-                  : 'border-red-500 bg-red-100 text-slate-600'
-              }`}
-            >
-              {params.message}
-            </p>
-          )}
-          <Label htmlFor="email">{dict.auth.email}</Label>
-          <Input
-            className="mb-4 rounded-full border bg-inherit px-4 h-10"
-            id="email"
-            type="email"
-            name="email"
-            placeholder="you@example.com"
-            required
-          />
-          <div className="mb-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">{dict.auth.password}</Label>
-              <ForgotPasswordLink emailId="email" />
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
             </div>
+            <div className="relative flex justify-center">
+              <span className="bg-background px-2 text-sm text-muted-foreground">
+                {dict.auth.orContinueWith}
+              </span>
+            </div>
+          </div>
+
+          <form className="animate-in flex w-full flex-col justify-center gap-2">
+            {params?.message && (
+              <p
+                className={`mt-4 border p-4 text-center ${
+                  params.reset === 'success'
+                    ? 'border-green-500 bg-green-100 text-green-800'
+                    : 'border-red-500 bg-red-100 text-slate-600'
+                }`}
+              >
+                {params.message}
+              </p>
+            )}
+            <Label htmlFor="email">{dict.auth.email}</Label>
             <Input
-              className="mt-2 rounded-full border bg-inherit px-4 h-10 placeholder:text-muted-foreground/30"
-              id="password"
-              type="password"
-              autoComplete="off"
-              name="password"
-              placeholder="••••••••"
-              minLength={6}
+              className="mb-4 rounded-full border bg-inherit px-4 h-10"
+              id="email"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
               required
             />
-          </div>
-          <SubmitButton formAction={signIn} className="mb-2 h-10">
-            Log in
-          </SubmitButton>
-          <p className="text-center">
-            Don&apos;t have an account?{' '}
-            <Link className="text-sky-600 hover:underline" href="/signup">
-              Sign up{' '}
-            </Link>
-            here.
-          </p>
-        </form>
+            <div className="mb-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{dict.auth.password}</Label>
+                <ForgotPasswordLink emailId="email" />
+              </div>
+              <Input
+                className="mt-2 rounded-full border bg-inherit px-4 h-10 placeholder:text-muted-foreground/30"
+                id="password"
+                type="password"
+                autoComplete="off"
+                name="password"
+                placeholder="••••••••"
+                minLength={6}
+                required
+              />
+            </div>
+            <SubmitButton formAction={signIn} className="mb-2 h-10">
+              {dict.auth.loginButton}
+            </SubmitButton>
+            <p className="text-center">
+              {dict.auth.noAccount}{' '}
+              <Link className="text-sky-600 hover:underline" href="/signup">
+                {dict.auth.signUpHere}
+              </Link>
+            </p>
+          </form>
+        </div>
       </div>
-    </div>
+    </TranslationsProvider>
   );
 }
