@@ -112,7 +112,9 @@ export default async function PhotographerProfilePage({
 
             {/* Payout profile card */}
             <div className="lg:flex-1 lg:flex lg:flex-col">
-              <PayoutProfileSection profile={profile} />
+              <TranslationsProvider translations={dict.photographerDashboard}>
+                <PayoutProfileSection profile={profile} />
+              </TranslationsProvider>
             </div>
           </div>
         </section>

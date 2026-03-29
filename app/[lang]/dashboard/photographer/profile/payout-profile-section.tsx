@@ -4,12 +4,18 @@ import { AlertCircle, CheckCircle2, CreditCard, MapPin, Pencil } from 'lucide-re
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import type { Profile } from '@/database/queries/profiles';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
+
+type PhotographerDashboardT = Dictionary['photographerDashboard'];
 
 interface PayoutProfileSectionProps {
   profile: Profile | null;
 }
 
 export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
+  const { t } = useTranslations<PhotographerDashboardT>();
+
   const isComplete = profile?.is_payout_profile_complete ?? false;
   const payoutMethod = profile?.payout_method;
   const payoutDetails = profile?.payout_details_json as Record<string, unknown> | null | undefined;
@@ -17,45 +23,43 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
   const getPayoutMethodLabel = (method: string | null | undefined) => {
     switch (method) {
       case 'bank_transfer':
-        return 'Bank Transfer';
+        return t('payoutBankTransfer');
       case 'paypal':
-        return 'PayPal';
+        return t('payoutPayPal');
       case 'other':
-        return 'Other';
+        return t('payoutOther');
       default:
-        return 'Not set';
+        return t('payoutNotSet');
     }
   };
 
   const getPayoutDetailsDisplay = () => {
-    if (!payoutDetails) return 'Not configured';
+    if (!payoutDetails) return t('payoutNotConfigured');
 
     if (payoutMethod === 'paypal') {
-      return (payoutDetails.email as string) || 'Not configured';
+      return (payoutDetails.email as string) || t('payoutNotConfigured');
     }
     if (payoutMethod === 'bank_transfer') {
       if (payoutDetails.iban) {
         const iban = payoutDetails.iban as string;
         return `IBAN: ${iban.substring(0, 4)}****${iban.substring(iban.length - 4)}`;
       }
-      return 'Bank account configured';
+      return t('payoutBankAccountConfigured');
     }
-    return 'Configured';
+    return t('payoutConfigured');
   };
 
   return (
     <div className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm lg:h-full lg:flex lg:flex-col">
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <h2 className="text-lg sm:text-xl font-semibold">Payout Profile</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your payout information for receiving payments
-          </p>
+          <h2 className="text-lg sm:text-xl font-semibold">{t('payoutProfileTitle')}</h2>
+          <p className="text-sm text-muted-foreground mt-1">{t('payoutProfileDesc')}</p>
         </div>
         <Link href="/dashboard/photographer/profile/payout-profile">
           <Button variant="outline" size="sm">
             <Pencil className="mr-2 h-4 w-4" />
-            {isComplete ? 'Edit' : 'Complete'}
+            {isComplete ? t('payoutProfileEdit') : t('payoutProfileCompleteButton')}
           </Button>
         </Link>
       </div>
@@ -67,11 +71,10 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-yellow-600 dark:text-yellow-400" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                  Payout profile incomplete
+                  {t('payoutProfileIncompleteTitle')}
                 </p>
                 <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-                  Complete your payout profile to enable withdrawal requests. This includes your
-                  address and payment method.
+                  {t('payoutProfileIncompleteDesc')}
                 </p>
               </div>
             </div>
@@ -82,7 +85,7 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
             <div className="flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 dark:bg-green-950">
               <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
               <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                Profile Complete
+                {t('payoutProfileCompleteStatus')}
               </span>
             </div>
 
@@ -93,7 +96,7 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">Legal Name</p>
+                  <p className="text-xs text-muted-foreground">{t('payoutLegalName')}</p>
                   <p className="text-sm font-medium">{profile.full_name}</p>
                 </div>
               </div>
@@ -106,7 +109,7 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">Address</p>
+                  <p className="text-xs text-muted-foreground">{t('payoutAddress')}</p>
                   <p className="text-sm font-medium">
                     {[
                       profile.address_line1,
@@ -130,7 +133,7 @@ export function PayoutProfileSection({ profile }: PayoutProfileSectionProps) {
                   <CreditCard className="h-4 w-4 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">Payout Method</p>
+                  <p className="text-xs text-muted-foreground">{t('payoutMethod')}</p>
                   <p className="text-sm font-medium">{getPayoutMethodLabel(payoutMethod)}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {getPayoutDetailsDisplay()}
