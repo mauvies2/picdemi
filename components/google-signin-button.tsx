@@ -10,12 +10,14 @@ interface GoogleSignInButtonProps {
   plan?: string;
   variant?: 'default' | 'outline' | 'ghost' | 'link' | 'destructive' | 'secondary';
   className?: string;
+  label?: string;
 }
 
 export function GoogleSignInButton({
   plan,
   variant = 'outline',
   className,
+  label,
 }: GoogleSignInButtonProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -41,7 +43,10 @@ export function GoogleSignInButton({
       onClick={handleClick}
       disabled={isPending}
     >
-      <Image src="/google.svg" alt="Google" width={25} height={25} />
+      <div className="flex justify-between gap-3 items-center">
+        <Image src="/google.svg" alt="Google" width={25} height={25} />
+        {label && <span>{label}</span>}
+      </div>
     </Button>
   );
 }

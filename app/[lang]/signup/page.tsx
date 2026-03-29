@@ -1,11 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { getDashboardPath } from '@/app/[lang]/actions/roles';
 import { CloseButton } from '@/components/close-button';
-import { FacebookSignInButton } from '@/components/facebook-signin-button';
 import { GoogleSignInButton } from '@/components/google-signin-button';
 import { SubmitButton } from '@/components/submit-button';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/database/server';
@@ -95,22 +92,12 @@ export default async function Signup({
         <h1 className="text-center text-4xl font-bold">{dict.signup.title}</h1>
         <p className="mt-4 text-center text-muted-foreground">{dict.signup.subtitle}</p>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4">
           <GoogleSignInButton
             plan={params.plan}
-            className="flex-1 h-12 border-2 rounded-lg bg-gray-100 hover:bg-gray-200"
+            label={dict.auth.continueWithGoogle}
+            className="w-full h-10 border-1 rounded-full"
           />
-          <FacebookSignInButton
-            plan={params.plan}
-            className="flex-1 h-12 border-2 rounded-lg bg-gray-100 hover:bg-gray-200"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 h-12 border-2 rounded-lg bg-gray-100 hover:bg-gray-200"
-          >
-            <Image src="/apple.svg" alt="Apple" width={22} height={22} />
-          </Button>
         </div>
 
         <div className="relative my-6">

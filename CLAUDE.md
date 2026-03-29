@@ -23,7 +23,7 @@ pnpm spell        # Spell check .ts/.tsx files
 
 - **Framework**: Next.js App Router with React 19, TypeScript
 - **Database**: Supabase (PostgreSQL) — raw SQL migrations, no ORM
-- **Auth**: Supabase Auth with Google + Facebook OAuth and email/password
+- **Auth**: Supabase Auth with Google
 - **Payments**: Stripe (subscriptions for photographers, photo purchases for talent)
 - **Styling**: Tailwind CSS v4 + shadcn/ui (New York style) + Radix UI
 - **Forms**: TanStack React Form + Zod validation

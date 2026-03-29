@@ -1,20 +1,17 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { getDashboardPath } from '@/app/[lang]/actions/roles';
 import { CloseButton } from '@/components/close-button';
-import { FacebookSignInButton } from '@/components/facebook-signin-button';
 import { ForgotPasswordLink } from '@/components/forgot-password-link';
 import { GoogleSignInButton } from '@/components/google-signin-button';
 import { SubmitButton } from '@/components/submit-button';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/database/server';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getLangFromHeaders } from '@/lib/i18n/get-lang-from-headers';
-import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 import { localizedRedirect } from '@/lib/i18n/redirect';
+import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 
 export default async function Login({
   params: routeParams,
@@ -135,12 +132,12 @@ export default async function Login({
         <div className="w-full max-w-md">
           <h1 className="text-center text-4xl font-bold">{dict.auth.welcomeBack}</h1>
           <p className="mt-4 text-center text-muted-foreground">{dict.auth.loginSubtitle}</p>
-          <div className="mt-4 flex gap-2">
-            <GoogleSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
-            <FacebookSignInButton plan={params.plan} className="flex-1 h-12 border-2 rounded-lg" />
-            <Button type="button" variant="outline" className="flex-1 h-12 border-2 rounded-lg">
-              <Image src="/apple.svg" alt="Apple" width={22} height={22} />
-            </Button>
+          <div className="mt-4">
+            <GoogleSignInButton
+              plan={params.plan}
+              label={dict.auth.continueWithGoogle}
+              className="w-full h-10 border-1 rounded-full"
+            />
           </div>
 
           <div className="relative my-6">

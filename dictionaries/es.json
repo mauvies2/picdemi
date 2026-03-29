@@ -50,7 +50,8 @@
   },
   "auth": {
     "welcomeBack": "Bienvenido de nuevo",
-    "loginSubtitle": "Inicia sesión con tu cuenta de Google, Facebook o Apple",
+    "loginSubtitle": "Inicia sesión con tu cuenta de Google",
+    "continueWithGoogle": "Continuar con Google",
     "orContinueWith": "o continúa con tu email",
     "email": "Email",
     "password": "Contraseña",
@@ -98,7 +99,7 @@
     "explore": "Explorar",
     "myPhotos": "Mis fotos",
     "orders": "Pedidos",
-    "activeRole": "Rol activo",
+    "activeRole": "Rol",
     "switchTo": "Cambiar a",
     "logOut": "Cerrar sesión",
     "billing": "Facturación",
@@ -128,7 +129,7 @@
   },
   "signup": {
     "title": "Crear una cuenta",
-    "subtitle": "Regístrate con tu cuenta de Google, Facebook o Apple",
+    "subtitle": "Regístrate con tu cuenta de Google",
     "orContinueWithEmail": "o continúa con tu email",
     "email": "Email",
     "password": "Contraseña",
