@@ -26,6 +26,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import type { PhotographerEarning } from '@/database/queries/earnings';
 import type { Payout } from '@/database/queries/payouts';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
 import { cn } from '@/lib/utils';
 import { getPayoutProfileStatusAction } from '../profile/payout-profile/actions';
 import {
@@ -37,6 +39,8 @@ import {
 import { getPaymentAccountsAction } from './payment-accounts-actions';
 import { PaymentAccountsSection } from './payment-accounts-section';
 import { PayoutProfileBanner } from './payout-profile-banner';
+
+type EarningsT = Dictionary['earnings'];
 
 function formatPrice(cents: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -100,6 +104,7 @@ function PayoutRequestDialog({
   onSuccess,
   isPayoutProfileComplete,
 }: PayoutRequestDialogProps) {
+  const { t } = useTranslations<EarningsT>();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState('');
   const [paymentAccountId, setPaymentAccountId] = useState<string>('');
@@ -125,19 +130,19 @@ function PayoutRequestDialog({
     setError(null);
 
     if (!paymentAccountId) {
-      setError('Please select a payment account');
+      setError(t('errorSelectAccount'));
       return;
     }
 
     const amountCents = Math.round(Number.parseFloat(amount) * 100);
 
     if (!amount || Number.isNaN(amountCents) || amountCents <= 0) {
-      setError('Please enter a valid amount');
+      setError(t('errorValidAmount'));
       return;
     }
 
     if (amountCents > availableBalance) {
-      setError(`Amount exceeds available balance of ${formatPrice(availableBalance)}`);
+      setError(`${t('errorExceedsBalance')} ${formatPrice(availableBalance)}`);
       return;
     }
 
@@ -149,7 +154,7 @@ function PayoutRequestDialog({
         setPaymentAccountId('');
         onSuccess();
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create payout request');
+        setError(err instanceof Error ? err.message : t('errorFailedPayout'));
       }
     });
   };
@@ -166,18 +171,18 @@ function PayoutRequestDialog({
     >
       <DialogTrigger asChild>
         <Button size="lg" disabled={!isPayoutProfileComplete}>
-          Request Payout
+          {t('requestPayoutButton')}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Request Payout</DialogTitle>
+          <DialogTitle>{t('requestPayoutTitle')}</DialogTitle>
           <DialogDescription>
             {!isPayoutProfileComplete ? (
-              'Please complete your payout profile first to request withdrawals.'
+              t('completeProfileFirst')
             ) : (
               <>
-                Enter the amount you want to withdraw. Available balance:{' '}
+                {t('enterAmountDesc')}{' '}
                 <span className="font-semibold">{formatPrice(availableBalance)}</span>
               </>
             )}
@@ -187,47 +192,47 @@ function PayoutRequestDialog({
           <div className="space-y-4 py-4">
             {!isPayoutProfileComplete ? (
               <div className="rounded-lg border border-dashed p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-2">Payout profile incomplete</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('payoutProfileIncomplete')}</p>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Complete your payout profile to enable withdrawal requests.
+                  {t('completePayoutProfileToEnable')}
                 </p>
                 <Link href="/dashboard/photographer/profile/payout-profile">
                   <Button variant="outline" size="sm">
-                    Complete Profile
+                    {t('completeProfile')}
                   </Button>
                 </Link>
               </div>
             ) : paymentAccounts.length === 0 ? (
               <div className="rounded-lg border border-dashed p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-2">No payment accounts found</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('noPaymentAccountsFound')}</p>
                 <p className="text-xs text-muted-foreground">
-                  Please add a payment account before requesting a payout.
+                  {t('addPaymentAccountFirst')}
                 </p>
               </div>
             ) : (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="paymentAccount">Payment Account *</Label>
+                  <Label htmlFor="paymentAccount">{t('paymentAccountLabel')} *</Label>
                   <Select
                     value={paymentAccountId}
                     onValueChange={setPaymentAccountId}
                     disabled={isPending}
                   >
                     <SelectTrigger id="paymentAccount">
-                      <SelectValue placeholder="Select payment account" />
+                      <SelectValue placeholder={t('selectPaymentAccount')} />
                     </SelectTrigger>
                     <SelectContent>
                       {paymentAccounts.map((account) => (
                         <SelectItem key={account.id} value={account.id}>
                           {account.display_name}
-                          {account.is_default && ' (Default)'}
+                          {account.is_default && ` ${t('defaultSuffix')}`}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount (USD)</Label>
+                  <Label htmlFor="amount">{t('amountLabel')}</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -239,7 +244,7 @@ function PayoutRequestDialog({
                       setAmount(e.target.value);
                       setError(null);
                     }}
-                    placeholder={`Max: ${maxAmount}`}
+                    placeholder={`${t('maxPrefix')} ${maxAmount}`}
                     disabled={isPending}
                   />
                 </div>
@@ -254,10 +259,10 @@ function PayoutRequestDialog({
               onClick={() => setOpen(false)}
               disabled={isPending}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" disabled={isPending || paymentAccounts.length === 0}>
-              {isPending ? 'Submitting...' : 'Submit Request'}
+              {isPending ? t('submitting') : t('submitRequest')}
             </Button>
           </DialogFooter>
         </form>
@@ -271,11 +276,13 @@ interface PayoutHistoryProps {
 }
 
 function PayoutHistory({ payouts }: PayoutHistoryProps) {
+  const { t } = useTranslations<EarningsT>();
+
   if (payouts.length === 0) {
     return (
       <div className="rounded-xl border bg-card p-6 shadow-sm">
-        <h3 className="mb-4 text-lg font-semibold">Payout History</h3>
-        <p className="text-sm text-muted-foreground">No payout requests yet</p>
+        <h3 className="mb-4 text-lg font-semibold">{t('payoutHistoryTitle')}</h3>
+        <p className="text-sm text-muted-foreground">{t('noPayoutRequestsYet')}</p>
       </div>
     );
   }
@@ -297,7 +304,7 @@ function PayoutHistory({ payouts }: PayoutHistoryProps) {
 
   return (
     <div className="rounded-xl border bg-card p-6 shadow-sm">
-      <h3 className="mb-4 text-lg font-semibold">Payout History</h3>
+      <h3 className="mb-4 text-lg font-semibold">{t('payoutHistoryTitle')}</h3>
       <div className="space-y-3">
         {payouts.map((payout) => (
           <div
@@ -312,15 +319,17 @@ function PayoutHistory({ payouts }: PayoutHistoryProps) {
                 </span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Requested: {formatDateTime(payout.created_at)}
+                {t('requestedLabel')} {formatDateTime(payout.created_at)}
               </p>
               {payout.paid_at && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Paid: {formatDateTime(payout.paid_at)}
+                  {t('paidLabel')} {formatDateTime(payout.paid_at)}
                 </p>
               )}
               {payout.admin_notes && (
-                <p className="mt-1 text-xs text-muted-foreground">Note: {payout.admin_notes}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t('noteLabel')} {payout.admin_notes}
+                </p>
               )}
             </div>
           </div>
@@ -335,39 +344,41 @@ interface EarningsTableProps {
 }
 
 function EarningsTable({ earnings }: EarningsTableProps) {
+  const { t } = useTranslations<EarningsT>();
+
   if (earnings.length === 0) {
     return (
       <div className="rounded-xl border bg-card p-6 shadow-sm">
-        <h3 className="mb-4 text-lg font-semibold">Recent Earnings</h3>
-        <p className="text-sm text-muted-foreground">No earnings yet</p>
+        <h3 className="mb-4 text-lg font-semibold">{t('recentEarningsTitle')}</h3>
+        <p className="text-sm text-muted-foreground">{t('noEarningsYet')}</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-xl border bg-card p-6 shadow-sm">
-      <h3 className="mb-4 text-lg font-semibold">Recent Earnings</h3>
+      <h3 className="mb-4 text-lg font-semibold">{t('recentEarningsTitle')}</h3>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
               <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
-                Date
+                {t('dateHeader')}
               </th>
               <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
-                Event
+                {t('eventHeader')}
               </th>
               <th className="px-4 py-2 text-left text-sm font-medium text-muted-foreground">
-                Buyer
+                {t('buyerHeader')}
               </th>
               <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">
-                Gross
+                {t('grossHeader')}
               </th>
               <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">
-                Fee
+                {t('feeHeader')}
               </th>
               <th className="px-4 py-2 text-right text-sm font-medium text-muted-foreground">
-                Net
+                {t('netHeader')}
               </th>
             </tr>
           </thead>
@@ -375,10 +386,12 @@ function EarningsTable({ earnings }: EarningsTableProps) {
             {earnings.map((earning) => (
               <tr key={earning.id} className="border-b border-border">
                 <td className="px-4 py-3 text-sm">{formatDate(earning.created_at)}</td>
-                <td className="px-4 py-3 text-sm">{earning.event_name || 'Untitled Event'}</td>
+                <td className="px-4 py-3 text-sm">{earning.event_name || t('untitledEvent')}</td>
                 <td className="px-4 py-3 text-sm text-muted-foreground">
                   {earning.buyer_email || (
-                    <span className="italic">Customer {earning.buyer_id.slice(0, 8)}</span>
+                    <span className="italic">
+                      {t('customerPrefix')} {earning.buyer_id.slice(0, 8)}
+                    </span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right text-sm">
@@ -400,6 +413,7 @@ function EarningsTable({ earnings }: EarningsTableProps) {
 }
 
 export function EarningsContent() {
+  const { t } = useTranslations<EarningsT>();
   const queryClient = useQueryClient();
 
   const { data, isFetching } = useQuery({
@@ -443,28 +457,28 @@ export function EarningsContent() {
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard
-              title="Total Earnings"
+              title={t('totalEarnings')}
               value={formatPrice(summary.totalGrossEarningsCents)}
               icon={<DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />}
-              description="All-time gross revenue"
+              description={t('allTimeGrossRevenue')}
             />
             <SummaryCard
-              title="Platform Fees"
+              title={t('platformFees')}
               value={formatPrice(summary.platformFeeCents)}
               icon={<XCircle className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />}
-              description="10% platform fee"
+              description={t('tenPercentFee')}
             />
             <SummaryCard
-              title="Net Earnings"
+              title={t('netEarnings')}
               value={formatPrice(summary.totalNetEarningsCents)}
               icon={<TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />}
-              description="After platform fees"
+              description={t('afterPlatformFees')}
             />
             <SummaryCard
-              title="Available Balance"
+              title={t('availableBalance')}
               value={formatPrice(summary.withdrawableBalanceCents)}
               icon={<Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />}
-              description="Ready to withdraw"
+              description={t('readyToWithdraw')}
             />
           </div>
 
@@ -475,10 +489,10 @@ export function EarningsContent() {
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="rounded-xl border bg-card p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Request Payout</h3>
+                <h3 className="text-lg font-semibold">{t('requestPayoutTitle')}</h3>
               </div>
               <p className="mb-4 text-sm text-muted-foreground">
-                Withdraw your available balance. Payouts are processed manually by our team.
+                {t('requestPayoutDesc')}
               </p>
               <PayoutRequestDialog
                 availableBalance={summary.withdrawableBalanceCents}

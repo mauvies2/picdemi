@@ -2,6 +2,10 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
+import type { Dictionary } from '@/lib/i18n/get-dictionary';
+import { useTranslations } from '@/lib/i18n/translations-provider';
+
+type NewEventT = Dictionary['newEvent'];
 
 type SummaryItem = { label: string; value: string };
 
@@ -20,14 +24,16 @@ export function ConfirmEventDialog({
   isPending,
   onConfirm,
 }: ConfirmEventDialogProps) {
+  const { t } = useTranslations<NewEventT>();
+
   return (
     <Dialog.Root open={open} onOpenChange={onClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-100 bg-black/40" />
         <Dialog.Content className="fixed inset-x-4 top-1/2 z-120 mx-auto w-full max-w-md -translate-y-1/2 rounded-2xl bg-background p-6 shadow-lg focus:outline-none">
-          <Dialog.Title className="text-lg font-semibold">Confirm details</Dialog.Title>
+          <Dialog.Title className="text-lg font-semibold">{t('confirmTitle')}</Dialog.Title>
           <Dialog.Description className="mt-1 text-sm text-muted-foreground">
-            Review and confirm your event information.
+            {t('confirmDesc')}
           </Dialog.Description>
           <div className="mt-4 grid gap-2 text-sm">
             {summary.map((item) => (
@@ -43,17 +49,17 @@ export function ConfirmEventDialog({
           <div className="mt-6 flex justify-end gap-2">
             <Dialog.Close asChild>
               <Button type="button" variant="outline" className="rounded-md">
-                Cancel
+                {t('confirmCancel')}
               </Button>
             </Dialog.Close>
             <Button type="button" onClick={onConfirm} disabled={isPending} className="rounded-md">
               {isPending ? (
                 <>
                   <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Uploading Photos...
+                  {t('confirmUploading')}
                 </>
               ) : (
-                'Confirm'
+                t('confirmButton')
               )}
             </Button>
           </div>

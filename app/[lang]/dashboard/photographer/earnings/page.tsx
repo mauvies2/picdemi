@@ -1,6 +1,7 @@
 import { DashboardHeader } from '@/components/dashboard-header';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { TranslationsProvider } from '@/lib/i18n/translations-provider';
 import { EarningsContent } from './earnings-content';
 
 export default async function EarningsPage({ params }: { params: Promise<{ lang: string }> }) {
@@ -15,7 +16,9 @@ export default async function EarningsPage({ params }: { params: Promise<{ lang:
           {dict.photographerDashboard.earningsSubtitle}
         </p>
       </div>
-      <EarningsContent />
+      <TranslationsProvider translations={dict.earnings}>
+        <EarningsContent />
+      </TranslationsProvider>
     </div>
   );
 }
