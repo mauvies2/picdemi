@@ -27,7 +27,7 @@ export const env = createEnv({
    */
   client: {
     // In dev this is often undefined, so make it optional
-    NEXT_PUBLIC_VERCEL_URL: z.url().optional(),
+    NEXT_PUBLIC_VERCEL_URL: z.string().optional(),
     NEXT_PUBLIC_SUPABASE_URL: z.url(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
     // Optional: if absent the search bar falls back to mock place suggestions
