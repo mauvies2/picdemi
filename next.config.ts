@@ -15,15 +15,14 @@ const nextConfig: NextConfig = {
       const patterns: Array<{
         protocol: 'http' | 'https';
         hostname: string;
-      }> = [
-        {
-          protocol: 'https',
-          hostname: 'placehold.co',
-        },
-      ];
-      // Allow localhost for development (watermark API routes)
+      }> = [];
+      // Allow localhost and placeholder images for development only
       if (process.env.NODE_ENV === 'development') {
         patterns.push(
+          {
+            protocol: 'https',
+            hostname: 'placehold.co',
+          },
           {
             protocol: 'http',
             hostname: 'localhost',

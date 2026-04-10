@@ -75,6 +75,8 @@
     "resetLinkSentTo": "We've sent a password reset link to",
     "didntReceiveEmail": "Didn't receive the email? Check your spam folder or try again in a few minutes.",
     "somethingWentWrong": "Something went wrong. Please try again.",
+    "errorInvalidCredentials": "Incorrect email or password. Please try again.",
+    "errorLoginGeneric": "Could not sign in. Please try again.",
     "backToLogin": "Back to login",
     "cancel": "Cancel"
   },
@@ -251,6 +253,9 @@
     "viewBillingHistory": "View Billing History",
     "feedbackTitle": "Share Your Feedback",
     "feedbackSubtitle": "Help us build Picdemi together — your voice shapes what we build next.",
+    "quickActionsTitle": "Quick Actions",
+    "quickActionsCreateEvent": "Create New Event",
+    "quickActionsViewEvents": "View All Events",
     "noSalesDataAvailable": "No sales data available",
     "salesOverTime": "Sales Over Time",
     "showingLast30DaysNote": "Showing last 30 days of data",

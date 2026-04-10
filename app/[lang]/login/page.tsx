@@ -1,3 +1,4 @@
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { getDashboardPath } from '@/app/[lang]/actions/roles';
 import { CloseButton } from '@/components/close-button';
@@ -20,6 +21,7 @@ export default async function Login({
   params: Promise<{ lang: string }>;
   searchParams: Promise<{
     message?: string;
+    error?: string;
     plan?: string;
     success?: string;
     reset?: string;
@@ -80,7 +82,8 @@ export default async function Login({
 
     if (error) {
       console.error(error);
-      return localizedRedirect(lang, `/login?message=Could not sign in. Reason: ${error.code}`);
+      const errorKey = error.code === 'invalid_credentials' ? 'invalid_credentials' : 'generic';
+      return localizedRedirect(lang, `/login?error=${errorKey}`);
     }
     // After successful login, check role to decide where to send the user.
     const {
@@ -152,16 +155,31 @@ export default async function Login({
           </div>
 
           <form className="animate-in flex w-full flex-col justify-center gap-2">
+            {params.error && (
+              <div className="mt-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  {params.error === 'invalid_credentials'
+                    ? dict.auth.errorInvalidCredentials
+                    : dict.auth.errorLoginGeneric}
+                </span>
+              </div>
+            )}
             {params?.message && (
-              <p
-                className={`mt-4 border p-4 text-center ${
+              <div
+                className={`mt-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
                   params.reset === 'success'
-                    ? 'border-green-500 bg-green-100 text-green-800'
-                    : 'border-red-500 bg-red-100 text-slate-600'
+                    ? 'border-green-200 bg-green-50 text-green-700'
+                    : 'border-red-200 bg-red-50 text-red-700'
                 }`}
               >
-                {params.message}
-              </p>
+                {params.reset === 'success' ? (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                )}
+                <span>{params.message}</span>
+              </div>
             )}
             <Label htmlFor="email">{dict.auth.email}</Label>
             <Input

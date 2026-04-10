@@ -214,7 +214,11 @@ export default async function PhotographerDashboardPage({
             )}
 
             {/* Quick Actions */}
-            <QuickActions />
+            <QuickActions
+              title={dict.photographerDashboard.quickActionsTitle}
+              createEventLabel={dict.photographerDashboard.quickActionsCreateEvent}
+              viewEventsLabel={dict.photographerDashboard.quickActionsViewEvents}
+            />
           </div>
         </div>
       </div>
