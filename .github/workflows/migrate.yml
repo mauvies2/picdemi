@@ -23,4 +23,5 @@ jobs:
       - name: Run migrations → production
         run: |
           supabase db push \
-            --db-url "postgresql://postgres:${{ secrets.SUPABASE_DB_PASSWORD_PROD }}@db.yzdlueeeizdqwuicydbr.supabase.co:5432/postgres" \
+            --db-url "postgresql://postgres@db.yzdlueeeizdqwuicydbr.supabase.co:5432/postgres" \
+            --password "${{ secrets.SUPABASE_DB_PASSWORD_PROD }}"
