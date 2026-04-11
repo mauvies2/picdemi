@@ -20,17 +20,21 @@ jobs:
         with:
           version: latest
 
-      # GitHub-hosted runners often have no working IPv6 egress; direct DB host may resolve
-      # to IPv6 first and fail with "network is unreachable". Force IPv4 via hostaddr while
-      # keeping the hostname for TLS (libpq).
+      # Direct host db.<ref>.supabase.co is often IPv6-only (AAAA). GitHub-hosted runners
+      # typically cannot use that path. Use Session pooler (5432) — IPv4 ELB — per Supabase
+      # docs for migrations. Region: Dashboard → Project Settings → General → Region.
       - name: Run migrations → production
+        env:
+          SUPABASE_PROJECT_REF: yzdlueeeizdqwuicydbr
         run: |
           set -eu
-          DB_IPV4=$(dig +short db.yzdlueeeizdqwuicydbr.supabase.co A @8.8.8.8 | head -n1)
-          if [ -z "$DB_IPV4" ]; then
-            echo "Could not resolve IPv4 (A record) for db host"
+          REGION="${{ secrets.SUPABASE_DB_REGION }}"
+          if [ -z "$REGION" ]; then
+            echo "Set repository secret SUPABASE_DB_REGION (e.g. eu-central-1) from Supabase → Project Settings → General → Region."
             exit 1
           fi
+          POOLER_HOST="aws-0-${REGION}.pooler.supabase.com"
+          # Session mode user is postgres.<project_ref> (not postgres@db...)
           supabase db push \
-            --db-url "postgresql://postgres@db.yzdlueeeizdqwuicydbr.supabase.co:5432/postgres?sslmode=require&hostaddr=${DB_IPV4}" \
+            --db-url "postgresql://postgres.${SUPABASE_PROJECT_REF}@${POOLER_HOST}:5432/postgres?sslmode=require" \
             --password "${{ secrets.SUPABASE_DB_PASSWORD_PROD }}"
