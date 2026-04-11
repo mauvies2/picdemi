@@ -17,6 +17,7 @@ module.exports = {
     'extensions.json',
     'next.config.ts',
     '*.ts.snap',
+    '.github/**',
   ],
   words: vscodeConfig['cSpell.words'],
 };
