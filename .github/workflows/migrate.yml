@@ -19,10 +19,12 @@ jobs:
         with:
           version: latest
 
+      - name: Link to production
+        run: supabase link --project-ref yzdlueeeizdqwuicydbr
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
       - name: Run migrations → production
-        run: |
-          supabase db push \
-            --project-ref yzdlueeeizdqwuicydbr \
-            --password "${{ secrets.SUPABASE_DB_PASSWORD_PROD }}"
+        run: supabase db push --password "${{ secrets.SUPABASE_DB_PASSWORD_PROD }}"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
