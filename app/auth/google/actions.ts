@@ -1,13 +1,11 @@
 'use server';
 
 import { createClient } from '@/database/server';
-import { env } from '@/env.mjs';
+import { getSiteUrl } from '@/lib/get-site-url';
 
 export async function signInWithGoogle(plan?: string) {
   const supabase = await createClient();
-  const origin = env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${env.NEXT_PUBLIC_VERCEL_URL}`
-    : 'http://localhost:3000';
+  const origin = getSiteUrl();
 
   // Build redirect URL with plan parameter if present
   const redirectTo = plan ? `${origin}/auth/callback?plan=${plan}` : `${origin}/auth/callback`;

@@ -6,7 +6,7 @@ import { SubmitButton } from '@/components/submit-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/database/server';
-import { env } from '@/env.mjs';
+import { getSiteUrl } from '@/lib/get-site-url';
 import type { Locale } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { getLangFromHeaders } from '@/lib/i18n/get-lang-from-headers';
@@ -53,9 +53,7 @@ export default async function Signup({
 
     const supabase = await createClient();
 
-    const baseRedirect = env.NEXT_PUBLIC_VERCEL_URL
-      ? `https://${env.NEXT_PUBLIC_VERCEL_URL}`
-      : 'http://localhost:3000';
+    const baseRedirect = getSiteUrl();
     const tokenRedirect = params.token
       ? `${baseRedirect}/auth/callback?token=${params.token}`
       : baseRedirect;

@@ -57,7 +57,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
 
           <h1 className="text-balance text-5xl font-semibold tracking-tight lg:text-7xl">
             {dict.home.heroHeadline1}
-            <span className="block bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+            <span className="block bg-linear-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent pb-1">
               {dict.home.heroHeadline2}
             </span>
           </h1>
