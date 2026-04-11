@@ -13,28 +13,36 @@ jobs:
     name: Run migrations
     runs-on: ubuntu-latest
 
+    env:
+      PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
+      DB_URL: postgresql://postgres.yzdlueeeizdqwuicydbr@aws-0-eu-west-1.pooler.supabase.com:5432/postgres
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      # Direct host db.<ref>.supabase.co is often IPv6-only (AAAA). GitHub-hosted runners
-      # typically cannot use that path. Use Session pooler (5432) — IPv4 ELB — per Supabase
-      # docs for migrations. Region: Dashboard → Project Settings → General → Region.
-      - name: Run migrations → production
-        env:
-          SUPABASE_PROJECT_REF: yzdlueeeizdqwuicydbr
+      - name: Create migration tracking table
         run: |
-          set -eu
-          REGION="${{ secrets.SUPABASE_DB_REGION }}"
-          if [ -z "$REGION" ]; then
-            echo "Set repository secret SUPABASE_DB_REGION (e.g. eu-central-1) from Supabase → Project Settings → General → Region."
-            exit 1
-          fi
-          POOLER_HOST="aws-0-${REGION}.pooler.supabase.com"
-          # Session mode user is postgres.<project_ref> (not postgres@db...)
-          supabase db push \
-            --db-url "postgresql://postgres.${SUPABASE_PROJECT_REF}@${POOLER_HOST}:5432/postgres?sslmode=require" \
-            --password "${{ secrets.SUPABASE_DB_PASSWORD_PROD }}"
+          psql "$DB_URL" -c "
+            create schema if not exists supabase_migrations;
+            create table if not exists supabase_migrations.schema_migrations (
+              version text primary key
+            );
+          "
+
+      - name: Run pending migrations
+        run: |
+          for file in $(ls supabase/migrations/*.sql | sort); do
+            version=$(basename "$file" .sql)
+            applied=$(psql "$DB_URL" -t -c \
+              "select count(*) from supabase_migrations.schema_migrations where version = '$version';" \
+              | tr -d ' \n')
+            if [ "$applied" = "0" ]; then
+              echo "Applying $version..."
+              psql "$DB_URL" -f "$file"
+              psql "$DB_URL" -c \
+                "insert into supabase_migrations.schema_migrations (version) values ('$version');"
+              echo "✓ $version"
+            else
+              echo "- $version (already applied)"
+            fi
+          done
