@@ -20,8 +20,17 @@ jobs:
         with:
           version: latest
 
+      # GitHub-hosted runners often have no working IPv6 egress; direct DB host may resolve
+      # to IPv6 first and fail with "network is unreachable". Force IPv4 via hostaddr while
+      # keeping the hostname for TLS (libpq).
       - name: Run migrations → production
         run: |
+          set -eu
+          DB_IPV4=$(dig +short db.yzdlueeeizdqwuicydbr.supabase.co A @8.8.8.8 | head -n1)
+          if [ -z "$DB_IPV4" ]; then
+            echo "Could not resolve IPv4 (A record) for db host"
+            exit 1
+          fi
           supabase db push \
-            --db-url "postgresql://postgres@db.yzdlueeeizdqwuicydbr.supabase.co:5432/postgres" \
+            --db-url "postgresql://postgres@db.yzdlueeeizdqwuicydbr.supabase.co:5432/postgres?sslmode=require&hostaddr=${DB_IPV4}" \
             --password "${{ secrets.SUPABASE_DB_PASSWORD_PROD }}"
