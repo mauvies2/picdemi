@@ -204,7 +204,9 @@ function RecentSales({ sales, lang }: RecentSalesProps) {
                 <td className="px-4 py-3 text-sm">{sale.event_name || t('untitledEvent')}</td>
                 <td className="px-4 py-3 text-sm text-muted-foreground">
                   {sale.buyer_email || (
-                    <span className="italic">{t('customer')} {sale.buyer_id.slice(0, 8)}</span>
+                    <span className="italic">
+                      {t('customer')} {sale.buyer_id.slice(0, 8)}
+                    </span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right text-sm font-medium">

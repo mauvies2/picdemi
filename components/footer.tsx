@@ -1,5 +1,4 @@
 import { Facebook, Instagram, Mail, Twitter } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import type { Dictionary } from '@/lib/i18n/get-dictionary';
 import { localizedPath } from '@/lib/i18n/localized-path';
@@ -8,19 +7,14 @@ export function Footer({ dict, lang }: { dict: Dictionary; lang: string }) {
   const t = dict.footer;
   return (
     <footer className="border-t bg-background">
-      <div className="mx-auto max-w-7xl py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
             <Link href={localizedPath(lang, '/')} className="flex items-center gap-2">
-              <Image
-                src="/favicon/favicon_simple_dark.png"
-                alt="Picdemi"
-                width={24}
-                height={24}
-                className="h-6 w-6"
-              />
-              <span className="text-xl font-bold tracking-tight">Picdemi</span>
+              <span className="font-[family-name:var(--font-wordmark)] text-lg font-bold tracking-widest">
+                PICDEMI
+              </span>
             </Link>
             <p className="text-sm text-muted-foreground">{t.tagline}</p>
             <div className="flex items-center gap-4">

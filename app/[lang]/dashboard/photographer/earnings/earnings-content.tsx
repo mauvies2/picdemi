@@ -205,9 +205,7 @@ function PayoutRequestDialog({
             ) : paymentAccounts.length === 0 ? (
               <div className="rounded-lg border border-dashed p-4 text-center">
                 <p className="text-sm text-muted-foreground mb-2">{t('noPaymentAccountsFound')}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t('addPaymentAccountFirst')}
-                </p>
+                <p className="text-xs text-muted-foreground">{t('addPaymentAccountFirst')}</p>
               </div>
             ) : (
               <>
@@ -491,9 +489,7 @@ export function EarningsContent() {
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">{t('requestPayoutTitle')}</h3>
               </div>
-              <p className="mb-4 text-sm text-muted-foreground">
-                {t('requestPayoutDesc')}
-              </p>
+              <p className="mb-4 text-sm text-muted-foreground">{t('requestPayoutDesc')}</p>
               <PayoutRequestDialog
                 availableBalance={summary.withdrawableBalanceCents}
                 onSuccess={() => queryClient.invalidateQueries({ queryKey: ['earnings'] })}

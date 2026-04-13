@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist_Mono, Inter, Inter_Tight } from 'next/font/google';
+import { Geist_Mono, Inter, Inter_Tight, Syne } from 'next/font/google';
 import { headers } from 'next/headers';
 import './globals.css';
 import { getSiteUrl } from '@/lib/get-site-url';
@@ -17,6 +17,12 @@ const geistMono = Geist_Mono({
 const interTight = Inter_Tight({
   variable: '--font-inter-tight',
   subsets: ['latin'],
+});
+
+const syne = Syne({
+  variable: '--font-syne',
+  subsets: ['latin'],
+  weight: ['700', '800'],
 });
 
 export const metadata: Metadata = {
@@ -56,7 +62,10 @@ export default async function RootLayout({
   const lang = (await headers()).get('x-lang') ?? 'es';
 
   return (
-    <html lang={lang} className={`${inter.variable} ${geistMono.variable} ${interTight.variable}`}>
+    <html
+      lang={lang}
+      className={`${inter.variable} ${geistMono.variable} ${interTight.variable} ${syne.variable}`}
+    >
       <body className="antialiased">{children}</body>
     </html>
   );

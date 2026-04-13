@@ -143,8 +143,7 @@ export function ForgotPasswordDialog({
               </div>
               <DialogTitle className="text-center text-2xl">{t('checkYourEmail')}</DialogTitle>
               <DialogDescription className="text-center">
-                {t('resetLinkSentTo')}{' '}
-                <span className="font-medium text-foreground">{email}</span>
+                {t('resetLinkSentTo')} <span className="font-medium text-foreground">{email}</span>
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">

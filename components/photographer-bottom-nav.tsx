@@ -11,7 +11,6 @@ import {
   Send,
   Settings,
   User,
-  Wallet,
   WalletMinimal,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -32,12 +31,7 @@ import { useLocalizedPath } from '@/hooks/use-localized-path';
 import type { RoleSlug } from '@/lib/roles';
 import { cn } from '@/lib/utils';
 
-const accountActiveRoutes = [
-  '/dashboard/photographer/sales',
-  '/dashboard/photographer/earnings',
-  '/dashboard/photographer/profile',
-  '/dashboard/photographer/settings',
-];
+const accountActiveRoutes = ['/dashboard/photographer/profile', '/dashboard/photographer/settings'];
 
 export function PhotographerBottomNav({
   user,
@@ -50,9 +44,9 @@ export function PhotographerBottomNav({
     overview: string;
     events: string;
     createEvent: string;
+    ventas: string;
     account: string;
-    sales: string;
-    earnings: string;
+    roleLabel: string;
     profile: string;
     settings: string;
     billing: string;
@@ -96,6 +90,15 @@ export function PhotographerBottomNav({
       isActive: (p: string) => {
         const clean = p.replace(/^\/(es|en)/, '');
         return clean === '/dashboard/photographer/events/new';
+      },
+    },
+    {
+      href: '/dashboard/photographer/ventas',
+      label: navLabels.ventas,
+      icon: WalletMinimal,
+      isActive: (p: string) => {
+        const clean = p.replace(/^\/(es|en)/, '');
+        return clean.startsWith('/dashboard/photographer/ventas');
       },
     },
   ];
@@ -206,24 +209,9 @@ export function PhotographerBottomNav({
           <div className="px-2 py-1.5">
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Camera className="h-3 w-3" />
+              {navLabels.roleLabel}
             </span>
           </div>
-
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem asChild>
-              <Link href={lp('/dashboard/photographer/sales')}>
-                <WalletMinimal className="mr-2 h-4 w-4" />
-                <span>{navLabels.sales}</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={lp('/dashboard/photographer/earnings')}>
-                <Wallet className="mr-2 h-4 w-4" />
-                <span>{navLabels.earnings}</span>
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
 
           <DropdownMenuSeparator />
           <DropdownMenuGroup>

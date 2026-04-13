@@ -223,6 +223,8 @@
     "unnamedEvent": "Unnamed Event",
     "pleaseSignIn": "Please sign in to view your events.",
     "noEventsYet": "No events yet.",
+    "noEventsYetDesc": "Create your first event to start uploading photos and selling to athletes.",
+    "createFirstEvent": "Create your first event",
     "perPhoto": "per photo",
     "salesTitle": "Sales",
     "salesSubtitle": "Track your sales performance and revenue",

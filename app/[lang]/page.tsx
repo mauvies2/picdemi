@@ -40,9 +40,9 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const isAuthenticated = false;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-svh flex-col">
       {/* Hero Section */}
-      <section className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center overflow-hidden bg-linear-to-br from-background via-background to-primary/5">
+      <section className="relative flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center overflow-hidden bg-linear-to-br from-background via-background to-primary/5">
         {/* Decorative background */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute left-1/4 top-1/4 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
@@ -73,11 +73,6 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
           <p className="text-xs text-muted-foreground/80 tracking-wider">
             {dict.home.heroDisclaimer}
           </p>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="h-6 w-px bg-muted-foreground/30" />
         </div>
       </section>
 
@@ -139,27 +134,6 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Divider */}
-          <div className="mx-auto mt-16 max-w-6xl border-t border-border/40" />
-
-          {/* Action Bar */}
-          <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href={localizedPath(lang, '/events')}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90"
-            >
-              <Search className="h-4 w-4" />
-              {dict.home.findMyPhotos}
-            </Link>
-            <Link
-              href={localizedPath(lang, '/signup')}
-              className="inline-flex items-center gap-2 rounded-full border border-input bg-background px-7 py-2.5 text-sm font-semibold text-foreground transition-all duration-200 hover:-translate-y-px hover:opacity-90"
-            >
-              <Camera className="h-4 w-4" />
-              {dict.home.startSelling}
-            </Link>
           </div>
         </div>
       </section>
