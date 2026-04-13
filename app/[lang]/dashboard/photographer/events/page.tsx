@@ -1,5 +1,7 @@
 import { cacheLife, cacheTag } from 'next/cache';
+import Link from 'next/link';
 import { DashboardHeader } from '@/components/dashboard-header';
+import { Button } from '@/components/ui/button';
 import { createSignedUrl, getPhotosForEvents, getUserEvents } from '@/database/queries';
 import { createClient } from '@/database/server';
 import { supabaseAdmin } from '@/database/supabase-admin';
@@ -120,42 +122,71 @@ export default async function EventsPage({ params }: { params: Promise<{ lang: s
   return (
     <div>
       <DashboardHeader title={dict.dashboard.events} />
-      <div className="text-sm text-muted-foreground">
-        {events.length
-          ? `${events.length} event${events.length === 1 ? '' : 's'}`
-          : dict.photographerDashboard.noEventsYet}
-      </div>
-      <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {events.map((event) => {
-          const stat = stats.get(event.id) ?? {
-            count: 0,
-            coverPath: null,
-            firstTakenAt: null,
-            lastTakenAt: null,
-          };
-          const count = stat.count;
-          const coverUrl = coverUrls.get(event.id);
+      {events.length === 0 ? (
+        <div className="mt-8 flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
+          <div className="mb-4 rounded-full bg-muted p-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 text-muted-foreground"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold">{dict.photographerDashboard.noEventsYet}</h3>
+          <p className="mt-2 mb-6 max-w-sm text-sm text-muted-foreground">
+            {dict.photographerDashboard.noEventsYetDesc}
+          </p>
+          <Link href={`/${lang}/dashboard/photographer/events/new`}>
+            <Button>{dict.photographerDashboard.createFirstEvent}</Button>
+          </Link>
+        </div>
+      ) : (
+        <>
+          <div className="text-sm text-muted-foreground">
+            {`${events.length} event${events.length === 1 ? '' : 's'}`}
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {events.map((event) => {
+              const stat = stats.get(event.id) ?? {
+                count: 0,
+                coverPath: null,
+                firstTakenAt: null,
+                lastTakenAt: null,
+              };
+              const count = stat.count;
+              const coverUrl = coverUrls.get(event.id);
 
-          return (
-            <EventCard
-              key={event.id}
-              id={event.id}
-              name={event.name}
-              date={event.date}
-              city={event.city}
-              country={event.country}
-              activity={event.activity}
-              pricePerPhoto={event.price_per_photo}
-              photoCount={count}
-              salesCount={salesCounts.get(event.id) ?? 0}
-              isPublic={event.is_public}
-              coverUrl={coverUrl}
-              editHref={`/dashboard/photographer/events/${event.id}/edit`}
-              onDelete={deleteEvent.bind(null, event.id)}
-            />
-          );
-        })}
-      </div>
+              return (
+                <EventCard
+                  key={event.id}
+                  id={event.id}
+                  name={event.name}
+                  date={event.date}
+                  city={event.city}
+                  country={event.country}
+                  activity={event.activity}
+                  pricePerPhoto={event.price_per_photo}
+                  photoCount={count}
+                  salesCount={salesCounts.get(event.id) ?? 0}
+                  isPublic={event.is_public}
+                  coverUrl={coverUrl}
+                  editHref={`/dashboard/photographer/events/${event.id}/edit`}
+                  onDelete={deleteEvent.bind(null, event.id)}
+                />
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }

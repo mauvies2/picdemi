@@ -1,0 +1,9 @@
+#!/bin/sh
+echo "Running lint check..."
+pnpm lint
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Lint failed. Fix the errors above before committing."
+  echo "Run 'pnpm lint:fix' to auto-fix formatting and safe issues."
+  exit 1
+fi

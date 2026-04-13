@@ -10,10 +10,8 @@ import {
   Package,
   Send,
   User,
-  Wallet,
   WalletMinimal,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import type { ComponentProps } from 'react';
 import { useLocalizedPath } from '@/hooks/use-localized-path';
@@ -25,8 +23,7 @@ interface NavLabels {
   overview: string;
   createEvent: string;
   events: string;
-  sales: string;
-  earnings: string;
+  ventas: string;
   myPhotos: string;
   profile: string;
   explore: string;
@@ -55,8 +52,7 @@ export function AppSidebar({
     { title: navLabels.overview, url: '/dashboard/photographer', icon: Home },
     { title: navLabels.createEvent, url: '/dashboard/photographer/events/new', icon: CalendarPlus },
     { title: navLabels.events, url: '/dashboard/photographer/events', icon: CalendarDays },
-    { title: navLabels.sales, url: '/dashboard/photographer/sales', icon: WalletMinimal },
-    { title: navLabels.earnings, url: '/dashboard/photographer/earnings', icon: Wallet },
+    { title: navLabels.ventas, url: '/dashboard/photographer/ventas', icon: WalletMinimal },
   ];
 
   const talentNav = [
@@ -82,9 +78,11 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" className="h-svh" {...props}>
       <SidebarHeader>
-        <div className="relative flex items-center px-2">
+        <div className="relative flex items-center px-2 py-1">
           <Link href={lp('/')} className="flex items-center gap-1">
-            <Image src="/logo_dark.svg" alt="Logo" width={170} height={50} priority />
+            <span className="font-[family-name:var(--font-wordmark)] text-lg font-bold tracking-widest">
+              PICDEMI
+            </span>
           </Link>
         </div>
       </SidebarHeader>

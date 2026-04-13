@@ -30,11 +30,11 @@
   "home": {
     "heroHeadline1": "Tus mejores fotos",
     "heroHeadline2": "entregadas al instante.",
-    "heroSubtitle": "Conectamos fotógrafos con deportistas. Encuentra tus fotos en segundos con nuestra búsqueda avanzada.",
+    "heroSubtitle": "Conectamos fotógrafos con talentos. Encuentra tus fotos en segundos con nuestra búsqueda avanzada.",
     "heroDisclaimer": "Sin cuenta · Compra en minutos · Descarga instantánea",
     "howItWorksLabel": "Cómo funciona",
     "howItWorksHeadline": "De la cámara a tu galería, en segundos.",
-    "howItWorksSubtitle": "Conectamos a los fotógrafos que aman su oficio con los deportistas que viven su pasión.",
+    "howItWorksSubtitle": "Conectamos a los fotógrafos que aman su oficio con los talentos que viven su pasión.",
     "pillar1Title": "Sube y profesionaliza",
     "pillar1Body": "Arrastra, suelta y empieza a vender. Sube miles de fotos en minutos y deja que nuestros metadatos inteligentes hagan la organización.",
     "pillar2Title": "Descubrimiento instantáneo",
@@ -44,7 +44,7 @@
     "findMyPhotos": "Encontrar mis fotos",
     "startSelling": "Empezar a vender como fotógrafo",
     "ctaHeadline": "¿Listo para ver tus eventos con nueva luz?",
-    "ctaSubtitle": "Únete a fotógrafos y deportistas que usan Picdemi para que los grandes momentos nunca se pierdan.",
+    "ctaSubtitle": "Únete a fotógrafos y talentos que usan Picdemi para que los grandes momentos nunca se pierdan.",
     "ctaCreateAccount": "Crear cuenta gratis",
     "ctaHaveAccount": "Ya tengo una cuenta"
   },
@@ -223,6 +223,8 @@
     "unnamedEvent": "Evento sin nombre",
     "pleaseSignIn": "Inicia sesión para ver tus eventos.",
     "noEventsYet": "Aún no tienes eventos.",
+    "noEventsYetDesc": "Crea tu primer evento para empezar a subir fotos y venderlas a los atletas.",
+    "createFirstEvent": "Crear tu primer evento",
     "perPhoto": "por foto",
     "salesTitle": "Ventas",
     "salesSubtitle": "Sigue tu rendimiento de ventas e ingresos",
@@ -321,7 +323,7 @@
     "presetLastWeek": "Última semana"
   },
   "footer": {
-    "tagline": "Encuéntrate en cada momento. Conectamos fotógrafos con deportistas y asistentes a eventos.",
+    "tagline": "Encuéntrate en cada momento. Conectamos fotógrafos con talentos y asistentes a eventos.",
     "productTitle": "Producto",
     "getStarted": "Empezar",
     "signIn": "Iniciar sesión",

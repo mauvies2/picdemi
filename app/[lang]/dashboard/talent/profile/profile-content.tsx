@@ -67,55 +67,50 @@ export function ProfileContent({ initialData, showSuccessMessage = false }: Prof
 
   return (
     <>
-      {/* Instagram-style Profile Header */}
-      <div className="border-b pb-8">
-        <div className="flex flex-col sm:flex-row gap-6">
-          {/* Avatar */}
-          <div className="flex justify-center sm:justify-start">
-            <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-2 border-border">
+      {/* Profile Header */}
+      {/* Mobile: avatar left + username inline; Desktop: Instagram-style with stats */}
+      <div className="sm:border-b sm:pb-8 mb-6 sm:mb-0">
+        {/* Mobile layout */}
+        <div className="flex items-center gap-4 sm:hidden mb-6">
+          <Avatar className="h-16 w-16 shrink-0 border-2 border-border">
+            <AvatarImage src={profile?.avatar_url ?? undefined} alt={displayName} />
+            <AvatarFallback className="text-2xl font-semibold">
+              {displayName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <h1 className="text-xl font-light">{displayName}</h1>
+        </div>
+
+        {/* Desktop layout */}
+        <div className="hidden sm:flex gap-6">
+          <div className="flex justify-start">
+            <Avatar className="h-32 w-32 border-2 border-border">
               <AvatarImage src={profile?.avatar_url ?? undefined} alt={displayName} />
-              <AvatarFallback className="text-3xl sm:text-4xl font-semibold">
+              <AvatarFallback className="text-4xl font-semibold">
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>
-
-          {/* Profile Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
-              <h1 className="text-2xl sm:text-3xl font-light">{displayName}</h1>
-              {/* {profile?.username && (
-                <span className="text-sm sm:text-base text-muted-foreground">
-                  @{profile.username}
-                </span>
-              )} */}
+            <div className="flex items-center gap-4 mb-4">
+              <h1 className="text-3xl font-light">{displayName}</h1>
             </div>
-
-            {/* Stats */}
-            <div className="flex gap-6 sm:gap-8 mb-4">
-              <div className="text-center sm:text-left">
-                <span className="block text-lg sm:text-xl font-semibold">
-                  {stats.purchasedPhotosCount}
-                </span>
+            <div className="flex gap-8 mb-4">
+              <div>
+                <span className="block text-xl font-semibold">{stats.purchasedPhotosCount}</span>
                 <span className="text-sm text-muted-foreground">photos</span>
               </div>
-              <div className="text-center sm:text-left">
-                <span className="block text-lg sm:text-xl font-semibold">{stats.eventsCount}</span>
+              <div>
+                <span className="block text-xl font-semibold">{stats.eventsCount}</span>
                 <span className="text-sm text-muted-foreground">events</span>
               </div>
             </div>
-
-            {/* Bio */}
-            {profile?.bio && (
-              <div className="mb-4">
-                <p className="text-sm sm:text-base">{profile.bio}</p>
-              </div>
-            )}
+            {profile?.bio && <p className="text-sm sm:text-base">{profile.bio}</p>}
           </div>
         </div>
       </div>
 
-      {/* Instagram-style Photo Grid */}
+      {/* Photo Grid */}
       {photos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="rounded-full bg-muted p-6 mb-4">
@@ -137,7 +132,7 @@ export function ProfileContent({ initialData, showSuccessMessage = false }: Prof
           </Link>
         </div>
       ) : (
-        <div className="w-full pt-4">
+        <div className="w-full pt-2 sm:pt-4">
           <ProfilePhotoViewer
             items={photoItems}
             photoMetadata={photoMetadata}

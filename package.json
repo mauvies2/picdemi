@@ -12,7 +12,8 @@
     "format": "biome format --write",
     "format:fix": "biome format --write",
     "typecheck": "tsc --noEmit",
-    "spell": "cspell --quiet **/*.ts **/*.tsx"
+    "spell": "cspell --quiet **/*.ts **/*.tsx",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -41,6 +42,7 @@
     "framer-motion": "^12.38.0",
     "lucide-react": "^0.556.0",
     "next": "16.0.8",
+    "radix-ui": "^1.4.3",
     "react": "19.2.1",
     "react-day-picker": "^9.14.0",
     "react-dom": "19.2.1",

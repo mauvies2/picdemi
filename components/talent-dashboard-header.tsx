@@ -1,7 +1,6 @@
 'use client';
 
 import { Package, Search, ShoppingBag, User } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BottomNav } from '@/components/bottom-nav';
@@ -58,7 +57,9 @@ export function TalentDashboardHeader({
         <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-6">
           {/* Left: Logo */}
           <Link href={lp('/')} className="flex shrink-0 items-center gap-2">
-            <Image src="/logo_dark.svg" alt="Picdemi" width={130} height={50} priority />
+            <span className="font-[family-name:var(--font-wordmark)] text-xl font-bold tracking-widest">
+              PICDEMI
+            </span>
           </Link>
 
           {/* Center: Nav Links (desktop only) */}

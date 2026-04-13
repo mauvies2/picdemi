@@ -295,9 +295,7 @@ function PaymentAccountForm({ onSuccess, onCancel, initialData }: PaymentAccount
                 </SelectContent>
               </Select>
               {countryCode && !initialData && (
-                <p className="text-xs text-muted-foreground">
-                  {t('usingCountryFromProfile')}
-                </p>
+                <p className="text-xs text-muted-foreground">{t('usingCountryFromProfile')}</p>
               )}
             </div>
             {countryCode && (
@@ -471,9 +469,7 @@ export function PaymentAccountsSection() {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>{t('addPaymentAccountTitle')}</DialogTitle>
-              <DialogDescription>
-                {t('addPaymentAccountDesc')}
-              </DialogDescription>
+              <DialogDescription>{t('addPaymentAccountDesc')}</DialogDescription>
             </DialogHeader>
             <PaymentAccountForm
               onSuccess={() => {
@@ -494,9 +490,7 @@ export function PaymentAccountsSection() {
       ) : accounts.length === 0 ? (
         <div className="rounded-lg border border-dashed p-8 text-center">
           <CreditCard className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            {t('noPaymentAccountsYet')}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('noPaymentAccountsYet')}</p>
         </div>
       ) : (
         <div className="space-y-3">
