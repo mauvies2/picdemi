@@ -113,10 +113,10 @@ export default async function PhotographerSettingsPage({
             <div className="space-y-2">
               <p className="text-sm font-medium">{dict.photographerDashboard.planFeatures}</p>
               <ul className="space-y-1 text-sm text-muted-foreground">
-                {currentPlan.features.map((feature, i) => {
+                {currentPlan.features.map((feature) => {
                   const text = typeof feature === 'string' ? feature : feature.text;
                   return (
-                    <li key={i} className="flex items-center gap-2">
+                    <li key={text} className="flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                       {text}
                     </li>

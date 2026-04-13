@@ -17,7 +17,7 @@ export default async function TalentFeedbackPage({
     <div className="flex flex-1 flex-col gap-2">
       <DashboardHeader title={dict.talentDashboard.shareFeedback} />
       <p className="text-sm text-muted-foreground mb-4">{dict.talentDashboard.feedbackSubtitle}</p>
-      <FeedbackView role="talent" initialVotes={initialVotes} />
+      <FeedbackView userRole="talent" initialVotes={initialVotes} />
     </div>
   );
 }

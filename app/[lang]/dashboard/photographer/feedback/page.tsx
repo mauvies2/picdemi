@@ -19,7 +19,7 @@ export default async function PhotographerFeedbackPage({
       <p className="text-sm text-muted-foreground mb-4">
         {dict.photographerDashboard.feedbackSubtitle}
       </p>
-      <FeedbackView role="photographer" initialVotes={initialVotes} />
+      <FeedbackView userRole="photographer" initialVotes={initialVotes} />
     </div>
   );
 }

@@ -223,7 +223,11 @@ function StarRating({
 
   return (
     <div className="flex items-center gap-3">
-      <div className="flex gap-0.5" onMouseLeave={onLeave}>
+      <fieldset
+        className="flex gap-0.5 border-0 p-0 m-0"
+        aria-label="Star rating"
+        onMouseLeave={onLeave}
+      >
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
@@ -243,7 +247,7 @@ function StarRating({
             />
           </button>
         ))}
-      </div>
+      </fieldset>
       <AnimatePresence mode="wait">
         {display > 0 && (
           <motion.span
@@ -337,11 +341,11 @@ function RoadmapSidebar({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface FeedbackViewProps {
-  role: RoleSlug;
+  userRole: RoleSlug;
   initialVotes: string[];
 }
 
-export function FeedbackView({ role, initialVotes }: FeedbackViewProps) {
+export function FeedbackView({ userRole, initialVotes }: FeedbackViewProps) {
   const pathname = usePathname();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
@@ -443,7 +447,7 @@ export function FeedbackView({ role, initialVotes }: FeedbackViewProps) {
         formData.append('rating', rating.toString());
         formData.append('subject', subject.trim());
         formData.append('description', description.trim());
-        formData.append('role', role);
+        formData.append('role', userRole);
         formData.append('pageUrl', pathname);
         if (screenshot) formData.append('screenshot', screenshot);
 
@@ -538,7 +542,7 @@ export function FeedbackView({ role, initialVotes }: FeedbackViewProps) {
             <Label htmlFor="feedback-description">Description</Label>
             <Textarea
               id="feedback-description"
-              placeholder={DESCRIPTION_PLACEHOLDER[role]}
+              placeholder={DESCRIPTION_PLACEHOLDER[userRole]}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
@@ -583,7 +587,8 @@ export function FeedbackView({ role, initialVotes }: FeedbackViewProps) {
                 </div>
               </div>
             ) : (
-              <div
+              <button
+                type="button"
                 onDragOver={(e) => {
                   e.preventDefault();
                   setIsDragging(true);
@@ -592,7 +597,7 @@ export function FeedbackView({ role, initialVotes }: FeedbackViewProps) {
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(
-                  'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 transition-colors',
+                  'flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 transition-colors',
                   isDragging
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-muted-foreground/40 hover:bg-muted/20',
@@ -615,7 +620,7 @@ export function FeedbackView({ role, initialVotes }: FeedbackViewProps) {
                     e.target.value = '';
                   }}
                 />
-              </div>
+              </button>
             )}
           </div>
 
