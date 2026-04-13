@@ -13,24 +13,33 @@ type PlanFeature = { text: string; bold?: boolean; badge?: string };
 
 const PLAN_FEATURES: Record<string, PlanFeature[]> = {
   free: [
-    { text: '15% sales fee', bold: true },
-    { text: '1GB storage' },
-    { text: 'Up to 3 active events' },
-    { text: 'Stripe-powered payments' },
+    { text: '12% sales fee', bold: true },
+    { text: '20GB storage' },
+    { text: 'Up to 5 active events' },
+    { text: 'BIB number recognition' },
+    { text: 'Face recognition (100 searches/month)' },
+    { text: 'Basic analytics' },
   ],
   starter: [
     { text: '8% sales fee', bold: true },
     { text: '50GB storage' },
-    { text: 'Up to 20 events' },
-    { text: 'Custom pricing & bundles' },
-    { text: 'AI Tagging & Face Recognition', badge: 'Coming soon' },
+    { text: 'Unlimited events' },
+    { text: 'BIB number recognition' },
+    { text: 'Face recognition' },
+    { text: 'Advanced analytics' },
+    { text: 'Priority in search results' },
+    { text: 'Email support' },
   ],
   pro: [
     { text: '5% sales fee', bold: true },
-    { text: '200GB storage included' },
+    { text: '250GB storage' },
     { text: 'Unlimited events' },
+    { text: 'BIB number recognition' },
+    { text: 'Face recognition' },
+    { text: 'Outfit pattern recognition', badge: 'Coming soon' },
+    { text: 'Advanced analytics & insights' },
     { text: 'Highest priority in search results' },
-    { text: 'Full AI Auto-tagging', badge: 'Coming soon' },
+    { text: 'Priority support' },
   ],
 };
 
@@ -48,7 +57,7 @@ const PLAN_CARDS: PlanCard[] = [
   {
     id: 'free',
     name: 'Free',
-    description: 'Perfect for getting started',
+    description: 'Perfect for getting started and testing Picdemi',
     monthlyPrice: null,
     yearlyMonthlyPrice: null,
     yearlyTotal: null,
@@ -56,7 +65,7 @@ const PLAN_CARDS: PlanCard[] = [
   {
     id: 'starter',
     name: 'Starter',
-    description: 'For active creators who publish events regularly',
+    description: 'For active photographers who publish events regularly',
     monthlyPrice: 14.99,
     yearlyMonthlyPrice: 11.99,
     yearlyTotal: 143.88,

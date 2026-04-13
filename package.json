@@ -12,7 +12,8 @@
     "format": "biome format --write",
     "format:fix": "biome format --write",
     "typecheck": "tsc --noEmit",
-    "spell": "cspell --quiet **/*.ts **/*.tsx"
+    "spell": "cspell --quiet **/*.ts **/*.tsx",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
