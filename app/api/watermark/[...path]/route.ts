@@ -83,19 +83,11 @@ export async function GET(
     // Add watermark
     const watermarkedBuffer = await addWatermarkToImage(imageBuffer);
 
-    // Determine content type
-    const contentType =
-      imageData.type ||
-      (fullPath.toLowerCase().endsWith('.png')
-        ? 'image/png'
-        : fullPath.toLowerCase().endsWith('.webp')
-          ? 'image/webp'
-          : 'image/jpeg');
-
+    // addWatermarkToImage always outputs JPEG regardless of input format
     // Return watermarked image with caching
     return new NextResponse(new Uint8Array(watermarkedBuffer), {
       headers: {
-        'Content-Type': contentType,
+        'Content-Type': 'image/jpeg',
         'Cache-Control': 'public, max-age=86400, s-maxage=86400', // Cache for 24 hours
       },
     });
