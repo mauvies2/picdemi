@@ -1,14 +1,3 @@
-#!/usr/bin/env tsx
-/**
- * Script to create a test Stripe customer with metadata
- *
- * Usage:
- *   tsx scripts/create-test-customer.ts <user_id> [email]
- *
- * Example:
- *   tsx scripts/create-test-customer.ts 07cf6833-ba80-4d56-8f90-96c9c4c2868e test@example.com
- */
-
 import Stripe from 'stripe';
 import { env } from '../env.mjs';
 
